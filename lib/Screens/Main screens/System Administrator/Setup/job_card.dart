@@ -280,7 +280,8 @@ class JobCard extends StatelessWidget {
                                   children: [
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
-                                      initialValue: 2,
+                                      initialValue:
+                                          controller.initDatePickerValue.value,
                                       children: const {
                                         1: Text('ALL'),
                                         2: Text('TODAY'),
@@ -315,7 +316,8 @@ class JobCard extends StatelessWidget {
                                     separator(color: Colors.black),
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
-                                      initialValue: 1,
+                                      initialValue:
+                                          controller.initPickersValue.value,
                                       children: const {
                                         1: Text('ALL'),
                                         2: Text('NEW'),
@@ -353,7 +355,8 @@ class JobCard extends StatelessWidget {
                                     separator(color: Colors.black),
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
-                                      initialValue: 1,
+                                      initialValue:
+                                          controller.initPickersValue.value,
                                       children: const {
                                         1: Text('ALL'),
                                         2: Text('JOBS'),
@@ -387,7 +390,8 @@ class JobCard extends StatelessWidget {
                                     separator(color: Colors.black),
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
-                                      initialValue: 1,
+                                      initialValue:
+                                          controller.initPickersValue.value,
                                       children: const {
                                         1: Text('ALL'),
                                         2: Text('RETURNED'),
@@ -524,75 +528,7 @@ class JobCard extends StatelessWidget {
                         },
                       ),
                     ),
-                    // Padding(
-                    //   padding: const EdgeInsets.symmetric(vertical: 8),
-                    //   child: GetX<JobCardController>(
-                    //     builder: (controller) {
-                    //       return Row(
-                    //         spacing: 10,
-                    //         children: [
-                    //           customBox(
-                    //             title: 'NUMBER OF JOBS',
-                    //             value: Text(
-                    //               '${controller.numberOfJobs.value}',
-                    //               style: TextStyle(
-                    //                 fontWeight: FontWeight.bold,
-                    //                 color: mainColor,
-                    //                 fontSize: 16,
-                    //               ),
-                    //             ),
-                    //           ),
-                    //           customBox(
-                    //             title: 'TOTALS',
-                    //             value: textForDataRowInTable(
-                    //               fontSize: 16,
-                    //               color: Colors.green,
-                    //               isBold: true,
-                    //               text: '${controller.allJobsTotals.value}',
-                    //             ),
-                    //           ),
-                    //           customBox(
-                    //             title: 'VATS',
-                    //             value: textForDataRowInTable(
-                    //               fontSize: 16,
-                    //               color: Colors.red,
-                    //               isBold: true,
-                    //               text: '${controller.allJobsVATS.value}',
-                    //             ),
-                    //           ),
-                    //           customBox(
-                    //             title: 'NETS',
-                    //             value: textForDataRowInTable(
-                    //               fontSize: 16,
-                    //               color: Colors.blueGrey,
-                    //               isBold: true,
-                    //               text: '${controller.allJobsNET.value}',
-                    //             ),
-                    //           ),
-                    //           customBox(
-                    //             title: 'PAID',
-                    //             value: textForDataRowInTable(
-                    //               fontSize: 16,
-                    //               color: Colors.orange,
-                    //               isBold: true,
-                    //               text: '${controller.allJobsPaid.value}',
-                    //             ),
-                    //           ),
-                    //           customBox(
-                    //             title: 'OUTSTANDING',
-                    //             value: textForDataRowInTable(
-                    //               fontSize: 16,
-                    //               color: Colors.blue,
-                    //               isBold: true,
-                    //               text:
-                    //                   '${controller.allJobsOutstanding.value}',
-                    //             ),
-                    //           ),
-                    //         ],
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
+
                     GetX<JobCardController>(
                       builder: (controller) {
                         return Container(
@@ -745,7 +681,7 @@ Widget tableOfScreensForMainJobCards({
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, '', 'LPO Number'),
+          label: columnForTable(constraints, 'LPO', 'Number'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
@@ -823,7 +759,7 @@ Widget tableOfScreensForMainJobCards({
           size: ColumnSize.M,
 
           numeric: true,
-          label: columnForTable(constraints, '', 'Outstanding'),
+          label: columnForTable(constraints, 'Out-', 'standing'),
           // onSort: controller.onSort,
         ),
       ],
@@ -1447,3 +1383,21 @@ class CardDataSource extends DataTableSource {
   @override
   int get selectedRowCount => 0;
 }
+
+// Widget smartTextIcon(String text, {double size = 45}) {
+//   final colors = [Colors.red, Colors.blue, Colors.green, Colors.orange];
+//   final color = colors[text.hashCode % colors.length];
+
+//   return CircleAvatar(
+//     radius: size / 2,
+//     // backgroundColor: color,
+//     child: Text(
+//       text.isNotEmpty ? text[0].toUpperCase() : "?",
+//       style: TextStyle(
+//         color: Colors.white,
+//         fontWeight: FontWeight.bold,
+//         fontSize: size * 0.5,
+//       ),
+//     ),
+//   );
+// }

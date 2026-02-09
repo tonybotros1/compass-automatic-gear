@@ -908,7 +908,7 @@ class DropdownController extends GetxController {
         children: [
           Positioned.fill(
             child: GestureDetector(
-              onTap: () => hideDropdown(restoreFocus: true),
+              onTap: () => hideDropdown(restoreFocus: false),
               child: Container(color: Colors.transparent),
             ),
           ),
@@ -1496,7 +1496,9 @@ class _CustomDropdownState extends State<CustomDropdown> {
                           ),
                           Container(
                             height: textFieldHeight,
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                            ),
                             decoration: controller.isValid.isFalse
                                 ? BoxDecoration(
                                     color: Colors.grey.shade200,
@@ -1509,17 +1511,21 @@ class _CustomDropdownState extends State<CustomDropdown> {
                                         color: Colors.white,
                                         border: Border.all(
                                           color:
-                                              widget.focusNode?.hasFocus == true
+                                              widget.focusNode?.hasFocus ==
+                                                  true
                                               ? Colors.blue
                                               : controller.isValid.value
                                               ? Colors.grey
                                               : Colors.red,
                                           width:
-                                              widget.focusNode?.hasFocus == true
+                                              widget.focusNode?.hasFocus ==
+                                                  true
                                               ? 2
                                               : 1,
                                         ),
-                                        borderRadius: BorderRadius.circular(4),
+                                        borderRadius: BorderRadius.circular(
+                                          4,
+                                        ),
                                       ))
                                 : (widget.disabledDecoration ??
                                       defaultDisabledDecoration),
@@ -1549,7 +1555,9 @@ class _CustomDropdownState extends State<CustomDropdown> {
                                                               ?.toString() ??
                                                           ''
                                                     : ''
-                                              : controller.textController.value,
+                                              : controller
+                                                    .textController
+                                                    .value,
                                           style: isEnabled
                                               ? (widget.enabledTextStyle ??
                                                     (controller
@@ -1573,13 +1581,20 @@ class _CustomDropdownState extends State<CustomDropdown> {
                                 ),
                                 Icon(
                                   Icons.arrow_drop_down,
-                                  color: isEnabled ? Colors.black : Colors.grey,
+                                  color: isEnabled
+                                      ? Colors.black
+                                      : Colors.grey,
                                 ),
                                 if (controller.selectedKey.isNotEmpty ||
-                                    controller.textController.value.isNotEmpty)
+                                    controller
+                                        .textController
+                                        .value
+                                        .isNotEmpty)
                                   ExcludeFocus(
                                     child: InkWell(
-                                      focusNode: FocusNode(canRequestFocus: false),
+                                      focusNode: FocusNode(
+                                        canRequestFocus: false,
+                                      ),
                                       child: const Icon(
                                         Icons.clear,
                                         size: 18,

@@ -26,6 +26,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
   Rx<TextEditingController> receiptTypeFilter = TextEditingController().obs;
   RxString customerNameFilterId = RxString('');
   Rx<TextEditingController> customerNameFilter = TextEditingController().obs;
+  RxInt initDatePickerValue = RxInt(2);
 
   @override
   void onInit() async {
@@ -49,13 +50,16 @@ class CashManagementReceiptsController extends CashManagementBaseController {
   void onChooseForDatePicker(int i) {
     switch (i) {
       case 1:
+        initDatePickerValue.value = 1;
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
         fromDate.value.clear();
         toDate.value.clear();
+        filterSearch();
         break;
       case 2:
+        initDatePickerValue.value = 2;
         setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = true;
@@ -65,9 +69,9 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         isMonthSelected.value = false;
         isDaySelected.value = true;
         filterSearch();
-        // searchEngineForReceipts({"today": true});
         break;
       case 3:
+        initDatePickerValue.value = 3;
         setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = false;
@@ -77,9 +81,9 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         isMonthSelected.value = true;
         isDaySelected.value = false;
         filterSearch();
-        // searchEngineForReceipts({"this_month": true});
         break;
       case 4:
+        initDatePickerValue.value = 4;
         setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
@@ -88,7 +92,6 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         isMonthSelected.value = false;
         isDaySelected.value = false;
         filterSearch();
-        // searchEngineForReceipts({"this_year": true});
         break;
       default:
     }
@@ -608,6 +611,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
   }
 
   void clearAllFilters() {
+    initDatePickerValue.value = 1;
     statusFilter.value.clear();
     isAllSelected.value = false;
     isTodaySelected.value = false;

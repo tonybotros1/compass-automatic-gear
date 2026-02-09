@@ -32,3 +32,5 @@ Widget dynamicBoxesLine({required List<DynamicBoxesLineModel> dynamicConfigs}) {
     ],
   );
 }
+
+

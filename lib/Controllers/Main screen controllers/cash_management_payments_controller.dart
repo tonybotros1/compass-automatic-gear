@@ -28,7 +28,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
   RxString paymentTypeFilterId = RxString('');
   RxString vendorNameFilterId = RxString('');
   Rx<TextEditingController> paymentCounterFilter = TextEditingController().obs;
-
+  RxInt initDatePickerValue = RxInt(2);
   @override
   void onInit() async {
     setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -52,13 +52,16 @@ class CashManagementPaymentsController extends CashManagementBaseController {
   void onChooseForDatePicker(int i) {
     switch (i) {
       case 1:
+        initDatePickerValue.value = 1;
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
         fromDate.value.clear();
         toDate.value.clear();
+        filterSearch();
         break;
       case 2:
+        initDatePickerValue.value = 2;
         setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = true;
@@ -70,6 +73,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         filterSearch();
         break;
       case 3:
+        initDatePickerValue.value = 3;
         setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = false;
@@ -81,6 +85,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         filterSearch();
         break;
       case 4:
+        initDatePickerValue.value = 4;
         setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
@@ -643,6 +648,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
   }
 
   void clearAllFilters() {
+    initDatePickerValue.value = 1;
     statusFilter.value.clear();
     isAllSelected.value = false;
     isTodaySelected.value = false;

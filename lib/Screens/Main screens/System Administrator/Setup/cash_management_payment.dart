@@ -1,11 +1,13 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/ap_payments_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/cash_management_payments_controller.dart';
-import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
+import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
+import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/cash_management_widgets/payment_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
@@ -177,48 +179,41 @@ class CashManagementPayment extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             spacing: 10,
                             children: [
-                              Row(
-                                spacing: 10,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  newPaymentButton(
-                                    context,
-                                    constraints,
-                                    controller,
-                                  ),
-                                  CustomSlidingSegmentedControl<int>(
-                                    height: 30,
-                                    initialValue: 2,
-                                    children: const {
-                                      1: Text('ALL'),
-                                      2: Text('TODAY'),
-                                      3: Text('THIS MONTH'),
-                                      4: Text('THIS YEAR'),
-                                    },
-                                    decoration: BoxDecoration(
-                                      color:
-                                          CupertinoColors.lightBackgroundGray,
-                                      borderRadius: BorderRadius.circular(8),
+                              newPaymentButton(
+                                context,
+                                constraints,
+                                controller,
+                              ),
+                              CustomSlidingSegmentedControl<int>(
+                                height: 30,
+                                initialValue: controller.initDatePickerValue.value,
+                                children: const {
+                                  1: Text('ALL'),
+                                  2: Text('TODAY'),
+                                  3: Text('THIS MONTH'),
+                                  4: Text('THIS YEAR'),
+                                },
+                                decoration: BoxDecoration(
+                                  color: CupertinoColors.lightBackgroundGray,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                thumbDecoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(6),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withAlpha(1),
+                                      blurRadius: 4.0,
+                                      spreadRadius: 1.0,
+                                      offset: const Offset(0.0, 2.0),
                                     ),
-                                    thumbDecoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(6),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withAlpha(1),
-                                          blurRadius: 4.0,
-                                          spreadRadius: 1.0,
-                                          offset: const Offset(0.0, 2.0),
-                                        ),
-                                      ],
-                                    ),
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInToLinear,
-                                    onValueChanged: (v) {
-                                      controller.onChooseForDatePicker(v);
-                                    },
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInToLinear,
+                                onValueChanged: (v) {
+                                  controller.onChooseForDatePicker(v);
+                                },
                               ),
                               Row(
                                 spacing: 10,
@@ -265,42 +260,34 @@ class CashManagementPayment extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: GetX<CashManagementPaymentsController>(
                       builder: (controller) {
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: Row(
-                                spacing: 10,
-                                children: [
-                                  customBox(
-                                    title: 'NUMBER OF PAYMENTS',
-                                    value: textForDataRowInTable(
-                                      fontSize: 16,
-                                      color: mainColor,
-                                      isBold: true,
-                                      text:
-                                          '${controller.numberOfPayments.value}',
-                                      formatDouble: false,
-                                    ),
-                                  ),
-                                  customBox(
-                                    title: 'PAID',
-                                    value: textForDataRowInTable(
-                                      fontSize: 16,
-                                      color: Colors.red,
-                                      isBold: true,
-                                      text:
-                                          '${controller.totalPaymentPaid.value}',
-                                    ),
-                                  ),
-                                ],
+                        return SizedBox(
+                          height: 100,
+                          child: dynamicBoxesLine(
+                            dynamicConfigs: [
+                              DynamicBoxesLineModel(
+                                isFormated: false,
+                                width: 300,
+                                label: 'NUMBER OF PAYMENTS',
+                                value: '${controller.numberOfPayments.value}',
+                                valueColor: Colors.blue,
+                                icon: Icons.numbers,
+                                iconColor: Colors.blue.shade100,
                               ),
-                            ),
-                            const Expanded(child: SizedBox()),
-                          ],
+                              DynamicBoxesLineModel(
+                                icon: Icons.payments,
+                                iconColor: Colors.red.shade100,
+                                width: 300,
+                                label: 'PAID',
+                                value: '${controller.totalPaymentPaid.value}',
+                                valueColor: Colors.red,
+                              ),
+                            ],
+                          ),
                         );
                       },
                     ),
                   ),
+                  
                   Container(
                     width: constraints.maxWidth,
                     decoration: BoxDecoration(
@@ -310,6 +297,7 @@ class CashManagementPayment extends StatelessWidget {
                     child: GetX<CashManagementPaymentsController>(
                       builder: (controller) {
                         return SizedBox(
+                          height: constraints.maxHeight * 0.73,
                           width: constraints.maxWidth,
                           child: tableOfScreensForCashManagement(
                             constraints: constraints,
@@ -520,79 +508,70 @@ Widget tableOfScreensForCashManagement({
         return null;
       }),
     ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      controller: scrollController,
-      child: PaginatedDataTable(
-        controller: scrollController,
-        showFirstLastButtons: true,
-        dataRowMaxHeight: 40,
-        dataRowMinHeight: 30,
-        columnSpacing: 5,
-        rowsPerPage: controller.numberOfPayments.value <= 12
-            ? 12
-            : controller.numberOfPayments.value >= 30
-            ? 30
-            : controller.numberOfPayments.value,
-        horizontalMargin: horizontalMarginForTable,
-        sortColumnIndex: controller.sortColumnIndex.value,
-        sortAscending: controller.isAscending.value,
-        columns: [
-          const DataColumn(
-            label: SizedBox(),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              text: 'Payment Number',
-              constraints: constraints,
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Status'),
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Payment Date',
-            ),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Vendor Name'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Payment Type',
-            ),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Account'),
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Cheque Number',
-            ),
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Cheque Date'),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(constraints: constraints, text: 'Paid'),
-            // onSort: controller.onSort,
-          ),
-        ],
-        source: CardDataSource(
-          cards: arePamentsLoading ? [] : data,
-          context: context,
-          constraints: constraints,
-          controller: controller,
+    child: PaginatedDataTable2(
+      showFirstLastButtons: true,
+      columnSpacing: 5,
+      lmRatio: 2.5,
+      horizontalMargin: horizontalMarginForTable,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
+      autoRowsToHeight: true,
+      columns: [
+        const DataColumn2(
+          size: ColumnSize.S,
+          label: SizedBox(),
+          // onSort: controller.onSort,
         ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(
+            text: 'Payment Number',
+            constraints: constraints,
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Status'),
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Payment Date'),
+        ),
+        DataColumn2(
+          size: ColumnSize.L,
+          label: AutoSizedText(constraints: constraints, text: 'Vendor Name'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Payment Type'),
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Account'),
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Cheque Number'),
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Cheque Date'),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'Paid'),
+          // onSort: controller.onSort,
+        ),
+      ],
+      source: CardDataSource(
+        cards: arePamentsLoading ? [] : data,
+        context: context,
+        constraints: constraints,
+        controller: controller,
       ),
     ),
   );
@@ -620,13 +599,12 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           text: cashManagementData.paymentNumber ?? '',
-
           formatDouble: false,
         ),
       ),
       DataCell(
         cashManagementData.status != ''
-            ? statusBox(cashManagementData.status ?? '', hieght: 35, width: 100)
+            ? statusBox(cashManagementData.status ?? '', hieght: 35)
             : const SizedBox(),
       ),
       DataCell(

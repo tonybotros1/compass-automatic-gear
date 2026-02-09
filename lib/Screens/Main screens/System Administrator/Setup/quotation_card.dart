@@ -1,4 +1,5 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/quotation%20cards/quotation_cards_model.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/quotation_card_controller.dart';
-import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
+import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
+import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/quotation_card_widgets/add_new_quotation_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/quotation_card_widgets/quotation_card_buttons.dart';
@@ -209,7 +211,7 @@ class QuotationCard extends StatelessWidget {
                               ),
                               CustomSlidingSegmentedControl<int>(
                                 height: 30,
-                                initialValue: 1,
+                                initialValue: controller.initDatePickerValue.value,
                                 children: const {
                                   1: Text('ALL'),
                                   2: Text('TODAY'),
@@ -280,53 +282,53 @@ class QuotationCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: GetX<QuotationCardController>(
                       builder: (controller) {
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          spacing: 10,
-                          children: [
-                            customBox(
-                              title: 'NUMBER OF QUOTATIONS',
-                              value: Text(
-                                '${controller.numberOfQuotations.value}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: mainColor,
-                                  fontSize: 16,
-                                ),
+                        return SizedBox(
+                          height: 100,
+
+                          // padding: const EdgeInsets.all(4),
+                          child: dynamicBoxesLine(
+                            dynamicConfigs: [
+                              DynamicBoxesLineModel(
+                                isFormated: false,
+                                width: 300,
+                                label: 'NUMBER OF QUOTATIONS',
+                                value: '${controller.numberOfQuotations.value}',
+                                valueColor: mainColor,
+                                icon: Icons.numbers,
+                                iconColor: mainColorWithAlpha,
                               ),
-                            ),
-                            customBox(
-                              title: 'TOTALS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.green,
-                                isBold: true,
-                                text: '${controller.allQuotationsTotals.value}',
+                              DynamicBoxesLineModel(
+                                icon: Icons.monetization_on_outlined,
+                                iconColor: Colors.green.shade100,
+                                width: 300,
+                                label: 'TOTAL AMOUNT',
+                                value:
+                                    '${controller.allQuotationsTotals.value}',
+                                valueColor: Colors.green,
                               ),
-                            ),
-                            customBox(
-                              title: 'VATS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.red,
-                                isBold: true,
-                                text: '${controller.allQuotationsVATS.value}',
+                              DynamicBoxesLineModel(
+                                icon: Icons.text_fields_rounded,
+                                iconColor: Colors.blue.shade100,
+                                width: 300,
+                                label: 'VAT AMOUNT',
+                                value: '${controller.allQuotationsVATS.value}',
+                                valueColor: Colors.blue,
                               ),
-                            ),
-                            customBox(
-                              title: 'NETS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.blueGrey,
-                                isBold: true,
-                                text: '${controller.allQuotationsNET.value}',
+                              DynamicBoxesLineModel(
+                                icon: Icons.monetization_on_outlined,
+                                iconColor: Colors.blueGrey.shade100,
+                                width: 300,
+                                label: 'NET AMOUNT',
+                                value: '${controller.allQuotationsNET.value}',
+                                valueColor: Colors.blueGrey,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         );
                       },
                     ),
                   ),
+
                   Container(
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
@@ -341,6 +343,7 @@ class QuotationCard extends StatelessWidget {
                     child: GetX<QuotationCardController>(
                       builder: (controller) {
                         return SizedBox(
+                          height: constraints.maxHeight * 0.73,
                           width: constraints.maxWidth,
                           child: tableOfScreens(
                             scrollController:
@@ -376,8 +379,6 @@ Widget tableOfScreens({
 
   return DataTableTheme(
     data: DataTableThemeData(
-      // headingTextStyle: fontStyleForTableHeader,
-      // dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
           return Colors.grey.shade300;
@@ -388,21 +389,11 @@ Widget tableOfScreens({
     child: Scrollbar(
       thumbVisibility: true,
       controller: scrollController,
-      child: PaginatedDataTable(
-        controller: scrollController,
-        // rowsPerPage: controller.numberOfQuotations.value +1,
-        // availableRowsPerPage: const [1, 10, 17, 25],
-        // onRowsPerPageChanged: (rows) {
-        //   controller.pagesPerPage.value = rows!;
-        // },
-        rowsPerPage: controller.numberOfQuotations.value <= 12
-            ? 12
-            : controller.numberOfQuotations.value >= 30
-            ? 30
-            : controller.numberOfQuotations.value,
+      child: PaginatedDataTable2(
+        minWidth: 1800,
+        lmRatio: 4,
+        autoRowsToHeight: true,
         showCheckboxColumn: false,
-        dataRowMaxHeight: 40,
-        dataRowMinHeight: 30,
         showFirstLastButtons: true,
         headingRowHeight: 70,
         columnSpacing: 15,
@@ -410,8 +401,9 @@ Widget tableOfScreens({
         sortAscending: controller.isAscending.value,
         // headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
         columns: [
-          const DataColumn(label: SizedBox()),
-          DataColumn(
+          const DataColumn2(size: ColumnSize.S, label: SizedBox()),
+          DataColumn2(
+            size: ColumnSize.M,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -423,7 +415,8 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
+          DataColumn2(
+            size: ColumnSize.M,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -436,7 +429,8 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
+          DataColumn2(
+            size: ColumnSize.M,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -448,7 +442,8 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
+          DataColumn2(
+            size: ColumnSize.M,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -460,7 +455,8 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
+          DataColumn2(
+            size: ColumnSize.M,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -472,7 +468,8 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
+          DataColumn2(
+            size: ColumnSize.M,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -484,7 +481,8 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
+          DataColumn2(
+            size: ColumnSize.M,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -496,7 +494,8 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
+          DataColumn2(
+            size: ColumnSize.L,
             label: Column(
               spacing: 5,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -508,19 +507,21 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(),
-                AutoSizedText(text: 'VIN', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
+          // DataColumn2(
+          // size: ColumnSize.M,
+          //   label: Column(
+          //     spacing: 5,
+          //     mainAxisAlignment: MainAxisAlignment.end,
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       const SizedBox(),
+          //       AutoSizedText(text: 'VIN', constraints: constraints),
+          //     ],
+          //   ),
+          //   // onSort: controller.onSort,
+          // ),
+          DataColumn2(
+            size: ColumnSize.M,
             numeric: true,
             label: Column(
               spacing: 5,
@@ -532,7 +533,8 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
+          DataColumn2(
+            size: ColumnSize.M,
             numeric: true,
             label: Column(
               spacing: 5,
@@ -544,7 +546,8 @@ Widget tableOfScreens({
             ),
             // onSort: controller.onSort,
           ),
-          DataColumn(
+          DataColumn2(
+            size: ColumnSize.M,
             numeric: true,
             label: Column(
               spacing: 5,
@@ -599,7 +602,6 @@ DataRow dataRowForTheTable(
             ? statusBox(
                 '${cardData.quotationStatus}',
                 hieght: 35,
-                width: 100,
                 padding: const EdgeInsets.symmetric(horizontal: 5),
               )
             : const SizedBox(),
@@ -612,14 +614,13 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(maxWidth: null, text: cardData.customer ?? ''),
       ),
-      DataCell(
-        textForDataRowInTable(
-          text: cardData.vehicleIdentificationNumber ?? '',
-          maxWidth: null,
-          isBold: true,
-          color: Colors.deepPurple,
-        ),
-      ),
+      // DataCell(
+      //   textForDataRowInTable(
+      //     text: cardData.vehicleIdentificationNumber ?? '',
+      //     maxWidth: null,
+      //     isBold: true,
+      //   ),
+      // ),
       DataCell(
         textForDataRowInTable(
           color: Colors.green,
@@ -629,7 +630,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          color: Colors.red,
+          color: Colors.blue,
           isBold: true,
           text: '${cardData.vat}',
         ),

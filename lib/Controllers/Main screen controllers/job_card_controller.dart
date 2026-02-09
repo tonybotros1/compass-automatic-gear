@@ -242,6 +242,8 @@ class JobCardController extends GetxController {
       RxList<JobItemsSummaryTable>([]);
   RxList<TimeSheetsSummaryForJobCard> timeSheetsSummaryTable =
       RxList<TimeSheetsSummaryForJobCard>([]);
+  RxInt initDatePickerValue = RxInt(2);
+  RxInt initPickersValue = RxInt(1);
 
   RxMap allStatus = RxMap({
     '1': {'name': 'New'},
@@ -372,6 +374,8 @@ class JobCardController extends GetxController {
   void onChooseForDatePicker(int i) {
     switch (i) {
       case 1:
+        initDatePickerValue.value = 1;
+        initPickersValue.value = 1;
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
@@ -380,6 +384,8 @@ class JobCardController extends GetxController {
         filterSearch();
         break;
       case 2:
+        initDatePickerValue.value = 2;
+        initPickersValue.value = 2;
         setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = true;
@@ -391,6 +397,8 @@ class JobCardController extends GetxController {
         filterSearch();
         break;
       case 3:
+        initDatePickerValue.value = 3;
+        initPickersValue.value = 3;
         setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = false;
@@ -402,6 +410,8 @@ class JobCardController extends GetxController {
         filterSearch();
         break;
       case 4:
+        initDatePickerValue.value = 4;
+        initPickersValue.value = 4;
         setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
@@ -2777,6 +2787,8 @@ class JobCardController extends GetxController {
   }
 
   void clearAllFilters() {
+    initPickersValue.value = 1;
+    initDatePickerValue.value = 1;
     lableFilter.value.clear();
     lpoFilter.value.clear();
     statusFilter.value.clear();

@@ -177,11 +177,20 @@ class QuotationCardController extends GetxController {
   ScrollController scrollerForCarDetails = ScrollController();
   ScrollController scrollerForCustomer = ScrollController();
   ScrollController scrollerForQuotationSection = ScrollController();
+  RxInt initDatePickerValue = RxInt(2);
 
   @override
   void onInit() async {
     super.onInit();
-    searchEngine({"today": true});
+    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
+    isAllSelected.value = false;
+    isTodaySelected.value = true;
+    isThisMonthSelected.value = false;
+    isThisYearSelected.value = false;
+    isYearSelected.value = false;
+    isMonthSelected.value = false;
+    isDaySelected.value = true;
+    filterSearch();
     await getCompanyDetails();
     getAllUsers();
   }
@@ -245,13 +254,16 @@ class QuotationCardController extends GetxController {
   void onChooseForDatePicker(int i) {
     switch (i) {
       case 1:
+        initDatePickerValue.value = 1;
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
         fromDate.value.clear();
         toDate.value.clear();
+        filterSearch();
         break;
       case 2:
+        initDatePickerValue.value = 2;
         setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = true;
@@ -260,9 +272,11 @@ class QuotationCardController extends GetxController {
         isYearSelected.value = false;
         isMonthSelected.value = false;
         isDaySelected.value = true;
-        searchEngine({"today": true});
+        filterSearch();
+
         break;
       case 3:
+        initDatePickerValue.value = 3;
         setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = false;
@@ -271,9 +285,11 @@ class QuotationCardController extends GetxController {
         isYearSelected.value = false;
         isMonthSelected.value = true;
         isDaySelected.value = false;
-        searchEngine({"this_month": true});
+        filterSearch();
+
         break;
       case 4:
+        initDatePickerValue.value = 4;
         setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
@@ -281,7 +297,8 @@ class QuotationCardController extends GetxController {
         isYearSelected.value = true;
         isMonthSelected.value = false;
         isDaySelected.value = false;
-        searchEngine({"this_year": true});
+        filterSearch();
+
         break;
       default:
     }
@@ -705,15 +722,15 @@ class QuotationCardController extends GetxController {
     if (customerNameIdFilter.value.isNotEmpty) {
       body["customer_name"] = customerNameIdFilter.value;
     }
-    if (isTodaySelected.isTrue) {
-      body["today"] = true;
-    }
-    if (isThisMonthSelected.isTrue) {
-      body["this_month"] = true;
-    }
-    if (isThisYearSelected.isTrue) {
-      body["this_year"] = true;
-    }
+    // if (isTodaySelected.isTrue) {
+    //   body["today"] = true;
+    // }
+    // if (isThisMonthSelected.isTrue) {
+    //   body["this_month"] = true;
+    // }
+    // if (isThisYearSelected.isTrue) {
+    //   body["this_year"] = true;
+    // }
     if (fromDate.value.text.isNotEmpty) {
       body["from_date"] = convertDateToIson(fromDate.value.text);
     }
@@ -1768,6 +1785,7 @@ class QuotationCardController extends GetxController {
   }
 
   void clearAllFilters() {
+    initDatePickerValue.value = 1;
     statusFilter.value.clear();
     numberOfQuotations.value = 0;
     allQuotationsTotals.value = 0;
