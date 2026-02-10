@@ -1,11 +1,13 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/ap_invoices_controller.dart';
 import '../../../../Models/ar receipts and ap payments/ap_invoices_model.dart';
-import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
+import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
+import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/ap_invoices_widgets/ap_invoice_dialog.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/my_text_field.dart';
@@ -160,51 +162,41 @@ class ApInvoices extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  spacing: 10,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    newInvoiceButton(
-                                      context,
-                                      constraints,
-                                      controller,
-                                    ),
-
-                                    CustomSlidingSegmentedControl<int>(
-                                      height: 30,
-                                      initialValue: 2,
-                                      children: const {
-                                        1: Text('ALL'),
-                                        2: Text('TODAY'),
-                                        3: Text('THIS MONTH'),
-                                        4: Text('THIS YEAR'),
-                                      },
-                                      decoration: BoxDecoration(
-                                        color:
-                                            CupertinoColors.lightBackgroundGray,
-                                        borderRadius: BorderRadius.circular(8),
+                                newInvoiceButton(
+                                  context,
+                                  constraints,
+                                  controller,
+                                ),
+                                CustomSlidingSegmentedControl<int>(
+                                  height: 30,
+                                  initialValue: 2,
+                                  children: const {
+                                    1: Text('ALL'),
+                                    2: Text('TODAY'),
+                                    3: Text('THIS MONTH'),
+                                    4: Text('THIS YEAR'),
+                                  },
+                                  decoration: BoxDecoration(
+                                    color: CupertinoColors.lightBackgroundGray,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  thumbDecoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withAlpha(1),
+                                        blurRadius: 4.0,
+                                        spreadRadius: 1.0,
+                                        offset: const Offset(0.0, 2.0),
                                       ),
-                                      thumbDecoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(6),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withAlpha(1),
-                                            blurRadius: 4.0,
-                                            spreadRadius: 1.0,
-                                            offset: const Offset(0.0, 2.0),
-                                          ),
-                                        ],
-                                      ),
-                                      duration: const Duration(
-                                        milliseconds: 300,
-                                      ),
-                                      curve: Curves.easeInToLinear,
-                                      onValueChanged: (v) {
-                                        controller.onChooseForDatePicker(v);
-                                      },
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInToLinear,
+                                  onValueChanged: (v) {
+                                    controller.onChooseForDatePicker(v);
+                                  },
                                 ),
                                 Row(
                                   spacing: 10,
@@ -243,56 +235,90 @@ class ApInvoices extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(height: 10),
-                    GetX<ApInvoicesController>(
-                      builder: (controller) {
-                        return Row(
-                          children: [
-                            Expanded(
-                              flex: 3,
-                              child: Row(
-                                spacing: 10,
-                                children: [
-                                  customBox(
-                                    title: 'NUMBER OF RECEIPTS',
-                                    value: textForDataRowInTable(
-                                      fontSize: 16,
-                                      color: mainColor,
-                                      isBold: true,
-                                      text:
-                                          '${controller.numberOfAPInvoices.value}',
-                                      formatDouble: false,
-                                    ),
-                                  ),
-                                  customBox(
-                                    title: 'AMOUNT',
-                                    value: textForDataRowInTable(
-                                      fontSize: 16,
-                                      color: Colors.green,
-                                      isBold: true,
-                                      text:
-                                          '${controller.totalAmountForAPInvoices.value}',
-                                    ),
-                                  ),
-                                  customBox(
-                                    title: 'VAT',
-                                    value: textForDataRowInTable(
-                                      fontSize: 16,
-                                      color: Colors.red,
-                                      isBold: true,
-                                      text:
-                                          '${controller.totalVATForAPInvoices.value}',
-                                    ),
-                                  ),
-                                ],
-                              ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: GetX<ApInvoicesController>(
+                        builder: (controller) {
+                          return SizedBox(
+                            height: 100,
+
+                            // padding: const EdgeInsets.all(4),
+                            child: dynamicBoxesLine(
+                              dynamicConfigs: [
+                                DynamicBoxesLineModel(
+                                  isFormated: false,
+                                  width: 300,
+
+                                  label: 'NUMBER OF INVOICES',
+                                  value:
+                                      '${controller.numberOfAPInvoices.value}',
+                                  valueColor: mainColor,
+                                  icon: Icons.numbers,
+                                  iconColor: mainColorWithAlpha,
+                                ),
+                                DynamicBoxesLineModel(
+                                  icon: FontAwesomeIcons.coins,
+                                  iconColor: Colors.green.shade100,
+                                  width: 300,
+                                  label: 'RECEIVED AMOUNT',
+                                  value:
+                                      '${controller.totalAmountForAPInvoices.value}',
+                                  valueColor: Colors.green,
+                                ),
+                              ],
                             ),
-                            const Expanded(child: SizedBox()),
-                          ],
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
-                    const SizedBox(height: 10),
+                    // GetX<ApInvoicesController>(
+                    //   builder: (controller) {
+                    //     return Row(
+                    //       children: [
+                    //         Expanded(
+                    //           flex: 3,
+                    //           child: Row(
+                    //             spacing: 10,
+                    //             children: [
+                    //               customBox(
+                    //                 title: 'NUMBER OF RECEIPTS',
+                    //                 value: textForDataRowInTable(
+                    //                   fontSize: 16,
+                    //                   color: mainColor,
+                    //                   isBold: true,
+                    //                   text:
+                    //                       '${controller.numberOfAPInvoices.value}',
+                    //                   formatDouble: false,
+                    //                 ),
+                    //               ),
+                    //               customBox(
+                    //                 title: 'AMOUNT',
+                    //                 value: textForDataRowInTable(
+                    //                   fontSize: 16,
+                    //                   color: Colors.green,
+                    //                   isBold: true,
+                    //                   text:
+                    //                       '${controller.totalAmountForAPInvoices.value}',
+                    //                 ),
+                    //               ),
+                    //               customBox(
+                    //                 title: 'VAT',
+                    //                 value: textForDataRowInTable(
+                    //                   fontSize: 16,
+                    //                   color: Colors.red,
+                    //                   isBold: true,
+                    //                   text:
+                    //                       '${controller.totalVATForAPInvoices.value}',
+                    //                 ),
+                    //               ),
+                    //             ],
+                    //           ),
+                    //         ),
+                    //         const Expanded(child: SizedBox()),
+                    //       ],
+                    //     );
+                    //   },
+                    // ),
                     GetX<ApInvoicesController>(
                       builder: (controller) {
                         return Container(
@@ -466,7 +492,6 @@ DataRow dataRowForTheTable(
         statusBox(
           typeData.status ?? '',
           hieght: 35,
-          width: 100,
           padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
       ),

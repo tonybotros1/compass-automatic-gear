@@ -1,11 +1,13 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/receiving_controller.dart';
+import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Models/receiving/receiving_model.dart';
-import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
+import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/receiving_widgets/receiving_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
@@ -55,7 +57,7 @@ class Receiving extends StatelessWidget {
                                     ),
                                     SizedBox(
                                       width: 150,
-                
+
                                       child: myTextFormFieldWithBorder(
                                         labelText: 'Reverence NO.',
                                         controller: controller
@@ -63,10 +65,10 @@ class Receiving extends StatelessWidget {
                                             .value,
                                       ),
                                     ),
-                
+
                                     SizedBox(
                                       width: 300,
-                
+
                                       child: CustomDropdown(
                                         textcontroller: controller
                                             .vendorNameIdFilterName
@@ -84,7 +86,9 @@ class Receiving extends StatelessWidget {
                                               key;
                                         },
                                         onDelete: () {
-                                          controller.vendorNameIdFilterName.value
+                                          controller
+                                              .vendorNameIdFilterName
+                                              .value
                                               .clear();
                                           controller.vendorNameIdFilter.value =
                                               '';
@@ -96,7 +100,7 @@ class Receiving extends StatelessWidget {
                                     ),
                                     SizedBox(
                                       width: 120,
-                
+
                                       child: CustomDropdown(
                                         textcontroller:
                                             controller.statusFilter.value.text,
@@ -160,55 +164,50 @@ class Receiving extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  spacing: 10,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    newReceivingButton(
-                                      context,
-                                      constraints,
-                                      controller,
-                                    ),
-                                    CustomSlidingSegmentedControl<int>(
-                                      height: 30,
-                                      initialValue: 1,
-                                      children: const {
-                                        1: Text('ALL'),
-                                        2: Text('TODAY'),
-                                        3: Text('THIS MONTH'),
-                                        4: Text('THIS YEAR'),
-                                      },
-                                      decoration: BoxDecoration(
-                                        color:
-                                            CupertinoColors.lightBackgroundGray,
-                                        borderRadius: BorderRadius.circular(8),
+                                newReceivingButton(
+                                  context,
+                                  constraints,
+                                  controller,
+                                ),
+                                CustomSlidingSegmentedControl<int>(
+                                  height: 30,
+                                  initialValue:
+                                      controller.initValueForDatePickker.value,
+                                  children: const {
+                                    1: Text('ALL'),
+                                    2: Text('TODAY'),
+                                    3: Text('THIS MONTH'),
+                                    4: Text('THIS YEAR'),
+                                  },
+                                  decoration: BoxDecoration(
+                                    color: CupertinoColors.lightBackgroundGray,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  thumbDecoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withAlpha(1),
+                                        blurRadius: 4.0,
+                                        spreadRadius: 1.0,
+                                        offset: const Offset(0.0, 2.0),
                                       ),
-                                      thumbDecoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(6),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withAlpha(1),
-                                            blurRadius: 4.0,
-                                            spreadRadius: 1.0,
-                                            offset: const Offset(0.0, 2.0),
-                                          ),
-                                        ],
-                                      ),
-                                      duration: const Duration(milliseconds: 300),
-                                      curve: Curves.easeInToLinear,
-                                      onValueChanged: (v) {
-                                        controller.onChooseForDatePicker(v);
-                                      },
-                                    ),
-                                  ],
+                                    ],
+                                  ),
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInToLinear,
+                                  onValueChanged: (v) {
+                                    controller.onChooseForDatePicker(v);
+                                  },
                                 ),
                                 Row(
                                   spacing: 10,
                                   children: [
                                     ElevatedButton(
                                       style: findButtonStyle,
-                                      onPressed: controller.isScreenLoding.isFalse
+                                      onPressed:
+                                          controller.isScreenLoding.isFalse
                                           ? () async {
                                               controller.filterSearch();
                                             }
@@ -216,7 +215,8 @@ class Receiving extends StatelessWidget {
                                       child: controller.isScreenLoding.isFalse
                                           ? Text(
                                               'Find',
-                                              style: fontStyleForElevatedButtons,
+                                              style:
+                                                  fontStyleForElevatedButtons,
                                             )
                                           : loadingProcess,
                                     ),
@@ -242,48 +242,49 @@ class Receiving extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: GetX<ReceivingController>(
                         builder: (controller) {
-                          return Row(
-                            spacing: 10,
-                            children: [
-                              customBox(
-                                title: 'NUMBER OF Docs',
-                                value: Text(
-                                  '${controller.numberOfReceivingDocs.value}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: mainColor,
-                                    fontSize: 16,
-                                  ),
+                          return SizedBox(
+                            height: 100,
+
+                            // padding: const EdgeInsets.all(4),
+                            child: dynamicBoxesLine(
+                              dynamicConfigs: [
+                                DynamicBoxesLineModel(
+                                  isFormated: false,
+                                  width: 300,
+                                  label: 'NUMBER OF DOCS',
+                                  value:
+                                      '${controller.numberOfReceivingDocs.value}',
+                                  valueColor: mainColor,
+                                  icon: counterIcon,
+                                  iconColor: mainColorWithAlpha,
                                 ),
-                              ),
-                              customBox(
-                                title: 'TOTALS',
-                                value: textForDataRowInTable(
-                                  fontSize: 16,
-                                  color: Colors.green,
-                                  isBold: true,
-                                  text: '${controller.allReceivingTotals.value}',
+                                DynamicBoxesLineModel(
+                                  icon: moneyIcon,
+                                  iconColor: Colors.green.shade100,
+                                  width: 300,
+                                  label: 'TOTAL AMOUNT',
+                                  value:
+                                      '${controller.allReceivingTotals.value}',
+                                  valueColor: Colors.green,
                                 ),
-                              ),
-                              customBox(
-                                title: 'VATS',
-                                value: textForDataRowInTable(
-                                  fontSize: 16,
-                                  color: Colors.red,
-                                  isBold: true,
-                                  text: '${controller.allReceivingVATS.value}',
+                                DynamicBoxesLineModel(
+                                  icon: moneyIcon,
+                                  iconColor: Colors.blue.shade100,
+                                  width: 300,
+                                  label: 'VAT AMOUNT',
+                                  value: '${controller.allReceivingVATS.value}',
+                                  valueColor: Colors.blue,
                                 ),
-                              ),
-                              customBox(
-                                title: 'NETS',
-                                value: textForDataRowInTable(
-                                  fontSize: 16,
-                                  color: Colors.blueGrey,
-                                  isBold: true,
-                                  text: '${controller.allReceivingNET.value}',
+                                DynamicBoxesLineModel(
+                                  icon: moneyIcon,
+                                  iconColor: Colors.blueGrey.shade100,
+                                  width: 300,
+                                  label: 'NET AMOUNT',
+                                  value: '${controller.allReceivingNET.value}',
+                                  valueColor: Colors.blueGrey,
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           );
                         },
                       ),
@@ -302,6 +303,7 @@ class Receiving extends StatelessWidget {
                           ),
                           child: SizedBox(
                             width: constraints.maxWidth,
+                            height: constraints.maxHeight * 0.73,
                             child: tableOfScreens(
                               showHistoryButton: true,
                               scrollController:
@@ -345,81 +347,77 @@ Widget tableOfScreens({
         return null;
       }),
     ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      controller: scrollController,
-      child: PaginatedDataTable(
-        controller: scrollController,
-        rowsPerPage: controller.numberOfReceivingDocs.value <= 12
-            ? 12
-            : controller.numberOfReceivingDocs.value >= 30
-            ? 30
-            : controller.numberOfReceivingDocs.value,
-
-        showCheckboxColumn: false,
-        dataRowMaxHeight: 40,
-        dataRowMinHeight: 30,
-        columnSpacing: 15,
-        sortColumnIndex: controller.sortColumnIndex.value,
-        sortAscending: controller.isAscending.value,
-        columns: [
-          const DataColumn(
-            label: SizedBox(),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(text: 'Number', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(text: 'Date', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(text: 'Status', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              text: 'Reference No.',
-              constraints: constraints,
-            ),
-            // onSort: controller.onSort,
-          ),
-
-          DataColumn(
-            label: AutoSizedText(text: 'Vendor Name', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-
-          DataColumn(
-            label: AutoSizedText(text: 'Branch', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(text: 'Total', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(text: 'VAT', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(text: 'NET', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-        ],
-        source: CardDataSource(
-          cards: isReceivingLoading ? [] : data,
-          context: context,
-          constraints: constraints,
-          controller: controller,
+    child: PaginatedDataTable2(
+      showCheckboxColumn: false,
+      columnSpacing: 15,
+      lmRatio: 3,
+      autoRowsToHeight: true,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
+      columns: [
+        const DataColumn2(
+          size: ColumnSize.S,
+          label: SizedBox(),
+          // onSort: controller.onSort,
         ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(text: 'Number', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(text: 'Date', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(text: 'Status', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(text: 'Reference No.', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+
+        DataColumn2(
+          size: ColumnSize.L,
+          label: AutoSizedText(text: 'Vendor Name', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(text: 'Branch', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: AutoSizedText(text: 'Total', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: AutoSizedText(text: 'VAT', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: AutoSizedText(text: 'NET', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+      ],
+      source: CardDataSource(
+        cards: isReceivingLoading ? [] : data,
+        context: context,
+        constraints: constraints,
+        controller: controller,
       ),
     ),
   );
@@ -439,7 +437,7 @@ DataRow dataRowForTheTable(
       if (states.contains(WidgetState.selected)) {
         return Colors.grey.shade400;
       }
-      return isEvenRow ? Colors.grey.shade200 : Colors.white;
+      return !isEvenRow ? coolColor : Colors.white;
     }),
     cells: [
       DataCell(
@@ -466,7 +464,6 @@ DataRow dataRowForTheTable(
         statusBox(
           docData.status ?? '',
           hieght: 35,
-          width: 100,
           padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
       ),

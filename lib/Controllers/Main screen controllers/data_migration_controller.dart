@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../consts.dart';
 import '../../helpers.dart';
+import 'websocket_controller.dart';
 
 class DataMigrationController extends GetxController {
   Rx<Uint8List> fileBytes = Uint8List(0).obs;
@@ -16,6 +17,8 @@ class DataMigrationController extends GetxController {
   RxBool uploadingFile = RxBool(false);
   RxString screenName = RxString('');
   RxBool deleteEveryThing = RxBool(false);
+  WebSocketService ws = Get.find<WebSocketService>();
+  RxDouble progress = RxDouble(0.0);
 
   RxMap screens = RxMap({
     '1': {'name': 'Job Cards'},
@@ -26,9 +29,27 @@ class DataMigrationController extends GetxController {
     '6': {'name': 'Receiving'},
     '7': {'name': 'Receiving Items'},
   });
+  @override
+  void onInit() async {
+    connectWebSocket();
+    super.onInit();
+  }
+
+  void connectWebSocket() {
+    ws.events.listen((message) {
+      if (message["type"] == "progress") {
+        progress.value = message["progress"].toDouble();
+      }
+
+      if (message["type"] == "done") {
+        progress.value = 100;
+      }
+    });
+  }
 
   Future<void> uploadFile() async {
     try {
+      print("Start Date: ${DateTime.now()}");
       uploadingFile.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -53,6 +74,7 @@ class DataMigrationController extends GetxController {
       var response = await request.send();
 
       if (response.statusCode == 200) {
+        print("End Date: ${DateTime.now()}");
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {

@@ -71,6 +71,13 @@ class CashManagementBaseController extends GetxController {
    ListOfValuesController listOfValuesController = Get.put(
     ListOfValuesController(),
   );
+  final FocusNode focusNodeForAccountInfos1 = FocusNode();
+  final FocusNode focusNodeForAccountInfos2 = FocusNode();
+  final FocusNode focusNodeForAccountInfos3 = FocusNode();
+  final FocusNode focusNodeForAccountInfos4 = FocusNode();
+  final FocusNode focusNodeForAccountInfos5 = FocusNode();
+  final FocusNode focusNodeForAccountInfos6 = FocusNode();
+
 
   Future<Map<String, dynamic>> getReceiptsAndPaymentsTypes() async {
     return await helper.getAllListValues('RECEIPT_TYPES');

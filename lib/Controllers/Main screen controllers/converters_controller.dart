@@ -46,7 +46,8 @@ class ConvertersController extends GetxController {
 
   @override
   void onInit() async {
-    searchEngine({"today": true});
+    setTodayRange(fromDate: fromDate, toDate: toDate);
+    filterSearch();
     super.onInit();
   }
 

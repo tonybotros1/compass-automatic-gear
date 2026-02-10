@@ -157,6 +157,21 @@ class DataMigration extends StatelessWidget {
                 ],
               ),
             ),
+            GetX<DataMigrationController>(
+              builder: (controller) {
+                return Column(
+                  children: [
+                    LinearProgressIndicator(
+                      value: controller.progress.value / 100,
+                      borderRadius: BorderRadius.circular(10),
+                      minHeight: 20,
+                    ),
+                    const SizedBox(height: 8),
+                    Text("${controller.progress.value.toInt()}%"),
+                  ],
+                );
+              },
+            ),
           ],
         ),
       ),

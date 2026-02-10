@@ -379,6 +379,7 @@ class InspectionReportDetails {
   }
 
   factory InspectionReportDetails.fromJson(Map<String, dynamic> json) {
+    print(json);
     return InspectionReportDetails(
       id: json.containsKey('_id') ? json['_id'] : null,
 

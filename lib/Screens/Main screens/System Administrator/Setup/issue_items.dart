@@ -242,11 +242,11 @@ class IssueItems extends StatelessWidget {
                                 value:
                                     '${controller.numberOfIssuesgDocs.value}',
                                 valueColor: Colors.blue,
-                                icon: Icons.numbers,
+                                icon: counterIcon,
                                 iconColor: Colors.blue.shade100,
                               ),
                               DynamicBoxesLineModel(
-                                icon: Icons.monetization_on_outlined,
+                                icon: moneyIcon,
                                 iconColor: Colors.green.shade100,
                                 width: 300,
                                 label: 'TOTAL AMOUNT',

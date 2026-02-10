@@ -316,8 +316,9 @@ class JobCard extends StatelessWidget {
                                     separator(color: Colors.black),
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
-                                      initialValue:
-                                          controller.initStatusPickersValue.value,
+                                      initialValue: controller
+                                          .initStatusPickersValue
+                                          .value,
                                       children: const {
                                         1: Text('ALL'),
                                         2: Text('NEW'),
@@ -390,8 +391,9 @@ class JobCard extends StatelessWidget {
                                     separator(color: Colors.black),
                                     CustomSlidingSegmentedControl<int>(
                                       height: 30,
-                                      initialValue:
-                                          controller.initLabelPickersValue.value,
+                                      initialValue: controller
+                                          .initLabelPickersValue
+                                          .value,
                                       children: const {
                                         1: Text('ALL'),
                                         2: Text('RETURNED'),
@@ -478,11 +480,11 @@ class JobCard extends StatelessWidget {
                                   label: 'NUMBER OF JOBS',
                                   value: '${controller.numberOfJobs.value}',
                                   valueColor: mainColor,
-                                  icon: Icons.numbers,
+                                  icon: counterIcon,
                                   iconColor: mainColorWithAlpha,
                                 ),
                                 DynamicBoxesLineModel(
-                                  icon: Icons.monetization_on_outlined,
+                                  icon: moneyIcon,
                                   iconColor: Colors.green.shade100,
                                   width: 300,
                                   label: 'TOTAL AMOUNT',
@@ -490,7 +492,7 @@ class JobCard extends StatelessWidget {
                                   valueColor: Colors.green,
                                 ),
                                 DynamicBoxesLineModel(
-                                  icon: Icons.text_fields_rounded,
+                                  icon: moneyIcon,
                                   iconColor: Colors.blue.shade100,
                                   width: 300,
                                   label: 'VAT AMOUNT',
@@ -498,7 +500,7 @@ class JobCard extends StatelessWidget {
                                   valueColor: Colors.blue,
                                 ),
                                 DynamicBoxesLineModel(
-                                  icon: Icons.monetization_on_outlined,
+                                  icon: moneyIcon,
                                   iconColor: Colors.blueGrey.shade100,
                                   width: 300,
                                   label: 'NET AMOUNT',
@@ -506,7 +508,7 @@ class JobCard extends StatelessWidget {
                                   valueColor: Colors.blueGrey,
                                 ),
                                 DynamicBoxesLineModel(
-                                  icon: Icons.monetization_on_outlined,
+                                  icon: moneyIcon,
                                   iconColor: Colors.orange.shade100,
                                   width: 300,
                                   label: 'PAID AMOUNT',
@@ -514,7 +516,7 @@ class JobCard extends StatelessWidget {
                                   valueColor: Colors.orange,
                                 ),
                                 DynamicBoxesLineModel(
-                                  icon: Icons.monetization_on_outlined,
+                                  icon: moneyIcon,
                                   iconColor: Colors.red.shade100,
                                   width: 300,
                                   label: 'OUTSTANDING AMOUNT',

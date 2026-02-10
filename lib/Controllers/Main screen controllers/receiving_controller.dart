@@ -98,10 +98,12 @@ class ReceivingController extends GetxController {
   final Uuid _uuid = const Uuid();
   RxBool isReceivingModified = RxBool(false);
   RxBool isReceivingItemsModified = RxBool(false);
+  RxInt initValueForDatePickker = RxInt(2);
 
   @override
   void onInit() async {
-    searchEngine({"today": true});
+    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
+    filterSearch();
     super.onInit();
   }
 
@@ -141,13 +143,16 @@ class ReceivingController extends GetxController {
   void onChooseForDatePicker(int i) {
     switch (i) {
       case 1:
+        initValueForDatePickker.value = 1;
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
         fromDate.value.clear();
         toDate.value.clear();
+        filterSearch();
         break;
       case 2:
+        initValueForDatePickker.value = 2;
         setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = true;
@@ -156,9 +161,10 @@ class ReceivingController extends GetxController {
         isYearSelected.value = false;
         isMonthSelected.value = false;
         isDaySelected.value = true;
-        searchEngine({"today": true});
+        filterSearch();
         break;
       case 3:
+        initValueForDatePickker.value = 3;
         setThisMonthRange(fromDate: fromDate.value, toDate: toDate.value);
         isAllSelected.value = false;
         isTodaySelected.value = false;
@@ -167,9 +173,10 @@ class ReceivingController extends GetxController {
         isYearSelected.value = false;
         isMonthSelected.value = true;
         isDaySelected.value = false;
-        searchEngine({"this_month": true});
+        filterSearch();
         break;
       case 4:
+        initValueForDatePickker.value = 4;
         setThisYearRange(fromDate: fromDate.value, toDate: toDate.value);
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
@@ -177,7 +184,7 @@ class ReceivingController extends GetxController {
         isYearSelected.value = true;
         isMonthSelected.value = false;
         isDaySelected.value = false;
-        searchEngine({"this_year": true});
+        filterSearch();
         break;
       default:
     }
@@ -483,15 +490,15 @@ class ReceivingController extends GetxController {
     if (statusFilter.value.text.isNotEmpty) {
       body["status"] = statusFilter.value.text;
     }
-    if (isTodaySelected.isTrue) {
-      body["today"] = true;
-    }
-    if (isThisMonthSelected.isTrue) {
-      body["this_month"] = true;
-    }
-    if (isThisYearSelected.isTrue) {
-      body["this_year"] = true;
-    }
+    // if (isTodaySelected.isTrue) {
+    //   body["today"] = true;
+    // }
+    // if (isThisMonthSelected.isTrue) {
+    //   body["this_month"] = true;
+    // }
+    // if (isThisYearSelected.isTrue) {
+    //   body["this_year"] = true;
+    // }
     if (fromDate.value.text.isNotEmpty) {
       body["from_date"] = convertDateToIson(fromDate.value.text);
     }
@@ -814,6 +821,7 @@ class ReceivingController extends GetxController {
   }
 
   void clearAllFilters() {
+    initValueForDatePickker.value = 1;
     statusFilter.value.clear();
     allReceivingDocs.clear();
     numberOfReceivingDocs.value = 0;

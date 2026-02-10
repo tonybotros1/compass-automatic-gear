@@ -27,6 +27,8 @@ Widget accountInformations<T extends CashManagementBaseController>(
               GetBuilder<T>(
                 builder: (controller) {
                   return CustomDropdown(
+                    focusNode: controller.focusNodeForAccountInfos1,
+                    nextFocusNode: controller.focusNodeForAccountInfos2,
                     width: 200,
                     textcontroller: isPayment
                         ? controller.paymentType.text
@@ -82,6 +84,10 @@ Widget accountInformations<T extends CashManagementBaseController>(
                 spacing: 10,
                 children: [
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForAccountInfos2,
+                    onFieldSubmitted: (_) {
+                      controller.focusNodeForAccountInfos3.requestFocus();
+                    },
                     width: 200,
                     controller: controller.chequeNumber,
                     isEnabled: controller.isChequeSelected.isTrue,
@@ -96,6 +102,9 @@ Widget accountInformations<T extends CashManagementBaseController>(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             CustomDropdown(
+                              focusNode: controller.focusNodeForAccountInfos3,
+                              nextFocusNode:
+                                  controller.focusNodeForAccountInfos4,
                               width: 300,
                               hintText: 'Bank Name',
                               enabled: controller.isChequeSelected.isTrue,
@@ -115,31 +124,37 @@ Widget accountInformations<T extends CashManagementBaseController>(
                                 return controller.getBanks();
                               },
                             ),
-                            valSectionInTheTable(
-                              isEnabled: controller.isChequeSelected.isTrue,
-                              controller.listOfValuesController,
-                              constraints,
-                              'BANKS',
-                              'New Bank',
-                              'Banks',
+                            ExcludeFocus(
+                              child: valSectionInTheTable(
+                                isEnabled: controller.isChequeSelected.isTrue,
+                                controller.listOfValuesController,
+                                constraints,
+                                'BANKS',
+                                'New Bank',
+                                'Banks',
+                              ),
                             ),
                           ],
                         ),
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForAccountInfos4,
+
                     width: 200,
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        if (isPayment) {
-                          controller.isPaymentModified.value = true;
-                        } else {
-                          controller.isReceiptModified.value = true;
-                        }
-                        controller.selectDateContext(
-                          context,
-                          controller.chequeDate,
-                        );
-                      },
-                      icon: const Icon(Icons.date_range),
+                    suffixIcon: ExcludeFocus(
+                      child: IconButton(
+                        onPressed: () {
+                          if (isPayment) {
+                            controller.isPaymentModified.value = true;
+                          } else {
+                            controller.isReceiptModified.value = true;
+                          }
+                          controller.selectDateContext(
+                            context,
+                            controller.chequeDate,
+                          );
+                        },
+                        icon: const Icon(Icons.date_range),
+                      ),
                     ),
                     onFieldSubmitted: (_) async {
                       if (isPayment) {
@@ -151,6 +166,7 @@ Widget accountInformations<T extends CashManagementBaseController>(
                         controller.chequeDate.text,
                         controller.chequeDate,
                       );
+                      controller.focusNodeForAccountInfos5.requestFocus();
                     },
                     controller: controller.chequeDate,
                     isEnabled: controller.isChequeSelected.isTrue,
@@ -169,6 +185,8 @@ Widget accountInformations<T extends CashManagementBaseController>(
               GetBuilder<T>(
                 builder: (controller) {
                   return CustomDropdown(
+                    focusNode: controller.focusNodeForAccountInfos5,
+                    nextFocusNode: controller.focusNodeForAccountInfos6,
                     width: 260,
                     textcontroller: controller.account.text,
                     hintText: 'Account',
@@ -212,6 +230,7 @@ Widget accountInformations<T extends CashManagementBaseController>(
                   ),
                   myTextFormFieldWithBorder(
                     width: 125,
+                    focusNode: controller.focusNodeForAccountInfos6,
 
                     moneyFormat: true,
                     // isDouble: true,

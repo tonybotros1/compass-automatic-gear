@@ -27,6 +27,9 @@ class CashManagementReceiptsController extends CashManagementBaseController {
   RxString customerNameFilterId = RxString('');
   Rx<TextEditingController> customerNameFilter = TextEditingController().obs;
   RxInt initDatePickerValue = RxInt(2);
+  final FocusNode focusNodeForReceiptHeader1 = FocusNode();
+  final FocusNode focusNodeForReceiptHeader2 = FocusNode();
+  final FocusNode focusNodeForReceiptHeader3 = FocusNode();
 
   @override
   void onInit() async {

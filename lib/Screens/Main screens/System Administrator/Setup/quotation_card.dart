@@ -211,7 +211,8 @@ class QuotationCard extends StatelessWidget {
                               ),
                               CustomSlidingSegmentedControl<int>(
                                 height: 30,
-                                initialValue: controller.initDatePickerValue.value,
+                                initialValue:
+                                    controller.initDatePickerValue.value,
                                 children: const {
                                   1: Text('ALL'),
                                   2: Text('TODAY'),
@@ -294,11 +295,11 @@ class QuotationCard extends StatelessWidget {
                                 label: 'NUMBER OF QUOTATIONS',
                                 value: '${controller.numberOfQuotations.value}',
                                 valueColor: mainColor,
-                                icon: Icons.numbers,
+                                icon: counterIcon,
                                 iconColor: mainColorWithAlpha,
                               ),
                               DynamicBoxesLineModel(
-                                icon: Icons.monetization_on_outlined,
+                                icon: moneyIcon,
                                 iconColor: Colors.green.shade100,
                                 width: 300,
                                 label: 'TOTAL AMOUNT',
@@ -307,7 +308,7 @@ class QuotationCard extends StatelessWidget {
                                 valueColor: Colors.green,
                               ),
                               DynamicBoxesLineModel(
-                                icon: Icons.text_fields_rounded,
+                                icon: moneyIcon,
                                 iconColor: Colors.blue.shade100,
                                 width: 300,
                                 label: 'VAT AMOUNT',
@@ -315,7 +316,7 @@ class QuotationCard extends StatelessWidget {
                                 valueColor: Colors.blue,
                               ),
                               DynamicBoxesLineModel(
-                                icon: Icons.monetization_on_outlined,
+                                icon: moneyIcon,
                                 iconColor: Colors.blueGrey.shade100,
                                 width: 300,
                                 label: 'NET AMOUNT',

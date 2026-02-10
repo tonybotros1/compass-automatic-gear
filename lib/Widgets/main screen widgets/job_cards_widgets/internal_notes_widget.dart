@@ -16,7 +16,7 @@ Future internalNotesDialog(
     Dialog(
       child: Container(
         height: constraints.maxHeight,
-        width: 600,
+        width: constraints.maxWidth / 2,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
         child: Column(
           children: [

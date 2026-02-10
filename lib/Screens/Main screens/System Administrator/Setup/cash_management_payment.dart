@@ -186,7 +186,8 @@ class CashManagementPayment extends StatelessWidget {
                               ),
                               CustomSlidingSegmentedControl<int>(
                                 height: 30,
-                                initialValue: controller.initDatePickerValue.value,
+                                initialValue:
+                                    controller.initDatePickerValue.value,
                                 children: const {
                                   1: Text('ALL'),
                                   2: Text('TODAY'),
@@ -269,9 +270,9 @@ class CashManagementPayment extends StatelessWidget {
                                 width: 300,
                                 label: 'NUMBER OF PAYMENTS',
                                 value: '${controller.numberOfPayments.value}',
-                                valueColor: Colors.blue,
-                                icon: Icons.numbers,
-                                iconColor: Colors.blue.shade100,
+                                valueColor: mainColor,
+                                icon: counterIcon,
+                                iconColor: mainColorWithAlpha,
                               ),
                               DynamicBoxesLineModel(
                                 icon: Icons.payments,
@@ -287,7 +288,7 @@ class CashManagementPayment extends StatelessWidget {
                       },
                     ),
                   ),
-                  
+
                   Container(
                     width: constraints.maxWidth,
                     decoration: BoxDecoration(

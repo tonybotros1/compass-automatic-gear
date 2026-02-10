@@ -268,7 +268,7 @@ class CardsScreenController extends GetxController {
   }
 
   Future<Map<String, dynamic>> getTechnicians() async {
-    return await helper.getAllEmployeesByDepartment('Job Cards');
+    return await helper.getAllListValues('TIME_SHEET');
   }
 
   Future getCurrentJobCardStatus(String id) async {
@@ -411,6 +411,14 @@ class CardsScreenController extends GetxController {
 
   Future<void> addInspectionCard() async {
     try {
+      if (companyDetails['current_user_branch_id'] == '' ||
+          companyDetails['current_user_branch_id'] == null) {
+        alertMessage(
+          context: Get.context!,
+          content: 'This user has no branch selected',
+        );
+        return;
+      }
       loadingScreen();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -421,6 +429,7 @@ class CardsScreenController extends GetxController {
       final request = http.MultipartRequest("POST", url);
 
       request.fields['fuel_amount'] = fuelAmount.text;
+      request.fields['branch'] = companyDetails['current_user_branch_id'] ?? '';
       request.fields['job_date'] = convertDateToIson(date.text).toString();
       request.fields['comment'] = comments.text;
       request.fields['technician'] = technicianId.value;
@@ -553,7 +562,7 @@ class CardsScreenController extends GetxController {
     try {
       Map jobStatus = await getCurrentJobCardStatus(currenyJobId.value);
       String status1 = jobStatus['job_status_1'];
-      if (status1 != 'New' && status1 != '') {
+      if (status1 != 'New' && status1 != '' && status1 != 'Draft') {
         showSnackBar('Alert', 'Only new jobs can be edited');
         return;
       }
