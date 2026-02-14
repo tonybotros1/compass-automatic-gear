@@ -636,6 +636,7 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           formatDouble: false,
           text: cashManagementData.chequeNumber ?? '',
+          
         ),
       ),
       DataCell(

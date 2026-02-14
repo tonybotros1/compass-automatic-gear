@@ -449,49 +449,41 @@ Future internalNotesDialog(
                                     .isFalse
                                 ? IconButton(
                                     onPressed: () async {
-                                      if (controller.jobStatus1.value ==
-                                          'New') {
-                                        if (controller.noteMessage.value
-                                            .trim()
-                                            .isNotEmpty) {
-                                          controller.internalNote.value.clear();
-                                          await controller
-                                              .addNewInternalNote(jobId, {
-                                                'note_type': 'text',
-                                                'note': controller
-                                                    .noteMessage
-                                                    .value
-                                                    .trim(),
-                                              });
-                                          controller.noteMessage.value = '';
-                                        } else if (controller.fileBytes.value !=
-                                            null) {
-                                          await controller
-                                              .addNewInternalNote(jobId, {
-                                                'file_name':
-                                                    controller.fileName.value,
-                                                'note_type':
-                                                    controller.fileType.value,
-                                                'media_note':
-                                                    controller.fileBytes.value,
-                                              });
-                                          controller.fileBytes.value = null;
-                                          controller.fileType.value = '';
-                                          controller.fileName.value = '';
-                                        }
-                                        Future.delayed(
-                                          const Duration(milliseconds: 100),
-                                          () {
-                                            controller.textFieldFocusNode
-                                                .requestFocus();
-                                          },
-                                        );
-                                      } else {
-                                        showSnackBar(
-                                          'Alert',
-                                          'Only New Jobs Allowed',
-                                        );
+                                      if (controller.noteMessage.value
+                                          .trim()
+                                          .isNotEmpty) {
+                                        controller.internalNote.value.clear();
+                                        await controller
+                                            .addNewInternalNote(jobId, {
+                                              'note_type': 'text',
+                                              'note': controller
+                                                  .noteMessage
+                                                  .value
+                                                  .trim(),
+                                            });
+                                        controller.noteMessage.value = '';
+                                      } else if (controller.fileBytes.value !=
+                                          null) {
+                                        await controller
+                                            .addNewInternalNote(jobId, {
+                                              'file_name':
+                                                  controller.fileName.value,
+                                              'note_type':
+                                                  controller.fileType.value,
+                                              'media_note':
+                                                  controller.fileBytes.value,
+                                            });
+                                        controller.fileBytes.value = null;
+                                        controller.fileType.value = '';
+                                        controller.fileName.value = '';
                                       }
+                                      Future.delayed(
+                                        const Duration(milliseconds: 100),
+                                        () {
+                                          controller.textFieldFocusNode
+                                              .requestFocus();
+                                        },
+                                      );
                                     },
                                     icon: Icon(
                                       Icons.send_rounded,

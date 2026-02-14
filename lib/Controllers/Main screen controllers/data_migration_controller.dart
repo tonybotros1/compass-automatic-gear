@@ -49,7 +49,7 @@ class DataMigrationController extends GetxController {
 
   Future<void> uploadFile() async {
     try {
-      print("Start Date: ${DateTime.now()}");
+      // print("Start Date: ${DateTime.now()}");
       uploadingFile.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -74,7 +74,7 @@ class DataMigrationController extends GetxController {
       var response = await request.send();
 
       if (response.statusCode == 200) {
-        print("End Date: ${DateTime.now()}");
+        // print("End Date: ${DateTime.now()}");
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {

@@ -1,7 +1,7 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/ap_invoices_controller.dart';
 import '../../../../Models/ar receipts and ap payments/ap_invoices_model.dart';
@@ -115,6 +115,10 @@ class ApInvoices extends StatelessWidget {
                                     ),
                                   ],
                                 ),
+                                // MenuWithValues(
+                                //   controller: controller.statusFilter.value,
+                                //   width: 300,
+                                // ),
                                 Row(
                                   spacing: 10,
                                   children: [
@@ -169,7 +173,7 @@ class ApInvoices extends StatelessWidget {
                                 ),
                                 CustomSlidingSegmentedControl<int>(
                                   height: 30,
-                                  initialValue: 2,
+                                  initialValue: 1,
                                   children: const {
                                     1: Text('ALL'),
                                     2: Text('TODAY'),
@@ -248,16 +252,24 @@ class ApInvoices extends StatelessWidget {
                                 DynamicBoxesLineModel(
                                   isFormated: false,
                                   width: 300,
-
                                   label: 'NUMBER OF INVOICES',
                                   value:
                                       '${controller.numberOfAPInvoices.value}',
                                   valueColor: mainColor,
-                                  icon: Icons.numbers,
+                                  icon: counterIcon,
                                   iconColor: mainColorWithAlpha,
                                 ),
                                 DynamicBoxesLineModel(
-                                  icon: FontAwesomeIcons.coins,
+                                  icon: moneyIcon,
+                                  iconColor: Colors.red.shade100,
+                                  width: 300,
+                                  label: 'VAT AMOUNT',
+                                  value:
+                                      '${controller.totalVATForAPInvoices.value}',
+                                  valueColor: Colors.red,
+                                ),
+                                DynamicBoxesLineModel(
+                                  icon: moneyIcon,
                                   iconColor: Colors.green.shade100,
                                   width: 300,
                                   label: 'RECEIVED AMOUNT',
@@ -265,60 +277,21 @@ class ApInvoices extends StatelessWidget {
                                       '${controller.totalAmountForAPInvoices.value}',
                                   valueColor: Colors.green,
                                 ),
+                                DynamicBoxesLineModel(
+                                  icon: moneyIcon,
+                                  iconColor: Colors.blueGrey.shade100,
+                                  width: 300,
+                                  label: 'TOTAL AMOUNT',
+                                  value:
+                                      '${controller.totalForAPInvoices.value}',
+                                  valueColor: Colors.blueGrey,
+                                ),
                               ],
                             ),
                           );
                         },
                       ),
                     ),
-                    // GetX<ApInvoicesController>(
-                    //   builder: (controller) {
-                    //     return Row(
-                    //       children: [
-                    //         Expanded(
-                    //           flex: 3,
-                    //           child: Row(
-                    //             spacing: 10,
-                    //             children: [
-                    //               customBox(
-                    //                 title: 'NUMBER OF RECEIPTS',
-                    //                 value: textForDataRowInTable(
-                    //                   fontSize: 16,
-                    //                   color: mainColor,
-                    //                   isBold: true,
-                    //                   text:
-                    //                       '${controller.numberOfAPInvoices.value}',
-                    //                   formatDouble: false,
-                    //                 ),
-                    //               ),
-                    //               customBox(
-                    //                 title: 'AMOUNT',
-                    //                 value: textForDataRowInTable(
-                    //                   fontSize: 16,
-                    //                   color: Colors.green,
-                    //                   isBold: true,
-                    //                   text:
-                    //                       '${controller.totalAmountForAPInvoices.value}',
-                    //                 ),
-                    //               ),
-                    //               customBox(
-                    //                 title: 'VAT',
-                    //                 value: textForDataRowInTable(
-                    //                   fontSize: 16,
-                    //                   color: Colors.red,
-                    //                   isBold: true,
-                    //                   text:
-                    //                       '${controller.totalVATForAPInvoices.value}',
-                    //                 ),
-                    //               ),
-                    //             ],
-                    //           ),
-                    //         ),
-                    //         const Expanded(child: SizedBox()),
-                    //       ],
-                    //     );
-                    //   },
-                    // ),
                     GetX<ApInvoicesController>(
                       builder: (controller) {
                         return Container(
@@ -327,25 +300,19 @@ class ApInvoices extends StatelessWidget {
                             border: Border.all(color: Colors.grey),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Column(
-                            children: [
-                              SingleChildScrollView(
-                                scrollDirection: Axis.vertical,
-                                child: SizedBox(
-                                  width: constraints.maxWidth,
-                                  child: tableOfScreens(
-                                    scrollController:
-                                        controller.scrollControllerFotTable1,
-                                    constraints: constraints,
-                                    context: context,
-                                    controller: controller,
-                                    data: controller.allApInvoices.isEmpty
-                                        ? RxList()
-                                        : controller.allApInvoices,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          child: SizedBox(
+                            height: constraints.maxHeight * 0.73,
+                            width: constraints.maxWidth,
+                            child: tableOfScreens(
+                              scrollController:
+                                  controller.scrollControllerFotTable1,
+                              constraints: constraints,
+                              context: context,
+                              controller: controller,
+                              data: controller.allApInvoices.isEmpty
+                                  ? RxList()
+                                  : controller.allApInvoices,
+                            ),
                           ),
                         );
                       },
@@ -372,8 +339,6 @@ Widget tableOfScreens({
 
   return DataTableTheme(
     data: DataTableThemeData(
-      // headingTextStyle: fontStyleForTableHeader,
-      // dataTextStyle: regTextStyle,
       dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.selected)) {
           return Colors.grey.shade300;
@@ -381,89 +346,79 @@ Widget tableOfScreens({
         return null;
       }),
     ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      controller: scrollController,
-      child: PaginatedDataTable(
-        controller: scrollController,
-        rowsPerPage: controller.numberOfAPInvoices.value <= 12
-            ? 12
-            : controller.numberOfAPInvoices.value >= 30
-            ? 30
-            : controller.numberOfAPInvoices.value,
-        horizontalMargin: horizontalMarginForTable,
-        dataRowMaxHeight: 40,
-        dataRowMinHeight: 30,
-        columnSpacing: 15,
-        sortColumnIndex: controller.sortColumnIndex.value,
-        sortAscending: controller.isAscending.value,
-        // headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-        columns: [
-          const DataColumn(label: SizedBox()),
-          DataColumn(
-            label: AutoSizedText(
-              text: 'Invoice Type',
-              constraints: constraints,
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(text: 'Status', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Reference No.',
-            ),
-            // onSort: controller.onS ort,
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Transaction Date',
-            ),
-            // onSort: controller.onS ort,
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Invoice Number',
-            ),
-            // onSort: controller.onS ort,
-          ),
-          DataColumn(
-            label: AutoSizedText(
-              constraints: constraints,
-              text: 'Invoice Date',
-            ),
-            // onSort: controller.onS ort,
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Vendor'),
-            // onSort: controller.onS ort,
-          ),
-          DataColumn(
-            label: AutoSizedText(constraints: constraints, text: 'Description'),
-            // onSort: controller.onS ort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(constraints: constraints, text: 'Amount'),
-            // onSort: controller.onS ort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(constraints: constraints, text: 'VAT'),
-            // onSort: controller.onS ort,
-          ),
-        ],
-        source: CardDataSource(
-          cards: isAPInvoicesLoading ? [] : data,
-          context: context,
-          constraints: constraints,
-          controller: controller,
+    child: PaginatedDataTable2(
+      horizontalMargin: horizontalMarginForTable,
+      columnSpacing: 15,
+      autoRowsToHeight: true,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
+      lmRatio: 2.5,
+      columns: [
+        const DataColumn2(size: ColumnSize.S, label: SizedBox()),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(text: 'Invoice Type', constraints: constraints),
+          // onSort: controller.onSort,
         ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(text: 'Status', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Reference No.'),
+          // onSort: controller.onS ort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(
+            constraints: constraints,
+            text: 'Transaction Date',
+          ),
+          // onSort: controller.onS ort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(
+            constraints: constraints,
+            text: 'Invoice Number',
+          ),
+          // onSort: controller.onS ort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Invoice Date'),
+          // onSort: controller.onS ort,
+        ),
+        DataColumn2(
+          size: ColumnSize.L,
+          label: AutoSizedText(constraints: constraints, text: 'Vendor'),
+          // onSort: controller.onS ort,
+        ),
+        DataColumn2(
+          size: ColumnSize.L,
+          label: AutoSizedText(constraints: constraints, text: 'Description'),
+          // onSort: controller.onS ort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'Amount'),
+          // onSort: controller.onS ort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'VAT'),
+          // onSort: controller.onS ort,
+        ),
+      ],
+      source: CardDataSource(
+        cards: isAPInvoicesLoading ? [] : data,
+        context: context,
+        constraints: constraints,
+        controller: controller,
       ),
     ),
   );
@@ -478,6 +433,12 @@ DataRow dataRowForTheTable(
   int index,
 ) {
   return DataRow(
+    color: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return Colors.yellow;
+      }
+      return index % 2 != 0 ? coolColor : Colors.white;
+    }),
     cells: [
       DataCell(
         Row(

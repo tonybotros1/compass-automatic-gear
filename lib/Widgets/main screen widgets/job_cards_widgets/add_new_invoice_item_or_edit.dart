@@ -1,7 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_card_controller.dart';
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import '../../../Screens/Main screens/System Administrator/Setup/invoice_items.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 import '../add_new_values_button.dart';
 
@@ -54,25 +54,29 @@ Widget addNewinvoiceItemsOrEdit({
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Expanded(
-                          child: CustomDropdown(
+                          child: MenuWithValues(
                             focusNode: controller.focusNodeForItemsDetails2,
-                            nextFocusNode: controller.focusNodeForItemsDetails3,
-                            hintText: 'Name',
-                            textcontroller: controller.invoiceItemName.text,
-                            showedSelectedName: 'name',
-                            validator: true,
-                            onChanged: (key, value) {
-                              controller.invoiceItemName.text = value['name'];
-                              controller.description.text =
-                                  value['description'];
-                              controller.invoiceItemNameId.value = key;
-                            },
+                            onFieldSubmitted: (_) => controller
+                                .focusNodeForItemsDetails3
+                                .requestFocus(),
+                            labelText: 'Name',
+                            headerLqabel: 'Names',
+                            dialogWidth: constraints.maxWidth / 2,
+                            controller: controller.invoiceItemName,
+                            displayKeys: const ['name'],
+                            displaySelectedKeys: const ['name'],
                             onOpen: () {
                               return controller.getInvoiceItemsFromCollection();
                             },
                             onDelete: () {
                               controller.invoiceItemName.clear();
                               controller.invoiceItemNameId.value = '';
+                            },
+                            onSelected: (value) {
+                              controller.invoiceItemName.text = value['name'];
+                              controller.description.text =
+                                  value['description'];
+                              controller.invoiceItemNameId.value = value['_id'];
                             },
                           ),
                         ),

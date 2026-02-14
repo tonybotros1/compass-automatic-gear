@@ -33,7 +33,7 @@ class JobCardModel {
   String? salesman;
   String? branch;
   String? currency;
-  int? rate;
+  double? rate;
   String? paymentMethod;
   String? lpoNumber;
   DateTime? jobApprovalDate;
@@ -206,7 +206,7 @@ class JobCardModel {
     salesman = tryGet<String>('salesman');
     branch = tryGet<String>('branch');
     currency = tryGet<String>('currency');
-    rate = (tryGet<num>('rate') ?? 0).toInt();
+    rate = (tryGet<double>('rate') ?? 0).toDouble();
     paymentMethod = tryGet<String>('payment_method');
     lpoNumber = tryGet<String>('lpo_number');
 

@@ -96,6 +96,7 @@ class ApInvoicesController extends GetxController {
   RxInt numberOfAPInvoices = RxInt(0);
   RxDouble totalAmountForAPInvoices = RxDouble(0);
   RxDouble totalVATForAPInvoices = RxDouble(0);
+  RxDouble totalForAPInvoices = RxDouble(0);
   RxDouble calculatedAmountForInvoiceItems = RxDouble(0.0);
   RxDouble calculatedVatForInvoiceItems = RxDouble(0.0);
 
@@ -112,7 +113,6 @@ class ApInvoicesController extends GetxController {
 
   @override
   void onInit() async {
-    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
     filterSearch();
     super.onInit();
   }
@@ -153,6 +153,7 @@ class ApInvoicesController extends GetxController {
         isThisYearSelected.value = false;
         fromDate.value.clear();
         toDate.value.clear();
+        filterSearch();
         break;
       case 2:
         setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
@@ -513,12 +514,13 @@ class ApInvoicesController extends GetxController {
         final decoded = jsonDecode(response.body);
         List invs = decoded['invoices'];
         Map grandTotals = decoded['grand_totals'];
-        totalAmountForAPInvoices.value = grandTotals['grand_amounts'];
-        totalVATForAPInvoices.value = grandTotals['grand_vats'];
+        totalAmountForAPInvoices.value = grandTotals['total_amount'];
+        totalVATForAPInvoices.value = grandTotals['total_vat'];
+        totalForAPInvoices.value = grandTotals['all_total'];
+        numberOfAPInvoices.value = grandTotals['total_items_count'];
         allApInvoices.assignAll(
           invs.map((inv) => ApInvoicesModel.fromJson(inv)),
         );
-        numberOfAPInvoices.value = allApInvoices.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {

@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/inventory%20items/inventory_items_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,78 +20,78 @@ class InventeryItems extends StatelessWidget {
         builder: (context, constraints) {
           return Padding(
             padding: screenPadding,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GetBuilder<InventoryItemsController>(
-                        init: InventoryItemsController(),
-                        builder: (controller) {
-                          return Row(
-                            spacing: 10,
-                            children: [
-                              myTextFormFieldWithBorder(
-                                width: 300,
-                                labelText: 'Code',
-                                controller: controller.inventoryCodeFilter.value,
-                              ),
-                              myTextFormFieldWithBorder(
-                                width: 300,
-                                labelText: 'Name',
-                                controller: controller.inventoryNameFilter.value,
-                              ),
-                              myTextFormFieldWithBorder(
-                                width: 170,
-                                labelText: 'Min. Quantity',
-                                controller:
-                                    controller.inventoryMinQuantityFilter.value,
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      Row(
-                        spacing: 10,
-                        children: [
-                          GetX<InventoryItemsController>(
-                            builder: (controller) {
-                              return ElevatedButton(
-                                style: findButtonStyle,
-                                onPressed: controller.isScreenLoding.isFalse
-                                    ? () async {
-                                        controller
-                                            .filterSearchFirInventoryItems();
-                                      }
-                                    : null,
-                                child: controller.isScreenLoding.isFalse
-                                    ? Text(
-                                        'Find',
-                                        style: fontStyleForElevatedButtons,
-                                      )
-                                    : loadingProcess,
-                              );
-                            },
-                          ),
-                          GetBuilder<InventoryItemsController>(
-                            builder: (controller) {
-                              return newCurrencyButton(
-                                context,
-                                constraints,
-                                controller,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  GetX<InventoryItemsController>(
-                    builder: (controller) {
-                      return Container(
-                        width: constraints.maxWidth,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GetBuilder<InventoryItemsController>(
+                      init: InventoryItemsController(),
+                      builder: (controller) {
+                        return Row(
+                          spacing: 10,
+                          children: [
+                            myTextFormFieldWithBorder(
+                              width: 300,
+                              labelText: 'Code',
+                              controller: controller.inventoryCodeFilter.value,
+                            ),
+                            myTextFormFieldWithBorder(
+                              width: 300,
+                              labelText: 'Name',
+                              controller: controller.inventoryNameFilter.value,
+                            ),
+                            myTextFormFieldWithBorder(
+                              width: 170,
+                              labelText: 'Min. Quantity',
+                              controller:
+                                  controller.inventoryMinQuantityFilter.value,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    Row(
+                      spacing: 10,
+                      children: [
+                        GetX<InventoryItemsController>(
+                          builder: (controller) {
+                            return ElevatedButton(
+                              style: findButtonStyle,
+                              onPressed: controller.isScreenLoding.isFalse
+                                  ? () async {
+                                      controller
+                                          .filterSearchFirInventoryItems();
+                                    }
+                                  : null,
+                              child: controller.isScreenLoding.isFalse
+                                  ? Text(
+                                      'Find',
+                                      style: fontStyleForElevatedButtons,
+                                    )
+                                  : loadingProcess,
+                            );
+                          },
+                        ),
+                        GetBuilder<InventoryItemsController>(
+                          builder: (controller) {
+                            return newCurrencyButton(
+                              context,
+                              constraints,
+                              controller,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                GetX<InventoryItemsController>(
+                  builder: (controller) {
+                    return Expanded(
+                      child: Container(
+                        height: constraints.maxHeight * 0.73,
                         padding: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
@@ -106,11 +107,11 @@ class InventeryItems extends StatelessWidget {
                           context: context,
                           controller: controller,
                         ),
-                      );
-                    },
-                  ),
-                ],
-              ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           );
         },
@@ -124,18 +125,11 @@ Widget tableOfScreens({
   required BuildContext context,
   required InventoryItemsController controller,
 }) {
-  return PaginatedDataTable(
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
+  return PaginatedDataTable2(
     columnSpacing: 5,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
-    rowsPerPage: controller.allItems.length <= 12
-        ? 12
-        : controller.allItems.length >= 30
-        ? 30
-        : controller.allItems.length,
-
+    autoRowsToHeight: true,
     columns: [
       const DataColumn(
         columnWidth: IntrinsicColumnWidth(flex: .5),

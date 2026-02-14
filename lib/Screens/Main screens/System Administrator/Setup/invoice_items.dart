@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/invoice%20items/invoice_items_model.dart';
 import 'package:datahubai/Widgets/main%20screen%20widgets/invoice_items_widgets/invoice_items_dialog.dart';
 import 'package:flutter/material.dart';
@@ -59,16 +60,12 @@ class InvoiceItems extends StatelessWidget {
                         if (controller.allInvoiceItems.isEmpty) {
                           return const Center(child: Text('No Element'));
                         }
-                        return SingleChildScrollView(
-                          scrollDirection: Axis
-                              .vertical, // Horizontal scrolling for the table
-                          child: SizedBox(
-                            width: constraints.maxWidth,
-                            child: tableOfScreens(
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
-                            ),
+                        return SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
                           ),
                         );
                       },
@@ -89,17 +86,12 @@ Widget tableOfScreens({
   required BuildContext context,
   required InvoiceItemsController controller,
 }) {
-  return DataTable(
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
+  return PaginatedDataTable2(
     horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
-    showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    autoRowsToHeight: true,
     columns: [
       const DataColumn(label: Text('')),
       DataColumn(
@@ -115,29 +107,38 @@ Widget tableOfScreens({
         onSort: controller.onSort,
       ),
     ],
-    rows:
-        controller.filteredInvoiceItems.isEmpty &&
-            controller.search.value.text.isEmpty
-        ? controller.allInvoiceItems.map<DataRow>((invoiceItems) {
-            final invoiceItemsId = invoiceItems.id ?? '';
-            return dataRowForTheTable(
-              invoiceItems,
-              context,
-              constraints,
-              invoiceItemsId,
-              controller,
-            );
-          }).toList()
-        : controller.filteredInvoiceItems.map<DataRow>((invoiceItems) {
-            final invoiceItemsId = invoiceItems.id ?? '';
-            return dataRowForTheTable(
-              invoiceItems,
-              context,
-              constraints,
-              invoiceItemsId,
-              controller,
-            );
-          }).toList(),
+    source: CardDataSource(
+      cards:
+          controller.filteredInvoiceItems.isEmpty &&
+              controller.search.value.text.isEmpty
+          ? controller.allInvoiceItems
+          : controller.filteredInvoiceItems,
+      context: context,
+      constraints: constraints,
+      controller: controller,
+    ),
+    // controller.filteredInvoiceItems.isEmpty &&
+    //     controller.search.value.text.isEmpty
+    // ? controller.allInvoiceItems.map<DataRow>((invoiceItems) {
+    //     final invoiceItemsId = invoiceItems.id ?? '';
+    //     return dataRowForTheTable(
+    //       invoiceItems,
+    //       context,
+    //       constraints,
+    //       invoiceItemsId,
+    //       controller,
+    //     );
+    //   }).toList()
+    // : controller.filteredInvoiceItems.map<DataRow>((invoiceItems) {
+    //     final invoiceItemsId = invoiceItems.id ?? '';
+    //     return dataRowForTheTable(
+    //       invoiceItems,
+    //       context,
+    //       constraints,
+    //       invoiceItemsId,
+    //       controller,
+    //     );
+    //   }).toList(),
   );
 }
 
@@ -147,6 +148,7 @@ DataRow dataRowForTheTable(
   BoxConstraints constraints,
   String invoiceItemsId,
   InvoiceItemsController controller,
+  int index,
 ) {
   return DataRow(
     cells: [
@@ -259,4 +261,44 @@ ElevatedButton newInvoiceItemButton(
     style: newButtonStyle,
     child: const Text('New Item'),
   );
+}
+
+class CardDataSource extends DataTableSource {
+  final List<InvoiceItemsModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final InvoiceItemsController controller;
+
+  CardDataSource({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final jobCard = cards[index];
+    final cardId = jobCard.id ?? '';
+
+    return dataRowForTheTable(
+      jobCard,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

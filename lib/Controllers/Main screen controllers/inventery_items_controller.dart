@@ -27,6 +27,7 @@ class InventoryItemsController extends GetxController {
   @override
   void onInit() async {
     connectWebSocket();
+    filterSearchFirInventoryItems();
     super.onInit();
   }
 

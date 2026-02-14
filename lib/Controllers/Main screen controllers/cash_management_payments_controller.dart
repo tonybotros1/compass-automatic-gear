@@ -31,9 +31,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
   RxInt initDatePickerValue = RxInt(2);
   @override
   void onInit() async {
-    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
     filterSearch();
-
     super.onInit();
   }
 
@@ -511,8 +509,8 @@ class CashManagementPaymentsController extends CashManagementBaseController {
         List recs = decoded['payments'];
         Map grandTotals = decoded['grand_totals'];
         totalPaymentPaid.value = grandTotals['grand_given'];
+        numberOfPayments.value = grandTotals['total_items_count'];
         allPayements.assignAll(recs.map((rec) => APPaymentModel.fromJson(rec)));
-        numberOfPayments.value = allPayements.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {

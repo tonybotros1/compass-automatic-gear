@@ -6,7 +6,8 @@ import 'package:get/get.dart';
 import 'package:signature/signature.dart';
 import '../../../Controllers/Mobile section controllers/cards_screen_controller.dart';
 import '../../../consts.dart';
-import '../../drop_down_menu3.dart';
+// import '../../drop_down_menu3.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 import 'break_and_tire_wheel.dart';
 import 'check_box_section.dart';
@@ -59,31 +60,49 @@ Padding buildInspectionReportBody(BuildContext context) {
                                 isDate: true,
                                 controller: controller.date,
                               ),
-                              CustomDropdown(
-                                width: double.infinity,
-                                textcontroller:
-                                    controller.technicianName.value.text,
-                                showedSelectedName: 'name',
-                                hintText: 'Technician',
-                                onChanged: (key, value) {
-                                  controller.technicianId.value = key;
+                              MenuWithValues(
+                                flexList: const [1],
+                                labelText: 'Technician',
+                                controller: controller.technicianName.value,
+                                displayKeys: const ['name'],
+                                displaySelectedKeys: const ['name'],
+                                onOpen: () {
+                                  return controller.getTechnicians();
                                 },
                                 onDelete: () {
                                   controller.technicianName.value.clear();
                                   controller.technicianId.value = "";
                                 },
-                                onOpen: () {
-                                  return controller.getTechnicians();
+                                onSelected: (value) {
+                                  controller.technicianId.value = value['_id'];
                                 },
                               ),
-                              CustomDropdown(
-                                width: double.infinity,
-                                textcontroller: controller.customer.text,
-                                showedSelectedName: 'entity_name',
-                                hintText: 'Customer',
-                                onChanged: (key, value) {
-                                  controller.customerId.value = key;
-                                  controller.onSelectForCustomers(value);
+                              // CustomDropdown(
+                              //   width: double.infinity,
+                              //   textcontroller:
+                              //       controller.technicianName.value.text,
+                              //   showedSelectedName: 'name',
+                              //   hintText: 'Technician',
+                              //   onChanged: (key, value) {
+                              //     controller.technicianId.value = key;
+                              //   },
+                              //   onDelete: () {
+                              //     controller.technicianName.value.clear();
+                              //     controller.technicianId.value = "";
+                              //   },
+                              //   onOpen: () {
+                              //     return controller.getTechnicians();
+                              //   },
+                              // ),
+                              MenuWithValues(
+                                flexList: const [1],
+
+                                labelText: 'Customer',
+                                controller: controller.customer,
+                                displayKeys: const ['entity_name'],
+                                displaySelectedKeys: const ['entity_name'],
+                                onOpen: () {
+                                  return controller.getAllCustomers();
                                 },
                                 onDelete: () {
                                   controller.customerId.value = "";
@@ -93,24 +112,42 @@ Padding buildInspectionReportBody(BuildContext context) {
                                   controller.customerCreditNumber.clear();
                                   controller.customerSaleManId.value = '';
                                 },
-                                onOpen: () {
-                                  return controller.getAllCustomers();
+                                onSelected: (value) {
+                                  controller.customerId.value = value['_id'];
+                                  controller.onSelectForCustomers(value);
                                 },
                               ),
-                              CustomDropdown(
-                                validator: true,
-                                width: double.infinity,
-                                showedSelectedName: 'name',
-                                hintText: 'Brand',
-                                textcontroller: controller.brand.text,
-                                onChanged: (key, value) {
-                                  controller.carBrandLogo.value =
-                                      value['logo'] ?? '';
-                                  controller.model.clear();
-                                  controller.modelId.value = '';
-                                  controller.getModelsByCarBrand(key);
-                                  controller.brandId.value = key;
-                                  controller.brand.text = value['name'];
+
+                              // CustomDropdown(
+                              //   width: double.infinity,
+                              //   textcontroller: controller.customer.text,
+                              //   showedSelectedName: 'entity_name',
+                              //   hintText: 'Customer',
+                              //   onChanged: (key, value) {
+                              // controller.customerId.value = key;
+                              // controller.onSelectForCustomers(value);
+                              //   },
+                              //   onDelete: () {
+                              // controller.customerId.value = "";
+                              // controller.customerEntityPhoneNumber.clear();
+                              // controller.customerEntityName.clear();
+                              // controller.customerEntityEmail.clear();
+                              // controller.customerCreditNumber.clear();
+                              // controller.customerSaleManId.value = '';
+                              //   },
+                              //   onOpen: () {
+                              //     return controller.getAllCustomers();
+                              //   },
+                              // ),
+                              MenuWithValues(
+                                flexList: const [1],
+
+                                labelText: 'Brand',
+                                controller: controller.brand,
+                                displayKeys: const ['name'],
+                                displaySelectedKeys: const ['name'],
+                                onOpen: () {
+                                  return controller.getCarBrands();
                                 },
                                 onDelete: () {
                                   controller.carBrandLogo.value = '';
@@ -120,26 +157,76 @@ Padding buildInspectionReportBody(BuildContext context) {
                                   controller.brandId.value = '';
                                   controller.brand.text = '';
                                 },
-                                onOpen: () {
-                                  return controller.getCarBrands();
+                                onSelected: (value) {
+                                  controller.carBrandLogo.value =
+                                      value['logo'] ?? '';
+                                  controller.model.clear();
+                                  controller.modelId.value = '';
+                                  controller.getModelsByCarBrand(value['_id']);
+                                  controller.brandId.value = value['_id'];
+                                  controller.brand.text = value['name'];
                                 },
                               ),
-                              CustomDropdown(
-                                validator: true,
-                                width: double.infinity,
-                                showedSelectedName: 'name',
-                                hintText: 'Model',
-                                items: controller.allModels,
-                                textcontroller: controller.model.text,
-                                onChanged: (key, value) {
-                                  controller.model.text = value['name'];
-                                  controller.modelId.value = key;
-                                },
+
+                              // CustomDropdown(
+                              //   validator: true,
+                              //   width: double.infinity,
+                              //   showedSelectedName: 'name',
+                              //   hintText: 'Brand',
+                              //   textcontroller: controller.brand.text,
+                              //   onChanged: (key, value) {
+                              //     controller.carBrandLogo.value =
+                              //         value['logo'] ?? '';
+                              //     controller.model.clear();
+                              //     controller.modelId.value = '';
+                              //     controller.getModelsByCarBrand(key);
+                              //     controller.brandId.value = key;
+                              //     controller.brand.text = value['name'];
+                              //   },
+                              //   onDelete: () {
+                              //     controller.carBrandLogo.value = '';
+                              //     controller.model.clear();
+                              //     controller.modelId.value = '';
+                              //     controller.allModels.clear();
+                              //     controller.brandId.value = '';
+                              //     controller.brand.text = '';
+                              //   },
+                              //   // onOpen: () {
+                              //   //   return controller.getCarBrands();
+                              //   // },
+                              // ),
+                              MenuWithValues(
+                                flexList: const [1],
+                                labelText: 'Model',
+                                controller: controller.model,
+                                displayKeys: const ['name'],
+                                displaySelectedKeys: const ['name'],
+                                data: controller.allModels,
                                 onDelete: () {
                                   controller.model.clear();
                                   controller.modelId.value = '';
                                 },
+                                onSelected: (value) {
+                                  controller.model.text = value['name'];
+                                  controller.modelId.value = value['_id'];
+                                },
                               ),
+                              // CustomDropdown(
+                              //   validator: true,
+                              //   width: double.infinity,
+                              //   showedSelectedName: 'name',
+                              //   hintText: 'Model',
+                              //   items: controller.allModels,
+                              //   textcontroller: controller.model.text,
+                              //   onChanged: (key, value) {
+                              //     controller.model.text = value['name'];
+                              //     controller.modelId.value = key;
+                              //   },
+                              //   onDelete: () {
+                              //     controller.model.clear();
+                              //     controller.modelId.value = '';
+                              //   },
+                              // ),
                               myTextFormFieldWithBorder(
                                 validate: false,
                                 isnumber: true,
@@ -154,30 +241,46 @@ Padding buildInspectionReportBody(BuildContext context) {
                               ),
                               myTextFormFieldWithBorder(
                                 validate: false,
+                                labelText: 'Plate Code',
+                                controller: controller.code,
+                              ),
+                              myTextFormFieldWithBorder(
+                                validate: false,
                                 labelText: 'VIN Number',
                                 controller: controller.vin,
                               ),
-                              CustomDropdown(
-                                width: double.infinity,
-                                hintText: 'Color',
-                                showedSelectedName: 'name',
-                                textcontroller: controller.color.text,
-                                onChanged: (key, value) {
-                                  controller.colorId.value = key;
+                              MenuWithValues(
+                                flexList: const [1],
+                                labelText: 'Color',
+                                controller: controller.color,
+                                displayKeys: const ['name'],
+                                displaySelectedKeys: const ['name'],
+                                onOpen: () {
+                                  return controller.getColors();
                                 },
                                 onDelete: () {
                                   controller.colorId.value = '';
                                 },
-                                onOpen: () {
-                                  return controller.getColors();
+                                onSelected: (value) {
+                                  controller.colorId.value = value['_id'];
                                 },
                               ),
 
-                              myTextFormFieldWithBorder(
-                                validate: false,
-                                labelText: 'Plate Code',
-                                controller: controller.code,
-                              ),
+                              // CustomDropdown(
+                              //   width: double.infinity,
+                              //   hintText: 'Color',
+                              //   showedSelectedName: 'name',
+                              //   textcontroller: controller.color.text,
+                              //   onChanged: (key, value) {
+                              //     controller.colorId.value = key;
+                              //   },
+                              //   onDelete: () {
+                              //     controller.colorId.value = '';
+                              //   },
+                              //   onOpen: () {
+                              //     return controller.getColors();
+                              //   },
+                              // ),
                               myTextFormFieldWithBorder(
                                 validate: false,
                                 isDouble: true,
@@ -185,22 +288,38 @@ Padding buildInspectionReportBody(BuildContext context) {
                                 keyboardType: TextInputType.number,
                                 controller: controller.mileage,
                               ),
-                              CustomDropdown(
-                                width: double.infinity,
-                                hintText: 'Engine Type',
-                                showedSelectedName: 'name',
-                                textcontroller: controller.engineType.text,
-                                onChanged: (key, value) {
-                                  controller.engineTypeId.value = key;
+                              MenuWithValues(
+                                flexList: const [1],
+                                labelText: 'Engine Type',
+                                controller: controller.engineType,
+                                displayKeys: const ['name'],
+                                displaySelectedKeys: const ['name'],
+                                onOpen: () {
+                                  return controller.getEngineTypes();
                                 },
                                 onDelete: () {
                                   controller.engineTypeId.value = '';
                                 },
-                                onOpen: () {
-                                  return controller.getEngineTypes();
+                                onSelected: (value) {
+                                  controller.engineTypeId.value = value['_id'];
                                 },
                               ),
 
+                              // CustomDropdown(
+                              //   width: double.infinity,
+                              //   hintText: 'Engine Type',
+                              //   showedSelectedName: 'name',
+                              //   textcontroller: controller.engineType.text,
+                              //   onChanged: (key, value) {
+                              //     controller.engineTypeId.value = key;
+                              //   },
+                              //   onDelete: () {
+                              //     controller.engineTypeId.value = '';
+                              //   },
+                              //   onOpen: () {
+                              //     return controller.getEngineTypes();
+                              //   },
+                              // ),
                               myTextFormFieldWithBorder(
                                 validate: false,
                                 labelText: 'Transmission Type',

@@ -1,11 +1,13 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/converters_controller.dart';
 import '../../../../Models/converters/converter_model.dart';
-import '../../../../Widgets/Dashboard Widgets/trading dashboard widgets/custom_box.dart';
+import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Widgets/drop_down_menu3.dart';
+import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/converters_widgets/converter_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
@@ -124,48 +126,41 @@ class Converters extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Row(
-                                spacing: 10,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  newConverterButton(
-                                    context,
-                                    constraints,
-                                    controller,
-                                  ),
-                                  CustomSlidingSegmentedControl<int>(
-                                    height: 30,
-                                    initialValue: 1,
-                                    children: const {
-                                      1: Text('ALL'),
-                                      2: Text('TODAY'),
-                                      3: Text('THIS MONTH'),
-                                      4: Text('THIS YEAR'),
-                                    },
-                                    decoration: BoxDecoration(
-                                      color:
-                                          CupertinoColors.lightBackgroundGray,
-                                      borderRadius: BorderRadius.circular(8),
+                              newConverterButton(
+                                context,
+                                constraints,
+                                controller,
+                              ),
+                              CustomSlidingSegmentedControl<int>(
+                                height: 30,
+                                initialValue: 1,
+                                children: const {
+                                  1: Text('ALL'),
+                                  2: Text('TODAY'),
+                                  3: Text('THIS MONTH'),
+                                  4: Text('THIS YEAR'),
+                                },
+                                decoration: BoxDecoration(
+                                  color: CupertinoColors.lightBackgroundGray,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                thumbDecoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(6),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withAlpha(1),
+                                      blurRadius: 4.0,
+                                      spreadRadius: 1.0,
+                                      offset: const Offset(0.0, 2.0),
                                     ),
-                                    thumbDecoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(6),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withAlpha(1),
-                                          blurRadius: 4.0,
-                                          spreadRadius: 1.0,
-                                          offset: const Offset(0.0, 2.0),
-                                        ),
-                                      ],
-                                    ),
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInToLinear,
-                                    onValueChanged: (v) {
-                                      controller.onChooseForDatePicker(v);
-                                    },
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeInToLinear,
+                                onValueChanged: (v) {
+                                  controller.onChooseForDatePicker(v);
+                                },
                               ),
                               Row(
                                 spacing: 10,
@@ -206,39 +201,41 @@ class Converters extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: GetX<ConvertersController>(
                       builder: (controller) {
-                        return Row(
-                          spacing: 10,
-                          children: [
-                            customBox(
-                              width: Get.width / 5,
-                              title: 'NUMBER OF CONVERTERS',
-                              value: Text(
-                                '${controller.numberOfConverters.value}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: mainColor,
-                                  fontSize: 16,
-                                ),
+                        return SizedBox(
+                          height: 100,
+
+                          // padding: const EdgeInsets.all(4),
+                          child: dynamicBoxesLine(
+                            dynamicConfigs: [
+                              DynamicBoxesLineModel(
+                                isFormated: false,
+                                width: 300,
+                                label: 'NUMBER OF CONVERTERS',
+                                value: '${controller.numberOfConverters.value}',
+                                valueColor: mainColor,
+                                icon: counterIcon,
+                                iconColor: mainColorWithAlpha,
                               ),
-                            ),
-                            customBox(
-                              width: Get.width / 5,
-                              title: 'TOTALS',
-                              value: textForDataRowInTable(
-                                fontSize: 16,
-                                color: Colors.green,
-                                isBold: true,
-                                text: '${controller.allConvertersTotals.value}',
+                              DynamicBoxesLineModel(
+                                icon: moneyIcon,
+                                iconColor: Colors.green.shade100,
+                                width: 300,
+                                label: 'TOTAL AMOUNT',
+                                value:
+                                    '${controller.allConvertersTotals.value}',
+                                valueColor: Colors.green,
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         );
                       },
                     ),
                   ),
+
                   GetX<ConvertersController>(
                     builder: (controller) {
                       return Container(
+                        height: constraints.maxHeight * 0.73,
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: const BorderRadius.only(
@@ -289,55 +286,56 @@ Widget tableOfScreens({
         return null;
       }),
     ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      controller: scrollController,
-      child: PaginatedDataTable(
-        controller: scrollController,
-        rowsPerPage: 10,
-        showCheckboxColumn: false,
-        dataRowMaxHeight: 40,
-        dataRowMinHeight: 30,
-        columnSpacing: 15,
-        sortColumnIndex: controller.sortColumnIndex.value,
-        sortAscending: controller.isAscending.value,
-        columns: [
-          const DataColumn(
-            label: SizedBox(),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(text: 'Number', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(text: 'Date', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(text: 'Status', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(text: 'Name', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            label: AutoSizedText(text: 'Description', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-          DataColumn(
-            numeric: true,
-            label: AutoSizedText(text: 'Total', constraints: constraints),
-            // onSort: controller.onSort,
-          ),
-        ],
-        source: ConverterDataSource(
-          cards: isReceivingLoading ? [] : data,
-          context: context,
-          constraints: constraints,
-          controller: controller,
+    child: PaginatedDataTable2(
+      showCheckboxColumn: false,
+      autoRowsToHeight: true,
+      columnSpacing: 5,
+      lmRatio: 2.5,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
+      columns: [
+        const DataColumn2(
+          size: ColumnSize.S,
+          label: SizedBox(),
+          // onSort: controller.onSort,
         ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(text: 'Number', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(text: 'Date', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(text: 'Status', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.L,
+          label: AutoSizedText(text: 'Name', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.L,
+          label: AutoSizedText(text: 'Description', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: AutoSizedText(text: 'Total', constraints: constraints),
+          // onSort: controller.onSort,
+        ),
+      ],
+      source: ConverterDataSource(
+        cards: isReceivingLoading ? [] : data,
+        context: context,
+        constraints: constraints,
+        controller: controller,
       ),
     ),
   );
@@ -372,7 +370,6 @@ DataRow dataRowForTheTable(
         statusBox(
           docData.status ?? '',
           hieght: 35,
-          width: 100,
           padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
       ),

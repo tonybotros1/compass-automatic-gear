@@ -39,27 +39,45 @@ class ApInvoicesModel {
 
   factory ApInvoicesModel.fromJson(Map<String, dynamic> json) {
     return ApInvoicesModel(
-      id: json["_id"],
-      createdAt: DateTime.tryParse(json["createdAt"] ?? ""),
-      updatedAt: DateTime.tryParse(json["updatedAt"] ?? ""),
-      companyId: json["company_id"],
-      description: json["description"],
-      invoiceDate: DateTime.tryParse(json["invoice_date"] ?? ""),
-      invoiceNumber: json["invoice_number"],
-      invoiceType: json["invoice_type"],
-      referenceNumber: json["reference_number"],
-      status: json["status"],
-      transactionDate: DateTime.tryParse(json["transaction_date"] ?? ""),
-      vendor: json["vendor"],
+      id: json.containsKey('_id') ? json["_id"] : '',
+      createdAt: json.containsKey('createdAt')
+          ? DateTime.tryParse(json["createdAt"] ?? "")
+          : null,
+      updatedAt: json.containsKey('updatedAt')
+          ? DateTime.tryParse(json["updatedAt"] ?? "")
+          : null,
+      companyId: json.containsKey('company_id') ? json["company_id"] : '',
+      description: json.containsKey('description') ? json["description"] : '',
+      invoiceDate: json.containsKey('invoice_date')
+          ? DateTime.tryParse(json["invoice_date"] ?? "")
+          : null,
+      invoiceNumber: json.containsKey('invoice_number')
+          ? json["invoice_number"]
+          : '',
+      invoiceType: json.containsKey('invoice_type') ? json["invoice_type"] : '',
+      referenceNumber: json.containsKey('reference_number')
+          ? json["reference_number"]
+          : '',
+      status: json.containsKey('status') ? json["status"] : '',
+      transactionDate: json.containsKey('transaction_date')
+          ? DateTime.tryParse(json["transaction_date"] ?? "")
+          : null,
+      vendor: json.containsKey('vendor') ? json["vendor"] : '',
       items:
           (json["items"] as List?)
               ?.map((e) => ApInvoicesItem.fromJson(e))
               .toList() ??
           const [],
-      vendorName: json["vendor_name"],
-      invoiceTypeName: json["invoice_type_name"],
-      totalAmount: (json["total_amounts"] ?? 0).toDouble(),
-      totalVat: (json["total_vats"] ?? 0).toDouble(),
+      vendorName: json.containsKey('vendor_name') ? json["vendor_name"] : '',
+      invoiceTypeName: json.containsKey('invoice_type_name')
+          ? json["invoice_type_name"]
+          : '',
+      totalAmount: json.containsKey('total_amounts')
+          ? (json["total_amounts"] ?? 0).toDouble()
+          : 0,
+      totalVat: json.containsKey('total_vats')
+          ? (json["total_vats"] ?? 0).toDouble()
+          : 0,
     );
   }
 
@@ -143,18 +161,32 @@ class ApInvoicesItem {
 
   factory ApInvoicesItem.fromJson(Map<String, dynamic> json) {
     return ApInvoicesItem(
-      id: json["_id"],
-      createdAt: DateTime.tryParse(json["createdAt"] ?? ""),
-      updatedAt: DateTime.tryParse(json["updatedAt"] ?? ""),
-      amount: (json["amount"] ?? 0).toDouble(),
-      jobNumber: json["job_number"] ?? '',
-      jobNumberId: json["job_number_id"] ?? '',
-      note: json["note"] ?? '',
-      transactionType: json["transaction_type"] ?? '',
-      vat: (json["vat"] ?? 0).toDouble(),
-      apInvoiceId: json["ap_invoice_id"] ?? '',
-      transactionTypeName: json["transaction_type_name"],
-      receivedNumber: json["received_number"]?.toString(),
+      id: json.containsKey('_id') ? json["_id"] : '',
+      createdAt: json.containsKey('createdAt')
+          ? DateTime.tryParse(json["createdAt"] ?? "")
+          : null,
+      updatedAt: json.containsKey('updatedAt')
+          ? DateTime.tryParse(json["updatedAt"] ?? "")
+          : null,
+      amount: json.containsKey('amount') ? (json["amount"] ?? 0).toDouble() : 0,
+      jobNumber: json.containsKey('job_number') ? json["job_number"] ?? '' : '',
+      jobNumberId: json.containsKey('job_number_id')
+          ? json["job_number_id"] ?? ''
+          : null,
+      note: json.containsKey('note') ? json["note"] ?? '' : null,
+      transactionType: json.containsKey('transaction_type')
+          ? json["transaction_type"] ?? ''
+          : null,
+      vat: json.containsKey('vat') ? (json["vat"] ?? 0).toDouble() : 0,
+      apInvoiceId: json.containsKey('ap_invoice_id')
+          ? json["ap_invoice_id"] ?? ''
+          : '',
+      transactionTypeName: json.containsKey('transaction_type_name')
+          ? json["transaction_type_name"]
+          : '',
+      receivedNumber: json.containsKey('received_number')
+          ? json["received_number"]?.toString()
+          : '',
     );
   }
 

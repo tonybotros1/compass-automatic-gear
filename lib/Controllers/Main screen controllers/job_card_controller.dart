@@ -72,7 +72,7 @@ class JobCardController extends GetxController {
   TextEditingController customerEntityPhoneNumber = TextEditingController();
   TextEditingController customerCreditNumber = TextEditingController();
   TextEditingController customerOutstanding = TextEditingController();
-  RxString customerSaleMan = RxString('');
+  TextEditingController customerSaleMan = TextEditingController();
   TextEditingController customerBranch = TextEditingController();
   TextEditingController customerCurrency = TextEditingController();
   TextEditingController customerCurrencyRate = TextEditingController();
@@ -256,13 +256,6 @@ class JobCardController extends GetxController {
     '5': {'name': 'Approved'},
     '6': {'name': 'Draft'},
   });
-
-  List<Map<String, dynamic>> customers = [
-    {"id": "1", "name": "Acme Corp"},
-    {"id": "2", "name": "Globex Corporation"},
-    {"id": "3", "name": "Soylent Corp"},
-    // ... imagine 1000+ more items here
-  ];
 
   String? selectedCustomerId;
 
@@ -2278,7 +2271,7 @@ class JobCardController extends GetxController {
     customerEntityPhoneNumber.clear();
     customerEntityEmail.clear();
     customerSaleManId.value = '';
-    customerSaleMan.value = '';
+    customerSaleMan.clear();
     lpoCounter.value.clear();
     approvalDate.value.clear();
     finishDate.value.clear();
@@ -2536,7 +2529,7 @@ class JobCardController extends GetxController {
     customerCreditNumber.text = data.creditLimit.toString();
     customerOutstanding.text = data.outstanding.toString();
     customerSaleManId.value = data.salesman ?? '';
-    customerSaleMan.value = data.salesmanName ?? '';
+    customerSaleMan.text = data.salesmanName ?? '';
     customerBranchId.value = data.branch ?? '';
     customerBranch.text = data.branchName ?? '';
     customerCurrencyId.value = data.currency ?? '';

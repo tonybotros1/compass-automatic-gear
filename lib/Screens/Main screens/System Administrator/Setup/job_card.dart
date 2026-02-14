@@ -7,11 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
-import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/job_card_buttons.dart';
+import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
@@ -60,28 +60,17 @@ class JobCard extends StatelessWidget {
                                       controller:
                                           controller.invoiceNumberFilter.value,
                                     ),
-                                    CustomDropdown(
+                                    MenuWithValues(
+                                      labelText: 'Car Brand',
+                                      headerLqabel: 'Brands',
+                                      dialogWidth: constraints.maxWidth / 3,
                                       width: 170,
-                                      showedSelectedName: 'name',
-                                      textcontroller: controller
-                                          .carBrandIdFilterName
-                                          .value
-                                          .text,
-                                      hintText: 'Car Brand',
-                                      onChanged: (key, value) async {
-                                        // controller.getModelsByCarBrand(key);
-                                        controller.carBrandIdFilter.value = key;
-                                        controller
-                                                .carBrandIdFilterName
-                                                .value
-                                                .text =
-                                            value['name'];
-                                        controller.carModelIdFilter.value = '';
-                                        controller
-                                                .carModelIdFilterName
-                                                .value
-                                                .text =
-                                            '';
+                                      controller:
+                                          controller.carBrandIdFilterName.value,
+                                      displayKeys: const ['name'],
+                                      displaySelectedKeys: const ['name'],
+                                      onOpen: () {
+                                        return controller.getCarBrands();
                                       },
                                       onDelete: () {
                                         controller.carBrandIdFilter.value = "";
@@ -94,35 +83,49 @@ class JobCard extends StatelessWidget {
                                                 .text =
                                             '';
                                       },
-                                      onOpen: () {
-                                        return controller.getCarBrands();
-                                      },
-                                    ),
-                                    CustomDropdown(
-                                      width: 170,
-                                      showedSelectedName: 'name',
-                                      textcontroller: controller
-                                          .carModelIdFilterName
-                                          .value
-                                          .text,
-                                      hintText: 'Car Model',
-                                      onChanged: (key, value) async {
-                                        controller.carModelIdFilter.value = key;
+                                      onSelected: (value) {
+                                        controller.carBrandIdFilter.value =
+                                            value['_id'];
+                                        controller
+                                                .carBrandIdFilterName
+                                                .value
+                                                .text =
+                                            value['name'];
+                                        controller.carModelIdFilter.value = '';
                                         controller
                                                 .carModelIdFilterName
                                                 .value
                                                 .text =
-                                            value['name'];
+                                            '';
+                                      },
+                                    ),
+                                    MenuWithValues(
+                                      labelText: 'Car Model',
+                                      headerLqabel: 'Models',
+                                      dialogWidth: constraints.maxWidth / 3,
+                                      width: 170,
+                                      controller:
+                                          controller.carModelIdFilterName.value,
+                                      displayKeys: const ['name'],
+                                      displaySelectedKeys: const ['name'],
+                                      onOpen: () {
+                                        return controller.getModelsByCarBrand(
+                                          controller.carBrandIdFilter.value,
+                                        );
                                       },
                                       onDelete: () {
                                         controller.carModelIdFilter.value = "";
                                         controller.carModelIdFilterName.value
                                             .clear();
                                       },
-                                      onOpen: () {
-                                        return controller.getModelsByCarBrand(
-                                          controller.carBrandIdFilter.value,
-                                        );
+                                      onSelected: (value) {
+                                        controller.carModelIdFilter.value =
+                                            value['_id'];
+                                        controller
+                                                .carModelIdFilterName
+                                                .value
+                                                .text =
+                                            value['name'];
                                       },
                                     ),
                                     myTextFormFieldWithBorder(
@@ -141,22 +144,20 @@ class JobCard extends StatelessWidget {
                                       labelText: 'LPO No.',
                                       controller: controller.lpoFilter.value,
                                     ),
-                                    CustomDropdown(
+                                    MenuWithValues(
+                                      labelText: 'Customer',
+                                      headerLqabel: 'Customers',
+                                      dialogWidth: constraints.maxWidth / 2,
                                       width: 300,
-                                      textcontroller: controller
+                                      controller: controller
                                           .customerNameIdFilterName
-                                          .value
-                                          .text,
-                                      showedSelectedName: 'entity_name',
-                                      hintText: 'Customer Name',
-                                      onChanged: (key, value) async {
-                                        controller
-                                                .customerNameIdFilterName
-                                                .value
-                                                .text =
-                                            value['entity_name'];
-                                        controller.customerNameIdFilter.value =
-                                            key;
+                                          .value,
+                                      displayKeys: const ['entity_name'],
+                                      displaySelectedKeys: const [
+                                        'entity_name',
+                                      ],
+                                      onOpen: () {
+                                        return controller.getAllCustomers();
                                       },
                                       onDelete: () {
                                         controller
@@ -166,23 +167,28 @@ class JobCard extends StatelessWidget {
                                         controller.customerNameIdFilter.value =
                                             "";
                                       },
-                                      onOpen: () {
-                                        return controller.getAllCustomers();
+                                      onSelected: (value) {
+                                        controller
+                                                .customerNameIdFilterName
+                                                .value
+                                                .text =
+                                            value['entity_name'];
+                                        controller.customerNameIdFilter.value =
+                                            value['_id'];
                                       },
                                     ),
-                                    CustomDropdown(
+
+                                    MenuWithValues(
+                                      labelText: 'Branch',
+                                      headerLqabel: 'Branches',
+                                      dialogWidth: constraints.maxWidth / 3,
                                       width: 250,
-                                      textcontroller: controller
-                                          .branchFilterName
-                                          .value
-                                          .text,
-                                      showedSelectedName: 'name',
-                                      hintText: 'Branch',
-                                      onChanged: (key, value) async {
-                                        controller.branchFilterName.value.text =
-                                            value['name'];
-                                        controller.branchNameIdFilter.value =
-                                            key;
+                                      controller:
+                                          controller.branchFilterName.value,
+                                      displayKeys: const ['name'],
+                                      displaySelectedKeys: const ['name'],
+                                      onOpen: () {
+                                        return controller.getBranches();
                                       },
                                       onDelete: () {
                                         controller.branchFilterName.value
@@ -190,8 +196,11 @@ class JobCard extends StatelessWidget {
                                         controller.branchNameIdFilter.value =
                                             "";
                                       },
-                                      onOpen: () {
-                                        return controller.getBranches();
+                                      onSelected: (value) {
+                                        controller.branchFilterName.value.text =
+                                            value['name'];
+                                        controller.branchNameIdFilter.value =
+                                            value['_id'];
                                       },
                                     ),
                                   ],
@@ -1385,21 +1394,3 @@ class CardDataSource extends DataTableSource {
   @override
   int get selectedRowCount => 0;
 }
-
-// Widget smartTextIcon(String text, {double size = 45}) {
-//   final colors = [Colors.red, Colors.blue, Colors.green, Colors.orange];
-//   final color = colors[text.hashCode % colors.length];
-
-//   return CircleAvatar(
-//     radius: size / 2,
-//     // backgroundColor: color,
-//     child: Text(
-//       text.isNotEmpty ? text[0].toUpperCase() : "?",
-//       style: TextStyle(
-//         color: Colors.white,
-//         fontWeight: FontWeight.bold,
-//         fontSize: size * 0.5,
-//       ),
-//     ),
-//   );
-// }

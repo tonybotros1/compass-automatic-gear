@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../../consts.dart';
-import '../../drop_down_menu3.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 import '../add_new_values_button.dart';
 
@@ -35,22 +35,21 @@ Widget customerDetailsSection(
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      CustomDropdown(
-                        width: Get.width / 3.7,
+                      MenuWithValues(
                         focusNode: controller.focusNodeForCustomerDetails1,
-                        nextFocusNode: controller.focusNodeForCustomerDetails2,
-                        showedSelectedName: 'entity_name',
-                        textcontroller: controller.customerName.text,
-                        hintText: 'Customer',
-                        onChanged: (key, value) {
-                          controller.customerName.text = value['entity_name'];
-                          controller.onSelectForCustomers(key, value);
-                          controller.customerId.value = key;
-                          controller.isJobModified.value = true;
-                          controller.jobWarrentyDays.value.text =
-                              value.containsKey('warranty_days')
-                              ? value['warranty_days'].toString()
-                              : '0';
+                        onFieldSubmitted: (_) => controller
+                            .focusNodeForCustomerDetails2
+                            .requestFocus(),
+                        labelText: 'Customer',
+                        headerLqabel: 'Customers',
+                        dialogWidth: constraints.maxWidth / 2,
+                        width: Get.width / 3.7,
+                        controller: controller.customerName,
+                        displayKeys: const ['entity_name'],
+                        flexList: const [1, 1],
+                        displaySelectedKeys: const ['entity_name'],
+                        onOpen: () {
+                          return controller.getAllCustomers();
                         },
                         onDelete: () {
                           controller.customerName.clear();
@@ -59,14 +58,22 @@ Widget customerDetailsSection(
                           controller.customerEntityEmail.clear();
                           controller.customerCreditNumber.clear();
                           controller.customerSaleManId.value = "";
-                          controller.customerSaleMan.value = "";
+                          controller.customerSaleMan.clear();
                           controller.customerId.value = "";
                           controller.isJobModified.value = true;
                         },
-                        onOpen: () {
-                          return controller.getAllCustomers();
+                        onSelected: (value) {
+                          controller.customerName.text = value['entity_name'];
+                          controller.onSelectForCustomers(value['_id'], value);
+                          controller.customerId.value = value['_id'];
+                          controller.isJobModified.value = true;
+                          controller.jobWarrentyDays.value.text =
+                              value.containsKey('warranty_days')
+                              ? value['warranty_days'].toString()
+                              : '0';
                         },
                       ),
+
                       ExcludeFocus(
                         child: newValueButton(
                           constraints,
@@ -140,27 +147,31 @@ Widget customerDetailsSection(
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          CustomDropdown(
+                          MenuWithValues(
                             focusNode: controller.focusNodeForCustomerDetails5,
-                            nextFocusNode:
-                                controller.focusNodeForCustomerDetails6,
-
+                            onFieldSubmitted: (_) => controller
+                                .focusNodeForCustomerDetails6
+                                .requestFocus(),
+                            labelText: 'Salesman',
+                            headerLqabel: 'Salesman',
+                            dialogWidth: constraints.maxWidth / 3,
                             width: 320,
-                            showedSelectedName: 'name',
-                            textcontroller: controller.customerSaleMan.value,
-                            hintText: 'Salesman',
-                            onChanged: (key, value) {
-                              controller.customerSaleMan.value = value['name'];
-                              controller.customerSaleManId.value = key;
-                              controller.isJobModified.value = true;
+                            controller: controller.customerSaleMan,
+                            displayKeys: const ['name'],
+                            flexList: const [1],
+                            displaySelectedKeys: const ['name'],
+                            onOpen: () {
+                              return controller.getSalesMan();
                             },
                             onDelete: () {
-                              controller.customerSaleMan.value = "";
+                              controller.customerSaleMan.clear();
                               controller.customerSaleManId.value = "";
                               controller.isJobModified.value = true;
                             },
-                            onOpen: () {
-                              return controller.getSalesMan();
+                            onSelected: (value) {
+                              controller.customerSaleMan.value = value['name'];
+                              controller.customerSaleManId.value = value['_id'];
+                              controller.isJobModified.value = true;
                             },
                           ),
                           ExcludeFocus(
@@ -178,27 +189,34 @@ Widget customerDetailsSection(
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      CustomDropdown(
+                      MenuWithValues(
                         focusNode: controller.focusNodeForCustomerDetails6,
-                        nextFocusNode: controller.focusNodeForCustomerDetails7,
+                        onFieldSubmitted: (_) => controller
+                            .focusNodeForCustomerDetails7
+                            .requestFocus(),
+                        labelText: 'Branch',
+                        headerLqabel: 'Branches',
+                        dialogWidth: constraints.maxWidth / 3,
                         width: 320,
-                        showedSelectedName: 'name',
-                        textcontroller: controller.customerBranch.text,
-                        hintText: 'Branch',
-                        onChanged: (key, value) {
-                          controller.customerBranch.text = value['name'];
-                          controller.customerBranchId.value = key;
-                          controller.isJobModified.value = true;
+                        controller: controller.customerBranch,
+                        displayKeys: const ['name'],
+                        flexList: const [1],
+                        displaySelectedKeys: const ['name'],
+                        onOpen: () {
+                          return controller.getBranches();
                         },
                         onDelete: () {
                           controller.customerBranch.clear();
                           controller.customerBranchId.value = "";
                           controller.isJobModified.value = true;
                         },
-                        onOpen: () {
-                          return controller.getBranches();
+                        onSelected: (value) {
+                          controller.customerBranch.text = value['name'];
+                          controller.customerBranchId.value = value['_id'];
+                          controller.isJobModified.value = true;
                         },
                       ),
+
                       ExcludeFocus(
                         child: newValueButton(
                           constraints,
@@ -212,21 +230,21 @@ Widget customerDetailsSection(
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      CustomDropdown(
+                      MenuWithValues(
                         focusNode: controller.focusNodeForCustomerDetails7,
-
-                        nextFocusNode: controller.focusNodeForCustomerDetails8,
+                        onFieldSubmitted: (_) => controller
+                            .focusNodeForCustomerDetails8
+                            .requestFocus(),
+                        labelText: 'Currency',
+                        headerLqabel: 'Currencies',
+                        dialogWidth: constraints.maxWidth / 3,
                         width: 170,
-                        textcontroller: controller.customerCurrency.value.text,
-                        hintText: 'Currency',
-                        showedSelectedName: 'currency_code',
-                        onChanged: (key, value) {
-                          controller.customerCurrency.text =
-                              value['currency_code'];
-                          controller.customerCurrencyId.value = key;
-                          controller.customerCurrencyRate.text =
-                              (value['rate'] ?? '1').toString();
-                          controller.isJobModified.value = true;
+                        controller: controller.customerCurrency,
+                        displayKeys: const ['currency_code'],
+                        flexList: const [1],
+                        displaySelectedKeys: const ['currency_code'],
+                        onOpen: () {
+                          return controller.getCurrencies();
                         },
                         onDelete: () {
                           controller.customerCurrency.clear();
@@ -234,10 +252,16 @@ Widget customerDetailsSection(
                           controller.customerCurrencyRate.clear();
                           controller.isJobModified.value = true;
                         },
-                        onOpen: () {
-                          return controller.getCurrencies();
+                        onSelected: (value) {
+                          controller.customerCurrency.text =
+                              value['currency_code'];
+                          controller.customerCurrencyId.value = value['_id'];
+                          controller.customerCurrencyRate.text =
+                              (value['rate'] ?? '1').toString();
+                          controller.isJobModified.value = true;
                         },
                       ),
+
                       ExcludeFocus(
                         child: newValueButton(
                           constraints,

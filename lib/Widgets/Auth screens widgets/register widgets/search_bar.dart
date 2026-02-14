@@ -42,6 +42,8 @@ Row searchBar({
                     onChanged: onChanged,
                     controller: search.value,
                     decoration: InputDecoration(
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
                       border: InputBorder.none,
                       hintStyle: const TextStyle(color: iconColor),
                       hintText: title,

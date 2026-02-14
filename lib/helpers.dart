@@ -365,6 +365,39 @@ class Helpers {
     }
   }
 
+   Future<List<Map<String, dynamic>>> getCarBrands2() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final response = await http.get(
+        Uri.parse('$backendTestURI/brands/get_all_brands_by_status'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = json.decode(response.body);
+        List<Map<String, dynamic>> jsonData = decoded['brands'];
+       
+        return jsonData;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getCarBrands();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return [];
+      } else if (response.statusCode == 401) {
+        logout();
+        return [];
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
+    }
+  }
+
   Future<Map<String, dynamic>> getModelsValues(String brandId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();

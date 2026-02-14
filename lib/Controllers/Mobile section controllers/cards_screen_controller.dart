@@ -151,6 +151,15 @@ class CardsScreenController extends GetxController {
   final bottomBarController = Get.put(PersistentTabController());
   // final formKey = GlobalKey<FormState>();
 
+  RxMap allStatus = RxMap({
+    '1': {'name': 'New', "date": "02-02-2024", "age": 40},
+    '2': {'name': 'Posted', "date": "02-02-2024", "age": 40},
+    '3': {'name': 'Cancelled', "date": "02-02-2024", "age": 40},
+    '4': {'name': 'Ready', "date": "02-02-2024", "age": 40},
+    '5': {'name': 'Approved', "date": "02-02-2024", "age": 40},
+    '6': {'name': 'Draft', "date": "02-02-2024", "age": 40},
+  });
+
   // interioir / exterioir
   RxList entrioirExterioirList = RxList([
     'Head Lights, Tail Lights, Turn Signals, Breake Lights, Hazard Lights, Exterioi Lamps, License Plate Lights',
@@ -250,6 +259,10 @@ class CardsScreenController extends GetxController {
   Future<Map<String, dynamic>> getAllCustomers() async {
     return await helper.getCustomers();
   }
+
+  // Future<Map<String, dynamic>> getCarBrands() async {
+  //   return await helper.getCarBrands();
+  // }
 
   Future<Map<String, dynamic>> getCarBrands() async {
     return await helper.getCarBrands();

@@ -137,7 +137,6 @@ DataRow dataRowForTheTable(
         statusBox(
           data.status ?? '',
           hieght: 35,
-          width: 100,
           padding: const EdgeInsets.symmetric(horizontal: 5),
         ),
       ),

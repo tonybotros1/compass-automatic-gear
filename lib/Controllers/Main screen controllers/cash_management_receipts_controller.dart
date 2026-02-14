@@ -33,7 +33,6 @@ class CashManagementReceiptsController extends CashManagementBaseController {
 
   @override
   void onInit() async {
-    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
     filterSearch();
     super.onInit();
   }
@@ -483,7 +482,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         List recs = decoded['receipts'];
         Map grandTotals = decoded['grand_totals'];
         totalReceiptsReceived.value = grandTotals['grand_received'];
-        numberOfReceipts.value = grandTotals['grand_count'];
+        numberOfReceipts.value = grandTotals['total_items_count'];
         allReceipts.assignAll(recs.map((rec) => ARReceiptsModel.fromJson(rec)));
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
