@@ -6,10 +6,10 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/ap_invoices_controller.dart';
 import '../../../../Models/ar receipts and ap payments/ap_invoices_model.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
-import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/ap_invoices_widgets/ap_invoice_dialog.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
@@ -46,27 +46,31 @@ class ApInvoices extends StatelessWidget {
                                   spacing: 10,
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    CustomDropdown(
+                                    MenuWithValues(
+                                      labelText: 'Invoice Type',
+                                      headerLqabel: 'Invoice Types',
+                                      dialogWidth: constraints.maxWidth / 3,
                                       width: 150,
-                                      textcontroller:
-                                          controller.invoiceTypeFilter.text,
-                                      showedSelectedName: 'name',
-                                      hintText: 'Invoice Type',
-                                      onChanged: (key, value) {
-                                        controller.invoiceTypeFilter.text =
-                                            value['name'];
-                                        controller.invoiceTypeFilterId.value =
-                                            key;
+                                      dialogHeight: 300,
+                                      controller: controller.invoiceTypeFilter,
+                                      displayKeys: const ['name'],
+                                      displaySelectedKeys: const ['name'],
+                                      onOpen: () {
+                                        return controller.getInvoiceTypes();
                                       },
                                       onDelete: () {
                                         controller.invoiceTypeFilter.clear();
                                         controller.invoiceTypeFilterId.value =
                                             '';
                                       },
-                                      onOpen: () {
-                                        return controller.getInvoiceTypes();
+                                      onSelected: (value) {
+                                        controller.invoiceTypeFilter.text =
+                                            value['name'];
+                                        controller.invoiceTypeFilterId.value =
+                                            value['_id'];
                                       },
                                     ),
+
                                     myTextFormFieldWithBorder(
                                       width: 150,
                                       labelText: 'Reference NO.',
@@ -79,46 +83,52 @@ class ApInvoices extends StatelessWidget {
                                       controller:
                                           controller.invoiceNumberFilter,
                                     ),
-                                    CustomDropdown(
+                                    MenuWithValues(
+                                      labelText: 'Vendor',
+                                      headerLqabel: 'Vendors',
+                                      dialogWidth: constraints.maxWidth / 2,
                                       width: 300,
-                                      textcontroller:
-                                          controller.vendorFilter.value.text,
-                                      showedSelectedName: 'entity_name',
-                                      hintText: 'Vendor',
-                                      onChanged: (key, value) async {
-                                        controller.vendorFilter.value.text =
-                                            value['entity_name'];
-                                        controller.vendorFilterId.value = key;
+                                      controller: controller.vendorFilter.value,
+                                      displayKeys: const ['entity_name'],
+                                      displaySelectedKeys: const [
+                                        'entity_name',
+                                      ],
+                                      onOpen: () {
+                                        return controller.getAllVendors();
                                       },
                                       onDelete: () {
                                         controller.vendorFilter.value.clear();
                                         controller.vendorFilterId.value = '';
                                       },
-                                      onOpen: () {
-                                        return controller.getAllVendors();
+                                      onSelected: (value) {
+                                        controller.vendorFilter.value.text =
+                                            value['entity_name'];
+                                        controller.vendorFilterId.value =
+                                            value['_id'];
                                       },
                                     ),
-                                    CustomDropdown(
+
+                                    MenuWithValues(
+                                      labelText: 'Status',
+                                      headerLqabel: 'Status',
+                                      dialogWidth: constraints.maxWidth / 3,
                                       width: 200,
-                                      textcontroller:
-                                          controller.statusFilter.value.text,
-                                      showedSelectedName: 'name',
-                                      hintText: 'Status',
-                                      items: allStatus,
-                                      onChanged: (key, value) async {
-                                        controller.statusFilter.value.text =
-                                            value['name'];
-                                      },
+                                      dialogHeight: 400,
+                                      controller: controller.statusFilter.value,
+                                      displayKeys: const ['name'],
+                                      displaySelectedKeys: const ['name'],
+                                      data: allStatus,
                                       onDelete: () {
                                         controller.statusFilter.value.clear();
+                                      },
+                                      onSelected: (value) {
+                                        controller.statusFilter.value.text =
+                                            value['name'];
                                       },
                                     ),
                                   ],
                                 ),
-                                // MenuWithValues(
-                                //   controller: controller.statusFilter.value,
-                                //   width: 300,
-                                // ),
+
                                 Row(
                                   spacing: 10,
                                   children: [

@@ -1,13 +1,13 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/ap_invoices_controller.dart';
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 
-Widget paymentHeader(BuildContext context) {
+Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
   return Container(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
@@ -25,31 +25,29 @@ Widget paymentHeader(BuildContext context) {
                     Row(
                       spacing: 10,
                       children: [
-                        FocusTraversalOrder(
-                          order: const NumericFocusOrder(1),
-                          child: Expanded(
-                            flex: 3,
-                            child: CustomDropdown(
-                              focusNode: controller.focusNodePayementHeader1,
-                              nextFocusNode:
-                                  controller.focusNodePayementHeader2,
-                              showedSelectedName: 'name',
-                              textcontroller: controller.invoiceType.text,
-                              hintText: 'Invoice Type',
-                              onChanged: (key, value) {
-                                controller.invoiceTypeId.value = key;
-                                controller.invoiceType.text = value['name'];
-                                controller.isInvoiceModified.value = true;
-                              },
-                              onDelete: () {
-                                controller.invoiceTypeId.value = '';
-                                controller.invoiceType.clear();
-                                controller.isInvoiceModified.value = true;
-                              },
-                              onOpen: () {
-                                return controller.getInvoiceTypes();
-                              },
-                            ),
+                        Expanded(
+                          flex: 3,
+                          child: MenuWithValues(
+                            labelText: 'Invoice Type',
+                            headerLqabel: 'Invoice Types',
+                            dialogWidth: constraints.maxWidth / 3,
+                            dialogHeight: 400,
+                            controller: controller.invoiceType,
+                            displayKeys: const ['name'],
+                            displaySelectedKeys: const ['name'],
+                            onSelected: (value) {
+                              controller.invoiceTypeId.value = value['_id'];
+                              controller.invoiceType.text = value['name'];
+                              controller.isInvoiceModified.value = true;
+                            },
+                            onOpen: () {
+                              return controller.getInvoiceTypes();
+                            },
+                            onDelete: () {
+                              controller.invoiceTypeId.value = '';
+                              controller.invoiceType.clear();
+                              controller.isInvoiceModified.value = true;
+                            },
                           ),
                         ),
                         Expanded(
@@ -65,40 +63,37 @@ Widget paymentHeader(BuildContext context) {
                         ),
                         Expanded(
                           flex: 3,
-                          child: FocusTraversalOrder(
-                            order: const NumericFocusOrder(2),
-                            child: myTextFormFieldWithBorder(
-                              textInputAction: TextInputAction.next,
-                              focusNode: controller.focusNodePayementHeader2,
-                              onEditingComplete: () {
-                                Get.focusScope!.requestFocus(
-                                  controller.focusNodePayementHeader3,
-                                );
-                              },
-                              isDate: true,
-                              suffixIcon: IconButton(
-                                focusNode: FocusNode(skipTraversal: true),
-                                onPressed: () {
-                                  controller.isInvoiceModified.value = true;
-                                  selectDateContext(
-                                    context,
-                                    controller.transactionDate,
-                                  );
-                                },
-                                icon: const Icon(Icons.date_range),
-                              ),
-                              controller: controller.transactionDate,
-                              onFieldSubmitted: (_) {
-                                normalizeDate(
-                                  controller.transactionDate.value.text,
+                          child: myTextFormFieldWithBorder(
+                            textInputAction: TextInputAction.next,
+                            focusNode: controller.focusNodePayementHeader2,
+                            onEditingComplete: () {
+                              Get.focusScope!.requestFocus(
+                                controller.focusNodePayementHeader3,
+                              );
+                            },
+                            isDate: true,
+                            suffixIcon: IconButton(
+                              focusNode: FocusNode(skipTraversal: true),
+                              onPressed: () {
+                                controller.isInvoiceModified.value = true;
+                                selectDateContext(
+                                  context,
                                   controller.transactionDate,
                                 );
                               },
-                              onChanged: (_) {
-                                controller.isInvoiceModified.value = true;
-                              },
-                              labelText: 'Transaction Date',
+                              icon: const Icon(Icons.date_range),
                             ),
+                            controller: controller.transactionDate,
+                            onFieldSubmitted: (_) {
+                              normalizeDate(
+                                controller.transactionDate.text,
+                                controller.transactionDate,
+                              );
+                            },
+                            onChanged: (_) {
+                              controller.isInvoiceModified.value = true;
+                            },
+                            labelText: 'Transaction Date',
                           ),
                         ),
                         const Expanded(flex: 5, child: SizedBox()),
@@ -150,8 +145,9 @@ Widget paymentHeader(BuildContext context) {
                             ),
                             controller: controller.invoiceDate,
                             onFieldSubmitted: (_) {
+                              print('yes');
                               normalizeDate(
-                                controller.invoiceDate.value.text,
+                                controller.invoiceDate.text,
                                 controller.invoiceDate,
                               );
                             },
@@ -166,29 +162,26 @@ Widget paymentHeader(BuildContext context) {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Expanded(
-                          child: FocusTraversalOrder(
-                            order: const NumericFocusOrder(3),
-                            child: CustomDropdown(
-                              focusNode: controller.focusNodePayementHeader3,
-                              nextFocusNode:
-                                  controller.focusNodePayementHeader4,
-                              showedSelectedName: 'entity_name',
-                              textcontroller: controller.vendor.text,
-                              hintText: 'Vendor ',
-                              onChanged: (key, value) {
-                                controller.isInvoiceModified.value = true;
-                                controller.vendorId.value = key;
-                                controller.vendor.text = value['entity_name'];
-                              },
-                              onDelete: () {
-                                controller.vendorId.value = '';
-                                controller.vendor.clear();
-                                controller.isInvoiceModified.value = true;
-                              },
-                              onOpen: () {
-                                return controller.getAllVendors();
-                              },
-                            ),
+                          child: MenuWithValues(
+                            labelText: 'Vendor',
+                            headerLqabel: 'Vendors',
+                            dialogWidth: constraints.maxWidth / 2,
+                            controller: controller.vendor,
+                            displayKeys: const ['entity_name'],
+                            displaySelectedKeys: const ['entity_name'],
+                            onSelected: (value) {
+                              controller.isInvoiceModified.value = true;
+                              controller.vendorId.value = value['_id'];
+                              controller.vendor.text = value['entity_name'];
+                            },
+                            onOpen: () {
+                              return controller.getAllVendors();
+                            },
+                            onDelete: () {
+                              controller.vendorId.value = '';
+                              controller.vendor.clear();
+                              controller.isInvoiceModified.value = true;
+                            },
                           ),
                         ),
                         addNewEntityButton(),
@@ -199,18 +192,14 @@ Widget paymentHeader(BuildContext context) {
               ),
             ),
             Expanded(
-              child: FocusTraversalOrder(
-                order: const NumericFocusOrder(4),
-                child: myTextFormFieldWithBorder(
-                  // focusNode: FocusNode(skipTraversal: true),
-                  focusNode: controller.focusNodePayementHeader4,
-                  labelText: 'Description',
-                  maxLines: 7,
-                  controller: controller.description,
-                  onChanged: (_) {
-                    controller.isInvoiceModified.value = true;
-                  },
-                ),
+              child: myTextFormFieldWithBorder(
+                focusNode: controller.focusNodePayementHeader4,
+                labelText: 'Description',
+                maxLines: 7,
+                controller: controller.description,
+                onChanged: (_) {
+                  controller.isInvoiceModified.value = true;
+                },
               ),
             ),
           ],

@@ -38,7 +38,7 @@ Widget addNewAPInvoiceOrEdit({
                                   style: fontStyle1,
                                 ),
                               ),
-                              paymentHeader(context),
+                              paymentHeader(context,constraints),
                               const SizedBox(height: 20),
                               labelContainer(
                                 lable: Row(

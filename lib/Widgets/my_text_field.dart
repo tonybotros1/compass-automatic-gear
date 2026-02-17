@@ -56,6 +56,8 @@ Widget myTextFormFieldWithBorder({
             if (event is KeyDownEvent &&
                 (event.logicalKey == LogicalKeyboardKey.tab ||
                     event.logicalKey == LogicalKeyboardKey.enter)) {
+              onFieldSubmitted?.call('');
+
               if (nextFocusNode != null) {
                 nextFocusNode.requestFocus();
               }

@@ -5,6 +5,7 @@ import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../menu_dialog.dart';
 import '../auto_size_box.dart';
 
 Widget addNewinvoiceForApInvoicesOrEdit({
@@ -21,25 +22,45 @@ Widget addNewinvoiceForApInvoicesOrEdit({
           children: [
             GetBuilder<ApInvoicesController>(
               builder: (controller) {
-                return CustomDropdown(
+                return MenuWithValues(
+                  labelText: 'Transaction Type',
+                  headerLqabel: 'Transaction Types',
+                  dialogWidth: constraints.maxWidth / 3,
                   width: double.infinity,
-                  focusNode: controller.focusNode1,
-                  nextFocusNode: controller.focusNode2,
-                  showedSelectedName: 'type',
-                  textcontroller: controller.transactionType.text,
-                  hintText: 'Transaction Type',
-                  onChanged: (key, value) {
-                    controller.transactionType.text = value['type'];
-                    controller.transactionTypeId.value = key;
+                  controller: controller.transactionType,
+                  displayKeys: const ['type'],
+                  displaySelectedKeys: const ['type'],
+                  onOpen: () {
+                    return controller.getTransactionTypes();
                   },
                   onDelete: () {
                     controller.transactionType.clear();
                     controller.transactionTypeId.value = '';
                   },
-                  onOpen: () {
-                    return controller.getTransactionTypes();
+                  onSelected: (value) {
+                    controller.transactionType.text = value['type'];
+                    controller.transactionTypeId.value = value['_id'];
                   },
                 );
+                // CustomDropdown(
+                //   width: double.infinity,
+                //   focusNode: controller.focusNode1,
+                //   nextFocusNode: controller.focusNode2,
+                //   showedSelectedName: 'type',
+                //   textcontroller: controller.transactionType.text,
+                //   hintText: 'Transaction Type',
+                //   onChanged: (key, value) {
+                // controller.transactionType.text = value['type'];
+                // controller.transactionTypeId.value = key;
+                //   },
+                //   onDelete: () {
+                // controller.transactionType.clear();
+                // controller.transactionTypeId.value = '';
+                //   },
+                //   onOpen: () {
+                //     return controller.getTransactionTypes();
+                //   },
+                // );
               },
             ),
             Row(
@@ -85,7 +106,7 @@ Widget addNewinvoiceForApInvoicesOrEdit({
                   },
                   labelText: 'Job Number',
                   controller: controller.jobNumber,
-                  isEnabled: false
+                  isEnabled: false,
                 ),
                 IconButton(
                   focusNode: FocusNode(skipTraversal: true),
