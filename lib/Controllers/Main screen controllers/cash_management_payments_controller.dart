@@ -605,7 +605,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
 
     note.text = data.note ?? '';
     paymentType.text = data.paymentTypeName ?? '';
-    paymentType.text == 'Cheque'
+    paymentType.text.toLowerCase() == 'cheque'
         ? isChequeSelected.value = true
         : isChequeSelected.value = false;
     paymentTypeId.value = data.paymentType ?? '';

@@ -188,7 +188,6 @@ Widget accountInformations<T extends CashManagementBaseController>(
                     labelText: 'Account',
                     headerLqabel: 'Accounts',
                     dialogWidth: constraints.maxWidth / 3,
-                    isEnabled: controller.isChequeSelected.isTrue,
                     width: 260,
                     controller: controller.account,
                     displayKeys: const ['account_number'],

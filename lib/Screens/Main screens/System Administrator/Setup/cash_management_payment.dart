@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/cash_management_payments_controller.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
-import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/cash_management_widgets/payment_dialog.dart';
+import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
@@ -49,85 +49,103 @@ class CashManagementPayment extends StatelessWidget {
                                     controller:
                                         controller.paymentCounterFilter.value,
                                   ),
-                                  CustomDropdown(
+                                  MenuWithValues(
+                                    labelText: 'Payment Type',
+                                    headerLqabel: 'Payment Types',
+                                    dialogWidth: constraints.maxWidth / 3,
                                     width: 200,
-                                    showedSelectedName: 'name',
-                                    textcontroller:
-                                        controller.paymentTypeFilter.value.text,
-                                    hintText: 'Payment Type',
-                                    onChanged: (key, value) async {
-                                      controller.paymentTypeFilterId.value =
-                                          key;
-                                      controller.paymentTypeFilter.value.text =
-                                          value['name'];
+                                    controller:
+                                        controller.paymentTypeFilter.value,
+                                    displayKeys: const ['name'],
+                                    displaySelectedKeys: const ['name'],
+                                    onOpen: () {
+                                      return controller
+                                          .getReceiptsAndPaymentsTypes();
                                     },
                                     onDelete: () {
                                       controller.paymentTypeFilterId.value = '';
                                       controller.paymentTypeFilter.value
                                           .clear();
                                     },
-                                    onOpen: () {
-                                      return controller
-                                          .getReceiptsAndPaymentsTypes();
+                                    onSelected: (value) {
+                                      controller.paymentTypeFilterId.value =
+                                          value['_id'];
+                                      controller.paymentTypeFilter.value.text =
+                                          value['name'];
                                     },
                                   ),
-                                  CustomDropdown(
+
+                                  MenuWithValues(
+                                    labelText: 'Vendor Name',
+                                    headerLqabel: 'Vendors',
+                                    dialogWidth: constraints.maxWidth / 2,
                                     width: 300,
-                                    showedSelectedName: 'entity_name',
-                                    textcontroller:
-                                        controller.vendorNameFilter.value.text,
-                                    hintText: 'Vendor Name',
-                                    onChanged: (key, value) async {
-                                      controller.vendorNameFilterId.value = key;
-                                      controller.vendorNameFilter.value.text =
-                                          value['entity_name'];
+                                    controller:
+                                        controller.vendorNameFilter.value,
+                                    displayKeys: const ['entity_name'],
+                                    displaySelectedKeys: const ['entity_name'],
+                                    onOpen: () {
+                                      return controller.getAllVendors();
                                     },
                                     onDelete: () {
                                       controller.vendorNameFilterId.value = '';
                                       controller.vendorNameFilter.value.clear();
                                     },
-                                    onOpen: () {
-                                      return controller.getAllVendors();
+                                    onSelected: (value) {
+                                      controller.vendorNameFilterId.value =
+                                          value['_id'];
+                                      controller.vendorNameFilter.value.text =
+                                          value['entity_name'];
                                     },
                                   ),
-                                  CustomDropdown(
+
+                                  MenuWithValues(
+                                    labelText: 'Account',
+                                    headerLqabel: 'Accounts',
+                                    dialogWidth: constraints.maxWidth / 3,
                                     width: 250,
-                                    showedSelectedName: 'account_number',
-                                    textcontroller:
-                                        controller.accountFilter.value.text,
-                                    hintText: 'Account',
-                                    onChanged: (key, value) async {
-                                      controller.accountFilterId.value = key;
-                                      controller.accountFilter.value.text =
-                                          value['account_number'];
+                                    controller: controller.accountFilter.value,
+                                    displayKeys: const ['account_number'],
+                                    displaySelectedKeys: const [
+                                      'account_number',
+                                    ],
+                                    onOpen: () {
+                                      return controller.getAllAccounts();
                                     },
                                     onDelete: () {
                                       controller.accountFilterId.value = '';
                                       controller.accountFilter.value.clear();
                                     },
-                                    onOpen: () {
-                                      return controller.getAllAccounts();
+                                    onSelected: (value) {
+                                      controller.accountFilterId.value =
+                                          value['_id'];
+                                      controller.accountFilter.value.text =
+                                          value['account_number'];
                                     },
                                   ),
+
                                   myTextFormFieldWithBorder(
                                     width: 150,
                                     labelText: 'Cheque NO.',
                                     controller:
                                         controller.chequeNumberFilter.value,
                                   ),
-                                  CustomDropdown(
-                                    width: 150,
-                                    textcontroller:
-                                        controller.statusFilter.value.text,
-                                    showedSelectedName: 'name',
-                                    hintText: 'Status',
-                                    items: allStatus,
-                                    onChanged: (key, value) async {
-                                      controller.statusFilter.value.text =
-                                          value['name'];
-                                    },
+                                  MenuWithValues(
+                                    labelText: 'Status',
+                                    headerLqabel: 'Status',
+                                    dialogWidth: 600,
+                                    dialogHeight: 400,
+                                    width: 170,
+                                    controller: controller.statusFilter.value,
+                                    displayKeys: const ['name'],
+                                    displaySelectedKeys: const ['name'],
+                                    data: allStatus,
                                     onDelete: () {
                                       controller.statusFilter.value.clear();
+                                    },
+                                    onSelected: (value) {
+                                      controller.statusFilter.value.text =
+                                          value['name'];
                                     },
                                   ),
                                 ],
@@ -636,7 +654,6 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           formatDouble: false,
           text: cashManagementData.chequeNumber ?? '',
-          
         ),
       ),
       DataCell(

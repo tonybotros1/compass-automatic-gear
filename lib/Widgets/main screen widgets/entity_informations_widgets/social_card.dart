@@ -1,10 +1,10 @@
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../Models/entity information/entity_information_model.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 
 Widget socialCardSection(EntityInformationsController controller) {
   return Column(
@@ -76,21 +76,17 @@ Widget buildSmartField(
                   spacing: 10,
                   children: [
                     Expanded(
-                      child: CustomDropdown(
-                        showedSelectedName: 'name',
-                        textcontroller: controller
+                      child: MenuWithValues(
+                        labelText: 'Type',
+                        headerLqabel: 'Types',
+                        dialogWidth: 600,
+                        controller: controller
                             .socialTypesControllers[index]
-                            .controller!
-                            .text,
-                        hintText: 'Type',
-                        onChanged: (key, value) {
-                          controller
-                                  .socialTypesControllers[index]
-                                  .controller!
-                                  .text =
-                              value['name'];
-                          controller.contactSocial[index].typeId = key;
-                          controller.contactSocial[index].type = value['name'];
+                            .controller!,
+                        displayKeys: const ['name'],
+                        displaySelectedKeys: const ['name'],
+                        onOpen: () {
+                          return controller.getTypeOfSocial();
                         },
                         onDelete: () {
                           controller.socialTypesControllers[index].controller!
@@ -98,10 +94,42 @@ Widget buildSmartField(
                           controller.contactSocial[index].typeId = '';
                           controller.contactSocial[index].type = '';
                         },
-                        onOpen: () {
-                          return controller.getTypeOfSocial();
+                        onSelected: (value) async {
+                          controller
+                                  .socialTypesControllers[index]
+                                  .controller!
+                                  .text =
+                              value['name'];
+                          controller.contactSocial[index].typeId = value['_id'];
+                          controller.contactSocial[index].type = value['name'];
                         },
                       ),
+                      //  CustomDropdown(
+                      //   showedSelectedName: 'name',
+                      //   textcontroller: controller
+                      //       .socialTypesControllers[index]
+                      //       .controller!
+                      //       .text,
+                      //   hintText: 'Type',
+                      //   onChanged: (key, value) {
+                      // controller
+                      //         .socialTypesControllers[index]
+                      //         .controller!
+                      // .text =
+                      //         value['name'];
+                      //     controller.contactSocial[index].typeId = key;
+                      //     controller.contactSocial[index].type = value['name'];
+                      //   },
+                      //   onDelete: () {
+                      //     controller.socialTypesControllers[index].controller!
+                      //         .clear();
+                      //     controller.contactSocial[index].typeId = '';
+                      //     controller.contactSocial[index].type = '';
+                      //   },
+                      //   onOpen: () {
+                      //     return controller.getTypeOfSocial();
+                      //   },
+                      // ),
                     ),
                     Expanded(
                       flex: 2,

@@ -1,4 +1,3 @@
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../Models/entity information/entity_information_model.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 
 Widget addressCardSection(EntityInformationsController controller) {
   return Column(
@@ -110,14 +110,28 @@ Widget buildSmartField(
                       ),
                     ),
                     Expanded(
-                      child: CustomDropdown(
-                        showedSelectedName: 'name',
-                        textcontroller: controller
-                            .countriesControllers[index]
-                            .controller!
-                            .text,
-                        hintText: 'Country',
-                        onChanged: (key, value) {
+                      child: MenuWithValues(
+                        labelText: 'Country',
+                        headerLqabel: 'Countries',
+                        dialogWidth: 600,
+                        controller:
+                            controller.countriesControllers[index].controller!,
+                        displayKeys: const ['name'],
+                        displaySelectedKeys: const ['name'],
+                        onOpen: () {
+                          return controller.getCountries();
+                        },
+                        onDelete: () {
+                          controller.countriesControllers[index].controller!
+                              .clear();
+                          controller.citiesControllers[index].controller!
+                              .clear();
+                          controller.contactAddress[index].countryId = '';
+                          controller.contactAddress[index].country = '';
+                          controller.contactAddress[index].city = '';
+                          controller.contactAddress[index].cityId = '';
+                        },
+                        onSelected: (value) async {
                           controller
                                   .countriesControllers[index]
                                   .controller!
@@ -125,43 +139,26 @@ Widget buildSmartField(
                               value['name'];
                           controller.citiesControllers[index].controller!
                               .clear();
-                          // controller.getCitiesByCountryID(key, index);
-                          controller.contactAddress[index].countryId = key;
+                          controller.contactAddress[index].countryId =
+                              value['_id'];
                           controller.contactAddress[index].country =
                               value['name'];
-                        },
-                        onDelete: () {
-                          controller.countriesControllers[index].controller!
-                              .clear();
-                          controller.citiesControllers[index].controller!
-                              .clear();
-                          // controller.allCities[index].clear();
-                          controller.contactAddress[index].countryId = '';
-                          controller.contactAddress[index].country = '';
-                          controller.contactAddress[index].city = '';
-                          controller.contactAddress[index].cityId = '';
-                        },
-                        onOpen: () {
-                          return controller.getCountries();
                         },
                       ),
                     ),
                     Expanded(
-                      child: CustomDropdown(
-                        showedSelectedName: 'name',
-                        textcontroller: controller
-                            .citiesControllers[index]
-                            .controller!
-                            .text,
-                        hintText: 'City',
-                        // menuValues: controller.allCities[index].isEmpty
-                        //     ? {}
-                        //     : controller.allCities[index],
-                        onChanged: (key, value) {
-                          controller.citiesControllers[index].controller!.text =
-                              value['name'];
-                          controller.contactAddress[index].cityId = key;
-                          controller.contactAddress[index].city = value['name'];
+                      child: MenuWithValues(
+                        labelText: 'City',
+                        headerLqabel: 'Cities',
+                        dialogWidth: 600,
+                        controller:
+                            controller.citiesControllers[index].controller!,
+                        displayKeys: const ['name'],
+                        displaySelectedKeys: const ['name'],
+                        onOpen: () {
+                          return controller.getCitiesByCountryID(
+                            controller.contactAddress[index].countryId,
+                          );
                         },
                         onDelete: () {
                           controller.citiesControllers[index].controller!
@@ -169,10 +166,12 @@ Widget buildSmartField(
                           controller.contactAddress[index].cityId = '';
                           controller.contactAddress[index].city = '';
                         },
-                        onOpen: () {
-                          return controller.getCitiesByCountryID(
-                            controller.contactAddress[index].countryId,
-                          );
+                        onSelected: (value) async {
+                          controller.citiesControllers[index].controller!.text =
+                              value['name'];
+                          controller.contactAddress[index].cityId =
+                              value['_id'];
+                          controller.contactAddress[index].city = value['name'];
                         },
                       ),
                     ),

@@ -82,9 +82,10 @@ Widget addNewReceiptOrEdit({
                                     style: new2ButtonStyle,
                                     onPressed: () {
                                       if (controller.customerNameId.isEmpty) {
-                                        showSnackBar(
-                                          'Alert',
-                                          'Please Select customer First',
+                                        alertMessage(
+                                          context: Get.context!,
+                                          content:
+                                              'Please Select customer First',
                                         );
                                         return;
                                       }

@@ -1,9 +1,9 @@
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 
 Container companySection() {
   return Container(
@@ -27,21 +27,27 @@ Container companySection() {
               spacing: 10,
               children: [
                 Expanded(
-                  child: CustomDropdown(
-                    enabled: controller.isCompanySelected.isTrue ? true : false,
-                    showedSelectedName: 'name',
-                    textcontroller: controller.industry.value.text,
-                    hintText: 'Industries',
-                    onChanged: (key, value) {
-                      controller.industry.value.text = '${value['name']}';
-                      controller.industryId.value = key;
+                  child: MenuWithValues(
+                    isEnabled: controller.isCompanySelected.isTrue
+                        ? true
+                        : false,
+
+                    labelText: 'Industry',
+                    headerLqabel: 'Industries',
+                    dialogWidth: 600,
+                    controller: controller.industry.value,
+                    displayKeys: const ['name'],
+                    displaySelectedKeys: const ['name'],
+                    onOpen: () {
+                      return controller.getIndustries();
                     },
                     onDelete: () {
                       controller.industry.value.clear();
                       controller.industryId.value = '';
                     },
-                    onOpen: () {
-                      return controller.getIndustries();
+                    onSelected: (value) async {
+                      controller.industry.value.text = '${value['name']}';
+                      controller.industryId.value = value['_id'];
                     },
                   ),
                 ),
@@ -53,23 +59,27 @@ Container companySection() {
                   ),
                 ),
                 Expanded(
-                  child: CustomDropdown(
-                    enabled: controller.isCompanySelected.isTrue,
-                    showedSelectedName: 'name',
-                    textcontroller: controller.entityType.value.text,
-                    hintText: 'Entity Type',
-                    onChanged: (key, value) {
-                      controller.entityType.value.text = '${value['name']}';
-                      controller.entityTypeId.value = key;
+                  child: MenuWithValues(
+                    isEnabled: controller.isCompanySelected.isTrue,
+                    labelText: 'Entity Type',
+                    headerLqabel: 'Entity Types',
+                    dialogWidth: 600,
+                    controller: controller.entityType.value,
+                    displayKeys: const ['name'],
+                    displaySelectedKeys: const ['name'],
+                    onOpen: () {
+                      return controller.getEntityType();
                     },
                     onDelete: () {
                       controller.entityType.value.clear();
                       controller.entityTypeId.value = '';
                     },
-                    onOpen: () {
-                      return controller.getEntityType();
+                    onSelected: (value) async {
+                      controller.entityType.value.text = '${value['name']}';
+                      controller.entityTypeId.value = value['_id'];
                     },
                   ),
+                 
                 ),
               ],
             );

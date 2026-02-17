@@ -1,9 +1,9 @@
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 import 'image_section.dart';
 
@@ -36,7 +36,7 @@ Container customerSection() {
                       ),
                       Container(
                         height: 35,
-                        width: 150,
+                        width: 160,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(color: Colors.grey),
@@ -76,22 +76,24 @@ Container customerSection() {
                   ),
                   GetX<EntityInformationsController>(
                     builder: (controller) {
-                      return CustomDropdown(
-                        enabled: controller.isCustomerSelected.isTrue,
+                      return MenuWithValues(
+                        labelText: 'Salesman',
+                        headerLqabel: 'Salesmen',
+                        dialogWidth: 600,
                         width: 200,
-                        hintText: 'Salesman',
-                        textcontroller: controller.salesMAn.value.text,
-                        showedSelectedName: 'name',
-                        onChanged: (key, value) {
-                          controller.salesMAn.value.text = '${value['name']}';
-                          controller.salesManId.value = key;
+                        controller: controller.salesMAn.value,
+                        displayKeys: const ['name'],
+                        displaySelectedKeys: const ['name'],
+                        onOpen: () {
+                          return controller.getSalesMan();
                         },
                         onDelete: () {
                           controller.salesMAn.value.clear();
                           controller.salesManId.value = '';
                         },
-                        onOpen: () {
-                          return controller.getSalesMan();
+                        onSelected: (value) async {
+                          controller.salesMAn.value.text = '${value['name']}';
+                          controller.salesManId.value = value['_id'];
                         },
                       );
                     },
@@ -99,7 +101,7 @@ Container customerSection() {
                   GetBuilder<EntityInformationsController>(
                     builder: (controller) {
                       return myTextFormFieldWithBorder(
-                        width: 150,
+                        width: 160,
                         controller: controller.warrantyDays,
                         isnumber: true,
                         labelText: 'Warranty Days',

@@ -145,7 +145,6 @@ Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
                             ),
                             controller: controller.invoiceDate,
                             onFieldSubmitted: (_) {
-                              print('yes');
                               normalizeDate(
                                 controller.invoiceDate.text,
                                 controller.invoiceDate,

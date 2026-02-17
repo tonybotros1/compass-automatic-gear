@@ -43,7 +43,11 @@ Widget addNewPaymentOrEdit({
                                       style: fontStyle1,
                                     ),
                                   ),
-                                  paymentHeader(context, constraints,controller),
+                                  paymentHeader(
+                                    context,
+                                    constraints,
+                                    controller,
+                                  ),
                                 ],
                               ),
                             ),
@@ -81,9 +85,10 @@ Widget addNewPaymentOrEdit({
                                     style: new2ButtonStyle,
                                     onPressed: controller.vendorNameId.isEmpty
                                         ? () {
-                                            showSnackBar(
-                                              'Alert',
-                                              'Please Select vendor First',
+                                            alertMessage(
+                                              context: Get.context!,
+                                              content:
+                                                  'Please Select vendor First',
                                             );
                                           }
                                         : () {

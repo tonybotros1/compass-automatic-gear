@@ -2,7 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/cash_managemen
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
-import '../../drop_down_menu3.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 
 Widget paymentHeader(
@@ -59,27 +59,16 @@ Widget paymentHeader(
             children: [
               GetBuilder<CashManagementPaymentsController>(
                 builder: (controller) {
-                  return CustomDropdown(
+                  return MenuWithValues(
+                    labelText: 'Vendor Name',
+                    headerLqabel: 'Vendors',
+                    dialogWidth: constraints.maxWidth / 2,
                     width: constraints.maxWidth / 2.75,
-                    textcontroller: controller.vendorName.text,
-                    hintText: 'Vendor Name',
-                    showedSelectedName: 'entity_name',
-                    onChanged: (key, value) async {
-                      controller.isPaymentModified.value = true;
-                      controller.vendorName.text = value['entity_name'];
-                      controller.vendorNameId.value = key;
-                      controller.availablePayments.clear();
-                      controller.selectedAvailablePayments.clear();
-                      controller.outstanding.value = formatter.formatEditUpdate(
-                        controller.outstanding.value,
-                        TextEditingValue(
-                          text: await controller
-                              .calculateVendorOutstanding(key)
-                              .then((value) {
-                                return value.toString();
-                              }),
-                        ),
-                      );
+                    controller: controller.vendorName,
+                    displayKeys: const ['entity_name'],
+                    displaySelectedKeys: const ['entity_name'],
+                    onOpen: () {
+                      return controller.getAllVendors();
                     },
                     onDelete: () {
                       controller.isPaymentModified.value = true;
@@ -89,8 +78,22 @@ Widget paymentHeader(
                       controller.selectedAvailablePayments.clear();
                       controller.outstanding.clear();
                     },
-                    onOpen: () {
-                      return controller.getAllVendors();
+                    onSelected: (value) async {
+                      controller.isPaymentModified.value = true;
+                      controller.vendorName.text = value['entity_name'];
+                      controller.vendorNameId.value = value['_id'];
+                      controller.availablePayments.clear();
+                      controller.selectedAvailablePayments.clear();
+                      controller.outstanding.value = formatter.formatEditUpdate(
+                        controller.outstanding.value,
+                        TextEditingValue(
+                          text: await controller
+                              .calculateVendorOutstanding(value['_id'])
+                              .then((value) {
+                                return value.toString();
+                              }),
+                        ),
+                      );
                     },
                   );
                 },
@@ -105,6 +108,7 @@ Widget paymentHeader(
           ),
           myTextFormFieldWithBorder(
             width: constraints.maxWidth / 2.75,
+            controller: controller.note,
             labelText: 'Note',
             maxLines: 4,
             onChanged: (_) {

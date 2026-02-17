@@ -5,10 +5,10 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/entity_informations_controller.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
-import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/entity_informations_widgets/add_new_entity_or_edit.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
 import '../../../../Widgets/text_button.dart';
 import '../../../../consts.dart';
@@ -50,19 +50,16 @@ class EntityInformations extends StatelessWidget {
                                       labelText: 'Name',
                                       controller: controller.entityNameFilter,
                                     ),
-                                    CustomDropdown(
+                                    MenuWithValues(
+                                      labelText: 'Country',
+                                      headerLqabel: 'Countries',
+                                      dialogWidth: constraints.maxWidth / 3,
                                       width: 200,
-                                      showedSelectedName: 'name',
-                                      textcontroller:
-                                          controller.countryFilter.text,
-                                      hintText: 'Country',
-                                      onChanged: (key, value) async {
-                                        // controller.getModelsByCarBrand(key);
-                                        controller.countryFilterId.value = key;
-                                        controller.countryFilter.text =
-                                            value['name'];
-                                        controller.cityFilterId.value = '';
-                                        controller.cityFilter.text = '';
+                                      controller: controller.countryFilter,
+                                      displayKeys: const ['name'],
+                                      displaySelectedKeys: const ['name'],
+                                      onOpen: () {
+                                        return controller.getCountries();
                                       },
                                       onDelete: () {
                                         controller.countryFilterId.value = '';
@@ -70,32 +67,43 @@ class EntityInformations extends StatelessWidget {
                                         controller.cityFilterId.value = '';
                                         controller.cityFilter.text = '';
                                       },
-                                      onOpen: () {
-                                        return controller.getCountries();
-                                      },
-                                    ),
-                                    CustomDropdown(
-                                      width: 200,
-                                      showedSelectedName: 'name',
-                                      textcontroller:
-                                          controller.cityFilter.text,
-                                      hintText: 'City',
-                                      onChanged: (key, value) async {
+                                      onSelected: (value) async {
                                         // controller.getModelsByCarBrand(key);
-                                        controller.cityFilterId.value = key;
-                                        controller.cityFilter.text =
+                                        controller.countryFilterId.value =
+                                            value['_id'];
+                                        controller.countryFilter.text =
                                             value['name'];
-                                      },
-                                      onDelete: () {
                                         controller.cityFilterId.value = '';
                                         controller.cityFilter.text = '';
                                       },
+                                    ),
+
+                                    MenuWithValues(
+                                      labelText: 'City',
+                                      headerLqabel: 'Cities',
+                                      dialogWidth: constraints.maxWidth / 3,
+                                      width: 200,
+                                      controller: controller.cityFilter,
+                                      displayKeys: const ['name'],
+                                      displaySelectedKeys: const ['name'],
                                       onOpen: () {
                                         return controller.getCitiesByCountryID(
                                           controller.countryFilterId.value,
                                         );
                                       },
+                                      onDelete: () {
+                                        controller.cityFilterId.value = '';
+                                        controller.cityFilter.text = '';
+                                      },
+                                      onSelected: (value) async {
+                                        // controller.getModelsByCarBrand(key);
+                                        controller.cityFilterId.value =
+                                            value['_id'];
+                                        controller.cityFilter.text =
+                                            value['name'];
+                                      },
                                     ),
+
                                     myTextFormFieldWithBorder(
                                       width: 200,
                                       labelText: 'Phone Number',
