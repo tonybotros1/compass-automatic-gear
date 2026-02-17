@@ -34,7 +34,7 @@ Widget addNewReceiveOrEdit({
                         labelContainer(
                           lable: Text('Main Infos', style: fontStyle1),
                         ),
-                        mainInfosSection(context, controller),
+                        mainInfosSection(context, controller, constraints),
                       ],
                     ),
                   ),
@@ -50,7 +50,7 @@ Widget addNewReceiveOrEdit({
                               labelContainer(
                                 lable: Text('Currency', style: fontStyle1),
                               ),
-                              currencySection(context, controller),
+                              currencySection(context, controller, constraints),
 
                               const SizedBox(height: 10),
                               labelContainer(
@@ -108,7 +108,7 @@ Widget addNewReceiveOrEdit({
             ],
           ),
         ),
-        itemsSection(context: context, constraints: constraints,),
+        itemsSection(context: context, constraints: constraints),
       ],
     ),
   );

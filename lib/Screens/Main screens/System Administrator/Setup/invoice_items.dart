@@ -92,17 +92,21 @@ Widget tableOfScreens({
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
     autoRowsToHeight: true,
+    lmRatio: 2.5,
     columns: [
-      const DataColumn(label: Text('')),
-      DataColumn(
+      const DataColumn2(label: Text(''), size: ColumnSize.S),
+      DataColumn2(
+        size: ColumnSize.L,
         label: AutoSizedText(text: 'Name', constraints: constraints),
         onSort: controller.onSort,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.L,
         label: AutoSizedText(constraints: constraints, text: 'Description'),
         onSort: controller.onSort,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.L,
         label: AutoSizedText(constraints: constraints, text: 'Price'),
         onSort: controller.onSort,
       ),

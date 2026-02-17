@@ -26,7 +26,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
   Rx<TextEditingController> receiptTypeFilter = TextEditingController().obs;
   RxString customerNameFilterId = RxString('');
   Rx<TextEditingController> customerNameFilter = TextEditingController().obs;
-  RxInt initDatePickerValue = RxInt(2);
+  RxInt initDatePickerValue = RxInt(1);
   final FocusNode focusNodeForReceiptHeader1 = FocusNode();
   final FocusNode focusNodeForReceiptHeader2 = FocusNode();
   final FocusNode focusNodeForReceiptHeader3 = FocusNode();
@@ -481,7 +481,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
         final decoded = jsonDecode(response.body);
         List recs = decoded['receipts'];
         Map grandTotals = decoded['grand_totals'];
-        totalReceiptsReceived.value = grandTotals['grand_received'];
+        totalReceiptsReceived.value = grandTotals['total_amount'];
         numberOfReceipts.value = grandTotals['total_items_count'];
         allReceipts.assignAll(recs.map((rec) => ARReceiptsModel.fromJson(rec)));
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {

@@ -98,11 +98,27 @@ class ReceivingController extends GetxController {
   final Uuid _uuid = const Uuid();
   RxBool isReceivingModified = RxBool(false);
   RxBool isReceivingItemsModified = RxBool(false);
-  RxInt initValueForDatePickker = RxInt(2);
+  RxInt initValueForDatePickker = RxInt(1);
+  RxMap companyDetails = RxMap({});
+
+  final FocusNode focusNode1 = FocusNode();
+  final FocusNode focusNode2 = FocusNode();
+  final FocusNode focusNode3 = FocusNode();
+  final FocusNode focusNode4 = FocusNode();
+  final FocusNode focusNode5 = FocusNode();
+  final FocusNode focusNode6 = FocusNode();
+  final FocusNode focusNode7 = FocusNode();
+  final FocusNode focusNode8 = FocusNode();
+  final FocusNode focusNode9 = FocusNode();
+  final FocusNode focusNode10 = FocusNode();
+  final FocusNode focusNode11 = FocusNode();
+  final FocusNode focusNode12 = FocusNode();
+  final FocusNode focusNode13 = FocusNode();
+  final FocusNode focusNode14 = FocusNode();
 
   @override
   void onInit() async {
-    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
+    getCompanyDetails();
     filterSearch();
     super.onInit();
   }
@@ -138,6 +154,10 @@ class ReceivingController extends GetxController {
 
   Future getCurrentReceivingStatus(String id) async {
     return await helper.getReceivingStatus(id);
+  }
+
+  Future<void> getCompanyDetails() async {
+    companyDetails.assignAll(await helper.getCurrentCompanyDetails());
   }
 
   void onChooseForDatePicker(int i) {
@@ -296,13 +316,14 @@ class ReceivingController extends GetxController {
 
         String status1 = jobStatus['status'];
         if (status1 != 'New' && status1 != '') {
-          showSnackBar('Alert', 'Only new receiving docs can be edited');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only new receiving docs can be edited',
+          );
           return;
         }
       }
       addingNewValue.value = true;
-
-      // Base data
       final Map<String, dynamic> newData = {
         'branch': branchId.value,
         'reference_number': referenceNumber.value.text.trim(),
@@ -330,7 +351,10 @@ class ReceivingController extends GetxController {
         try {
           newData['date'] = convertDateToIson(rawDate);
         } catch (e) {
-          showSnackBar('Alert', 'Please enter a valid date');
+          alertMessage(
+            context: Get.context!,
+            content: 'Please enter a valid date',
+          );
           addingNewValue.value = false;
           return;
         }
@@ -342,7 +366,6 @@ class ReceivingController extends GetxController {
       Uri addingRecUrl = Uri.parse('$backendUrl/receiving/add_new_receiving');
 
       if (curreentReceivingId.isEmpty) {
-        showSnackBar('Adding', 'Please Wait');
         newData['status'] = 'New';
         final response = await http.post(
           addingRecUrl,
@@ -363,7 +386,7 @@ class ReceivingController extends GetxController {
           isReceivingItemsModified.value = false;
           isReceivingModified.value = false;
           calculateTotalsForSelectedReceive();
-          showSnackBar('Done', 'Receiving Added Successfully');
+          allReceivingDocs.insert(0, newRec);
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -378,8 +401,6 @@ class ReceivingController extends GetxController {
         if (isReceivingItemsModified.isTrue || isReceivingModified.isTrue) {
           http.Response? responseForEditingReceving;
           http.Response? responseForEditingRececingItems;
-
-          showSnackBar('Updating', 'Please Wait');
 
           if (isReceivingModified.isTrue) {
             Uri updatingJobUrl = Uri.parse(
@@ -462,15 +483,14 @@ class ReceivingController extends GetxController {
               logout();
             }
           }
-          if ((responseForEditingReceving?.statusCode == 200) ||
-              (responseForEditingRececingItems?.statusCode == 200)) {
-            showSnackBar('Done', 'Updated Successfully');
-          }
+          // if ((responseForEditingReceving?.statusCode == 200) ||
+          //     (responseForEditingRececingItems?.statusCode == 200)) {
+          // }
         }
       }
       addingNewValue.value = false; // Ensure loading flag is reset
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong');
+      alertMessage(context: Get.context!, content: 'Something went wrong');
       addingNewValue.value = false; // Ensure loading flag is reset
     }
   }
@@ -490,15 +510,6 @@ class ReceivingController extends GetxController {
     if (statusFilter.value.text.isNotEmpty) {
       body["status"] = statusFilter.value.text;
     }
-    // if (isTodaySelected.isTrue) {
-    //   body["today"] = true;
-    // }
-    // if (isThisMonthSelected.isTrue) {
-    //   body["this_month"] = true;
-    // }
-    // if (isThisYearSelected.isTrue) {
-    //   body["this_year"] = true;
-    // }
     if (fromDate.value.text.isNotEmpty) {
       body["from_date"] = convertDateToIson(fromDate.value.text);
     }
@@ -532,14 +543,13 @@ class ReceivingController extends GetxController {
         final decoded = jsonDecode(response.body);
         List receiving = decoded['receiving'];
         Map grandTotals = decoded['grand_totals'];
-        allReceivingTotals.value = grandTotals['grand_total'];
-        allReceivingVATS.value = grandTotals['grand_vat'];
-        allReceivingNET.value = grandTotals['grand_net'];
-        // print(jobs[0]);
+        allReceivingTotals.value = grandTotals['total_amount'];
+        allReceivingVATS.value = grandTotals['vat_amount'];
+        allReceivingNET.value = grandTotals['net_amount'];
+        numberOfReceivingDocs.value = grandTotals['total_items_count'];
         allReceivingDocs.assignAll(
           receiving.map((rec) => ReceivingModel.fromJson(rec)),
         );
-        numberOfReceivingDocs.value = allReceivingDocs.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -573,16 +583,15 @@ class ReceivingController extends GetxController {
         allReceivingDocs.removeWhere((rec) => rec.id == deletedReceivingId);
         numberOfReceivingDocs.value -= 1;
         Get.close(2);
-        showSnackBar('Success', 'Receiving deleted successfully');
       } else if (response.statusCode == 400 || response.statusCode == 404) {
         final decoded =
             jsonDecode(response.body) ?? 'Failed to delete receiving';
         String error = decoded['detail'];
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 403) {
         final decoded = jsonDecode(response.body);
         String error = decoded['detail'] ?? 'Only New Receiving Allowed';
-        showSnackBar('Alert', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -594,12 +603,15 @@ class ReceivingController extends GetxController {
         final decoded = jsonDecode(response.body);
         final error =
             decoded['detail'] ?? 'Server error while deleting receiving';
-        showSnackBar('Server Error', error);
+        alertMessage(context: Get.context!, content: error);
       } else if (response.statusCode == 401) {
         logout();
       }
     } catch (e) {
-      showSnackBar('Alert', 'Something went wrong please try again');
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -672,18 +684,24 @@ class ReceivingController extends GetxController {
 
   // =============================================================================================================
   void clearValues() {
+    currencyId.value = companyDetails.containsKey('currency_id')
+        ? companyDetails['currency_id'] ?? ""
+        : "";
+    rate.value.text = companyDetails.containsKey('currency_rate')
+        ? companyDetails['currency_rate'].toString()
+        : "";
+    currency.value.text = companyDetails.containsKey('currency_code')
+        ? companyDetails['currency_code'] ?? ""
+        : "";
     receivingNumber.value.clear();
     date.value.text = textToDate(DateTime.now());
-    branch.value.clear();
-    branchId.value = '';
+    branch.value.text = companyDetails['current_user_branch_name'] ?? '';
+    branchId.value = companyDetails['current_user_branch_id'] ?? '';
     referenceNumber.value.clear();
     vendor.value.clear();
     vendorId.value = '';
     note.value.clear();
     curreentReceivingId.value = '';
-    currency.value.clear();
-    currencyId.value = '';
-    rate.value.clear();
     approvedBy.value.clear();
     orderedBy.value.clear();
     purchasedBy.value.clear();
@@ -770,7 +788,7 @@ class ReceivingController extends GetxController {
 
   Future<void> editPostForReceiving(String id) async {
     if (status.value.isEmpty) {
-      showSnackBar('Alert', 'Please save doc first');
+      alertMessage(context: Get.context!, content: 'Please save doc first');
       return;
     }
     Map recStatus = await getCurrentReceivingStatus(curreentReceivingId.value);
@@ -778,21 +796,22 @@ class ReceivingController extends GetxController {
     String status1 = recStatus['status'];
 
     if (status1 == 'Posted') {
-      showSnackBar('Alert', 'Doc is already posted');
+      alertMessage(context: Get.context!, content: 'Doc is already posted');
       return;
     }
     if (status1 == 'Cancelled') {
-      showSnackBar('Alert', 'Doc is cancelled');
+      alertMessage(context: Get.context!, content: 'Doc is cancelled');
       return;
     }
 
     status.value = 'Posted';
     isReceivingModified.value = true;
+    addNewReceivingDoc();
   }
 
   Future<void> editCancelForReceiving(String id) async {
     if (status.value.isEmpty) {
-      showSnackBar('Alert', 'Please save doc first');
+      alertMessage(context: Get.context!, content: 'Please save doc first');
       return;
     }
     Map recStatus = await getCurrentReceivingStatus(curreentReceivingId.value);
@@ -800,17 +819,18 @@ class ReceivingController extends GetxController {
     String status1 = recStatus['status'];
 
     if (status1 == 'Posted') {
-      showSnackBar('Alert', 'Doc is posted');
+      alertMessage(context: Get.context!, content: 'Doc is posted');
       return;
     }
 
     if (status1 == 'Cancelled') {
-      showSnackBar('Alert', 'Doc is already cancelled');
+      alertMessage(context: Get.context!, content: 'Doc is already cancelled');
       return;
     }
 
     status.value = 'Cancelled';
     isReceivingModified.value = true;
+    addNewReceivingDoc();
   }
 
   void removeFilters() {

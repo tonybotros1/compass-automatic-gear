@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../consts.dart';
 
-class MenuWithValues extends StatelessWidget {
+class MenuWithValues extends StatefulWidget {
   const MenuWithValues({
     super.key,
     required this.controller,
@@ -29,7 +30,7 @@ class MenuWithValues extends StatelessWidget {
     this.labelText,
     this.onDelete,
     this.headerLqabel,
-    this.flexList = const [], // default: empty list
+    this.flexList = const [],
   });
   final TextEditingController controller;
   final double? width;
@@ -57,58 +58,151 @@ class MenuWithValues extends StatelessWidget {
   final String? headerLqabel;
 
   @override
+  State<MenuWithValues> createState() => _MenuWithValuesState();
+}
+
+class _MenuWithValuesState extends State<MenuWithValues> {
+  late FocusNode _effectiveFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    // Use the passed focusNode if available, otherwise create one
+    _effectiveFocusNode = widget.focusNode ?? FocusNode();
+    _effectiveFocusNode.addListener(_handleFocusChange);
+  }
+
+  @override
+  void dispose() {
+    // Only dispose if we created it locally
+    if (widget.focusNode == null) _effectiveFocusNode.dispose();
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    // If focus is lost, run validation
+    // if (!_effectiveFocusNode.hasFocus) {
+    //   _validateValue();
+    // }
+  }
+
+  // 1. Update your cache variable in the State class to hold the Item objects
+  // Map<String, dynamic>? _validItemsMap;
+
+  // Future<void> _validateValue() async {
+  //   final text = widget.controller.text.trim();
+  //   if (text.isEmpty) return;
+
+  //   // 2. Fetch and Cache the data as a Map if not already done
+  //   if (_validItemsMap == null) {
+  //     final rawData = widget.onOpen == null
+  //         ? widget.data
+  //         : await widget.onOpen!();
+  //     if (rawData == null) return;
+
+  //     List<dynamic> items = rawData is Map
+  //         ? rawData.values.toList()
+  //         : (rawData as List);
+
+  //     _validItemsMap = {}; // Initialize empty map
+
+  //     for (var item in items) {
+  //       final Map<String, dynamic> itemMap = item is Map
+  //           ? Map<String, dynamic>.from(item)
+  //           : {'value': item};
+
+  //       // Create the same display string used in the UI
+  //       final displayValue = widget.displaySelectedKeys
+  //           .map((k) => itemMap[k]?.toString() ?? '')
+  //           .where((v) => v.trim().isNotEmpty)
+  //           .join(' - ');
+
+  //       // Map the String -> Original Item Object
+  //       _validItemsMap![displayValue] = item;
+  //     }
+  //   }
+
+  //   // 3. Check for a match
+  //   if (_validItemsMap!.containsKey(text)) {
+  //     // MATCH FOUND: Call onSelected with the actual data object
+  //     final selectedItem = _validItemsMap![text];
+  //     widget.onSelected?.call(selectedItem);
+  //     widget.onFieldSubmitted?.call(text);
+  //   } else {
+  //     // NO MATCH: Clear and delete
+
+  //     // showResponsiveDialog(
+  //     //   context,
+  //     //   widget.dialogWidth,
+  //     //   widget.controller,
+  //     //   widget.dialogHeight,
+  //     //   data: widget.data,
+  //     //   initialSearch: widget.controller.text,
+  //     //   flexList: widget.flexList,
+  //     //   onOpen: widget.onOpen,
+  //     //   displayKeys: widget.displayKeys,
+  //     //   displaySelectedKeys: widget.displaySelectedKeys,
+  //     //   onSelected: widget.onSelected,
+  //     //   headerLqabel: widget.headerLqabel,
+  //     // );
+  //     // widget.controller.clear();
+  //     // widget.onDelete?.call();
+  //   }
+  // }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width,
+      width: widget.width,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          labelText != null
+          widget.labelText != null
               ? Padding(
                   padding: const EdgeInsets.only(left: 2),
                   child: Text(
                     overflow: TextOverflow.ellipsis,
-                    labelText!,
+                    widget.labelText!,
                     style: textFieldLabelStyle,
                   ),
                 )
               : const SizedBox(),
           TextFormField(
             canRequestFocus: true,
-            readOnly: readOnly ?? false,
-            onTapOutside: onTapOutside,
-            onEditingComplete: onEditingComplete,
-            textInputAction: textInputAction,
-            focusNode: focusNode,
+            readOnly: widget.readOnly ?? true,
+            onTapOutside: widget.onTapOutside,
+            onEditingComplete: widget.onEditingComplete,
+            textInputAction: widget.textInputAction,
+            focusNode: _effectiveFocusNode,
             onFieldSubmitted: (value) {
               showResponsiveDialog(
                 context,
-                dialogWidth,
-                controller,
-                dialogHeight,
-                data: data,
+                widget.dialogWidth,
+                widget.controller,
+                widget.dialogHeight,
+                data: widget.data,
                 initialSearch: value,
-                flexList: flexList,
-                onOpen: onOpen,
-                displayKeys: displayKeys,
-                displaySelectedKeys: displaySelectedKeys,
-                onSelected: onSelected,
-                headerLqabel: headerLqabel,
+                flexList: widget.flexList,
+                onOpen: widget.onOpen,
+                displayKeys: widget.displayKeys,
+                displaySelectedKeys: widget.displaySelectedKeys,
+                onSelected: widget.onSelected,
+                headerLqabel: widget.headerLqabel,
               );
-              onFieldSubmitted?.call(value);
+              widget.onFieldSubmitted?.call(value);
             },
-            textAlign: textAlign!,
+            textAlign: widget.textAlign!,
             style: textFieldFontStyle,
-            minLines: minLines,
-            maxLines: maxLines,
+            minLines: widget.minLines,
+            maxLines: widget.maxLines,
             onChanged: (value) {
-              if (controller.text.isEmpty) {
-                onDelete?.call();
-              }
-              onChanged?.call(value);
+              // if (widget.controller.text.isEmpty) {
+              //   widget.onDelete?.call();
+              // }
+              widget.onChanged?.call(value);
             },
-            enabled: isEnabled,
-            controller: controller,
+            enabled: widget.isEnabled,
+            controller: widget.controller,
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 10,
@@ -117,7 +211,7 @@ class MenuWithValues extends StatelessWidget {
               isDense: true,
 
               suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                valueListenable: controller,
+                valueListenable: widget.controller,
                 builder: (context, value, _) {
                   final hasText = value.text.trim().isNotEmpty;
 
@@ -136,17 +230,18 @@ class MenuWithValues extends StatelessWidget {
                               onTap: () {
                                 showResponsiveDialog(
                                   context,
-                                  dialogWidth,
-                                  controller,
-                                  dialogHeight,
-                                  flexList: flexList,
-                                  initialSearch: controller.text,
-                                  data: data,
-                                  onOpen: onOpen,
-                                  displayKeys: displayKeys,
-                                  displaySelectedKeys: displaySelectedKeys,
-                                  onSelected: onSelected,
-                                  headerLqabel: headerLqabel,
+                                  widget.dialogWidth,
+                                  widget.controller,
+                                  widget.dialogHeight,
+                                  flexList: widget.flexList,
+                                  initialSearch: widget.controller.text,
+                                  data: widget.data,
+                                  onOpen: widget.onOpen,
+                                  displayKeys: widget.displayKeys,
+                                  displaySelectedKeys:
+                                      widget.displaySelectedKeys,
+                                  onSelected: widget.onSelected,
+                                  headerLqabel: widget.headerLqabel,
                                 );
                               },
                             ),
@@ -155,8 +250,8 @@ class MenuWithValues extends StatelessWidget {
                                 icon: Icons.close,
                                 color: Colors.red,
                                 onTap: () {
-                                  controller.clear();
-                                  onDelete?.call();
+                                  widget.controller.clear();
+                                  widget.onDelete?.call();
                                 },
                               ),
                           ],
@@ -178,11 +273,11 @@ class MenuWithValues extends StatelessWidget {
               alignLabelWithHint: true,
 
               labelStyle: TextStyle(
-                color: isEnabled == false
+                color: widget.isEnabled == false
                     ? Colors.grey.shade500
                     : Colors.grey.shade700,
               ),
-              fillColor: isEnabled == true
+              fillColor: widget.isEnabled == true
                   ? Colors.white
                   : Colors.grey.shade200,
               filled: true,
@@ -275,13 +370,14 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
   final _searchController = TextEditingController();
   final _searchFocusNode = FocusNode();
   final _scrollController = ScrollController();
-
+  final _keyboardFocusNode = FocusNode();
   Timer? _debounce;
   int _filterRequestId = 0;
 
   bool _isLoading = true;
   bool _isFiltering = false;
   String? _errorMessage;
+  int _selectedIndex = -1;
 
   List<Map<String, dynamic>> _items = const <Map<String, dynamic>>[];
   List<String> _effectiveKeys = const <String>[];
@@ -317,6 +413,7 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
     _searchController.dispose();
     _searchFocusNode.dispose();
     _scrollController.dispose();
+    _keyboardFocusNode.dispose();
     super.dispose();
   }
 
@@ -325,6 +422,84 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
     _debounce = Timer(const Duration(milliseconds: 250), () {
       _applyFilter(_searchController.text);
     });
+  }
+
+  void _handleKeyEvent(KeyEvent event) {
+    if (event is! KeyDownEvent) return;
+    if (_visibleIndexes.isEmpty) return;
+
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+      setState(() {
+        if (_selectedIndex < _visibleIndexes.length - 1) {
+          _selectedIndex++;
+        } else {
+          _selectedIndex = 0;
+        }
+      });
+      _scrollToSelected();
+    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      setState(() {
+        if (_selectedIndex > 0) {
+          _selectedIndex--;
+        } else {
+          _selectedIndex = _visibleIndexes.length - 1;
+        }
+      });
+      _scrollToSelected();
+    } else if (event.logicalKey == LogicalKeyboardKey.enter) {
+      if (_selectedIndex >= 0 && _selectedIndex < _visibleIndexes.length) {
+        final item = _items[_visibleIndexes[_selectedIndex]];
+        _selectItem(item);
+      }
+    } else if (event.logicalKey == LogicalKeyboardKey.escape) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _scrollToSelected() {
+    if (!_scrollController.hasClients || _selectedIndex < 0) return;
+
+    const itemHeight = 52.0;
+
+    final viewportHeight = _scrollController.position.viewportDimension;
+    final currentOffset = _scrollController.offset;
+
+    final firstVisibleIndex = (currentOffset / itemHeight).floor();
+    final visibleItemCount = (viewportHeight / itemHeight).floor();
+    final lastVisibleIndex = firstVisibleIndex + visibleItemCount - 1;
+
+    // If selected item is ABOVE visible area
+    if (_selectedIndex < firstVisibleIndex) {
+      final targetOffset = _selectedIndex * itemHeight;
+      _scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeInOut,
+      );
+    }
+    // If selected item is BELOW visible area
+    else if (_selectedIndex > lastVisibleIndex) {
+      final targetOffset =
+          (_selectedIndex * itemHeight) - (viewportHeight - itemHeight);
+
+      _scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _selectItem(Map<String, dynamic> item) {
+    final text = widget.displaySelectedKeys
+        .map((k) => item[k]?.toString() ?? '')
+        .where((v) => v.trim().isNotEmpty)
+        .join(' - ');
+
+    widget.controller?.text = text;
+
+    Navigator.of(context).pop();
+    widget.onSelected?.call(item);
   }
 
   Map<String, dynamic> _normalizeItem(dynamic item) {
@@ -520,154 +695,177 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
     });
   }
 
-  void _selectItem(Map<String, dynamic> item) {
-    final text = widget.displaySelectedKeys
-        .map((k) => item[k]?.toString() ?? '')
-        .where((v) => v.trim().isNotEmpty)
-        .join(' - ');
-    widget.controller?.text = text;
-    Navigator.of(context).pop();
-    widget.onSelected?.call(item);
-  }
+  // void _selectItem(Map<String, dynamic> item) {
+  //   final text = widget.displaySelectedKeys
+  //       .map((k) => item[k]?.toString() ?? '')
+  //       .where((v) => v.trim().isNotEmpty)
+  //       .join(' - ');
+  //   widget.controller?.text = text;
+  //   Navigator.of(context).pop();
+  //   widget.onSelected?.call(item);
+  // }
 
   @override
   Widget build(BuildContext context) {
     final String label = widget.headerLqabel ?? '';
-    return Dialog(
-      constraints: BoxConstraints(
-        maxHeight: widget.height ?? MediaQuery.of(context).size.height / 1.5,
-        maxWidth: widget.width ?? MediaQuery.of(context).size.width,
-      ),
-      insetPadding: const EdgeInsets.all(20),
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 5),
-                  child: Text(
-                    label.isEmpty ? 'Select Item' : label,
-                    style: const TextStyle(fontSize: 18),
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      autofocus: true,
+      onKeyEvent: _handleKeyEvent,
+      child: Dialog(
+        constraints: BoxConstraints(
+          maxHeight: widget.height ?? MediaQuery.of(context).size.height / 1.5,
+          maxWidth: widget.width ?? MediaQuery.of(context).size.width,
+        ),
+        insetPadding: const EdgeInsets.all(20),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5),
+                    child: Text(
+                      label.isEmpty ? 'Select Item' : label,
+                      style: const TextStyle(fontSize: 18),
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
 
-            SearchBox(
-              controller: _searchController,
-              focusNode: _searchFocusNode,
-            ),
-            if (_isFiltering) const LinearProgressIndicator(minHeight: 2),
-            const Divider(),
-            Expanded(
-              child: _isLoading
-                  ? Center(child: loadingProcess)
-                  : _errorMessage != null
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _errorMessage!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 14,
+              SearchBox(
+                controller: _searchController,
+                focusNode: _searchFocusNode,
+              ),
+              if (_isFiltering) const LinearProgressIndicator(minHeight: 2),
+
+              const SizedBox(height: 10),
+              Expanded(
+                child: _isLoading
+                    ? Center(child: loadingProcess)
+                    : _errorMessage != null
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _errorMessage!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 14,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          ElevatedButton(
-                            onPressed: _loadData,
-                            child: const Text('Retry'),
-                          ),
-                        ],
-                      ),
-                    )
-                  : _visibleIndexes.isEmpty
-                  ? const Center(child: Text('No items found'))
-                  : Scrollbar(
-                      controller: _scrollController,
-                      thumbVisibility: true,
-                      child: ListView.builder(
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: _loadData,
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _visibleIndexes.isEmpty
+                    ? const Center(child: Text('No items found'))
+                    : Scrollbar(
                         controller: _scrollController,
-                        itemCount: _visibleIndexes.length,
-                        itemExtent: 52,
-                        itemBuilder: (context, rowIndex) {
-                          final item = _items[_visibleIndexes[rowIndex]];
-                          final isEven = rowIndex % 2 == 0;
-
-                          return Material(
-                            borderRadius: rowIndex == 0
-                                ? const BorderRadius.only(
-                                    topLeft: Radius.circular(15),
-                                    topRight: Radius.circular(15),
-                                  )
-                                : rowIndex == _visibleIndexes.length - 1
-                                ? const BorderRadius.only(
-                                    bottomLeft: Radius.circular(15),
-                                    bottomRight: Radius.circular(15),
-                                  )
-                                : null,
-                            color: isEven
-                                ? Colors.grey.shade100
-                                : Colors.blue.shade50,
-                            child: InkWell(
-                              onTap: () => _selectItem(item),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                child: Row(
-                                  children: [
-                                    for (
-                                      var i = 0;
-                                      i < _effectiveKeys.length;
-                                      i++
-                                    )
-                                      Expanded(
-                                        flex:
-                                            (i < widget.flexList.length &&
-                                                widget.flexList[i] > 0)
-                                            ? widget.flexList[i]
-                                            : 1,
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: _visibleIndexes.length,
+                          itemExtent: 52,
+                          itemBuilder: (context, rowIndex) {
+                            final item = _items[_visibleIndexes[rowIndex]];
+                            // final isEven = rowIndex % 2 == 0;
+                            final isSelected = rowIndex == _selectedIndex;
+                            return Material(
+                              // borderRadius: rowIndex == 0
+                              //     ? const BorderRadius.only(
+                              //         topLeft: Radius.circular(15),
+                              //         topRight: Radius.circular(15),
+                              //       )
+                              //     : rowIndex == _visibleIndexes.length - 1
+                              //     ? const BorderRadius.only(
+                              //         bottomLeft: Radius.circular(15),
+                              //         bottomRight: Radius.circular(15),
+                              //       )
+                              //     : null,
+                              color: Colors.white,
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      color: isSelected
+                                          ? Colors.blue.shade100
+                                          : Colors.white,
+                                      child: InkWell(
+                                        onTap: () => _selectItem(item),
                                         child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            right: 12,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
                                           ),
-                                          child: Text(
-                                            item[_effectiveKeys[i]]
-                                                    ?.toString() ??
-                                                '-',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                            ),
+                                          child: Row(
+                                            children: [
+                                              for (
+                                                var i = 0;
+                                                i < _effectiveKeys.length;
+                                                i++
+                                              )
+                                                Expanded(
+                                                  flex:
+                                                      (i <
+                                                              widget
+                                                                  .flexList
+                                                                  .length &&
+                                                          widget.flexList[i] >
+                                                              0)
+                                                      ? widget.flexList[i]
+                                                      : 1,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          right: 12,
+                                                        ),
+                                                    child: Text(
+                                                      item[_effectiveKeys[i]]
+                                                              ?.toString() ??
+                                                          '-',
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow
+                                                          .ellipsis,
+                                                      style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
                                           ),
                                         ),
                                       ),
-                                  ],
-                                ),
+                                    ),
+                                  ),
+                                  const Divider(),
+                                ],
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

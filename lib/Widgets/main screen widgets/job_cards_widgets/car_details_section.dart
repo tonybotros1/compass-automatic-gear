@@ -38,10 +38,12 @@ Widget carDetailsSection(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           MenuWithValues(
+                           
                             focusNode: controller.focusNodeForCardDetails1,
-                            onFieldSubmitted: (_) => controller
-                                .focusNodeForCardDetails2
-                                .requestFocus(),
+                            onFieldSubmitted: (_) {
+                              controller.focusNodeForCardDetails2
+                                  .requestFocus();
+                            },
                             headerLqabel: 'Car Brands',
                             dialogWidth: constraints.maxWidth / 4,
                             width: 325,

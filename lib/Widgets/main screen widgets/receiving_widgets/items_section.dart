@@ -187,9 +187,19 @@ DataRow dataRowForTheTable(
           ],
         ),
       ),
-      DataCell(textForDataRowInTable(text: data.itemCode ?? '',maxWidth: null,formatDouble: false)),
       DataCell(
-        textForDataRowInTable(text: data.itemName ?? '', maxWidth: null,formatDouble: false),
+        textForDataRowInTable(
+          text: data.itemCode ?? '',
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.itemName ?? '',
+          maxWidth: null,
+          formatDouble: false,
+        ),
       ),
 
       DataCell(
@@ -246,7 +256,10 @@ Widget deleteSection(
           },
         );
       } else {
-        showSnackBar('Alert', 'Only New Receiving Allowed');
+        alertMessage(
+          context: Get.context!,
+          content: 'Only New Receiving Allowed',
+        );
       }
     },
     icon: const Icon(Icons.delete, color: Colors.red),
@@ -269,7 +282,10 @@ Widget editSection(
 
         String status1 = recStatus['status'];
         if (status1 != 'New') {
-          showSnackBar('Alert', 'Only New Receiving Docs Allowd');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only New Receiving Docs Allowd',
+          );
           return;
         }
       }
@@ -306,7 +322,10 @@ ElevatedButton newItemButton(
 
         String status1 = recStatus['status'];
         if (status1 != 'New') {
-          showSnackBar('Alert', 'Only New Receiving Docs Allowd');
+          alertMessage(
+            context: Get.context!,
+            content: 'Only New Receiving Docs Allowd',
+          );
           return;
         }
       }

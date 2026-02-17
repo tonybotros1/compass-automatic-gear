@@ -70,7 +70,9 @@ Future<dynamic> receivigDialog({
                                   onTap: controller.addingNewValue.isFalse
                                       ? onTapForSave
                                       : null,
-                                  text: 'Save',
+                                  text: controller.addingNewValue.isFalse
+                                      ? 'Save'
+                                      : '•••',
                                 ),
                                 if (onTapForDelete != null)
                                   Row(

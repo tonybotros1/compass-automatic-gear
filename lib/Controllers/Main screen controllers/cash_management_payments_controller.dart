@@ -28,7 +28,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
   RxString paymentTypeFilterId = RxString('');
   RxString vendorNameFilterId = RxString('');
   Rx<TextEditingController> paymentCounterFilter = TextEditingController().obs;
-  RxInt initDatePickerValue = RxInt(2);
+  RxInt initDatePickerValue = RxInt(1);
   @override
   void onInit() async {
     filterSearch();

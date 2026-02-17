@@ -6,10 +6,10 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/receiving_controller.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Models/receiving/receiving_model.dart';
-import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/receiving_widgets/receiving_dialog.dart';
+import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
@@ -65,56 +65,53 @@ class Receiving extends StatelessWidget {
                                             .value,
                                       ),
                                     ),
-
-                                    SizedBox(
+                                    MenuWithValues(
+                                      labelText: 'Vendor',
+                                      headerLqabel: 'Vendors',
+                                      dialogWidth: constraints.maxWidth / 2,
                                       width: 300,
-
-                                      child: CustomDropdown(
-                                        textcontroller: controller
-                                            .vendorNameIdFilterName
-                                            .value
-                                            .text,
-                                        showedSelectedName: 'entity_name',
-                                        hintText: 'Vendor Name',
-                                        onChanged: (key, value) async {
-                                          controller
-                                                  .vendorNameIdFilterName
-                                                  .value
-                                                  .text =
-                                              value['entity_name'];
-                                          controller.vendorNameIdFilter.value =
-                                              key;
-                                        },
-                                        onDelete: () {
-                                          controller
-                                              .vendorNameIdFilterName
-                                              .value
-                                              .clear();
-                                          controller.vendorNameIdFilter.value =
-                                              '';
-                                        },
-                                        onOpen: () {
-                                          return controller.getAllVendors();
-                                        },
-                                      ),
+                                      controller: controller
+                                          .vendorNameIdFilterName
+                                          .value,
+                                      displayKeys: const ['entity_name'],
+                                      displaySelectedKeys: const [
+                                        'entity_name',
+                                      ],
+                                      onOpen: () {
+                                        return controller.getAllVendors();
+                                      },
+                                      onDelete: () {
+                                        controller.vendorNameIdFilterName.value
+                                            .clear();
+                                        controller.vendorNameIdFilter.value =
+                                            '';
+                                      },
+                                      onSelected: (value) {
+                                        controller
+                                                .vendorNameIdFilterName
+                                                .value
+                                                .text =
+                                            value['entity_name'];
+                                        controller.vendorNameIdFilter.value =
+                                            value['_id'];
+                                      },
                                     ),
-                                    SizedBox(
-                                      width: 120,
-
-                                      child: CustomDropdown(
-                                        textcontroller:
-                                            controller.statusFilter.value.text,
-                                        showedSelectedName: 'name',
-                                        hintText: 'Status',
-                                        items: allStatus,
-                                        onChanged: (key, value) async {
-                                          controller.statusFilter.value.text =
-                                              value['name'];
-                                        },
-                                        onDelete: () {
-                                          controller.statusFilter.value.clear();
-                                        },
-                                      ),
+                                    MenuWithValues(
+                                      labelText: 'Status',
+                                      headerLqabel: 'Status',
+                                      dialogWidth: constraints.maxWidth / 3,
+                                      width: 170,
+                                      controller: controller.statusFilter.value,
+                                      displayKeys: const ['name'],
+                                      displaySelectedKeys: const ['name'],
+                                      data: allStatus,
+                                      onDelete: () {
+                                        controller.statusFilter.value.clear();
+                                      },
+                                      onSelected: (value) {
+                                        controller.statusFilter.value.text =
+                                            value['name'];
+                                      },
                                     ),
                                   ],
                                 ),
@@ -606,7 +603,10 @@ IconButton editReceivingButton({
               },
             );
           } else {
-            showSnackBar('Alert', 'Only New Receiving Allowed');
+            alertMessage(
+              context: Get.context!,
+              content: 'Only New Receiving Allowed',
+            );
           }
         },
         onTapForCancel: () {

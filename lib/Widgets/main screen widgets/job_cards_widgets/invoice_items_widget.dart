@@ -264,7 +264,7 @@ Widget deleteSection(
           },
         );
       } else {
-        showSnackBar('Alert', 'Only New Jobs Allowed');
+        alertMessage(context: Get.context!, content: 'Only New Jobs Allowed');
       }
     },
     icon: const Icon(Icons.delete, color: Colors.red),
@@ -304,7 +304,7 @@ Widget editSection(
                 },
         );
       } else {
-        showSnackBar('Alert', 'Only New Jobs Allowed');
+        alertMessage(context: Get.context!, content: 'Only New Jobs Allowed');
       }
     },
     icon: const Icon(Icons.edit_note_rounded, color: Colors.blue),
@@ -319,15 +319,6 @@ ElevatedButton newinvoiceItemsButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      // if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
-      //   if (controller.jobStatus1.value == 'New') {
-
-      //   } else {
-      //     showSnackBar('Alert', 'Only New Jobs Allowed');
-      //   }
-      // } else {
-      //   showSnackBar('Alert', 'Please Save Job First');
-      // }
       controller.clearInvoiceItemsVariables();
 
       invoiceItemsForJobDialog(

@@ -2,7 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/cahs_managemen
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
-import '../../drop_down_menu3.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 import '../add_new_values_button.dart';
 
@@ -26,36 +26,18 @@ Widget accountInformations<T extends CashManagementBaseController>(
             children: [
               GetBuilder<T>(
                 builder: (controller) {
-                  return CustomDropdown(
-                    focusNode: controller.focusNodeForAccountInfos1,
-                    nextFocusNode: controller.focusNodeForAccountInfos2,
+                  return MenuWithValues(
+                    labelText: isPayment ? 'Payment Type' : 'Receipt Type',
+                    headerLqabel: isPayment ? 'Payment Types' : 'Receipt Types',
+                    dialogWidth: constraints.maxWidth / 3,
                     width: 200,
-                    textcontroller: isPayment
-                        ? controller.paymentType.text
-                        : controller.receiptType.text,
-                    showedSelectedName: 'name',
-                    hintText: isPayment ? 'Payment Type' : 'Receipt Type',
-                    onChanged: (key, value) {
-                      if (isPayment) {
-                        controller.isPaymentModified.value = true;
-                        controller.paymentType.text = value['name'];
-                        controller.paymentTypeId.value = key;
-                      } else {
-                        controller.receiptTypeId.value = key;
-                        controller.receiptType.text = value['name'];
-                        controller.isReceiptModified.value = true;
-                      }
-                      if (value['name'].toLowerCase() == 'cheque') {
-                        controller.isChequeSelected.value = true;
-                        controller.chequeDate.text = textToDate(
-                          DateTime.now().toString(),
-                        );
-                      } else {
-                        controller.isChequeSelected.value = false;
-                        controller.chequeDate.clear();
-                        controller.chequeNumber.clear();
-                        controller.bankName.clear();
-                      }
+                    controller: isPayment
+                        ? controller.paymentType
+                        : controller.receiptType,
+                    displayKeys: const ['name'],
+                    displaySelectedKeys: const ['name'],
+                    onOpen: () {
+                      return controller.getReceiptsAndPaymentsTypes();
                     },
                     onDelete: () {
                       controller.isReceiptModified.value = true;
@@ -73,13 +55,31 @@ Widget accountInformations<T extends CashManagementBaseController>(
                       controller.chequeNumber.clear();
                       controller.bankName.clear();
                     },
-                    onOpen: () {
-                      return controller.getReceiptsAndPaymentsTypes();
+                    onSelected: (value) async {
+                      if (isPayment) {
+                        controller.isPaymentModified.value = true;
+                        controller.paymentType.text = value['name'];
+                        controller.paymentTypeId.value = value['_id'];
+                      } else {
+                        controller.receiptTypeId.value = value['_id'];
+                        controller.receiptType.text = value['name'];
+                        controller.isReceiptModified.value = true;
+                      }
+                      if (value['name'].toLowerCase() == 'cheque') {
+                        controller.isChequeSelected.value = true;
+                        controller.chequeDate.text = textToDate(
+                          DateTime.now().toString(),
+                        );
+                      } else {
+                        controller.isChequeSelected.value = false;
+                        controller.chequeDate.clear();
+                        controller.chequeNumber.clear();
+                        controller.bankName.clear();
+                      }
                     },
                   );
                 },
               ),
-              // const SizedBox(height: 10),
               Row(
                 spacing: 10,
                 children: [
@@ -101,27 +101,27 @@ Widget accountInformations<T extends CashManagementBaseController>(
                       : Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            CustomDropdown(
-                              focusNode: controller.focusNodeForAccountInfos3,
-                              nextFocusNode:
-                                  controller.focusNodeForAccountInfos4,
+                            MenuWithValues(
+                              labelText: 'Bank Name',
+                              headerLqabel: 'Banks Names',
+                              dialogWidth: constraints.maxWidth / 3,
+                              isEnabled: controller.isChequeSelected.isTrue,
                               width: 300,
-                              hintText: 'Bank Name',
-                              enabled: controller.isChequeSelected.isTrue,
-                              textcontroller: controller.bankName.text,
-                              showedSelectedName: 'name',
-                              onChanged: (key, value) {
-                                controller.isReceiptModified.value = true;
-                                controller.bankId.value = key;
-                                controller.bankName.text = value['name'];
+                              controller: controller.bankName,
+                              displayKeys: const ['name'],
+                              displaySelectedKeys: const ['name'],
+                              onOpen: () {
+                                return controller.getBanks();
                               },
                               onDelete: () {
                                 controller.isReceiptModified.value = true;
                                 controller.bankId.value = '';
                                 controller.bankName.clear();
                               },
-                              onOpen: () {
-                                return controller.getBanks();
+                              onSelected: (value) async {
+                                controller.isReceiptModified.value = true;
+                                controller.bankId.value = value['_id'];
+                                controller.bankName.text = value['name'];
                               },
                             ),
                             ExcludeFocus(
@@ -184,23 +184,17 @@ Widget accountInformations<T extends CashManagementBaseController>(
               ),
               GetBuilder<T>(
                 builder: (controller) {
-                  return CustomDropdown(
-                    focusNode: controller.focusNodeForAccountInfos5,
-                    nextFocusNode: controller.focusNodeForAccountInfos6,
+                  return MenuWithValues(
+                    labelText: 'Account',
+                    headerLqabel: 'Accounts',
+                    dialogWidth: constraints.maxWidth / 3,
+                    isEnabled: controller.isChequeSelected.isTrue,
                     width: 260,
-                    textcontroller: controller.account.text,
-                    hintText: 'Account',
-                    showedSelectedName: 'account_number',
-                    onChanged: (key, value) async {
-                      if (isPayment) {
-                        controller.isPaymentModified.value = true;
-                      } else {
-                        controller.isReceiptModified.value = true;
-                      }
-                      controller.account.text = value['account_number'];
-                      controller.accountId.value = key;
-                      controller.currency.text = value['currency'];
-                      controller.rate.text = '${value['rate']}';
+                    controller: controller.account,
+                    displayKeys: const ['account_number'],
+                    displaySelectedKeys: const ['account_number'],
+                    onOpen: () {
+                      return controller.getAllAccounts();
                     },
                     onDelete: () {
                       if (isPayment) {
@@ -213,8 +207,16 @@ Widget accountInformations<T extends CashManagementBaseController>(
                       controller.currency.clear();
                       controller.rate.clear();
                     },
-                    onOpen: () {
-                      return controller.getAllAccounts();
+                    onSelected: (value) async {
+                      if (isPayment) {
+                        controller.isPaymentModified.value = true;
+                      } else {
+                        controller.isReceiptModified.value = true;
+                      }
+                      controller.account.text = value['account_number'];
+                      controller.accountId.value = value['_id'];
+                      controller.currency.text = value['currency'];
+                      controller.rate.text = '${value['rate']}';
                     },
                   );
                 },

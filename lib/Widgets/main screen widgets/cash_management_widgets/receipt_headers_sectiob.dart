@@ -2,7 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/cash_managemen
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
-import '../../drop_down_menu3.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 
 Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
@@ -63,30 +63,16 @@ Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
                 Row(
                   spacing: 10,
                   children: [
-                    CustomDropdown(
-                      focusNode: controller.focusNodeForReceiptHeader2,
-                      nextFocusNode: controller.focusNodeForReceiptHeader3,
+                    MenuWithValues(
+                      labelText: 'Customer Name',
+                      headerLqabel: 'Customers',
+                      dialogWidth: constraints.maxWidth / 2,
                       width: constraints.maxWidth / 2.75,
-                      textcontroller: controller.customerName.text,
-                      showedSelectedName: 'entity_name',
-                      hintText: 'Customer Name',
-                      onChanged: (key, value) async {
-                        controller.isReceiptModified.value = true;
-                        controller.customerName.text = value['entity_name'];
-                        controller.customerNameId.value = key;
-                        controller.availableReceipts.clear();
-                        controller.selectedAvailableReceipts.clear();
-                        controller.outstanding.value = formatter
-                            .formatEditUpdate(
-                              controller.outstanding.value,
-                              TextEditingValue(
-                                text: await controller
-                                    .calculateCustomerOutstanding(key)
-                                    .then((value) {
-                                      return value.toString();
-                                    }),
-                              ),
-                            );
+                      controller: controller.customerName,
+                      displayKeys: const ['entity_name'],
+                      displaySelectedKeys: const ['entity_name'],
+                      onOpen: () {
+                        return controller.getAllCustomers();
                       },
                       onDelete: () {
                         controller.customerName.clear();
@@ -96,8 +82,23 @@ Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
                         controller.outstanding.clear();
                         controller.isReceiptModified.value = true;
                       },
-                      onOpen: () {
-                        return controller.getAllCustomers();
+                      onSelected: (value) async {
+                        controller.isReceiptModified.value = true;
+                        controller.customerName.text = value['entity_name'];
+                        controller.customerNameId.value = value['_id'];
+                        controller.availableReceipts.clear();
+                        controller.selectedAvailableReceipts.clear();
+                        controller.outstanding.value = formatter
+                            .formatEditUpdate(
+                              controller.outstanding.value,
+                              TextEditingValue(
+                                text: await controller
+                                    .calculateCustomerOutstanding(value['_id'])
+                                    .then((value) {
+                                      return value.toString();
+                                    }),
+                              ),
+                            );
                       },
                     ),
                     myTextFormFieldWithBorder(

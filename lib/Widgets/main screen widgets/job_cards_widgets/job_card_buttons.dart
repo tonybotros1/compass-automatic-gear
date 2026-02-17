@@ -26,7 +26,10 @@ Widget deleteJobButton(
           },
         );
       } else {
-        showSnackBar('Can Not Delete', 'Only New Cards Can be Deleted');
+        alertMessage(
+          context: Get.context!,
+          content: 'Only New Cards Can be Deleted',
+        );
       }
     },
     text: 'Delete',
@@ -129,7 +132,7 @@ Widget internalNotesButton(
         controller.getJobCardInternalNotes(jobId);
         internalNotesDialog(controller, constraints, jobId);
       } else {
-        showSnackBar('Alert', 'Please Save Job First');
+        alertMessage(context: Get.context!, content: 'Please Save Job First');
       }
     },
     text: 'Internal Notes',
@@ -229,7 +232,6 @@ GetBuilder<JobCardController> copyJobButton(
                   newData.id ?? '',
                   newData.type == 'JOB' ? false : true,
                 ); // need to be changed
-                showSnackBar('Done', 'Job Copied Successfully');
               }
             : null,
         text: 'Copy',
@@ -250,7 +252,10 @@ GetX<JobCardController> creatQuotationButton(
           if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
             controller.createQuotationCard(jobId);
           } else {
-            showSnackBar('Alert', 'Please Save Job First');
+            alertMessage(
+              context: Get.context!,
+              content: 'Please Save Job First',
+            );
           }
         },
         text: controller.creatingNewQuotation.isFalse
@@ -342,7 +347,10 @@ GetX<JobCardController> creatReceiptButton(
           if (controller.canAddInternalNotesAndInvoiceItems.isTrue) {
             controller.createReceipt(jobId, controller.customerId.value);
           } else {
-            showSnackBar('Alert', 'Please Save Job First');
+            alertMessage(
+              context: Get.context!,
+              content: 'Please Save Job First',
+            );
           }
         },
         text: controller.creatingNewReceipt.isFalse ? 'Create Receipt' : '•••',
