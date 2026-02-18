@@ -178,6 +178,7 @@ class QuotationCardController extends GetxController {
   ScrollController scrollerForCustomer = ScrollController();
   ScrollController scrollerForQuotationSection = ScrollController();
   RxInt initDatePickerValue = RxInt(1);
+  RxInt initStatusPickersValue = RxInt(1);
 
   @override
   void onInit() async {
@@ -291,6 +292,32 @@ class QuotationCardController extends GetxController {
         isDaySelected.value = false;
         filterSearch();
 
+        break;
+      default:
+    }
+  }
+
+  void onChooseForStatusPicker(int i) {
+    switch (i) {
+      case 1:
+        initStatusPickersValue.value = 1;
+        statusFilter.value.clear();
+        filterSearch();
+        break;
+      case 2:
+        initStatusPickersValue.value = 2;
+        statusFilter.value.text = 'New';
+        filterSearch();
+        break;
+      case 3:
+        initStatusPickersValue.value = 3;
+        statusFilter.value.text = 'Posted';
+        filterSearch();
+        break;
+      case 4:
+        initStatusPickersValue.value = 4;
+        statusFilter.value.text = 'Cancelled';
+        filterSearch();
         break;
       default:
     }

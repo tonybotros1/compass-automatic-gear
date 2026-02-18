@@ -141,25 +141,6 @@ class QuotationCard extends StatelessWidget {
                                       return controller.getAllCustomers();
                                     },
                                   ),
-
-                                  MenuWithValues(
-                                    labelText: 'Status',
-                                    headerLqabel: 'Status',
-                                    dialogWidth: constraints.maxWidth / 3,
-                                    dialogHeight: 400,
-                                    width: 150,
-                                    controller: controller.statusFilter.value,
-                                    displayKeys: const ['name'],
-                                    displaySelectedKeys: const ['name'],
-                                    data: allStatus,
-                                    onDelete: () {
-                                      controller.statusFilter.value.clear();
-                                    },
-                                    onSelected: (value) {
-                                      controller.statusFilter.value.text =
-                                          value['name'];
-                                    },
-                                  ),
                                 ],
                               ),
                               Row(
@@ -216,37 +197,78 @@ class QuotationCard extends StatelessWidget {
                                 constraints,
                                 controller,
                               ),
-                              CustomSlidingSegmentedControl<int>(
-                                height: 30,
-                                initialValue:
-                                    controller.initDatePickerValue.value,
-                                children: const {
-                                  1: Text('ALL'),
-                                  2: Text('TODAY'),
-                                  3: Text('THIS MONTH'),
-                                  4: Text('THIS YEAR'),
-                                },
-                                decoration: BoxDecoration(
-                                  color: CupertinoColors.lightBackgroundGray,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                thumbDecoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(6),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withAlpha(1),
-                                      blurRadius: 4.0,
-                                      spreadRadius: 1.0,
-                                      offset: const Offset(0.0, 2.0),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue:
+                                        controller.initDatePickerValue.value,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('TODAY'),
+                                      3: Text('THIS MONTH'),
+                                      4: Text('THIS YEAR'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                  ],
-                                ),
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInToLinear,
-                                onValueChanged: (v) {
-                                  controller.onChooseForDatePicker(v);
-                                },
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForDatePicker(v);
+                                    },
+                                  ),
+                                  separator(color: Colors.black),
+
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue:
+                                        controller.initStatusPickersValue.value,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('NEW'),
+                                      3: Text('POSTED'),
+                                      4: Text('CANCELLED'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForStatusPicker(v);
+                                    },
+                                  ),
+                                ],
                               ),
 
                               Row(
