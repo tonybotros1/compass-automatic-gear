@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/converters_controller.dart';
 import '../../../../Models/converters/converter_model.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
-import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/converters_widgets/converter_dialog.dart';
@@ -62,21 +61,6 @@ class Converters extends StatelessWidget {
                                     controller:
                                         controller.converterDescriptionFilter,
                                   ),
-                                  CustomDropdown(
-                                    width: 150,
-                                    textcontroller:
-                                        controller.statusFilter.value.text,
-                                    showedSelectedName: 'name',
-                                    hintText: 'Status',
-                                    items: allStatus,
-                                    onChanged: (key, value) async {
-                                      controller.statusFilter.text =
-                                          value['name'];
-                                    },
-                                    onDelete: () {
-                                      controller.statusFilter.clear();
-                                    },
-                                  ),
                                 ],
                               ),
                               Row(
@@ -131,36 +115,77 @@ class Converters extends StatelessWidget {
                                 constraints,
                                 controller,
                               ),
-                              CustomSlidingSegmentedControl<int>(
-                                height: 30,
-                                initialValue: 1,
-                                children: const {
-                                  1: Text('ALL'),
-                                  2: Text('TODAY'),
-                                  3: Text('THIS MONTH'),
-                                  4: Text('THIS YEAR'),
-                                },
-                                decoration: BoxDecoration(
-                                  color: CupertinoColors.lightBackgroundGray,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                thumbDecoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(6),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withAlpha(1),
-                                      blurRadius: 4.0,
-                                      spreadRadius: 1.0,
-                                      offset: const Offset(0.0, 2.0),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue:
+                                        controller.initDatePickerValue.value,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('TODAY'),
+                                      3: Text('THIS MONTH'),
+                                      4: Text('THIS YEAR'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                  ],
-                                ),
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInToLinear,
-                                onValueChanged: (v) {
-                                  controller.onChooseForDatePicker(v);
-                                },
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForDatePicker(v);
+                                    },
+                                  ),
+                                  separator(color: Colors.black),
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue:
+                                        controller.initStatusPickersValue.value,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('NEW'),
+                                      3: Text('POSTED'),
+                                      4: Text('CANCELLED'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForStatusPicker(v);
+                                    },
+                                  ),
+                                ],
                               ),
                               Row(
                                 spacing: 10,

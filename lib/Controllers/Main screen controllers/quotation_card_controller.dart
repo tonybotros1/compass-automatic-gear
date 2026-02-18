@@ -1804,6 +1804,7 @@ class QuotationCardController extends GetxController {
   }
 
   void clearAllFilters() {
+    initStatusPickersValue.value = 1;
     initDatePickerValue.value = 1;
     statusFilter.value.clear();
     numberOfQuotations.value = 0;

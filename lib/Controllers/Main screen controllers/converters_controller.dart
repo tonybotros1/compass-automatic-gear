@@ -43,10 +43,11 @@ class ConvertersController extends GetxController {
   String backendUrl = backendTestURI;
   RxList<Issues> issues = RxList<Issues>([]);
   RxDouble finalItemsTotal = RxDouble(0.0);
+  RxInt initDatePickerValue = RxInt(1);
+  RxInt initStatusPickersValue = RxInt(1);
 
   @override
   void onInit() async {
-    setTodayRange(fromDate: fromDate, toDate: toDate);
     filterSearch();
     super.onInit();
   }
@@ -54,13 +55,16 @@ class ConvertersController extends GetxController {
   void onChooseForDatePicker(int i) {
     switch (i) {
       case 1:
+        initDatePickerValue.value = 1;
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
         fromDate.clear();
         toDate.clear();
+        filterSearch();
         break;
       case 2:
+        initDatePickerValue.value = 2;
         setTodayRange(fromDate: fromDate, toDate: toDate);
         isAllSelected.value = false;
         isTodaySelected.value = true;
@@ -69,9 +73,10 @@ class ConvertersController extends GetxController {
         isYearSelected.value = false;
         isMonthSelected.value = false;
         isDaySelected.value = true;
-        searchEngine({"today": true});
+        filterSearch();
         break;
       case 3:
+        initDatePickerValue.value = 3;
         setThisMonthRange(fromDate: fromDate, toDate: toDate);
         isAllSelected.value = false;
         isTodaySelected.value = false;
@@ -80,9 +85,10 @@ class ConvertersController extends GetxController {
         isYearSelected.value = false;
         isMonthSelected.value = true;
         isDaySelected.value = false;
-        searchEngine({"this_month": true});
+        filterSearch();
         break;
       case 4:
+        initDatePickerValue.value = 4;
         setThisYearRange(fromDate: fromDate, toDate: toDate);
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
@@ -90,7 +96,33 @@ class ConvertersController extends GetxController {
         isYearSelected.value = true;
         isMonthSelected.value = false;
         isDaySelected.value = false;
-        searchEngine({"this_year": true});
+        filterSearch();
+        break;
+      default:
+    }
+  }
+
+  void onChooseForStatusPicker(int i) {
+    switch (i) {
+      case 1:
+        initStatusPickersValue.value = 1;
+        statusFilter.clear();
+        filterSearch();
+        break;
+      case 2:
+        initStatusPickersValue.value = 2;
+        statusFilter.text = 'New';
+        filterSearch();
+        break;
+      case 3:
+        initStatusPickersValue.value = 3;
+        statusFilter.text = 'Posted';
+        filterSearch();
+        break;
+      case 4:
+        initStatusPickersValue.value = 4;
+        statusFilter.text = 'Cancelled';
+        filterSearch();
         break;
       default:
     }
@@ -407,10 +439,10 @@ class ConvertersController extends GetxController {
         List converters = decoded['converters'];
         Map grandTotals = decoded['grand_totals'];
         allConvertersTotals.value = grandTotals['grand_total'];
+        numberOfConverters.value = grandTotals['grand_count'];
         allConverters.assignAll(
           converters.map((job) => ConverterModel.fromJson(job)),
         );
-        numberOfConverters.value = allConverters.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -429,6 +461,8 @@ class ConvertersController extends GetxController {
   }
 
   void clearAllFilters() {
+    initDatePickerValue.value = 1;
+    initStatusPickersValue.value = 1;
     converterDescriptionFilter.clear();
     converterNameFilter.clear();
     converterNumberFilter.clear();
