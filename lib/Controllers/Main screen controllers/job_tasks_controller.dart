@@ -200,7 +200,6 @@ class JobTasksController extends GetxController {
       //
     }
   }
- 
 
   // this function is to filter the search results for web
   void filterTasks() {

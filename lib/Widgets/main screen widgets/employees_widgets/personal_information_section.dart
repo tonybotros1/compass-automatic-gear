@@ -1,7 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_controller.dart';
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 
 Container personalInformation(
@@ -35,20 +35,24 @@ Container personalInformation(
         Row(
           spacing: 10,
           children: [
-            CustomDropdown(
+            MenuWithValues(
+              labelText: 'Gender',
+              headerLqabel: 'Gender',
+              dialogWidth: 600,
               width: 150,
-              hintText: 'Gender',
-              textcontroller: controller.employeeGender.text,
-              showedSelectedName: 'name',
-              onChanged: (key, value) {
-                controller.employeeGender.text = value['name'];
-                controller.employeeGenderId.value = key;
-              },onDelete: (){
-                 controller.employeeGender.clear();
+              controller: controller.employeeGender,
+              displayKeys: const ['name'],
+              displaySelectedKeys: const ['name'],
+              onOpen: () {
+                return controller.getGenders();
+              },
+              onDelete: () {
+                controller.employeeGender.clear();
                 controller.employeeGenderId.value = '';
               },
-              onOpen: (){
-                return controller.getGenders();
+              onSelected: (value) {
+                controller.employeeGender.text = value['name'];
+                controller.employeeGenderId.value = value['_id'];
               },
             ),
             myTextFormFieldWithBorder(
@@ -71,38 +75,45 @@ Container personalInformation(
             ),
           ],
         ),
-        CustomDropdown(
+        MenuWithValues(
+          labelText: 'Nationality',
+          headerLqabel: 'Nationality',
+          dialogWidth: 600,
           width: 310,
-          hintText: 'Nationality',
-          showedSelectedName: 'name',
-          textcontroller: controller.employeeNationality.text,
-          onChanged: (key, value) {
-            controller.employeeNationality.text = value['name'];
-            controller.employeeNamtionalityId.value = key;
+          controller: controller.employeeNationality,
+          displayKeys: const ['name'],
+          displaySelectedKeys: const ['name'],
+          onOpen: () {
+            return controller.getNationalities();
           },
           onDelete: () {
             controller.employeeNationality.clear();
             controller.employeeNamtionalityId.value = '';
           },
-          onOpen: () {
-            return controller.getNationalities();
+          onSelected: (value) {
+            controller.employeeNationality.text = value['name'];
+            controller.employeeNamtionalityId.value = value['_id'];
           },
         ),
-        CustomDropdown(
+
+        MenuWithValues(
+          labelText: 'Martial Status',
+          headerLqabel: 'Martial Status',
+          dialogWidth: 600,
           width: 310,
-          hintText: 'Martial Status',
-          showedSelectedName: 'name',
-          textcontroller: controller.employeeMaritalStatus.text,
-          onChanged: (key, value) {
-            controller.employeeMaritalStatus.text = value['name'];
-            controller.employeeMaritalStatusId.value = key;
+          controller: controller.employeeMaritalStatus,
+          displayKeys: const ['name'],
+          displaySelectedKeys: const ['name'],
+          onOpen: () {
+            return controller.getMaritalStatus();
           },
           onDelete: () {
             controller.employeeMaritalStatus.clear();
             controller.employeeMaritalStatusId.value = '';
           },
-          onOpen: () {
-            return controller.getMaritalStatus();
+          onSelected: (value) {
+            controller.employeeMaritalStatus.text = value['name'];
+            controller.employeeMaritalStatusId.value = value['_id'];
           },
         ),
         myTextFormFieldWithBorder(

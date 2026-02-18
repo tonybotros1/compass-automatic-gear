@@ -1,9 +1,9 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_controller.dart';
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 
 Container jobInformation(BuildContext context, EmployeesController controller) {
@@ -82,23 +82,27 @@ Container jobInformation(BuildContext context, EmployeesController controller) {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomDropdown(
-                hintText: 'Employee Status',
+              MenuWithValues(
+                labelText: 'Employee Status',
+                headerLqabel: 'Employee Status',
+                dialogWidth: 600,
                 width: 300,
-                showedSelectedName: 'name',
-                textcontroller: controller.employeeStatus.text,
-                onChanged: (key, value) {
-                  controller.employeeStatus.text = value['name'];
-                  controller.employeeStatusId.value = key;
+                controller: controller.employeeStatus,
+                displayKeys: const ['name'],
+                displaySelectedKeys: const ['name'],
+                onOpen: () {
+                  return controller.getEmployeeStatus();
                 },
                 onDelete: () {
                   controller.employeeStatus.clear();
                   controller.employeeStatusId.value = '';
                 },
-                onOpen: () {
-                  return controller.getEmployeeStatus();
+                onSelected: (value) {
+                  controller.employeeStatus.text = value['name'];
+                  controller.employeeStatusId.value = value['_id'];
                 },
               ),
+             
               Text('Category', style: textFieldLabelStyle),
               Row(
                 children: [

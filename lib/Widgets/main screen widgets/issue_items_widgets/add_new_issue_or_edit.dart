@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Models/job cards/job_card_model.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 import 'details_table.dart';
 import '../../main screen widgets/add_new_values_button.dart';
 
@@ -51,7 +52,7 @@ Widget addNewIssueOrEdit({
                                     myTextFormFieldWithBorder(
                                       controller: controller.issueNumber.value,
                                       isEnabled: false,
-                                      width: 150,
+                                      width: 200,
                                       labelText: 'Number',
                                     ),
                                     FocusTraversalOrder(
@@ -94,17 +95,37 @@ Widget addNewIssueOrEdit({
                                   children: [
                                     GetBuilder<IssueItemsController>(
                                       builder: (controller) {
-                                        return CustomDropdown(
-                                          // focusNode: controller.focusNode3,
-                                          // nextFocusNode: controller.focusNode4,
-                                          hintText: 'Issue Types',
-                                          showedSelectedName: 'name',
-                                          textcontroller:
-                                              controller.issueType.value,
-                                          width: 150,
-
-                                          onChanged: (key, value) {
-                                            controller.issueTypeId.value = key;
+                                        return MenuWithValues(
+                                          labelText: 'Issue Type',
+                                          headerLqabel: 'Issue Types',
+                                          dialogWidth: 600,
+                                          width: 200,
+                                          dialogHeight: 400,
+                                          controller:
+                                              controller.issueTypeController,
+                                          displayKeys: const ['name'],
+                                          displaySelectedKeys: const ['name'],
+                                          onOpen: () {
+                                            return controller.getIssueTypes();
+                                          },
+                                          onDelete: () {
+                                            controller.issueTypeId.value = '';
+                                            controller.issueTypeController
+                                                .clear();
+                                            controller.issueType.value = '';
+                                            controller.jobDetails.clear();
+                                            controller.allJobCards.clear();
+                                            controller.allConverters.clear();
+                                            controller.isIssuingModified.value =
+                                                true;
+                                          },
+                                          onSelected: (value) {
+                                            controller.issueTypeId.value =
+                                                value['_id'];
+                                            controller
+                                                    .issueTypeController
+                                                    .text =
+                                                value['name'];
                                             controller.issueType.value =
                                                 value['name'];
                                             controller.jobDetails.clear();
@@ -113,30 +134,19 @@ Widget addNewIssueOrEdit({
                                             controller.isIssuingModified.value =
                                                 true;
                                           },
-                                          onDelete: () {
-                                            controller.issueTypeId.value = '';
-                                            controller.issueType.value = '';
-                                            controller.jobDetails.clear();
-                                            controller.allJobCards.clear();
-                                            controller.allConverters.clear();
-                                            controller.isIssuingModified.value =
-                                                true;
-                                          },
-                                          onOpen: () {
-                                            return controller.getIssueTypes();
-                                          },
                                         );
                                       },
                                     ),
                                     GetX<IssueItemsController>(
                                       builder: (controller) {
-                                        var selectedType = controller.issueType;
+                                        var selectedType =
+                                            controller.issueType.value;
                                         return myTextFormFieldWithBorder(
                                           readOnly: true,
                                           controller: controller.jobDetails,
-                                          labelText: selectedType.value == ''
+                                          labelText: selectedType == ''
                                               ? 'Not Selected'
-                                              : selectedType.value,
+                                              : selectedType,
                                           width: 400,
                                           onEditingComplete: () {
                                             FocusScope.of(context).requestFocus(
@@ -151,12 +161,12 @@ Widget addNewIssueOrEdit({
                                             onPressed: () {
                                               if (controller
                                                   .issueType
+                                                  .value
                                                   .isEmpty) {
                                                 return;
                                               }
                                               bool isJobSelected =
-                                                  selectedType.value ==
-                                                  'Job Card';
+                                                  selectedType == 'Job Card';
                                               controller
                                                   .clearSearchFiltersForJobCardsAndConverters();
 
@@ -379,22 +389,17 @@ Widget addNewIssueOrEdit({
                                       order: const NumericFocusOrder(2),
                                       child: GetBuilder<IssueItemsController>(
                                         builder: (controller) {
-                                          return CustomDropdown(
-                                            // focusNode: controller.focusNode2,
-                                            // nextFocusNode:
-                                            //     controller.focusNode3,
-                                            textcontroller:
-                                                controller.branch.value.text,
-                                            showedSelectedName: 'name',
-                                            hintText: 'Branch',
-                                            onChanged: (key, value) {
-                                              controller.branchId.value = key;
-                                              controller.branch.value.text =
-                                                  value['name'];
-                                              controller
-                                                      .isIssuingModified
-                                                      .value =
-                                                  true;
+                                          return MenuWithValues(
+                                            labelText: 'Branch',
+                                            headerLqabel: 'Branches',
+                                            dialogWidth: 600,
+                                            width: 200,
+                                            dialogHeight: 400,
+                                            controller: controller.branch.value,
+                                            displayKeys: const ['name'],
+                                            displaySelectedKeys: const ['name'],
+                                            onOpen: () {
+                                              return controller.getBranches();
                                             },
                                             onDelete: () {
                                               controller.branchId.value = '';
@@ -404,8 +409,15 @@ Widget addNewIssueOrEdit({
                                                       .value =
                                                   true;
                                             },
-                                            onOpen: () {
-                                              return controller.getBranches();
+                                            onSelected: (value) {
+                                              controller.branchId.value =
+                                                  value['_id'];
+                                              controller.branch.value.text =
+                                                  value['name'];
+                                              controller
+                                                      .isIssuingModified
+                                                      .value =
+                                                  true;
                                             },
                                           );
                                         },
@@ -414,18 +426,19 @@ Widget addNewIssueOrEdit({
 
                                     GetBuilder<IssueItemsController>(
                                       builder: (controller) {
-                                        return CustomDropdown(
-                                          textcontroller:
-                                              controller.receivedBy.value.text,
-                                          hintText: 'Issue To',
-                                          showedSelectedName: 'name',
+                                        return MenuWithValues(
+                                          labelText: 'Issue To',
+                                          headerLqabel: 'Issue To',
+                                          dialogWidth: 600,
                                           width: 400,
-                                          onChanged: (key, value) {
-                                            controller.receivedBy.value.text =
-                                                value['name'];
-                                            controller.receivedById.value = key;
-                                            controller.isIssuingModified.value =
-                                                true;
+                                          dialogHeight: 400,
+                                          controller:
+                                              controller.receivedBy.value,
+                                          displayKeys: const ['name'],
+                                          displaySelectedKeys: const ['name'],
+                                          onOpen: () {
+                                            return controller
+                                                .getISSUERECEIVEPEOPLE();
                                           },
                                           onDelete: () {
                                             controller.receivedBy.value.clear();
@@ -433,9 +446,13 @@ Widget addNewIssueOrEdit({
                                             controller.isIssuingModified.value =
                                                 true;
                                           },
-                                          onOpen: () {
-                                            return controller
-                                                .getISSUERECEIVEPEOPLE();
+                                          onSelected: (value) {
+                                            controller.receivedBy.value.text =
+                                                value['name'];
+                                            controller.receivedById.value =
+                                                value['_id'];
+                                            controller.isIssuingModified.value =
+                                                true;
                                           },
                                         );
                                       },
@@ -491,7 +508,7 @@ Widget addNewIssueOrEdit({
             builder: (controller) {
               final showSection =
                   controller.issueType.value != 'Converter' &&
-                  controller.issueType.isNotEmpty;
+                  controller.issueType.value.isNotEmpty;
 
               return AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),

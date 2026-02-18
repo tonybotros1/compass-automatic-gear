@@ -7,9 +7,9 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/issue_items_controller.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Models/issuing/issung_model.dart';
-import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/issue_items_widgets/issue_dialog.dart';
+import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
@@ -76,38 +76,27 @@ class IssueItems extends StatelessWidget {
                                   //       ? {}
                                   //       : controller.alljobConverters,
                                   // ),
-                                  CustomDropdown(
+                                  MenuWithValues(
+                                    labelText: 'Issue To',
+                                    headerLqabel: 'Issue To',
+                                    dialogWidth: constraints.maxWidth / 3,
                                     width: 300,
-                                    textcontroller:
-                                        controller.receivedByFilter.value.text,
-                                    showedSelectedName: 'name',
-                                    hintText: 'Issue To',
-                                    onChanged: (key, value) async {
-                                      controller.receivedByFilter.value.text =
-                                          value['name'];
-                                      controller.receivedByIdFilter.value = key;
+                                    controller:
+                                        controller.receivedByFilter.value,
+                                    displayKeys: const ['name'],
+                                    displaySelectedKeys: const ['name'],
+                                    onOpen: () {
+                                      return controller.getISSUERECEIVEPEOPLE();
                                     },
                                     onDelete: () {
                                       controller.receivedByFilter.value.clear();
                                       controller.receivedByIdFilter.value = '';
                                     },
-                                    onOpen: () {
-                                      return controller.getISSUERECEIVEPEOPLE();
-                                    },
-                                  ),
-                                  CustomDropdown(
-                                    width: 120,
-                                    textcontroller:
-                                        controller.statusFilter.value.text,
-                                    showedSelectedName: 'name',
-                                    hintText: 'Status',
-                                    items: allStatus,
-                                    onChanged: (key, value) async {
-                                      controller.statusFilter.value.text =
+                                    onSelected: (value) {
+                                      controller.receivedByFilter.value.text =
                                           value['name'];
-                                    },
-                                    onDelete: () {
-                                      controller.statusFilter.value.clear();
+                                      controller.receivedByIdFilter.value =
+                                          value['_id'];
                                     },
                                   ),
                                 ],
@@ -159,37 +148,78 @@ class IssueItems extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               newIssueButton(context, constraints, controller),
-                              CustomSlidingSegmentedControl<int>(
-                                height: 30,
-                                initialValue:
-                                    controller.initDatePickerValue.value,
-                                children: const {
-                                  1: Text('ALL'),
-                                  2: Text('TODAY'),
-                                  3: Text('THIS MONTH'),
-                                  4: Text('THIS YEAR'),
-                                },
-                                decoration: BoxDecoration(
-                                  color: CupertinoColors.lightBackgroundGray,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                thumbDecoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(6),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withAlpha(1),
-                                      blurRadius: 4.0,
-                                      spreadRadius: 1.0,
-                                      offset: const Offset(0.0, 2.0),
+                              Row(
+                                spacing: 10,
+                                children: [
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue:
+                                        controller.initDatePickerValue.value,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('TODAY'),
+                                      3: Text('THIS MONTH'),
+                                      4: Text('THIS YEAR'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                  ],
-                                ),
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInToLinear,
-                                onValueChanged: (v) {
-                                  controller.onChooseForDatePicker(v);
-                                },
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForDatePicker(v);
+                                    },
+                                  ),
+                                  separator(color: Colors.black),
+
+                                  CustomSlidingSegmentedControl<int>(
+                                    height: 30,
+                                    initialValue:
+                                        controller.initStatusPickersValue.value,
+                                    children: const {
+                                      1: Text('ALL'),
+                                      2: Text('NEW'),
+                                      3: Text('POSTED'),
+                                      4: Text('CANCELLED'),
+                                    },
+                                    decoration: BoxDecoration(
+                                      color:
+                                          CupertinoColors.lightBackgroundGray,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    thumbDecoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withAlpha(1),
+                                          blurRadius: 4.0,
+                                          spreadRadius: 1.0,
+                                          offset: const Offset(0.0, 2.0),
+                                        ),
+                                      ],
+                                    ),
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInToLinear,
+                                    onValueChanged: (v) {
+                                      controller.onChooseForStatusPicker(v);
+                                    },
+                                  ),
+                                ],
                               ),
                               Row(
                                 spacing: 10,
@@ -359,7 +389,7 @@ Widget tableOfScreens({
         ),
         DataColumn2(
           size: ColumnSize.L,
-          label: AutoSizedText(text: 'Received By', constraints: constraints),
+          label: AutoSizedText(text: 'Issued To', constraints: constraints),
           // onSort: controller.onSort,
         ),
 

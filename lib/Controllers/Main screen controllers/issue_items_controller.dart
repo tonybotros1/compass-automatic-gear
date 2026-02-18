@@ -20,11 +20,12 @@ class IssueItemsController extends GetxController {
   Rx<TextEditingController> branch = TextEditingController().obs;
   Rx<TextEditingController> note = TextEditingController().obs;
   Rx<TextEditingController> issueNumber = TextEditingController().obs;
-  RxString issueType = RxString('');
+  TextEditingController issueTypeController = TextEditingController();
   // Rx<TextEditingController> issueType = TextEditingController().obs;
   RxString branchId = RxString('');
   RxString issueTypeId = RxString('');
   RxString receivedById = RxString('');
+  final RxString issueType = ''.obs;
 
   Rx<TextEditingController> receivedBy = TextEditingController().obs;
   Rx<TextEditingController> issueNumberFilter = TextEditingController().obs;
@@ -124,11 +125,11 @@ class IssueItemsController extends GetxController {
   ListOfValuesController listOfValuesController = Get.put(
     ListOfValuesController(),
   );
-  RxInt initDatePickerValue = RxInt(2);
+  RxInt initDatePickerValue = RxInt(1);
+  RxInt initStatusPickersValue = RxInt(1);
 
   @override
   void onInit() async {
-    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
     filterSearch();
     super.onInit();
   }
@@ -227,6 +228,32 @@ class IssueItemsController extends GetxController {
         isYearSelected.value = true;
         isMonthSelected.value = false;
         isDaySelected.value = false;
+        filterSearch();
+        break;
+      default:
+    }
+  }
+
+  void onChooseForStatusPicker(int i) {
+    switch (i) {
+      case 1:
+        initStatusPickersValue.value = 1;
+        statusFilter.value.clear();
+        filterSearch();
+        break;
+      case 2:
+        initStatusPickersValue.value = 2;
+        statusFilter.value.text = 'New';
+        filterSearch();
+        break;
+      case 3:
+        initStatusPickersValue.value = 3;
+        statusFilter.value.text = 'Posted';
+        filterSearch();
+        break;
+      case 4:
+        initStatusPickersValue.value = 4;
+        statusFilter.value.text = 'Cancelled';
         filterSearch();
         break;
       default:
@@ -842,8 +869,8 @@ class IssueItemsController extends GetxController {
         final decoded = jsonDecode(response.body);
         List issuing = decoded['issuing'];
         Map grandTotals = decoded['grand_totals'];
-        allIssuesTotals.value = grandTotals['grand_total'];
-        numberOfIssuesgDocs.value = grandTotals['grand_count'];
+        allIssuesTotals.value = grandTotals['total_amount'];
+        numberOfIssuesgDocs.value = grandTotals['total_items_count'];
         allIssuesDocs.assignAll(
           issuing.map((iss) => IssuingModel.fromJson(iss)),
         );
@@ -1147,7 +1174,7 @@ class IssueItemsController extends GetxController {
     branchId.value = '';
     date.value.text = textToDate(DateTime.now());
     issueNumber.value.clear();
-    issueType.value = '';
+    issueTypeController.clear();
     issueTypeId.value = '';
     jobDetails.clear();
     allJobCards.clear();
@@ -1171,6 +1198,7 @@ class IssueItemsController extends GetxController {
     currentIssuingId.value = data.id ?? '';
     issueNumber.value.text = data.issuingNumber ?? '';
     date.value.text = textToDate(data.date);
+    issueTypeController.text = data.issueTypeName ?? '';
     issueType.value = data.issueTypeName ?? '';
     jobCardId.value = data.jobCardId ?? '';
     converterId.value = data.converterId ?? '';
@@ -1192,10 +1220,11 @@ class IssueItemsController extends GetxController {
   }
 
   void clearAllFilters() {
-    initDatePickerValue.value = 11;
+    initStatusPickersValue.value = 1;
+    initDatePickerValue.value = 1;
     issueNumberFilter.value.clear();
     receivedByFilter.value.clear();
-    receivedById.value = '';
+    receivedByIdFilter.value = '';
     statusFilter.value.clear();
     fromDate.value.clear();
     toDate.value.clear();

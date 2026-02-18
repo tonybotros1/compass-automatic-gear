@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Controllers/Main%20screen%20controllers/job_tasks_controller.dart';
 import 'package:datahubai/Models/job%20tasks/job_tasks_model.dart';
 import 'package:datahubai/consts.dart';
@@ -59,15 +60,12 @@ class JobTasks extends StatelessWidget {
                         if (controller.allTasks.isEmpty) {
                           return const Center(child: Text('No Elements'));
                         }
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: SizedBox(
-                            width: constraints.maxWidth,
-                            child: tableOfScreens(
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
-                            ),
+                        return SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
                           ),
                         );
                       },
@@ -88,71 +86,60 @@ Widget tableOfScreens({
   required BuildContext context,
   required JobTasksController controller,
 }) {
-  return DataTable(
+  return PaginatedDataTable2(
     horizontalMargin: horizontalMarginForTable,
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
     columnSpacing: 5,
-    showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    autoRowsToHeight: true,
     columns: [
-      const DataColumn(label: Text('')),
-      DataColumn(
+      const DataColumn2(size: ColumnSize.S, label: Text('')),
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(text: 'Name - EN', constraints: constraints),
         // onSort: controller.onSort,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(text: 'Name - AR', constraints: constraints),
         // onSort: controller.onSort,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Points'),
         // onSort: controller.onSort,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Category'),
         // onSort: controller.onSort,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         // onSort: controller.onSort,
       ),
     ],
-    rows:
-        controller.filteredTasks.isEmpty && controller.search.value.text.isEmpty
-        ? controller.allTasks.map<DataRow>((task) {
-            final taskId = task.id;
-            return dataRowForTheTable(
-              task,
-              context,
-              constraints,
-              taskId,
-              controller,
-            );
-          }).toList()
-        : controller.filteredTasks.map<DataRow>((task) {
-            final taskId = task.id;
-            return dataRowForTheTable(
-              task,
-              context,
-              constraints,
-              taskId,
-              controller,
-            );
-          }).toList(),
+    source: CardDataSourceForEmployees(
+      cards:
+          controller.filteredTasks.isEmpty &&
+              controller.search.value.text.isEmpty
+          ? controller.allTasks
+          : controller.filteredTasks,
+      context: context,
+      constraints: constraints,
+      controller: controller,
+    ),
   );
 }
 
 DataRow dataRowForTheTable(
   JobTasksModel taskData,
-  context,
-  constraints,
-  taskId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String taskId,
   JobTasksController controller,
+  int index,
 ) {
   return DataRow(
     cells: [
@@ -243,4 +230,44 @@ ElevatedButton newtaskesButton(
     style: newButtonStyle,
     child: const Text('New Task'),
   );
+}
+
+class CardDataSourceForEmployees extends DataTableSource {
+  final List<JobTasksModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final JobTasksController controller;
+
+  CardDataSourceForEmployees({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final card = cards[index];
+    final cardId = card.id;
+
+    return dataRowForTheTable(
+      card,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

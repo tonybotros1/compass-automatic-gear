@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/employees/employees_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -59,15 +60,12 @@ class Employees extends StatelessWidget {
                         if (controller.allEmployees.isEmpty) {
                           return const Center(child: Text('No Element'));
                         }
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: SizedBox(
-                            width: constraints.maxWidth,
-                            child: tableOfScreens(
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
-                            ),
+                        return SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
                           ),
                         );
                       },
@@ -88,61 +86,50 @@ Widget tableOfScreens({
   required BuildContext context,
   required EmployeesController controller,
 }) {
-  return DataTable(
+  return PaginatedDataTable2(
     horizontalMargin: horizontalMarginForTable,
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
     columnSpacing: 5,
-    showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    autoRowsToHeight: true,
+    renderEmptyRowsInTheEnd: true,
     columns: [
-      const DataColumn(label: Text('')),
-      DataColumn(
+      const DataColumn2(label: Text(''), size: ColumnSize.S),
+      DataColumn2(
         label: AutoSizedText(text: 'Name', constraints: constraints),
+        size: ColumnSize.M,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Number'),
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Job Title'),
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Hire Date'),
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'End Date'),
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Status'),
       ),
     ],
-    rows:
-        controller.filteredEmployees.isEmpty &&
-            controller.search.value.text.isEmpty
-        ? controller.allEmployees.map<DataRow>((data) {
-            final employeeId = data.id ?? '';
-            return dataRowForTheTable(
-              data,
-              context,
-              constraints,
-              employeeId,
-              controller,
-            );
-          }).toList()
-        : controller.filteredEmployees.map<DataRow>((data) {
-            final employeeId = data.id ?? '';
-            return dataRowForTheTable(
-              data,
-              context,
-              constraints,
-              employeeId,
-              controller,
-            );
-          }).toList(),
+    source: CardDataSourceForEmployees(
+      cards:
+          controller.filteredEmployees.isEmpty &&
+              controller.search.value.text.isEmpty
+          ? controller.allEmployees
+          : controller.filteredEmployees,
+      context: context,
+      constraints: constraints,
+      controller: controller,
+    ),
   );
 }
 
@@ -152,6 +139,7 @@ DataRow dataRowForTheTable(
   BoxConstraints constraints,
   String employeeId,
   EmployeesController controller,
+  int index,
 ) {
   return DataRow(
     cells: [
@@ -260,4 +248,44 @@ ElevatedButton newEmployeeButton(
     style: newButtonStyle,
     child: const Text('New Employee'),
   );
+}
+
+class CardDataSourceForEmployees extends DataTableSource {
+  final List<EmployeesModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final EmployeesController controller;
+
+  CardDataSourceForEmployees({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final card = cards[index];
+    final cardId = card.id ?? '';
+
+    return dataRowForTheTable(
+      card,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }
