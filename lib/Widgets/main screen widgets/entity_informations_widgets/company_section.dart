@@ -14,7 +14,6 @@ Container companySection() {
         GetX<EntityInformationsController>(
           builder: (controller) {
             return myTextFormFieldWithBorder(
-              isEnabled: controller.isCompanySelected.isTrue,
               controller: controller.groupName,
               labelText: 'Group Name',
             );
@@ -28,10 +27,6 @@ Container companySection() {
               children: [
                 Expanded(
                   child: MenuWithValues(
-                    isEnabled: controller.isCompanySelected.isTrue
-                        ? true
-                        : false,
-
                     labelText: 'Industry',
                     headerLqabel: 'Industries',
                     dialogWidth: 600,
@@ -53,14 +48,12 @@ Container companySection() {
                 ),
                 Expanded(
                   child: myTextFormFieldWithBorder(
-                    isEnabled: controller.isCompanySelected.isTrue,
                     labelText: 'Tax Registration Number',
                     controller: controller.trn,
                   ),
                 ),
                 Expanded(
                   child: MenuWithValues(
-                    isEnabled: controller.isCompanySelected.isTrue,
                     labelText: 'Entity Type',
                     headerLqabel: 'Entity Types',
                     dialogWidth: 600,
@@ -79,7 +72,6 @@ Container companySection() {
                       controller.entityTypeId.value = value['_id'];
                     },
                   ),
-                 
                 ),
               ],
             );

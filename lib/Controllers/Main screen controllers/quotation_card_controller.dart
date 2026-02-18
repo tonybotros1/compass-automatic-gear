@@ -54,7 +54,7 @@ class QuotationCardController extends GetxController {
   TextEditingController customerEntityPhoneNumber = TextEditingController();
   TextEditingController customerCreditNumber = TextEditingController();
   TextEditingController customerOutstanding = TextEditingController();
-  RxString customerSaleMan = RxString('');
+  TextEditingController customerSaleMan = TextEditingController();
   TextEditingController customerBranch = TextEditingController();
   TextEditingController customerCurrency = TextEditingController();
   TextEditingController customerCurrencyRate = TextEditingController();
@@ -177,19 +177,11 @@ class QuotationCardController extends GetxController {
   ScrollController scrollerForCarDetails = ScrollController();
   ScrollController scrollerForCustomer = ScrollController();
   ScrollController scrollerForQuotationSection = ScrollController();
-  RxInt initDatePickerValue = RxInt(2);
+  RxInt initDatePickerValue = RxInt(1);
 
   @override
   void onInit() async {
     super.onInit();
-    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
-    isAllSelected.value = false;
-    isTodaySelected.value = true;
-    isThisMonthSelected.value = false;
-    isThisYearSelected.value = false;
-    isYearSelected.value = false;
-    isMonthSelected.value = false;
-    isDaySelected.value = true;
     filterSearch();
     await getCompanyDetails();
     getAllUsers();
@@ -752,7 +744,7 @@ class QuotationCardController extends GetxController {
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse(
-        '$backendUrl/quotation_cards/search_engine_for_quotation_cards',
+        '$backendUrl/quotation_cards/search_engine_for_quotation_cards_2',
       );
       final response = await http.post(
         url,
@@ -767,12 +759,12 @@ class QuotationCardController extends GetxController {
         List jobs = decoded['quotation_cards'];
         Map grandTotals = decoded['grand_totals'] ?? 0;
         allQuotationsTotals.value = grandTotals['grand_total'] ?? 0;
-        allQuotationsVATS.value = grandTotals['grand_vat'] ?? 0;
-        allQuotationsNET.value = grandTotals['grand_net'] ?? 0;
+        allQuotationsVATS.value = grandTotals['total_vat'] ?? 0;
+        allQuotationsNET.value = grandTotals['total_items_net'] ?? 0;
+        numberOfQuotations.value = grandTotals['total_items_count'] ?? 0;
         allQuotationCards.assignAll(
           jobs.map((job) => QuotationCardsModel.fromJson(job)),
         );
-        numberOfQuotations.value = allQuotationCards.length;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -1568,7 +1560,7 @@ class QuotationCardController extends GetxController {
     customerEntityPhoneNumber.clear();
     customerEntityEmail.clear();
     customerSaleManId.value = '';
-    customerSaleMan.value = '';
+    customerSaleMan.clear();
     quotationDays.value.clear();
     validityEndDate.value.clear();
     referenceNumber.value.clear();
@@ -1640,7 +1632,7 @@ class QuotationCardController extends GetxController {
 
     // Salesman & branch
     customerSaleManId.value = data.salesmanId ?? '';
-    customerSaleMan.value = data.salesman ?? '';
+    customerSaleMan.text = data.salesman ?? '';
 
     customerBranchId.value = data.branchId ?? '';
     customerBranch.text = data.branch ?? '';
@@ -1775,7 +1767,7 @@ class QuotationCardController extends GetxController {
     customerCreditNumber.text = (selectedCustomer['credit_limit'] ?? '0')
         .toString();
     customerSaleManId.value = selectedCustomer['salesman_id'] ?? '';
-    customerSaleMan.value = selectedCustomer['salesman'] ?? "";
+    customerSaleMan.text = selectedCustomer['salesman'] ?? "";
   }
 
   String getScreenName() {

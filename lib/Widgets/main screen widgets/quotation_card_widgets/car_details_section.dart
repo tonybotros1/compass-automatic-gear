@@ -1,9 +1,9 @@
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_getx_widget.dart';
 import '../../../Controllers/Main screen controllers/quotation_card_controller.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 import '../add_new_values_button.dart';
 
 Widget carDetailsSection(
@@ -33,49 +33,47 @@ Widget carDetailsSection(
                       spacing: 10,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          spacing: 10,
-                          children: [
-                            CustomDropdown(
-                              width: 325,
-                              showedSelectedName: 'name',
-                              textcontroller: controller.carBrand.text,
-                              hintText: 'Brand',
-                              onChanged: (key, value) {
-                                controller.carBrandLogo.value =
-                                    value['logo'] ?? '';
-                                controller.carBrand.text = value['name'];
-                                controller.getModelsByCarBrand(key);
-                                controller.carBrandId.value = key;
-                                controller.isQuotationModified.value = true;
-                              },
-                              onDelete: () {
-                                controller.carBrandLogo.value = '';
-                                controller.carBrand.clear();
-                                controller.carModel.clear();
-                                controller.carBrandId.value = '';
-                                controller.isQuotationModified.value = true;
-                                controller.isQuotationModified.value = true;
-                              },
-                              onOpen: () {
-                                return controller.getCarBrands();
-                              },
-                            ),
-                          ],
+                        MenuWithValues(
+                          labelText: 'Brand',
+                          headerLqabel: 'Brands',
+                          dialogWidth: constraints.maxWidth / 3,
+                          width: 325,
+                          controller: controller.carBrand,
+                          displayKeys: const ['name'],
+                          displaySelectedKeys: const ['name'],
+                          onSelected: (value) {
+                            controller.carBrandLogo.value = value['logo'] ?? '';
+                            controller.carBrand.text = value['name'];
+                            controller.getModelsByCarBrand(value['_id']);
+                            controller.carBrandId.value = value['_id'];
+                            controller.isQuotationModified.value = true;
+                          },
+                          onDelete: () {
+                            controller.carBrandLogo.value = '';
+                            controller.carBrand.clear();
+                            controller.carModel.clear();
+                            controller.carBrandId.value = '';
+                            controller.isQuotationModified.value = true;
+                            controller.isQuotationModified.value = true;
+                          },
+                          onOpen: () {
+                            return controller.getCarBrands();
+                          },
                         ),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            CustomDropdown(
+                            MenuWithValues(
+                              labelText: 'Model',
+                              headerLqabel: 'Models',
+                              dialogWidth: constraints.maxWidth / 3,
                               width: 325,
-                              showedSelectedName: 'name',
-                              textcontroller: controller.carModel.text,
-                              hintText: 'Model',
-
-                              onChanged: (key, value) {
+                              controller: controller.carModel,
+                              displayKeys: const ['name'],
+                              displaySelectedKeys: const ['name'],
+                              onSelected: (value) {
                                 controller.carModel.text = value['name'];
-                                controller.carModelId.value = key;
+                                controller.carModelId.value = value['_id'];
                                 controller.isQuotationModified.value = true;
                               },
                               onDelete: () {
@@ -110,14 +108,17 @@ Widget carDetailsSection(
                               },
                             ),
                             const SizedBox(width: 10),
-                            CustomDropdown(
+                            MenuWithValues(
+                              labelText: 'Color',
+                              headerLqabel: 'Colors',
+                              dialogWidth: constraints.maxWidth / 3,
                               width: 200,
-                              showedSelectedName: 'name',
-                              textcontroller: controller.color.text,
-                              hintText: 'Color',
-                              onChanged: (key, value) {
+                              controller: controller.color,
+                              displayKeys: const ['name'],
+                              displaySelectedKeys: const ['name'],
+                              onSelected: (value) {
                                 controller.color.text = value['name'];
-                                controller.colorId.value = key;
+                                controller.colorId.value = value['_id'];
                                 controller.isQuotationModified.value = true;
                               },
                               onDelete: () {
@@ -129,6 +130,7 @@ Widget carDetailsSection(
                                 return controller.getColors();
                               },
                             ),
+
                             valSectionInTheTable(
                               controller.listOfValuesController,
                               constraints,
@@ -173,22 +175,25 @@ Widget carDetailsSection(
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    CustomDropdown(
+                    MenuWithValues(
+                      labelText: 'Country',
+                      headerLqabel: 'Countries',
+                      dialogWidth: constraints.maxWidth / 3,
                       width: 240,
-                      showedSelectedName: 'name',
-                      textcontroller: controller.country.text,
-                      hintText: 'Country',
-                      onChanged: (key, value) {
+                      controller: controller.country,
+                      displayKeys: const ['name'],
+                      displaySelectedKeys: const ['name'],
+                      onSelected: (value) {
                         controller.country.text = value['name'];
                         controller.city.clear();
-                        // controller.getCitiesByCountryID(key);
-                        controller.countryId.value = key;
+                        controller.cityId.value = '';
+                        controller.countryId.value = value['_id'];
                         controller.isQuotationModified.value = true;
                       },
                       onDelete: () {
                         controller.country.clear();
                         controller.city.clear();
-                        // controller.allCities.clear();
+                        controller.cityId.value = '';
                         controller.countryId.value = '';
                         controller.isQuotationModified.value = true;
                       },
@@ -196,25 +201,22 @@ Widget carDetailsSection(
                         return controller.getCountries();
                       },
                     ),
+
                     const SizedBox(width: 10),
-                    CustomDropdown(
+                    MenuWithValues(
+                      labelText: 'City',
+                      headerLqabel: 'Cities',
+                      dialogWidth: constraints.maxWidth / 3,
                       width: 200,
-                      showedSelectedName: 'name',
-                      textcontroller: controller.city.text,
-                      hintText: 'City',
-                      // items: controller.allCities.isEmpty
-                      //     ? {}
-                      //     : controller.allCities,
-                      onChanged: (key, value) {
-                        controller.country.text = value['name'];
-                        controller.city.clear();
+                      controller: controller.city,
+                      displayKeys: const ['name'],
+                      displaySelectedKeys: const ['name'],
+                      onSelected: (value) {
                         controller.city.text = value['name'];
-                        controller.cityId.value = key;
+                        controller.cityId.value = value['_id'];
                         controller.isQuotationModified.value = true;
                       },
                       onDelete: () {
-                        controller.country.clear();
-                        controller.city.clear();
                         controller.city.clear();
                         controller.cityId.value = '';
                         controller.isQuotationModified.value = true;
@@ -225,6 +227,7 @@ Widget carDetailsSection(
                         );
                       },
                     ),
+
                     valSectionInTheTableForCountries(
                       controller.countriesController,
                       controller.countryId.value,
@@ -247,14 +250,17 @@ Widget carDetailsSection(
                       },
                     ),
                     const SizedBox(width: 10),
-                    CustomDropdown(
+                    MenuWithValues(
+                      labelText: 'Engine Type',
+                      headerLqabel: 'Engine Types',
+                      dialogWidth: constraints.maxWidth / 3,
                       width: 200,
-                      showedSelectedName: 'name',
-                      textcontroller: controller.engineType.text,
-                      hintText: 'Engine Type',
-                      onChanged: (key, value) {
+                      controller: controller.engineType,
+                      displayKeys: const ['name'],
+                      displaySelectedKeys: const ['name'],
+                      onSelected: (value) {
                         controller.engineType.text = value['name'];
-                        controller.engineTypeId.value = key;
+                        controller.engineTypeId.value = value['_id'];
                         controller.isQuotationModified.value = true;
                       },
                       onDelete: () {

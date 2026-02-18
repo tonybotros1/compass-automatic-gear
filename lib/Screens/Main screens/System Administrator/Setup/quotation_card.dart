@@ -8,11 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/quotation_card_controller.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
-import '../../../../Widgets/drop_down_menu3.dart';
 import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/quotation_card_widgets/add_new_quotation_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/quotation_card_widgets/quotation_card_buttons.dart';
+import '../../../../Widgets/menu_dialog.dart';
 import '../../../../consts.dart';
 
 class QuotationCard extends StatelessWidget {
@@ -111,22 +111,25 @@ class QuotationCard extends StatelessWidget {
                                     labelText: 'VIN',
                                     controller: controller.vinFilter.value,
                                   ),
-                                  CustomDropdown(
+                                  MenuWithValues(
+                                    labelText: 'Customer Name',
+                                    headerLqabel: 'Customers',
+                                    dialogWidth: constraints.maxWidth / 2,
                                     width: 300,
-                                    textcontroller: controller
+                                    controller: controller
                                         .customerNameIdFilterName
-                                        .value
-                                        .text,
-                                    showedSelectedName: 'entity_name',
-                                    hintText: 'Customer Name',
-                                    onChanged: (key, value) async {
+                                        .value,
+                                    displayKeys: const ['entity_name'],
+                                    displaySelectedKeys: const ['entity_name'],
+                                    data: allStatus,
+                                    onSelected: (value) {
                                       controller
                                               .customerNameIdFilterName
                                               .value
                                               .text =
                                           value['entity_name'];
                                       controller.customerNameIdFilter.value =
-                                          key;
+                                          value['_id'];
                                     },
                                     onDelete: () {
                                       controller.customerNameIdFilterName.value
@@ -138,19 +141,23 @@ class QuotationCard extends StatelessWidget {
                                       return controller.getAllCustomers();
                                     },
                                   ),
-                                  CustomDropdown(
+
+                                  MenuWithValues(
+                                    labelText: 'Status',
+                                    headerLqabel: 'Status',
+                                    dialogWidth: constraints.maxWidth / 3,
+                                    dialogHeight: 400,
                                     width: 150,
-                                    textcontroller:
-                                        controller.statusFilter.value.text,
-                                    showedSelectedName: 'name',
-                                    hintText: 'Status',
-                                    items: allStatus,
-                                    onChanged: (key, value) async {
-                                      controller.statusFilter.value.text =
-                                          value['name'];
-                                    },
+                                    controller: controller.statusFilter.value,
+                                    displayKeys: const ['name'],
+                                    displaySelectedKeys: const ['name'],
+                                    data: allStatus,
                                     onDelete: () {
                                       controller.statusFilter.value.clear();
+                                    },
+                                    onSelected: (value) {
+                                      controller.statusFilter.value.text =
+                                          value['name'];
                                     },
                                   ),
                                 ],
@@ -387,186 +394,182 @@ Widget tableOfScreens({
         return null;
       }),
     ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      controller: scrollController,
-      child: PaginatedDataTable2(
-        minWidth: 1800,
-        lmRatio: 4,
-        autoRowsToHeight: true,
-        showCheckboxColumn: false,
-        showFirstLastButtons: true,
-        headingRowHeight: 70,
-        columnSpacing: 15,
-        sortColumnIndex: controller.sortColumnIndex.value,
-        sortAscending: controller.isAscending.value,
-        // headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
-        columns: [
-          const DataColumn2(size: ColumnSize.S, label: SizedBox()),
-          DataColumn2(
-            size: ColumnSize.M,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizedText(text: 'Quotation', constraints: constraints),
-                AutoSizedText(text: 'Number', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
+    child: PaginatedDataTable2(
+      minWidth: 1800,
+      lmRatio: 4,
+      autoRowsToHeight: true,
+      showCheckboxColumn: false,
+      showFirstLastButtons: true,
+      headingRowHeight: 70,
+      columnSpacing: 15,
+      sortColumnIndex: controller.sortColumnIndex.value,
+      sortAscending: controller.isAscending.value,
+      // headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+      columns: [
+        const DataColumn2(size: ColumnSize.S, label: SizedBox()),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AutoSizedText(text: 'Quotation', constraints: constraints),
+              AutoSizedText(text: 'Number', constraints: constraints),
+            ],
           ),
-          DataColumn2(
-            size: ColumnSize.M,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(),
-                // AutoSizedText(text: '', constraints: constraints),
-                AutoSizedText(text: 'Date', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn2(
-            size: ColumnSize.M,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(),
-                AutoSizedText(text: 'Status', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn2(
-            size: ColumnSize.M,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizedText(text: 'Car', constraints: constraints),
-                AutoSizedText(text: 'Brand', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn2(
-            size: ColumnSize.M,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(),
-                AutoSizedText(text: 'Model', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn2(
-            size: ColumnSize.M,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(),
-                AutoSizedText(text: 'Color', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn2(
-            size: ColumnSize.M,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AutoSizedText(text: 'Plate', constraints: constraints),
-                AutoSizedText(text: 'Number', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn2(
-            size: ColumnSize.L,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(),
-                AutoSizedText(text: 'Customer Name', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-          // DataColumn2(
-          // size: ColumnSize.M,
-          //   label: Column(
-          //     spacing: 5,
-          //     mainAxisAlignment: MainAxisAlignment.end,
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       const SizedBox(),
-          //       AutoSizedText(text: 'VIN', constraints: constraints),
-          //     ],
-          //   ),
-          //   // onSort: controller.onSort,
-          // ),
-          DataColumn2(
-            size: ColumnSize.M,
-            numeric: true,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const SizedBox(),
-                AutoSizedText(text: 'Totals', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn2(
-            size: ColumnSize.M,
-            numeric: true,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const SizedBox(),
-                AutoSizedText(text: 'VAT', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-          DataColumn2(
-            size: ColumnSize.M,
-            numeric: true,
-            label: Column(
-              spacing: 5,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const SizedBox(),
-                AutoSizedText(text: 'NET', constraints: constraints),
-              ],
-            ),
-            // onSort: controller.onSort,
-          ),
-        ],
-        source: CardDataSource(
-          cards: isQuotationsLoading ? [] : data,
-          context: context,
-          constraints: constraints,
-          controller: controller,
+          // onSort: controller.onSort,
         ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(),
+              // AutoSizedText(text: '', constraints: constraints),
+              AutoSizedText(text: 'Date', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(),
+              AutoSizedText(text: 'Status', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AutoSizedText(text: 'Car', constraints: constraints),
+              AutoSizedText(text: 'Brand', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(),
+              AutoSizedText(text: 'Model', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(),
+              AutoSizedText(text: 'Color', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AutoSizedText(text: 'Plate', constraints: constraints),
+              AutoSizedText(text: 'Number', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.L,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(),
+              AutoSizedText(text: 'Customer Name', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        // DataColumn2(
+        // size: ColumnSize.M,
+        //   label: Column(
+        //     spacing: 5,
+        //     mainAxisAlignment: MainAxisAlignment.end,
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       const SizedBox(),
+        //       AutoSizedText(text: 'VIN', constraints: constraints),
+        //     ],
+        //   ),
+        //   // onSort: controller.onSort,
+        // ),
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const SizedBox(),
+              AutoSizedText(text: 'Totals', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const SizedBox(),
+              AutoSizedText(text: 'VAT', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: Column(
+            spacing: 5,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              const SizedBox(),
+              AutoSizedText(text: 'NET', constraints: constraints),
+            ],
+          ),
+          // onSort: controller.onSort,
+        ),
+      ],
+      source: CardDataSource(
+        cards: isQuotationsLoading ? [] : data,
+        context: context,
+        constraints: constraints,
+        controller: controller,
       ),
     ),
   );
@@ -596,7 +599,7 @@ DataRow dataRowForTheTable(
           ],
         ),
       ),
-      DataCell(textForDataRowInTable(text: cardData.quotationNumber ?? '')),
+      DataCell(textForDataRowInTable(text: cardData.quotationNumber ?? '-')),
       DataCell(textForDataRowInTable(text: textToDate(cardData.quotationDate))),
       DataCell(
         cardData.quotationStatus != ''
@@ -607,13 +610,13 @@ DataRow dataRowForTheTable(
               )
             : const SizedBox(),
       ),
-      DataCell(textForDataRowInTable(text: cardData.carBrand ?? '')),
-      DataCell(textForDataRowInTable(text: cardData.carModel ?? '')),
-      DataCell(textForDataRowInTable(text: cardData.color ?? '')),
-      DataCell(SelectableText(cardData.plateNumber ?? '', maxLines: 1)),
+      DataCell(textForDataRowInTable(text: cardData.carBrand ?? '-')),
+      DataCell(textForDataRowInTable(text: cardData.carModel ?? '-')),
+      DataCell(textForDataRowInTable(text: cardData.color ?? '-')),
+      DataCell(SelectableText(cardData.plateNumber ?? '-', maxLines: 1)),
 
       DataCell(
-        textForDataRowInTable(maxWidth: null, text: cardData.customer ?? ''),
+        textForDataRowInTable(maxWidth: null, text: cardData.customer ?? '-'),
       ),
       // DataCell(
       //   textForDataRowInTable(

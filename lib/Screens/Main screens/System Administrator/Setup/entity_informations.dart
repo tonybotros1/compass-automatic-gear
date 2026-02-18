@@ -157,7 +157,7 @@ class EntityInformations extends StatelessWidget {
                                   label: 'NUMBER OF ENTITIES',
                                   value: '${controller.countOfEntities.value}',
                                   valueColor: mainColor,
-                                  icon: Icons.numbers,
+                                  icon: counterIcon,
                                   iconColor: mainColorWithAlpha,
                                 ),
                               ],
