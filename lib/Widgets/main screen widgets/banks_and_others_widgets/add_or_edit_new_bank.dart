@@ -1,8 +1,8 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/banks_and_others_controller.dart';
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 
 Widget addNewBankOrEdit({
@@ -29,17 +29,22 @@ Widget addNewBankOrEdit({
       GetX<BanksAndOthersController>(
         builder: (controller) {
           var isCurrencyLoading = controller.allCurrencies.isEmpty;
-          return CustomDropdown(
-            showedSelectedName: 'currency_code',
-            textcontroller: controller.currency.value.text,
-            hintText: 'Currency',
-            items: isCurrencyLoading ? {} : controller.allCurrencies,
-            onChanged: (key, value) {
-              controller.currency.value.text = value['currency_code'];
-              controller.currencyId.value = key;
-            },onDelete: (){
-               controller.currency.value.clear();
+          return MenuWithValues(
+            labelText: 'Currency',
+            headerLqabel: 'Currencies',
+            dialogWidth: 600,
+            width: 250,
+            controller: controller.currency.value,
+            displayKeys: const ['currency_code'],
+            displaySelectedKeys: const ['currency_code'],
+            data: isCurrencyLoading ? {} : controller.allCurrencies,
+            onDelete: () {
+              controller.currency.value.clear();
               controller.currencyId.value = '';
+            },
+            onSelected: (value) {
+              controller.currency.value.text = value['currency_code'];
+              controller.currencyId.value = value['_id'];
             },
           );
         },
@@ -49,19 +54,38 @@ Widget addNewBankOrEdit({
         builder: (controller) {
           var isAccountTypesLoading = controller.allAccountTypes.isEmpty;
 
-          return CustomDropdown(
-            hintText: 'Account Type',
-            textcontroller: controller.accountType.value.text,
-            showedSelectedName: 'name',
-            items: isAccountTypesLoading ? {} : controller.allAccountTypes,
-            onChanged: (key, value) {
-              controller.accountType.value.text = value['name'];
-              controller.accountTypeId.value = key;
-            },onDelete: (){
+          return MenuWithValues(
+            labelText: 'Account Type',
+            headerLqabel: 'Account Types',
+            dialogWidth: 600,
+            width: 250,
+            controller: controller.accountType.value,
+            displayKeys: const ['name'],
+            displaySelectedKeys: const ['name'],
+            data: isAccountTypesLoading ? {} : controller.allAccountTypes,
+            onDelete: () {
               controller.accountType.value.clear();
               controller.accountTypeId.value = '';
             },
+            onSelected: (value) {
+              controller.accountType.value.text = value['name'];
+              controller.accountTypeId.value = value['_id'];
+            },
           );
+          // CustomDropdown(
+          //   hintText: 'Account Type',
+          //   textcontroller: controller.accountType.value.text,
+          //   showedSelectedName: 'name',
+          //   items: isAccountTypesLoading ? {} : controller.allAccountTypes,
+          //   onChanged: (key, value) {
+          // controller.accountType.value.text = value['name'];
+          // controller.accountTypeId.value = key;
+          //   },
+          //   onDelete: () {
+          // controller.accountType.value.clear();
+          // controller.accountTypeId.value = '';
+          //   },
+          // );
         },
       ),
     ],

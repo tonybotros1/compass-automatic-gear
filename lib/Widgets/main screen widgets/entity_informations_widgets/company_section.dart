@@ -11,7 +11,7 @@ Container companySection() {
     decoration: containerDecor,
     child: Column(
       children: [
-        GetX<EntityInformationsController>(
+        GetBuilder<EntityInformationsController>(
           builder: (controller) {
             return myTextFormFieldWithBorder(
               controller: controller.groupName,
@@ -20,7 +20,7 @@ Container companySection() {
           },
         ),
         const SizedBox(height: 15),
-        GetX<EntityInformationsController>(
+        GetBuilder<EntityInformationsController>(
           builder: (controller) {
             return Row(
               spacing: 10,

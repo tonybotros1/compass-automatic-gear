@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/banks/banks_model.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
@@ -59,15 +60,12 @@ class BanksAndOthers extends StatelessWidget {
                         if (controller.allBanks.isEmpty) {
                           return const Center(child: Text('No Element'));
                         }
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: SizedBox(
-                            width: constraints.maxWidth,
-                            child: tableOfScreens(
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
-                            ),
+                        return SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
                           ),
                         );
                       },
@@ -88,17 +86,12 @@ Widget tableOfScreens({
   required BuildContext context,
   required BanksAndOthersController controller,
 }) {
-  return DataTable(
+  return PaginatedDataTable2(
     horizontalMargin: horizontalMarginForTable,
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
     columnSpacing: 5,
-    showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    autoRowsToHeight: true,
     columns: [
       const DataColumn(label: Text('')),
       DataColumn(
@@ -131,37 +124,26 @@ Widget tableOfScreens({
         onSort: controller.onSort,
       ),
     ],
-    rows:
-        controller.filteredBanks.isEmpty && controller.search.value.text.isEmpty
-        ? controller.allBanks.map<DataRow>((bank) {
-            final bankId = bank.id;
-            return dataRowForTheTable(
-              bank,
-              context,
-              constraints,
-              bankId,
-              controller,
-            );
-          }).toList()
-        : controller.filteredBanks.map<DataRow>((bank) {
-            final bankId = bank.id;
-            return dataRowForTheTable(
-              bank,
-              context,
-              constraints,
-              bankId,
-              controller,
-            );
-          }).toList(),
+    source: CardDataSourceForBanks(
+      cards:
+          controller.filteredBanks.isEmpty &&
+              controller.search.value.text.isEmpty
+          ? controller.allBanks
+          : controller.filteredBanks,
+      context: context,
+      constraints: constraints,
+      controller: controller,
+    ),
   );
 }
 
 DataRow dataRowForTheTable(
   BanksModel bankData,
-  context,
-  constraints,
-  bankId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String bankId,
   BanksAndOthersController controller,
+  int index,
 ) {
   return DataRow(
     cells: [
@@ -252,4 +234,44 @@ ElevatedButton newbankesButton(
     style: newButtonStyle,
     child: const Text('New Bank'),
   );
+}
+
+class CardDataSourceForBanks extends DataTableSource {
+  final List<BanksModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final BanksAndOthersController controller;
+
+  CardDataSourceForBanks({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final card = cards[index];
+    final cardId = card.id ?? '';
+
+    return dataRowForTheTable(
+      card,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

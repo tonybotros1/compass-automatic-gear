@@ -242,7 +242,7 @@ class JobCardController extends GetxController {
       RxList<JobItemsSummaryTable>([]);
   RxList<TimeSheetsSummaryForJobCard> timeSheetsSummaryTable =
       RxList<TimeSheetsSummaryForJobCard>([]);
-  RxInt initDatePickerValue = RxInt(2);
+  RxInt initDatePickerValue = RxInt(1);
   // RxInt initPickersValue = RxInt(1);
   RxInt initStatusPickersValue = RxInt(1);
   RxInt initLabelPickersValue = RxInt(1);
@@ -262,7 +262,6 @@ class JobCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    setTodayRange(fromDate: fromDate.value, toDate: toDate.value);
     filterSearch();
     await getCompanyDetails();
     jobWarrentyEndDate.value.addListener(() {
@@ -1577,12 +1576,12 @@ class JobCardController extends GetxController {
         final decoded = jsonDecode(response.body);
         List jobs = decoded['job_cards'];
         Map grandTotals = decoded['grand_totals'];
-        allJobsTotals.value = grandTotals['grand_total'] ?? 0;
-        allJobsVATS.value = grandTotals['grand_vat'] ?? 0;
-        allJobsNET.value = grandTotals['grand_net'] ?? 0;
-        allJobsPaid.value = grandTotals['grand_paid'] ?? 0;
-        allJobsOutstanding.value = grandTotals['grand_outstanding'] ?? 0;
-        numberOfJobs.value = grandTotals['grand_count'] ?? 0;
+        allJobsTotals.value = grandTotals['total_amount'] ?? 0;
+        allJobsVATS.value = grandTotals['total_vat'] ?? 0;
+        allJobsNET.value = grandTotals['total_net'] ?? 0;
+        allJobsPaid.value = grandTotals['total_paid'] ?? 0;
+        allJobsOutstanding.value = grandTotals['total_outstanding'] ?? 0;
+        numberOfJobs.value = grandTotals['total_items_count'] ?? 0;
         allJobCards.assignAll(jobs.map((job) => JobCardModel.fromJson(job)));
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);

@@ -120,7 +120,7 @@ Widget tableOfScreens({
         // onSort: controller.onSort,
       ),
     ],
-    source: CardDataSourceForEmployees(
+    source: CardDataSourceForJobTasks(
       cards:
           controller.filteredTasks.isEmpty &&
               controller.search.value.text.isEmpty
@@ -232,13 +232,13 @@ ElevatedButton newtaskesButton(
   );
 }
 
-class CardDataSourceForEmployees extends DataTableSource {
+class CardDataSourceForJobTasks extends DataTableSource {
   final List<JobTasksModel> cards;
   final BuildContext context;
   final BoxConstraints constraints;
   final JobTasksController controller;
 
-  CardDataSourceForEmployees({
+  CardDataSourceForJobTasks({
     required this.cards,
     required this.context,
     required this.constraints,

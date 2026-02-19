@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Controllers/Main%20screen%20controllers/ap_payment_type_controller.dart';
 import 'package:datahubai/Models/ap%20payment%20types/ap_payment_types_model.dart';
 import 'package:flutter/material.dart';
@@ -56,15 +57,12 @@ class ApPaymentType extends StatelessWidget {
                         if (controller.allApPaymentTypes.isEmpty) {
                           return const Center(child: Text('No Element'));
                         }
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: SizedBox(
-                            width: constraints.maxWidth,
-                            child: tableOfScreens(
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
-                            ),
+                        return SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
                           ),
                         );
                       },
@@ -85,60 +83,46 @@ Widget tableOfScreens({
   required BuildContext context,
   required ApPaymentTypeController controller,
 }) {
-  return DataTable(
+  return PaginatedDataTable2(
     horizontalMargin: horizontalMarginForTable,
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
     columnSpacing: 5,
-    showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    autoRowsToHeight: true,
+    lmRatio: 2,
     columns: [
-      const DataColumn(label: Text('')),
-      DataColumn(
+      const DataColumn2(size: ColumnSize.S, label: Text('')),
+      DataColumn2(
+        size: ColumnSize.L,
         label: AutoSizedText(text: 'Type', constraints: constraints),
         // onSort: controller.onSort,
       ),
-      DataColumn(
+      DataColumn2(
+        size: ColumnSize.L,
         label: AutoSizedText(constraints: constraints, text: 'Creation Date'),
         // onSort: controller.onS ort,
       ),
     ],
-    rows:
-        controller.filteredApPaymentTypes.isEmpty &&
-            controller.search.value.text.isEmpty
-        ? controller.allApPaymentTypes.map<DataRow>((type) {
-            final typeId = type.id;
-            return dataRowForTheTable(
-              type,
-              context,
-              constraints,
-              typeId,
-              controller,
-            );
-          }).toList()
-        : controller.filteredApPaymentTypes.map<DataRow>((type) {
-            final typeId = type.id;
-            return dataRowForTheTable(
-              type,
-              context,
-              constraints,
-              typeId,
-              controller,
-            );
-          }).toList(),
+    source: CardDataSourceForPaymentTypes(
+      cards:
+          controller.filteredApPaymentTypes.isEmpty &&
+              controller.search.value.text.isEmpty
+          ? controller.allApPaymentTypes
+          : controller.filteredApPaymentTypes,
+      context: context,
+      constraints: constraints,
+      controller: controller,
+    ),
   );
 }
 
 DataRow dataRowForTheTable(
   APPaymentTypesModel typeData,
-  context,
-  constraints,
-  typeId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String typeId,
   ApPaymentTypeController controller,
+  int index,
 ) {
   return DataRow(
     cells: [
@@ -176,8 +160,8 @@ IconButton editSection(
   BuildContext context,
   ApPaymentTypeController controller,
   APPaymentTypesModel typeData,
-  constraints,
-  typeId,
+  BoxConstraints constraints,
+  String typeId,
 ) {
   return IconButton(
     onPressed: () async {
@@ -219,4 +203,44 @@ ElevatedButton newTypeButton(
     style: newButtonStyle,
     child: const Text('New Type'),
   );
+}
+
+class CardDataSourceForPaymentTypes extends DataTableSource {
+  final List<APPaymentTypesModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final ApPaymentTypeController controller;
+
+  CardDataSourceForPaymentTypes({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final card = cards[index];
+    final cardId = card.id ?? '';
+
+    return dataRowForTheTable(
+      card,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }
