@@ -127,10 +127,12 @@ class IssueItemsController extends GetxController {
   );
   RxInt initDatePickerValue = RxInt(1);
   RxInt initStatusPickersValue = RxInt(1);
+  RxMap companyDetails = RxMap({});
 
   @override
   void onInit() async {
     filterSearch();
+    await getCompanyDetails();
     super.onInit();
   }
 
@@ -166,6 +168,10 @@ class IssueItemsController extends GetxController {
 
   Future<Map<String, dynamic>> getAllCustomers() async {
     return await helper.getCustomers();
+  }
+
+  Future<void> getCompanyDetails() async {
+    companyDetails.assignAll(await helper.getCurrentCompanyDetails());
   }
 
   void clearSearchFiltersForJobCardsAndConverters() {
@@ -1170,8 +1176,8 @@ class IssueItemsController extends GetxController {
 
   void clearValues() {
     currentIssuingId.value = '';
-    branch.value.clear();
-    branchId.value = '';
+    branch.value.text = companyDetails['current_user_branch_name'] ?? '';
+    branchId.value = companyDetails['current_user_branch_id'] ?? '';
     date.value.text = textToDate(DateTime.now());
     issueNumber.value.clear();
     issueTypeController.clear();

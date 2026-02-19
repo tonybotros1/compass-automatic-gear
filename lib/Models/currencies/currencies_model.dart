@@ -2,6 +2,7 @@ class CurrenciesModel {
   String? id;
   String? countryId;
   String? code;
+  String? countryName;
   String? name;
   double? rate;
   bool? status;
@@ -28,7 +29,10 @@ class CurrenciesModel {
     updatedAt = json['updatedAt'] != null
         ? DateTime.tryParse(json['updatedAt'].toString())
         : null;
-    name = json['country_name']?.toString() ?? '';
+    name = json.containsKey('currency_name')
+        ? json['currency_name']?.toString() ?? ''
+        : '';
+    countryName = json.containsKey('country_name') ? json['country_name'] : '';
     rate = json['rate'] ?? 0;
     status = json['status'];
     countryId = json["country_id"];

@@ -1,8 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/branches_controller.dart';
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 
 Widget addNewBranchOrEdit({
@@ -36,19 +35,24 @@ Widget addNewBranchOrEdit({
       GetX<BranchesController>(
         builder: (controller) {
           var isCountryLoading = controller.allCountries.isEmpty;
-          return CustomDropdown(
-            hintText: 'Country',
-            textcontroller: controller.country.text,
-            showedSelectedName: 'name',
-            items: isCountryLoading ? {} : controller.allCountries,
-            onChanged: (key, value) {
-              controller.country.text = value['name'];
-              controller.getCitiesByCountryID(key);
-              controller.city.clear();
-              controller.countryId.value = key;
-            },
+          return MenuWithValues(
+            labelText: 'Country',
+            headerLqabel: 'Countries',
+            dialogWidth: 600,
+            data: isCountryLoading ? {} : controller.allCountries,
+            controller: controller.country,
+            displayKeys: const ['name'],
+            displaySelectedKeys: const ['name'],
             onDelete: () {
+              controller.country.clear();
               controller.allCities.clear();
+              controller.countryId.value = '';
+            },
+            onSelected: (value) {
+              controller.country.text = value['name'];
+              controller.getCitiesByCountryID(value['_id']);
+              controller.city.clear();
+              controller.countryId.value = value['_id'];
             },
           );
         },
@@ -58,14 +62,21 @@ Widget addNewBranchOrEdit({
         builder: (controller) {
           var isCityLoading = controller.allCities.isEmpty;
 
-          return CustomDropdown(
-            hintText: 'City',
-            textcontroller: controller.city.text,
-            showedSelectedName: 'name',
-            items: isCityLoading ? {} : controller.allCities,
-            onChanged: (key, value) {
+          return MenuWithValues(
+            labelText: 'City',
+            headerLqabel: 'Cities',
+            dialogWidth: 600,
+            data: isCityLoading ? {} : controller.allCities,
+            controller: controller.city,
+            displayKeys: const ['name'],
+            displaySelectedKeys: const ['name'],
+            onDelete: () {
+              controller.city.clear();
+              controller.cityId.value = '';
+            },
+            onSelected: (value) {
               controller.city.text = value['name'];
-              controller.cityId.value = key;
+              controller.cityId.value = value['_id'];
             },
           );
         },

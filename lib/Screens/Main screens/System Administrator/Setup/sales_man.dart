@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -59,15 +60,12 @@ class SalesMan extends StatelessWidget {
                         if (controller.allSalesMan.isEmpty) {
                           return const Center(child: Text('No Element'));
                         }
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: SizedBox(
-                            width: constraints.maxWidth,
-                            child: tableOfScreens(
-                              constraints: constraints,
-                              context: context,
-                              controller: controller,
-                            ),
+                        return SizedBox(
+                          width: constraints.maxWidth,
+                          child: tableOfScreens(
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
                           ),
                         );
                       },
@@ -88,17 +86,12 @@ Widget tableOfScreens({
   required BuildContext context,
   required SalesManController controller,
 }) {
-  return DataTable(
-    dataRowMaxHeight: 40,
-    dataRowMinHeight: 30,
+  return PaginatedDataTable2(
     columnSpacing: 5,
-    showBottomBorder: true,
     horizontalMargin: horizontalMarginForTable,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
+    autoRowsToHeight: true,
     columns: [
       DataColumn(
         label: AutoSizedText(text: 'Name', constraints: constraints),
@@ -114,29 +107,16 @@ Widget tableOfScreens({
       ),
       const DataColumn(label: Text('')),
     ],
-    rows:
-        controller.filteredSalesMan.isEmpty &&
-            controller.search.value.text.isEmpty
-        ? controller.allSalesMan.map<DataRow>((saleman) {
-            final salemanId = saleman.id;
-            return dataRowForTheTable(
-              saleman,
-              context,
-              constraints,
-              salemanId,
-              controller,
-            );
-          }).toList()
-        : controller.filteredSalesMan.map<DataRow>((saleman) {
-            final salemanId = saleman.id;
-            return dataRowForTheTable(
-              saleman,
-              context,
-              constraints,
-              salemanId,
-              controller,
-            );
-          }).toList(),
+    source: CardDataSourceForSalesman(
+      cards:
+          controller.filteredSalesMan.isEmpty &&
+              controller.search.value.text.isEmpty
+          ? controller.allSalesMan
+          : controller.filteredSalesMan,
+      context: context,
+      constraints: constraints,
+      controller: controller,
+    ),
   );
 }
 
@@ -146,6 +126,7 @@ DataRow dataRowForTheTable(
   BoxConstraints constraints,
   String salemanId,
   SalesManController controller,
+  int index,
 ) {
   return DataRow(
     cells: [
@@ -248,4 +229,44 @@ ElevatedButton newSalesManButton(
     style: newButtonStyle,
     child: const Text('New Salesman'),
   );
+}
+
+class CardDataSourceForSalesman extends DataTableSource {
+  final List<SalesmanModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final SalesManController controller;
+
+  CardDataSourceForSalesman({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final jobCard = cards[index];
+    final cardId = jobCard.id;
+
+    return dataRowForTheTable(
+      jobCard,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
 }

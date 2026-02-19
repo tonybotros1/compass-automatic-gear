@@ -1,8 +1,8 @@
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/company_controller.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 
 Container contactDetails({required CompanyController controller}) {
@@ -68,18 +68,14 @@ Container contactDetails({required CompanyController controller}) {
               spacing: 10,
               children: [
                 Expanded(
-                  child: CustomDropdown(
-                    hintText: 'Country',
-                    showedSelectedName: 'name',
-                    textcontroller: controller.country.text,
-                    items: isCountriesLoading ? {} : controller.allCountries,
-                    onChanged: (key, value) {
-                      controller.country.text = value['name'];
-                      controller.getCitiesByCountryId(key);
-                      controller.city.clear();
-                      controller.selectedCountryId.value = key;
-                      controller.selectedCityId.value = '';
-                    },
+                  child: MenuWithValues(
+                    labelText: 'Country',
+                    headerLqabel: 'Countries',
+                    dialogWidth: 600,
+                    controller: controller.country,
+                    displayKeys: const ['name'],
+                    displaySelectedKeys: const ['name'],
+                    data: isCountriesLoading ? {} : controller.allCountries,
                     onDelete: () {
                       controller.country.clear();
                       controller.allCities.clear();
@@ -87,22 +83,33 @@ Container contactDetails({required CompanyController controller}) {
                       controller.selectedCountryId.value = '';
                       controller.selectedCityId.value = '';
                     },
+                    onSelected: (value) {
+                      controller.country.text = value['name'];
+                      controller.getCitiesByCountryId(value['_id']);
+                      controller.city.clear();
+                      controller.selectedCountryId.value = value['_id'];
+                      controller.selectedCityId.value = '';
+                    },
                   ),
                 ),
                 Expanded(
-                  child: CustomDropdown(
-                    hintText: 'City',
-                    showedSelectedName: 'name',
-                    textcontroller: controller.city.text,
-                    items: controller.allCities.isEmpty
+                  child: MenuWithValues(
+                    labelText: 'City',
+                    headerLqabel: 'Cities',
+                    dialogWidth: 600,
+                    controller: controller.city,
+                    displayKeys: const ['name'],
+                    displaySelectedKeys: const ['name'],
+                    data: controller.allCities.isEmpty
                         ? {}
                         : controller.allCities,
-                    onChanged: (key, value) {
-                      controller.city.text = value['name'];
-                      controller.selectedCityId.value = key;
-                    },onDelete: (){
+                    onDelete: () {
                       controller.city.clear();
                       controller.selectedCityId.value = '';
+                    },
+                    onSelected: (value) {
+                      controller.city.text = value['name'];
+                      controller.selectedCityId.value = value['_id'];
                     },
                   ),
                 ),

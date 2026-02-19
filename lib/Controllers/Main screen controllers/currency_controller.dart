@@ -137,6 +137,7 @@ class CurrencyController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
+        Get.back();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -146,9 +147,14 @@ class CurrencyController extends GetxController {
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else if (response.statusCode == 409) {
+        alertMessage(
+          context: Get.context!,
+          content: 'Currency is already exists',
+        );
       } else {}
       addingNewValue.value = false;
-      Get.back();
+      // Get.back();
     } catch (e) {
       addingNewValue.value = false;
       Get.back();

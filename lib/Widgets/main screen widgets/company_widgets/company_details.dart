@@ -1,9 +1,8 @@
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../Controllers/Main screen controllers/company_controller.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 
 Container companyDetails({required CompanyController controller}) {
@@ -30,15 +29,22 @@ Container companyDetails({required CompanyController controller}) {
               GetX<CompanyController>(
                 builder: (controller) {
                   final isIndustryLoading = controller.industryMap.isEmpty;
-                  return CustomDropdown(
+                  return MenuWithValues(
+                    labelText: 'Industry',
+                    headerLqabel: 'Industries',
+                    dialogWidth: 600,
                     width: 300,
-                    textcontroller: controller.industry.value.text,
-                    hintText: 'Industry',
-                    showedSelectedName: 'name',
-                    items: isIndustryLoading ? {} : controller.industryMap,
-                    onChanged: (key, value) {
+                    controller: controller.industry.value,
+                    displayKeys: const ['name'],
+                    displaySelectedKeys: const ['name'],
+                    data: isIndustryLoading ? {} : controller.industryMap,
+                    onDelete: () {
+                      controller.industry.value.clear();
+                      controller.industryId.value = '';
+                    },
+                    onSelected: (value) {
                       controller.industry.value.text = value['name'];
-                      controller.industryId.value = key;
+                      controller.industryId.value = value['_id'];
                     },
                   );
                 },

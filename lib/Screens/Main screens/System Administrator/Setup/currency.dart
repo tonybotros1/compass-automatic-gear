@@ -128,7 +128,7 @@ Widget tableOfScreens({
               currency,
               context,
               constraints,
-              currencyId,
+              currencyId ?? '',
               controller,
             );
           }).toList()
@@ -138,7 +138,7 @@ Widget tableOfScreens({
               currency,
               context,
               constraints,
-              currencyId,
+              currencyId ?? '',
               controller,
             );
           }).toList(),
@@ -147,9 +147,9 @@ Widget tableOfScreens({
 
 DataRow dataRowForTheTable(
   CurrenciesModel currencyData,
-  context,
-  constraints,
-  currencyId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String currencyId,
   CurrencyController controller,
 ) {
   return DataRow(
@@ -236,7 +236,7 @@ ElevatedButton editSection(
     style: editButtonStyle,
     onPressed: () {
       controller.countryId.value = currencyData.countryId ?? '';
-      controller.code.text = currencyData.code ?? '';
+      controller.code.text = "${currencyData.code ?? ''} ${currencyData.countryName ?? ''}";
       controller.name.text = currencyData.name ?? '';
       controller.rate.text = (currencyData.rate ?? '').toString();
       currencyDialog(
