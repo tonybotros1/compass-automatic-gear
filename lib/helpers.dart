@@ -175,15 +175,13 @@ class Helpers {
     }
   }
 
-   // this function is to ger all roles for drop down menu
+  // this function is to ger all roles for drop down menu
   Future<Map<String, dynamic>> getAllRolesForCurrentCompany() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse(
-        '$backendUrl/users/get_company_admin_roles',
-      );
+      var url = Uri.parse('$backendUrl/users/get_company_admin_roles');
       final response = await http.get(
         url,
         headers: {"Authorization": "Bearer $accessToken"},
@@ -213,7 +211,6 @@ class Helpers {
       return {};
     }
   }
-
 
   // this function is to get all list values by code for drop down menu
   Future<Map<String, dynamic>> getAllListValues(String code) async {
@@ -365,7 +362,7 @@ class Helpers {
     }
   }
 
-   Future<List<Map<String, dynamic>>> getCarBrands2() async {
+  Future<List<Map<String, dynamic>>> getCarBrands2() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -377,7 +374,7 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
         List<Map<String, dynamic>> jsonData = decoded['brands'];
-       
+
         return jsonData;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -543,7 +540,9 @@ class Helpers {
     }
   }
 
-  Future<Map<String, dynamic>> getCurrencyNameAndSubunit(String currencyId) async {
+  Future<Map<String, dynamic>> getCurrencyNameAndSubunit(
+    String currencyId,
+  ) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -577,7 +576,9 @@ class Helpers {
     }
   }
 
-   Future<Map<String, dynamic>> getEntityInformationForPrinting(String id) async {
+  Future<Map<String, dynamic>> getEntityInformationForPrinting(
+    String id,
+  ) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -766,6 +767,7 @@ class Helpers {
 
       final decoded = jsonDecode(buffer.toString());
       final List<dynamic> customers = decoded['customers'];
+      print(customers[0]);
 
       return {for (final customer in customers) customer['_id']: customer};
     } catch (e) {

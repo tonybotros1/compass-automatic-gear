@@ -43,9 +43,12 @@ Widget customerDetailsSection(
                         dialogWidth: constraints.maxWidth / 2,
                         width: Get.width / 3.7,
                         controller: controller.customerName,
-                        displayKeys: const ['entity_name'],
-                        flexList: const [1, 1],
-                        displaySelectedKeys: const ['entity_name'],
+                        displayKeys: const ['entity_name', 'phone_numbers'],
+                        flexList: const [2, 1],
+                        displaySelectedKeys: const [
+                          'entity_name',
+                          'phone_numbers',
+                        ],
                         onOpen: () {
                           return controller.getAllCustomers();
                         },

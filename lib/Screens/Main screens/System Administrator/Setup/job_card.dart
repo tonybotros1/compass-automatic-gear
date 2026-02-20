@@ -152,10 +152,15 @@ class JobCard extends StatelessWidget {
                                       controller: controller
                                           .customerNameIdFilterName
                                           .value,
-                                      displayKeys: const ['entity_name'],
+                                      displayKeys: const [
+                                        'entity_name',
+                                        'phone_numbers',
+                                      ],
                                       displaySelectedKeys: const [
                                         'entity_name',
+                                        'phone_numbers',
                                       ],
+                                      flexList: const [2, 1],
                                       onOpen: () {
                                         return controller.getAllCustomers();
                                       },
