@@ -89,16 +89,20 @@ Widget paymentHeader(
                       controller.vendorNameId.value = value['_id'];
                       controller.availablePayments.clear();
                       controller.selectedAvailablePayments.clear();
-                      controller.outstanding.value = formatter.formatEditUpdate(
-                        controller.outstanding.value,
-                        TextEditingValue(
-                          text: await controller
-                              .calculateVendorOutstanding(value['_id'])
-                              .then((value) {
-                                return value.toString();
-                              }),
-                        ),
-                      );
+                      // controller.outstanding.value = formatter.formatEditUpdate(
+                      //   controller.outstanding.value,
+                      //   TextEditingValue(
+                      //     text: await controller
+                      //         .calculateVendorOutstanding(value['_id'])
+                      //         .then((value) {
+                      //           return value.toString();
+                      //         }),
+                      //   ),
+                      // );
+                      final outstandingAmount = await controller
+                          .calculateVendorOutstanding(value['_id']);
+                      controller.outstanding.text = outstandingAmount
+                          .toStringAsFixed(2);
                     },
                   );
                 },

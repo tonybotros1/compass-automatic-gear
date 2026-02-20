@@ -34,7 +34,7 @@ class CashManagementPaymentsController extends CashManagementBaseController {
   FocusNode focusNode3 = FocusNode();
   @override
   void onInit() async {
-    filterSearch();
+    // filterSearch();
     super.onInit();
   }
 

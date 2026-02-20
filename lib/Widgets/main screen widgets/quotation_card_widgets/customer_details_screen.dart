@@ -156,7 +156,7 @@ Widget customerDetailsSection(
                     displayKeys: const ['name'],
                     displaySelectedKeys: const ['name'],
                     onSelected: (value) {
-                      controller.customerSaleMan.value = value['name'];
+                      controller.customerSaleMan.text = value['name'];
                       controller.customerSaleManId.value = value['_id'];
                       controller.isQuotationModified.value = true;
                     },

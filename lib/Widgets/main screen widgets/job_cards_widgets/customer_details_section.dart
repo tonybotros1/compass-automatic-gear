@@ -166,7 +166,7 @@ Widget customerDetailsSection(
                               controller.isJobModified.value = true;
                             },
                             onSelected: (value) {
-                              controller.customerSaleMan.value = value['name'];
+                              controller.customerSaleMan.text = value['name'];
                               controller.customerSaleManId.value = value['_id'];
                               controller.isJobModified.value = true;
                             },

@@ -215,7 +215,7 @@ class QuotationCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    filterSearch();
+    // filterSearch();
     await getCompanyDetails();
     getAllUsers();
   }

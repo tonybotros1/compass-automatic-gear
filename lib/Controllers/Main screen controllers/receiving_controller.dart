@@ -119,7 +119,7 @@ class ReceivingController extends GetxController {
   @override
   void onInit() async {
     getCompanyDetails();
-    filterSearch();
+    // filterSearch();
     super.onInit();
   }
 

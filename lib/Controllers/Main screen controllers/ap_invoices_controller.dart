@@ -115,7 +115,7 @@ class ApInvoicesController extends GetxController {
 
   @override
   void onInit() async {
-    filterSearch();
+    // filterSearch();
     super.onInit();
   }
 
@@ -633,7 +633,7 @@ class ApInvoicesController extends GetxController {
     invoiceType = TextEditingController();
     invoiceTypeId.value = '';
     referenceNumber.clear();
-    transactionDate.clear();
+    transactionDate.text = textToDate(DateTime.now());
     vendor = TextEditingController();
     vendorId.value = '';
     description.clear();

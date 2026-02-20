@@ -33,7 +33,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
 
   @override
   void onInit() async {
-    filterSearch();
+    // filterSearch();
     super.onInit();
   }
 

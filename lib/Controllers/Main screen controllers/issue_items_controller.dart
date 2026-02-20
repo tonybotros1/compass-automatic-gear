@@ -133,7 +133,7 @@ class IssueItemsController extends GetxController {
 
   @override
   void onInit() async {
-    filterSearch();
+    // filterSearch();
     await getCompanyDetails();
     super.onInit();
   }

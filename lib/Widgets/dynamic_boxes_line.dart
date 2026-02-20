@@ -12,11 +12,17 @@ Widget dynamicBoxesLine({required List<DynamicBoxesLineModel> dynamicConfigs}) {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(5),
             border: Border.all(color: Colors.grey.shade300, width: 1.2),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.grey.shade100, Colors.grey.shade200],
-            ),
+            // gradient: LinearGradient(
+            //   begin: Alignment.topLeft,
+            //   end: Alignment.bottomRight,
+            //   colors: [
+            //     Colors.grey.shade300,
+            //     Colors.grey.shade200,
+            //     Colors.grey.shade100,
+            //     Colors.grey.shade200,
+            //     Colors.grey.shade300,
+            //   ],
+            // ),
           ),
           child: Center(
             child: Icon(

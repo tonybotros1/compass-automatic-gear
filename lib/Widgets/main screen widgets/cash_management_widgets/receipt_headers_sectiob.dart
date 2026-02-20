@@ -90,17 +90,21 @@ Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
                         controller.customerNameId.value = value['_id'];
                         controller.availableReceipts.clear();
                         controller.selectedAvailableReceipts.clear();
-                        controller.outstanding.value = formatter
-                            .formatEditUpdate(
-                              controller.outstanding.value,
-                              TextEditingValue(
-                                text: await controller
-                                    .calculateCustomerOutstanding(value['_id'])
-                                    .then((value) {
-                                      return value.toString();
-                                    }),
-                              ),
-                            );
+                        // controller.outstanding.value = formatter
+                        //     .formatEditUpdate(
+                        //       controller.outstanding.value,
+                        //       TextEditingValue(
+                        //         text: await controller
+                        //             .calculateCustomerOutstanding(value['_id'])
+                        //             .then((value) {
+                        //               return value.toString();
+                        //             }),
+                        //       ),
+                        //     );
+                        final outstandingAmount = await controller
+                            .calculateCustomerOutstanding(value['_id']);
+                        controller.outstanding.text = outstandingAmount
+                            .toStringAsFixed(2);
                       },
                     ),
                     myTextFormFieldWithBorder(

@@ -606,6 +606,9 @@ ElevatedButton newInvoiceButton(
           controller.editPostForApInvoices(controller.currentApInvoiceId.value);
         },
       );
+      Future.delayed(const Duration(milliseconds: 100), () {
+        controller.focusNodePayementHeader2.requestFocus();
+      });
     },
     style: newButtonStyle,
     child: const Text('New Invoice'),

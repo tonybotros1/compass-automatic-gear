@@ -262,7 +262,7 @@ class JobCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    filterSearch();
+    // filterSearch();
     await getCompanyDetails();
     jobWarrentyEndDate.value.addListener(() {
       jobWarrentyEndDate.refresh();
@@ -2790,7 +2790,7 @@ class JobCardController extends GetxController {
     customerEntityName.text = phone['name'] ?? '';
     customerEntityEmail.text = phone['email'] ?? '';
     customerSaleManId.value = selectedCustomer['salesman_id'] ?? '';
-    customerSaleMan.value = selectedCustomer['salesman'] ?? "";
+    customerSaleMan.text = selectedCustomer['salesman'] ?? "";
 
     customerCreditNumber.value = formatter.formatEditUpdate(
       customerOutstanding.value,

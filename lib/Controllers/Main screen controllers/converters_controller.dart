@@ -48,7 +48,7 @@ class ConvertersController extends GetxController {
 
   @override
   void onInit() async {
-    filterSearch();
+    // filterSearch();
     super.onInit();
   }
 
