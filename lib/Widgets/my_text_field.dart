@@ -34,6 +34,7 @@ Widget myTextFormFieldWithBorder({
   bool? isEnabled = true,
   void Function(PointerDownEvent)? onTapOutside,
   bool? readOnly,
+  FocusNode? previousFocusNode,
 }) {
   return SizedBox(
     width: width,
@@ -51,20 +52,29 @@ Widget myTextFormFieldWithBorder({
               )
             : const SizedBox(),
         Focus(
-          focusNode: focusNode,
+          canRequestFocus: false,
+          skipTraversal: true,
           onKeyEvent: (node, event) {
-            if (event is KeyDownEvent &&
-                (event.logicalKey == LogicalKeyboardKey.tab ||
-                    event.logicalKey == LogicalKeyboardKey.enter)) {
-              onFieldSubmitted?.call('');
+            if (event is! KeyDownEvent) return KeyEventResult.ignored;
+            if (event.logicalKey != LogicalKeyboardKey.tab) {
+              return KeyEventResult.ignored;
+            }
 
+            final isShift = HardwareKeyboard.instance.isShiftPressed;
+
+            if (isShift) {
+              if (previousFocusNode != null) {
+                previousFocusNode.requestFocus();
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored; // default back traversal
+            } else {
               if (nextFocusNode != null) {
                 nextFocusNode.requestFocus();
+                return KeyEventResult.handled;
               }
-              return KeyEventResult.handled;
-            } else if (event is KeyDownEvent &&
-                event.logicalKey == LogicalKeyboardKey.shift) {}
-            return KeyEventResult.ignored;
+              return KeyEventResult.ignored; // default forward traversal
+            }
           },
           child: TextFormField(
             canRequestFocus: true,
@@ -72,8 +82,13 @@ Widget myTextFormFieldWithBorder({
             onTapOutside: onTapOutside,
             onEditingComplete: onEditingComplete,
             textInputAction: textInputAction,
-            // focusNode: focusNode,
-            onFieldSubmitted: onFieldSubmitted,
+            focusNode: focusNode,
+            onFieldSubmitted: (v) {
+              if (nextFocusNode != null) {
+                nextFocusNode.requestFocus();
+              }
+              onFieldSubmitted?.call(v);
+            },
             textAlign: textAlign!,
             style: textFieldFontStyle,
             minLines: minLines,
@@ -159,3 +174,20 @@ Widget myTextFormFieldWithBorder({
     ),
   );
 }
+
+
+ // focusNode: focusNode,
+          // onKeyEvent: (node, event) {
+          //   if (event is KeyDownEvent &&
+          //       (event.logicalKey == LogicalKeyboardKey.tab ||
+          //           event.logicalKey == LogicalKeyboardKey.enter)) {
+          //     onFieldSubmitted?.call('');
+
+          //     if (nextFocusNode != null) {
+          //       nextFocusNode.requestFocus();
+          //     }
+          //     return KeyEventResult.handled;
+          //   } else if (event is KeyDownEvent &&
+          //       event.logicalKey == LogicalKeyboardKey.shift) {}
+          //   return KeyEventResult.ignored;
+          // },

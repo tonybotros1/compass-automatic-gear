@@ -20,6 +20,9 @@ Container additionalDiscountSection(
         SizedBox(
           width: 150,
           child: myTextFormFieldWithBorder(
+            focusNode: controller.focusNode14,
+            nextFocusNode: controller.focusNode1,
+            previousFocusNode: controller.focusNode13,
             labelText: 'Amount',
             controller: controller.amount.value,
             isDouble: true,

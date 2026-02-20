@@ -38,12 +38,8 @@ Widget carDetailsSection(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           MenuWithValues(
-                           
                             focusNode: controller.focusNodeForCardDetails1,
-                            onFieldSubmitted: (_) {
-                              controller.focusNodeForCardDetails2
-                                  .requestFocus();
-                            },
+                            nextFocusNode: controller.focusNodeForCardDetails2,
                             headerLqabel: 'Car Brands',
                             dialogWidth: constraints.maxWidth / 4,
                             width: 325,
@@ -78,9 +74,8 @@ Widget carDetailsSection(
                             children: [
                               MenuWithValues(
                                 focusNode: controller.focusNodeForCardDetails2,
-                                onFieldSubmitted: (_) => controller
-                                    .focusNodeForCardDetails3
-                                    .requestFocus(),
+                                nextFocusNode:
+                                    controller.focusNodeForCardDetails3,
                                 headerLqabel: 'Car Models',
                                 dialogWidth: constraints.maxWidth / 4,
                                 width: 325,
@@ -138,9 +133,9 @@ Widget carDetailsSection(
                                   MenuWithValues(
                                     focusNode:
                                         controller.focusNodeForCardDetails4,
-                                    onFieldSubmitted: (_) => controller
-                                        .focusNodeForCardDetails5
-                                        .requestFocus(),
+                                    nextFocusNode:
+                                        controller.focusNodeForCardDetails5,
+
                                     headerLqabel: 'Colors',
                                     dialogWidth: constraints.maxWidth / 4,
                                     width: 200,
@@ -219,8 +214,8 @@ Widget carDetailsSection(
                     children: [
                       MenuWithValues(
                         focusNode: controller.focusNodeForCardDetails7,
-                        onFieldSubmitted: (_) =>
-                            controller.focusNodeForCardDetails8.requestFocus(),
+                        nextFocusNode: controller.focusNodeForCardDetails8,
+
                         headerLqabel: 'Countries',
                         dialogWidth: constraints.maxWidth / 4,
                         width: 240,
@@ -251,9 +246,8 @@ Widget carDetailsSection(
                         children: [
                           MenuWithValues(
                             focusNode: controller.focusNodeForCardDetails8,
-                            onFieldSubmitted: (_) => controller
-                                .focusNodeForCardDetails9
-                                .requestFocus(),
+                            nextFocusNode: controller.focusNodeForCardDetails9,
+
                             headerLqabel: 'Cities',
                             dialogWidth: constraints.maxWidth / 4,
                             width: 200,
@@ -309,8 +303,7 @@ Widget carDetailsSection(
                       const SizedBox(width: 10),
                       MenuWithValues(
                         focusNode: controller.focusNodeForCardDetails10,
-                        onFieldSubmitted: (_) =>
-                            controller.focusNodeForCardDetails11.requestFocus(),
+                        nextFocusNode: controller.focusNodeForCardDetails11,
                         headerLqabel: 'Engine Types',
                         dialogWidth: constraints.maxWidth / 4,
                         width: 200,

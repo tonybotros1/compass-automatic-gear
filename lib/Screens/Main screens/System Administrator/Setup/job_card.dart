@@ -1349,6 +1349,9 @@ ElevatedButton newJobCardButton(
           ),
         ),
       );
+      Future.delayed(const Duration(milliseconds: 100), () {
+        controller.focusNodeForCardDetails1.requestFocus();
+      });
     },
     style: isJob == true ? newButtonStyle : newSalesInvoicesButtonStyle,
     child: Text(isJob == true ? 'New Job' : 'New Sale'),

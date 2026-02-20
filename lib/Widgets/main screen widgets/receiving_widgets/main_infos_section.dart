@@ -35,6 +35,7 @@ Widget mainInfosSection(
               myTextFormFieldWithBorder(
                 focusNode: controller.focusNode1,
                 nextFocusNode: controller.focusNode2,
+                previousFocusNode: controller.focusNode14,
                 width: 150,
                 onFieldSubmitted: (_) async {
                   controller.isReceivingModified.value = true;
@@ -42,7 +43,7 @@ Widget mainInfosSection(
                     controller.date.value.text,
                     controller.date.value,
                   );
-                  controller.focusNode2.requestFocus();
+                  // controller.focusNode2.requestFocus();
                 },
                 controller: controller.date.value,
                 labelText: 'Date',
@@ -65,6 +66,8 @@ Widget mainInfosSection(
                 builder: (controller) {
                   return MenuWithValues(
                     focusNode: controller.focusNode2,
+                    nextFocusNode: controller.focusNode3,
+                    previousFocusNode: controller.focusNode1,
                     labelText: 'Branch',
                     headerLqabel: 'Branches',
                     dialogWidth: constraints.maxWidth / 3,
@@ -102,6 +105,9 @@ Widget mainInfosSection(
             ],
           ),
           myTextFormFieldWithBorder(
+            focusNode: controller.focusNode3,
+            nextFocusNode: controller.focusNode4,
+            previousFocusNode: controller.focusNode2,
             width: 310,
             labelText: 'Reference Number',
             controller: controller.referenceNumber.value,
@@ -117,6 +123,9 @@ Widget mainInfosSection(
                 child: GetX<ReceivingController>(
                   builder: (controller) {
                     return MenuWithValues(
+                      focusNode: controller.focusNode4,
+                      nextFocusNode: controller.focusNode5,
+                      previousFocusNode: controller.focusNode3,
                       labelText: 'Vendor',
                       headerLqabel: 'Vendors',
                       dialogWidth: constraints.maxWidth / 2,
@@ -155,6 +164,9 @@ Widget mainInfosSection(
             ],
           ),
           myTextFormFieldWithBorder(
+            focusNode: controller.focusNode5,
+            nextFocusNode: controller.focusNode6,
+            previousFocusNode: controller.focusNode4,
             labelText: 'Note',
             maxLines: 5,
             controller: controller.note.value,

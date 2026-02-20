@@ -31,6 +31,8 @@ class MenuWithValues extends StatefulWidget {
     this.onDelete,
     this.headerLqabel,
     this.flexList = const [],
+    this.nextFocusNode,
+    this.previousFocusNode,
   });
   final TextEditingController controller;
   final double? width;
@@ -40,6 +42,8 @@ class MenuWithValues extends StatefulWidget {
   final void Function()? onEditingComplete;
   final TextInputAction? textInputAction;
   final FocusNode? focusNode;
+  final FocusNode? nextFocusNode;
+  final FocusNode? previousFocusNode;
   final void Function(String)? onFieldSubmitted;
   final TextAlign? textAlign;
   final int maxLines;
@@ -167,131 +171,164 @@ class _MenuWithValuesState extends State<MenuWithValues> {
                   ),
                 )
               : const SizedBox(),
-          TextFormField(
-            canRequestFocus: true,
-            readOnly: widget.readOnly ?? true,
-            onTapOutside: widget.onTapOutside,
-            onEditingComplete: widget.onEditingComplete,
-            textInputAction: widget.textInputAction,
-            focusNode: _effectiveFocusNode,
-            onFieldSubmitted: (value) {
-              showResponsiveDialog(
-                context,
-                widget.dialogWidth,
-                widget.controller,
-                widget.dialogHeight,
-                data: widget.data,
-                initialSearch: value,
-                flexList: widget.flexList,
-                onOpen: widget.onOpen,
-                displayKeys: widget.displayKeys,
-                displaySelectedKeys: widget.displaySelectedKeys,
-                onSelected: widget.onSelected,
-                headerLqabel: widget.headerLqabel,
-              );
-              widget.onFieldSubmitted?.call(value);
-            },
-            textAlign: widget.textAlign!,
-            style: textFieldFontStyle,
-            minLines: widget.minLines,
-            maxLines: widget.maxLines,
-            onChanged: (value) {
-              // if (widget.controller.text.isEmpty) {
-              //   widget.onDelete?.call();
-              // }
-              widget.onChanged?.call(value);
-            },
-            enabled: widget.isEnabled,
-            controller: widget.controller,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: !kIsWeb ? 7 : 11,
-              ),
-              isDense: true,
+          Focus(
+            canRequestFocus: false,
+            skipTraversal: true,
+            onKeyEvent: (node, event) {
+              if (event is! KeyDownEvent) return KeyEventResult.ignored;
+              if (event.logicalKey != LogicalKeyboardKey.tab) {
+                return KeyEventResult.ignored;
+              }
 
-              suffixIcon: ValueListenableBuilder<TextEditingValue>(
-                valueListenable: widget.controller,
-                builder: (context, value, _) {
-                  final hasText = value.text.trim().isNotEmpty;
+              final isShift = HardwareKeyboard.instance.isShiftPressed;
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: ExcludeFocus(
-                      child: SizedBox(
-                        width: 50,
-                        child: Row(
-                          spacing: 4,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            MiniIcon(
-                              icon: Icons.more_horiz,
-                              onTap: () {
-                                showResponsiveDialog(
-                                  context,
-                                  widget.dialogWidth,
-                                  widget.controller,
-                                  widget.dialogHeight,
-                                  flexList: widget.flexList,
-                                  initialSearch: widget.controller.text,
-                                  data: widget.data,
-                                  onOpen: widget.onOpen,
-                                  displayKeys: widget.displayKeys,
-                                  displaySelectedKeys:
-                                      widget.displaySelectedKeys,
-                                  onSelected: widget.onSelected,
-                                  headerLqabel: widget.headerLqabel,
-                                );
-                              },
-                            ),
-                            if (hasText)
+              if (isShift) {
+                if (widget.previousFocusNode != null) {
+                  widget.previousFocusNode!.requestFocus();
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored; // default back traversal
+              } else {
+                if (widget.nextFocusNode != null) {
+                  widget.nextFocusNode!.requestFocus();
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored; // default forward traversal
+              }
+            },
+            child: TextFormField(
+              canRequestFocus: true,
+              readOnly: widget.readOnly ?? true,
+              onTapOutside: widget.onTapOutside,
+              onEditingComplete: widget.onEditingComplete,
+              textInputAction: widget.textInputAction,
+              focusNode: _effectiveFocusNode,
+              onFieldSubmitted: (value) {
+                showResponsiveDialog(
+                  context,
+                  widget.dialogWidth,
+                  widget.controller,
+                  widget.dialogHeight,
+                  data: widget.data,
+                  initialSearch: value,
+                  flexList: widget.flexList,
+                  onOpen: widget.onOpen,
+                  displayKeys: widget.displayKeys,
+                  displaySelectedKeys: widget.displaySelectedKeys,
+                  onSelected: widget.onSelected,
+                  headerLqabel: widget.headerLqabel,
+                  nextFocusNode: widget.nextFocusNode,
+                  focusNode: widget.focusNode,
+                );
+                widget.onFieldSubmitted?.call(value);
+              },
+              textAlign: widget.textAlign!,
+              style: textFieldFontStyle,
+              minLines: widget.minLines,
+              maxLines: widget.maxLines,
+              onChanged: (value) {
+                // if (widget.controller.text.isEmpty) {
+                //   widget.onDelete?.call();
+                // }
+                widget.onChanged?.call(value);
+              },
+              enabled: widget.isEnabled,
+              controller: widget.controller,
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: !kIsWeb ? 7 : 11,
+                ),
+                isDense: true,
+
+                suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: widget.controller,
+                  builder: (context, value, _) {
+                    final hasText = value.text.trim().isNotEmpty;
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: ExcludeFocus(
+                        child: SizedBox(
+                          width: 50,
+                          child: Row(
+                            spacing: 4,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                               MiniIcon(
-                                icon: Icons.close,
-                                color: Colors.red,
+                                icon: Icons.more_horiz,
                                 onTap: () {
-                                  widget.controller.clear();
-                                  widget.onDelete?.call();
+                                  showResponsiveDialog(
+                                    context,
+                                    widget.dialogWidth,
+                                    widget.controller,
+                                    widget.dialogHeight,
+                                    flexList: widget.flexList,
+                                    initialSearch: widget.controller.text,
+                                    data: widget.data,
+                                    onOpen: widget.onOpen,
+                                    displayKeys: widget.displayKeys,
+                                    displaySelectedKeys:
+                                        widget.displaySelectedKeys,
+                                    onSelected: widget.onSelected,
+                                    headerLqabel: widget.headerLqabel,
+                                    nextFocusNode: widget.nextFocusNode,
+                                    focusNode: widget.focusNode,
+                                  );
                                 },
                               ),
-                          ],
+                              if (hasText)
+                                MiniIcon(
+                                  icon: Icons.close,
+                                  color: Colors.red,
+                                  onTap: () {
+                                    widget.controller.clear();
+                                    widget.onDelete?.call();
+                                  },
+                                ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
-              suffixIconConstraints: const BoxConstraints(
-                maxHeight: 30,
-                maxWidth: 70,
-              ),
-              prefixIconConstraints: const BoxConstraints(
-                maxHeight: 15,
-                maxWidth: 15,
-              ),
-              hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-              alignLabelWithHint: true,
+                    );
+                  },
+                ),
+                suffixIconConstraints: const BoxConstraints(
+                  maxHeight: 30,
+                  maxWidth: 70,
+                ),
+                prefixIconConstraints: const BoxConstraints(
+                  maxHeight: 15,
+                  maxWidth: 15,
+                ),
+                hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                alignLabelWithHint: true,
 
-              labelStyle: TextStyle(
-                color: widget.isEnabled == false
-                    ? Colors.grey.shade500
-                    : Colors.grey.shade700,
-              ),
-              fillColor: widget.isEnabled == true
-                  ? Colors.white
-                  : Colors.grey.shade200,
-              filled: true,
-              enabledBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey, width: 1.0),
-              ),
-              disabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
-              ),
-              errorBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.red, width: 1.0),
-              ),
-              focusedErrorBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.red, width: 2.0),
+                labelStyle: TextStyle(
+                  color: widget.isEnabled == false
+                      ? Colors.grey.shade500
+                      : Colors.grey.shade700,
+                ),
+                fillColor: widget.isEnabled == true
+                    ? Colors.white
+                    : Colors.grey.shade200,
+                filled: true,
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey.shade400,
+                    width: 1.0,
+                  ),
+                ),
+                errorBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red, width: 1.0),
+                ),
+                focusedErrorBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red, width: 2.0),
+                ),
               ),
             ),
           ),
@@ -315,6 +352,8 @@ Future<void> showResponsiveDialog(
   Function(dynamic selected)? onSelected,
   Future<dynamic> Function()? onOpen,
   String? headerLqabel,
+  FocusNode? nextFocusNode,
+  FocusNode? focusNode,
 }) async {
   await showDialog<void>(
     context: context,
@@ -331,6 +370,8 @@ Future<void> showResponsiveDialog(
       displaySelectedKeys: displaySelectedKeys,
       onSelected: onSelected,
       onOpen: onOpen,
+      nextFocusNode: nextFocusNode,
+      focusNode: focusNode,
     ),
   );
 }
@@ -348,6 +389,8 @@ class _LargeDataDialog extends StatefulWidget {
     required this.onOpen,
     required this.headerLqabel,
     required this.initialSearch,
+    required this.nextFocusNode,
+    required this.focusNode,
   });
 
   final double? width;
@@ -361,6 +404,8 @@ class _LargeDataDialog extends StatefulWidget {
   final Future<dynamic> Function()? onOpen;
   final String? headerLqabel;
   final String? initialSearch;
+  final FocusNode? nextFocusNode;
+  final FocusNode? focusNode;
 
   @override
   State<_LargeDataDialog> createState() => _LargeDataDialogState();
@@ -498,6 +543,9 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
 
     widget.controller?.text = text;
 
+    if (widget.nextFocusNode != null) {
+      widget.nextFocusNode?.requestFocus();
+    }
     Navigator.of(context).pop();
     widget.onSelected?.call(item);
   }
@@ -737,7 +785,12 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () {
+                      if (widget.focusNode != null) {
+                        widget.focusNode?.requestFocus();
+                      }
+                      Navigator.of(context).pop();
+                    },
                   ),
                 ],
               ),
@@ -840,8 +893,8 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
                                                               ?.toString() ??
                                                           '-',
                                                       maxLines: 1,
-                                                      overflow: TextOverflow
-                                                          .ellipsis,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                       style: const TextStyle(
                                                         fontSize: 14,
                                                         fontWeight:

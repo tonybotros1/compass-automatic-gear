@@ -32,6 +32,7 @@ Widget quotationsSection(
                   labelText: 'Quotation No.',
                 ),
                 myTextFormFieldWithBorder(
+                  focusNode: controller.focusNodeForQuotationDetails1,
                   width: 150,
                   isDate: true,
                   suffixIcon: IconButton(

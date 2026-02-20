@@ -70,6 +70,7 @@ class IssueItemsController extends GetxController {
   final FocusNode focusNode3 = FocusNode();
   final FocusNode focusNode4 = FocusNode();
   final FocusNode focusNode5 = FocusNode();
+  final FocusNode focusNode6 = FocusNode();
   RxBool loadingJobCards = RxBool(false);
   RxBool loadingConverters = RxBool(false);
   final RxList<BaseModelForIssuingItems> allInventeryItems =
@@ -128,6 +129,7 @@ class IssueItemsController extends GetxController {
   RxInt initDatePickerValue = RxInt(1);
   RxInt initStatusPickersValue = RxInt(1);
   RxMap companyDetails = RxMap({});
+
 
   @override
   void onInit() async {

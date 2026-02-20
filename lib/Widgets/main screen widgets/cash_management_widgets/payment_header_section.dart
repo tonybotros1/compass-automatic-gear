@@ -30,6 +30,8 @@ Widget paymentHeader(
                 isEnabled: false,
               ),
               myTextFormFieldWithBorder(
+                focusNode: controller.focusNode1,
+                nextFocusNode: controller.focusNode2,
                 width: 150,
                 controller: controller.paymentDate.value,
                 suffixIcon: IconButton(
@@ -60,6 +62,9 @@ Widget paymentHeader(
               GetBuilder<CashManagementPaymentsController>(
                 builder: (controller) {
                   return MenuWithValues(
+                    focusNode: controller.focusNode2,
+                    nextFocusNode: controller.focusNode3,
+                    previousFocusNode: controller.focusNode1,
                     labelText: 'Vendor Name',
                     headerLqabel: 'Vendors',
                     dialogWidth: constraints.maxWidth / 2,
@@ -107,6 +112,9 @@ Widget paymentHeader(
             ],
           ),
           myTextFormFieldWithBorder(
+            focusNode: controller.focusNode3,
+            nextFocusNode: controller.focusNodeForAccountInfos1,
+            previousFocusNode: controller.focusNode2,
             width: constraints.maxWidth / 2.75,
             controller: controller.note,
             labelText: 'Note',

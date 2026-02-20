@@ -88,6 +88,8 @@ class ApInvoicesController extends GetxController {
   final FocusNode focusNodePayementHeader2 = FocusNode();
   final FocusNode focusNodePayementHeader3 = FocusNode();
   final FocusNode focusNodePayementHeader4 = FocusNode();
+  final FocusNode focusNodePayementHeader5 = FocusNode();
+  final FocusNode focusNodePayementHeader6 = FocusNode();
 
   String backendUrl = backendTestURI;
   final Uuid _uuid = const Uuid();

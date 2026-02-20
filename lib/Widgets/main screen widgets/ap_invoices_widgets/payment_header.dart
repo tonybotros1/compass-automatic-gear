@@ -28,6 +28,8 @@ Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
                         Expanded(
                           flex: 3,
                           child: MenuWithValues(
+                            focusNode: controller.focusNodePayementHeader1,
+                            nextFocusNode: controller.focusNodePayementHeader2,
                             labelText: 'Invoice Type',
                             headerLqabel: 'Invoice Types',
                             dialogWidth: constraints.maxWidth / 3,
@@ -64,13 +66,8 @@ Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
                         Expanded(
                           flex: 3,
                           child: myTextFormFieldWithBorder(
-                            textInputAction: TextInputAction.next,
                             focusNode: controller.focusNodePayementHeader2,
-                            onEditingComplete: () {
-                              Get.focusScope!.requestFocus(
-                                controller.focusNodePayementHeader3,
-                              );
-                            },
+                            nextFocusNode: controller.focusNodePayementHeader3,
                             isDate: true,
                             suffixIcon: IconButton(
                               focusNode: FocusNode(skipTraversal: true),
@@ -105,7 +102,8 @@ Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
                         Expanded(
                           flex: 3,
                           child: myTextFormFieldWithBorder(
-                            focusNode: controller.focusNode4,
+                            focusNode: controller.focusNodePayementHeader3,
+                            nextFocusNode: controller.focusNodePayementHeader4,
                             onEditingComplete: () {
                               FocusScope.of(
                                 context,
@@ -122,12 +120,9 @@ Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
                         Expanded(
                           flex: 3,
                           child: myTextFormFieldWithBorder(
-                            focusNode: controller.focusNode5,
-                            onEditingComplete: () {
-                              FocusScope.of(
-                                context,
-                              ).requestFocus(controller.focusNode6);
-                            },
+                            focusNode: controller.focusNodePayementHeader4,
+                            nextFocusNode: controller.focusNodePayementHeader5,
+
                             onChanged: (_) {
                               controller.isInvoiceModified.value = true;
                             },
@@ -162,6 +157,8 @@ Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
                       children: [
                         Expanded(
                           child: MenuWithValues(
+                            focusNode: controller.focusNodePayementHeader5,
+                            nextFocusNode: controller.focusNodePayementHeader6,
                             labelText: 'Vendor',
                             headerLqabel: 'Vendors',
                             dialogWidth: constraints.maxWidth / 2,
@@ -192,7 +189,7 @@ Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
-                focusNode: controller.focusNodePayementHeader4,
+                focusNode: controller.focusNodePayementHeader6,
                 labelText: 'Description',
                 maxLines: 7,
                 controller: controller.description,

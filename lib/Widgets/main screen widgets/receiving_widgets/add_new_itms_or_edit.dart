@@ -39,16 +39,17 @@ Widget addNewitemsOrEdit({
                   ),
                 ),
               ),
-              IconButton(
-                tooltip: 'Add New Value',
-
-                onPressed: () {
-                  addNewValueToScreenButtonDialog(
-                    screenName: '📜 Inventery Items',
-                    widget: const InventeryItems(),
-                  );
-                },
-                icon: const Icon(Icons.add),
+              ExcludeFocus(
+                child: IconButton(
+                  tooltip: 'Add New Value',
+                  onPressed: () {
+                    addNewValueToScreenButtonDialog(
+                      screenName: '📜 Inventery Items',
+                      widget: const InventeryItems(),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                ),
               ),
             ],
           ),

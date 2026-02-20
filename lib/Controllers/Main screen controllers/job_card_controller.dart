@@ -273,6 +273,32 @@ class JobCardController extends GetxController {
 
   @override
   void onClose() {
+    focusNodeForCardDetails1.dispose();
+    focusNodeForCardDetails2.dispose();
+    focusNodeForCardDetails3.dispose();
+    focusNodeForCardDetails4.dispose();
+    focusNodeForCardDetails5.dispose();
+    focusNodeForCardDetails6.dispose();
+    focusNodeForCardDetails7.dispose();
+    focusNodeForCardDetails8.dispose();
+    focusNodeForCardDetails9.dispose();
+    focusNodeForCardDetails10.dispose();
+    focusNodeForCardDetails11.dispose();
+    focusNodeForCardDetails12.dispose();
+    focusNodeForCardDetails13.dispose();
+    focusNodeForCardDetails14.dispose();
+    focusNodeForCustomerDetails1.dispose();
+    focusNodeForCustomerDetails2.dispose();
+    focusNodeForCustomerDetails3.dispose();
+    focusNodeForCustomerDetails4.dispose();
+    focusNodeForCustomerDetails5.dispose();
+    focusNodeForCustomerDetails6.dispose();
+    focusNodeForCustomerDetails7.dispose();
+    focusNodeForCustomerDetails8.dispose();
+    focusNodeForItemsDetails1.dispose();
+    focusNodeForItemsDetails2.dispose();
+    focusNodeForItemsDetails3.dispose();
+    noFocusNode.dispose();
     textFieldFocusNode.dispose();
     allJobCards.clear();
     super.onClose();

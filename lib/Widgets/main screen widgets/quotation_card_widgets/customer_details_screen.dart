@@ -32,6 +32,8 @@ Widget customerDetailsSection(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   MenuWithValues(
+                    focusNode: controller.focusNodeForCustomerDetails1,
+                    nextFocusNode: controller.focusNodeForCustomerDetails2,
                     labelText: 'Customer',
                     headerLqabel: 'Customers',
                     dialogWidth: constraints.maxWidth / 3,
@@ -75,6 +77,8 @@ Widget customerDetailsSection(
               Row(
                 children: [
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForCustomerDetails2,
+                    nextFocusNode: controller.focusNodeForCustomerDetails3,
                     width: 250,
                     controller: controller.customerEntityName,
                     labelText: 'Contact Name',
@@ -87,6 +91,8 @@ Widget customerDetailsSection(
               Row(
                 children: [
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForCustomerDetails3,
+                    nextFocusNode: controller.focusNodeForCustomerDetails4,
                     width: 250,
                     controller: controller.customerEntityPhoneNumber,
                     labelText: 'Contact Number',
@@ -99,6 +105,8 @@ Widget customerDetailsSection(
               Row(
                 children: [
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForCustomerDetails4,
+                    nextFocusNode: controller.focusNodeForCustomerDetails5,
                     width: 250,
                     controller: controller.customerEntityEmail,
                     labelText: 'Contact Email',
@@ -137,6 +145,9 @@ Widget customerDetailsSection(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   MenuWithValues(
+                    focusNode: controller.focusNodeForCustomerDetails5,
+                    nextFocusNode: controller.focusNodeForCustomerDetails6,
+
                     labelText: 'Salesman',
                     headerLqabel: 'Salesmen',
                     dialogWidth: constraints.maxWidth / 3,
@@ -170,6 +181,9 @@ Widget customerDetailsSection(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   MenuWithValues(
+                    focusNode: controller.focusNodeForCustomerDetails6,
+                    nextFocusNode: controller.focusNodeForCustomerDetails7,
+
                     labelText: 'Branch',
                     headerLqabel: 'Branches',
                     dialogWidth: constraints.maxWidth / 3,
@@ -204,6 +218,8 @@ Widget customerDetailsSection(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   MenuWithValues(
+                    focusNode: controller.focusNodeForCustomerDetails7,
+                    nextFocusNode: controller.focusNodeForCustomerDetails8,
                     labelText: 'Currency',
                     headerLqabel: 'Currencies',
                     dialogWidth: constraints.maxWidth / 3,
@@ -237,6 +253,8 @@ Widget customerDetailsSection(
                   ),
                   const SizedBox(width: 10),
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForCustomerDetails8,
+                    nextFocusNode: controller.focusNodeForQuotationDetails1,
                     width: 100,
                     isDouble: true,
                     controller: controller.customerCurrencyRate,

@@ -29,6 +29,8 @@ Widget addNewinvoiceItemsOrEdit({required QuotationCardController controller}) {
                     children: [
                       Expanded(
                         child: myTextFormFieldWithBorder(
+                          focusNode: controller.focusNodeForItemsDetails1,
+                          nextFocusNode: controller.focusNodeForItemsDetails2,
                           isnumber: true,
                           controller: controller.lineNumber,
                           labelText: 'Line Number',
@@ -44,8 +46,10 @@ Widget addNewinvoiceItemsOrEdit({required QuotationCardController controller}) {
                     children: [
                       Expanded(
                         child: MenuWithValues(
-                          labelText: 'Currency',
-                          headerLqabel: 'Currencies',
+                          focusNode: controller.focusNodeForItemsDetails2,
+                          nextFocusNode: controller.focusNodeForItemsDetails3,
+                          labelText: 'Name',
+                          headerLqabel: 'Name',
                           dialogWidth: 600,
                           controller: controller.invoiceItemName,
                           displayKeys: const ['name'],
@@ -121,6 +125,8 @@ Widget addNewinvoiceItemsOrEdit({required QuotationCardController controller}) {
                   ),
                   const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForItemsDetails3,
+                    nextFocusNode: controller.focusNodeForItemsDetails4,
                     maxLines: 13,
                     controller: controller.description,
                     labelText: 'Description',
@@ -144,6 +150,8 @@ Widget addNewinvoiceItemsOrEdit({required QuotationCardController controller}) {
                   ),
                   const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForItemsDetails4,
+                    nextFocusNode: controller.focusNodeForItemsDetails5,
                     onChanged: (_) => controller.updateCalculating(),
                     isnumber: true,
                     controller: controller.quantity,
@@ -152,6 +160,8 @@ Widget addNewinvoiceItemsOrEdit({required QuotationCardController controller}) {
                   ),
                   const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForItemsDetails5,
+                    nextFocusNode: controller.focusNodeForItemsDetails6,
                     onChanged: (_) => controller.updateCalculating(),
                     isDouble: true,
                     controller: controller.price,
@@ -168,6 +178,8 @@ Widget addNewinvoiceItemsOrEdit({required QuotationCardController controller}) {
                   ),
                   const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForItemsDetails6,
+                    nextFocusNode: controller.focusNodeForItemsDetails7,
                     onChanged: (_) => controller.updateCalculating(),
                     isDouble: true,
                     controller: controller.discount,
@@ -192,6 +204,8 @@ Widget addNewinvoiceItemsOrEdit({required QuotationCardController controller}) {
                   ),
                   const SizedBox(height: 12),
                   myTextFormFieldWithBorder(
+                    focusNode: controller.focusNodeForItemsDetails7,
+                    nextFocusNode: controller.focusNodeForItemsDetails1,
                     onChanged: (_) => controller.updateAmount(),
                     isDouble: true,
                     controller: controller.net,

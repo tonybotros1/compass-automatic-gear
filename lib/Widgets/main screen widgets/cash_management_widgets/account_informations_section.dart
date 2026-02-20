@@ -27,6 +27,8 @@ Widget accountInformations<T extends CashManagementBaseController>(
               GetBuilder<T>(
                 builder: (controller) {
                   return MenuWithValues(
+                    focusNode: controller.focusNodeForAccountInfos1,
+                    nextFocusNode: controller.focusNodeForAccountInfos5,
                     labelText: isPayment ? 'Payment Type' : 'Receipt Type',
                     headerLqabel: isPayment ? 'Payment Types' : 'Receipt Types',
                     dialogWidth: constraints.maxWidth / 3,
@@ -85,6 +87,8 @@ Widget accountInformations<T extends CashManagementBaseController>(
                 children: [
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForAccountInfos2,
+                    nextFocusNode: controller.focusNodeForAccountInfos3,
+                    previousFocusNode: controller.focusNodeForAccountInfos1,
                     onFieldSubmitted: (_) {
                       controller.focusNodeForAccountInfos3.requestFocus();
                     },
@@ -102,6 +106,11 @@ Widget accountInformations<T extends CashManagementBaseController>(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             MenuWithValues(
+                              focusNode: controller.focusNodeForAccountInfos3,
+                              nextFocusNode:
+                                  controller.focusNodeForAccountInfos4,
+                              previousFocusNode:
+                                  controller.focusNodeForAccountInfos2,
                               labelText: 'Bank Name',
                               headerLqabel: 'Banks Names',
                               dialogWidth: constraints.maxWidth / 3,
@@ -138,7 +147,8 @@ Widget accountInformations<T extends CashManagementBaseController>(
                         ),
                   myTextFormFieldWithBorder(
                     focusNode: controller.focusNodeForAccountInfos4,
-
+                    nextFocusNode: controller.focusNodeForAccountInfos5,
+                    previousFocusNode: controller.focusNodeForAccountInfos3,
                     width: 200,
                     suffixIcon: ExcludeFocus(
                       child: IconButton(
@@ -166,7 +176,6 @@ Widget accountInformations<T extends CashManagementBaseController>(
                         controller.chequeDate.text,
                         controller.chequeDate,
                       );
-                      controller.focusNodeForAccountInfos5.requestFocus();
                     },
                     controller: controller.chequeDate,
                     isEnabled: controller.isChequeSelected.isTrue,
@@ -185,6 +194,9 @@ Widget accountInformations<T extends CashManagementBaseController>(
               GetBuilder<T>(
                 builder: (controller) {
                   return MenuWithValues(
+                    focusNode: controller.focusNodeForAccountInfos5,
+                    nextFocusNode: controller.focusNodeForAccountInfos6,
+                    previousFocusNode: controller.focusNodeForAccountInfos4,
                     labelText: 'Account',
                     headerLqabel: 'Accounts',
                     dialogWidth: constraints.maxWidth / 3,
@@ -232,7 +244,7 @@ Widget accountInformations<T extends CashManagementBaseController>(
                   myTextFormFieldWithBorder(
                     width: 125,
                     focusNode: controller.focusNodeForAccountInfos6,
-
+                    previousFocusNode: controller.focusNodeForAccountInfos5,
                     moneyFormat: true,
                     // isDouble: true,
                     controller: controller.rate,

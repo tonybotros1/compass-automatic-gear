@@ -37,9 +37,7 @@ Widget customerDetailsSection(
                     children: [
                       MenuWithValues(
                         focusNode: controller.focusNodeForCustomerDetails1,
-                        onFieldSubmitted: (_) => controller
-                            .focusNodeForCustomerDetails2
-                            .requestFocus(),
+                        nextFocusNode: controller.focusNodeForCustomerDetails2,
                         labelText: 'Customer',
                         headerLqabel: 'Customers',
                         dialogWidth: constraints.maxWidth / 2,
@@ -149,9 +147,8 @@ Widget customerDetailsSection(
                         children: [
                           MenuWithValues(
                             focusNode: controller.focusNodeForCustomerDetails5,
-                            onFieldSubmitted: (_) => controller
-                                .focusNodeForCustomerDetails6
-                                .requestFocus(),
+                            nextFocusNode:
+                                controller.focusNodeForCustomerDetails6,
                             labelText: 'Salesman',
                             headerLqabel: 'Salesman',
                             dialogWidth: constraints.maxWidth / 3,
@@ -191,9 +188,7 @@ Widget customerDetailsSection(
                     children: [
                       MenuWithValues(
                         focusNode: controller.focusNodeForCustomerDetails6,
-                        onFieldSubmitted: (_) => controller
-                            .focusNodeForCustomerDetails7
-                            .requestFocus(),
+                        nextFocusNode: controller.focusNodeForCustomerDetails7,
                         labelText: 'Branch',
                         headerLqabel: 'Branches',
                         dialogWidth: constraints.maxWidth / 3,
@@ -232,9 +227,7 @@ Widget customerDetailsSection(
                     children: [
                       MenuWithValues(
                         focusNode: controller.focusNodeForCustomerDetails7,
-                        onFieldSubmitted: (_) => controller
-                            .focusNodeForCustomerDetails8
-                            .requestFocus(),
+                        nextFocusNode: controller.focusNodeForCustomerDetails8,
                         labelText: 'Currency',
                         headerLqabel: 'Currencies',
                         dialogWidth: constraints.maxWidth / 3,

@@ -29,6 +29,9 @@ class CashManagementPaymentsController extends CashManagementBaseController {
   RxString vendorNameFilterId = RxString('');
   Rx<TextEditingController> paymentCounterFilter = TextEditingController().obs;
   RxInt initDatePickerValue = RxInt(1);
+  FocusNode focusNode1 = FocusNode();
+  FocusNode focusNode2 = FocusNode();
+  FocusNode focusNode3 = FocusNode();
   @override
   void onInit() async {
     filterSearch();

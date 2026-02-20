@@ -30,6 +30,7 @@ Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
                     ),
                     myTextFormFieldWithBorder(
                       focusNode: controller.focusNodeForReceiptHeader1,
+                      nextFocusNode: controller.focusNodeForReceiptHeader2,
                       width: 150,
                       controller: controller.receiptDate.value,
                       suffixIcon: ExcludeFocus(
@@ -52,7 +53,6 @@ Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
                           controller.receiptDate.value.text,
                           controller.receiptDate.value,
                         );
-                        controller.focusNodeForReceiptHeader2.requestFocus();
                       },
                       onChanged: (_) {
                         controller.isReceiptModified.value = true;
@@ -64,6 +64,8 @@ Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
                   spacing: 10,
                   children: [
                     MenuWithValues(
+                      focusNode: controller.focusNodeForReceiptHeader2,
+                      nextFocusNode: controller.focusNodeForReceiptHeader3,
                       labelText: 'Customer Name',
                       headerLqabel: 'Customers',
                       dialogWidth: constraints.maxWidth / 2,
@@ -112,9 +114,7 @@ Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
                 ),
                 myTextFormFieldWithBorder(
                   focusNode: controller.focusNodeForReceiptHeader3,
-                  onFieldSubmitted: (_) {
-                    controller.focusNodeForAccountInfos1.requestFocus();
-                  },
+                  nextFocusNode: controller.focusNodeForAccountInfos1,
                   width: constraints.maxWidth / 2.75,
                   controller: controller.note,
                   labelText: 'Notes',

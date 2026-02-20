@@ -749,6 +749,9 @@ ElevatedButton newReceiptButton(
                 controller.addNewReceipts();
               },
       );
+      Future.delayed(const Duration(milliseconds: 100), () {
+        controller.focusNodeForReceiptHeader1.requestFocus();
+      });
     },
     style: newButtonStyle,
     child: const Text('New Receipt'),

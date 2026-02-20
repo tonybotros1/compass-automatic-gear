@@ -30,6 +30,9 @@ Widget currencySection(
                 child: GetBuilder<ReceivingController>(
                   builder: (controller) {
                     return MenuWithValues(
+                      focusNode: controller.focusNode6,
+                      nextFocusNode: controller.focusNode7,
+                      previousFocusNode: controller.focusNode5,
                       labelText: 'Currency',
                       headerLqabel: 'Currencies',
                       dialogWidth: 400,
@@ -72,8 +75,12 @@ Widget currencySection(
           SizedBox(
             width: 150,
             child: myTextFormFieldWithBorder(
+              previousFocusNode: controller.focusNode6,
               focusNode: controller.focusNode7,
               nextFocusNode: controller.focusNode8,
+              onFieldSubmitted: (_) {
+                controller.focusNode8.requestFocus();
+              },
               labelText: 'Rate',
               controller: controller.rate.value,
               isDouble: true,

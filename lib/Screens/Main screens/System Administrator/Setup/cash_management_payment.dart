@@ -385,6 +385,9 @@ ElevatedButton newPaymentButton(
                 controller.addNewPayment();
               },
       );
+      Future.delayed(const Duration(milliseconds: 100), () {
+        controller.focusNode1.requestFocus();
+      });
     },
     style: newButtonStyle,
     child: const Text('New Payment'),

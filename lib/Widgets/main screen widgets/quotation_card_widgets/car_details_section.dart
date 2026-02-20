@@ -34,6 +34,8 @@ Widget carDetailsSection(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         MenuWithValues(
+                          focusNode: controller.focusNodeForCardDetails1,
+                          nextFocusNode: controller.focusNodeForCardDetails2,
                           labelText: 'Brand',
                           headerLqabel: 'Brands',
                           dialogWidth: constraints.maxWidth / 3,
@@ -64,6 +66,9 @@ Widget carDetailsSection(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             MenuWithValues(
+                              focusNode: controller.focusNodeForCardDetails2,
+                              nextFocusNode:
+                                  controller.focusNodeForCardDetails3,
                               labelText: 'Model',
                               headerLqabel: 'Models',
                               dialogWidth: constraints.maxWidth / 3,
@@ -88,11 +93,13 @@ Widget carDetailsSection(
                                 );
                               },
                             ),
-                            valSectionInTheTableForBrands(
-                              controller.carBrandsController,
-                              controller.carBrandId.value,
-                              constraints,
-                              'New Model',
+                            ExcludeFocus(
+                              child: valSectionInTheTableForBrands(
+                                controller.carBrandsController,
+                                controller.carBrandId.value,
+                                constraints,
+                                'New Model',
+                              ),
                             ),
                           ],
                         ),
@@ -100,6 +107,9 @@ Widget carDetailsSection(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             myTextFormFieldWithBorder(
+                              focusNode: controller.focusNodeForCardDetails3,
+                              nextFocusNode:
+                                  controller.focusNodeForCardDetails4,
                               width: 115,
                               controller: controller.year,
                               labelText: 'Year',
@@ -109,6 +119,9 @@ Widget carDetailsSection(
                             ),
                             const SizedBox(width: 10),
                             MenuWithValues(
+                              focusNode: controller.focusNodeForCardDetails4,
+                              nextFocusNode:
+                                  controller.focusNodeForCardDetails5,
                               labelText: 'Color',
                               headerLqabel: 'Colors',
                               dialogWidth: constraints.maxWidth / 3,
@@ -131,12 +144,14 @@ Widget carDetailsSection(
                               },
                             ),
 
-                            valSectionInTheTable(
-                              controller.listOfValuesController,
-                              constraints,
-                              'COLORS',
-                              'New Color',
-                              'Colors',
+                            ExcludeFocus(
+                              child: valSectionInTheTable(
+                                controller.listOfValuesController,
+                                constraints,
+                                'COLORS',
+                                'New Color',
+                                'Colors',
+                              ),
                             ),
                           ],
                         ),
@@ -154,6 +169,8 @@ Widget carDetailsSection(
                   spacing: 10,
                   children: [
                     myTextFormFieldWithBorder(
+                      focusNode: controller.focusNodeForCardDetails5,
+                      nextFocusNode: controller.focusNodeForCardDetails6,
                       width: 115,
                       controller: controller.plateNumber,
                       labelText: 'Plate No.',
@@ -162,6 +179,8 @@ Widget carDetailsSection(
                       },
                     ),
                     myTextFormFieldWithBorder(
+                      focusNode: controller.focusNodeForCardDetails6,
+                      nextFocusNode: controller.focusNodeForCardDetails7,
                       width: 115,
                       controller: controller.plateCode,
                       labelText: 'Code',
@@ -176,6 +195,8 @@ Widget carDetailsSection(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     MenuWithValues(
+                      focusNode: controller.focusNodeForCardDetails7,
+                      nextFocusNode: controller.focusNodeForCardDetails8,
                       labelText: 'Country',
                       headerLqabel: 'Countries',
                       dialogWidth: constraints.maxWidth / 3,
@@ -204,6 +225,8 @@ Widget carDetailsSection(
 
                     const SizedBox(width: 10),
                     MenuWithValues(
+                      focusNode: controller.focusNodeForCardDetails8,
+                      nextFocusNode: controller.focusNodeForCardDetails9,
                       labelText: 'City',
                       headerLqabel: 'Cities',
                       dialogWidth: constraints.maxWidth / 3,
@@ -228,11 +251,13 @@ Widget carDetailsSection(
                       },
                     ),
 
-                    valSectionInTheTableForCountries(
-                      controller.countriesController,
-                      controller.countryId.value,
-                      constraints,
-                      'New City',
+                    ExcludeFocus(
+                      child: valSectionInTheTableForCountries(
+                        controller.countriesController,
+                        controller.countryId.value,
+                        constraints,
+                        'New City',
+                      ),
                     ),
                   ],
                 ),
@@ -241,6 +266,8 @@ Widget carDetailsSection(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     myTextFormFieldWithBorder(
+                      focusNode: controller.focusNodeForCardDetails9,
+                      nextFocusNode: controller.focusNodeForCardDetails10,
                       width: 240,
                       controller: controller.transmissionType,
                       labelText: 'Transmission Type',
@@ -251,6 +278,8 @@ Widget carDetailsSection(
                     ),
                     const SizedBox(width: 10),
                     MenuWithValues(
+                      focusNode: controller.focusNodeForCardDetails10,
+                      nextFocusNode: controller.focusNodeForCardDetails11,
                       labelText: 'Engine Type',
                       headerLqabel: 'Engine Types',
                       dialogWidth: constraints.maxWidth / 3,
@@ -272,16 +301,20 @@ Widget carDetailsSection(
                         return controller.getEngineTypes();
                       },
                     ),
-                    valSectionInTheTable(
-                      controller.listOfValuesController,
-                      constraints,
-                      'ENGINE_TYPES',
-                      'New Engine Type',
-                      'Engine Type',
+                    ExcludeFocus(
+                      child: valSectionInTheTable(
+                        controller.listOfValuesController,
+                        constraints,
+                        'ENGINE_TYPES',
+                        'New Engine Type',
+                        'Engine Type',
+                      ),
                     ),
                   ],
                 ),
                 myTextFormFieldWithBorder(
+                  focusNode: controller.focusNodeForCardDetails11,
+                  nextFocusNode: controller.focusNodeForCardDetails12,
                   width: 450,
                   controller: controller.vin,
                   labelText: 'VIN',
@@ -291,6 +324,8 @@ Widget carDetailsSection(
                   },
                 ),
                 myTextFormFieldWithBorder(
+                  focusNode: controller.focusNodeForCardDetails12,
+                  nextFocusNode: controller.focusNodeForCustomerDetails1,
                   width: 115,
                   isnumber: true,
                   controller: controller.mileageIn.value,

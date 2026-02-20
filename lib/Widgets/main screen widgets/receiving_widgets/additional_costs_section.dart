@@ -19,6 +19,9 @@ Container additionalCostsSection(
         SizedBox(
           width: 150,
           child: myTextFormFieldWithBorder(
+            focusNode: controller.focusNode11,
+            nextFocusNode: controller.focusNode12,
+            previousFocusNode: controller.focusNode10,
             labelText: 'Shipping',
             controller: controller.shipping.value,
             isDouble: true,
@@ -30,6 +33,9 @@ Container additionalCostsSection(
         SizedBox(
           width: 150,
           child: myTextFormFieldWithBorder(
+            focusNode: controller.focusNode12,
+            nextFocusNode: controller.focusNode13,
+            previousFocusNode: controller.focusNode11,
             labelText: 'Handling',
             controller: controller.handling.value,
             isDouble: true,
@@ -41,6 +47,9 @@ Container additionalCostsSection(
         SizedBox(
           width: 150,
           child: myTextFormFieldWithBorder(
+            focusNode: controller.focusNode13,
+            nextFocusNode: controller.focusNode14,
+            previousFocusNode: controller.focusNode12,
             labelText: 'Other',
             controller: controller.other.value,
             isDouble: true,

@@ -26,7 +26,9 @@ Widget makerCheckerAndApproverSection(
                 children: [
                   Expanded(
                     child: MenuWithValues(
-                      focusNode:  controller.focusNode8,
+                      focusNode: controller.focusNode8,
+                      nextFocusNode: controller.focusNode9,
+                      previousFocusNode: controller.focusNode7,
                       labelText: 'Approved By',
                       headerLqabel: 'Approved By',
                       dialogWidth: constraints.maxWidth / 2,
@@ -48,12 +50,14 @@ Widget makerCheckerAndApproverSection(
                       },
                     ),
                   ),
-                  valSectionInTheTable(
-                    controller.listOfValuesController,
-                    constraints,
-                    'ISSUE_RECEIVE_PEOPLE',
-                    'New Value',
-                    'People',
+                  ExcludeFocus(
+                    child: valSectionInTheTable(
+                      controller.listOfValuesController,
+                      constraints,
+                      'ISSUE_RECEIVE_PEOPLE',
+                      'New Value',
+                      'People',
+                    ),
                   ),
                 ],
               ),
@@ -62,6 +66,9 @@ Widget makerCheckerAndApproverSection(
                 children: [
                   Expanded(
                     child: MenuWithValues(
+                      focusNode: controller.focusNode9,
+                      nextFocusNode: controller.focusNode10,
+                      previousFocusNode: controller.focusNode8,
                       labelText: 'Ordered By',
                       headerLqabel: 'Ordered By',
                       dialogWidth: constraints.maxWidth / 2,
@@ -83,12 +90,14 @@ Widget makerCheckerAndApproverSection(
                       },
                     ),
                   ),
-                  valSectionInTheTable(
-                    controller.listOfValuesController,
-                    constraints,
-                    'ISSUE_RECEIVE_PEOPLE',
-                    'New Value',
-                    'People',
+                  ExcludeFocus(
+                    child: valSectionInTheTable(
+                      controller.listOfValuesController,
+                      constraints,
+                      'ISSUE_RECEIVE_PEOPLE',
+                      'New Value',
+                      'People',
+                    ),
                   ),
                 ],
               ),
@@ -97,6 +106,9 @@ Widget makerCheckerAndApproverSection(
                 children: [
                   Expanded(
                     child: MenuWithValues(
+                      focusNode: controller.focusNode10,
+                      nextFocusNode: controller.focusNode11,
+                    previousFocusNode: controller.focusNode9,
                       labelText: 'Purchased By',
                       headerLqabel: 'Purchased By',
                       dialogWidth: constraints.maxWidth / 2,
@@ -118,12 +130,14 @@ Widget makerCheckerAndApproverSection(
                       },
                     ),
                   ),
-                  valSectionInTheTable(
-                    controller.listOfValuesController,
-                    constraints,
-                    'ISSUE_RECEIVE_PEOPLE',
-                    'New Value',
-                    'People',
+                  ExcludeFocus(
+                    child: valSectionInTheTable(
+                      controller.listOfValuesController,
+                      constraints,
+                      'ISSUE_RECEIVE_PEOPLE',
+                      'New Value',
+                      'People',
+                    ),
                   ),
                 ],
               ),

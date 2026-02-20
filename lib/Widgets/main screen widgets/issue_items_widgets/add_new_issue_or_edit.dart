@@ -59,6 +59,8 @@ Widget addNewIssueOrEdit({
                                       order: const NumericFocusOrder(1),
 
                                       child: myTextFormFieldWithBorder(
+                                        focusNode: controller.focusNode1,
+                                        nextFocusNode: controller.focusNode2,
                                         controller: controller.date.value,
                                         onFieldSubmitted: (_) async {
                                           normalizeDate(
@@ -96,6 +98,8 @@ Widget addNewIssueOrEdit({
                                     GetBuilder<IssueItemsController>(
                                       builder: (controller) {
                                         return MenuWithValues(
+                                          focusNode: controller.focusNode2,
+                                          nextFocusNode: controller.focusNode3,
                                           labelText: 'Issue Type',
                                           headerLqabel: 'Issue Types',
                                           dialogWidth: 600,
@@ -142,17 +146,14 @@ Widget addNewIssueOrEdit({
                                         var selectedType =
                                             controller.issueType.value;
                                         return myTextFormFieldWithBorder(
+                                          focusNode: controller.focusNode3,
+                                          nextFocusNode: controller.focusNode4,
                                           readOnly: true,
                                           controller: controller.jobDetails,
                                           labelText: selectedType == ''
                                               ? 'Not Selected'
                                               : selectedType,
                                           width: 400,
-                                          onEditingComplete: () {
-                                            FocusScope.of(context).requestFocus(
-                                              controller.focusNode5,
-                                            );
-                                          },
                                           textInputAction: TextInputAction.next,
                                           suffixIcon: IconButton(
                                             focusNode: FocusNode(
@@ -390,6 +391,9 @@ Widget addNewIssueOrEdit({
                                       child: GetBuilder<IssueItemsController>(
                                         builder: (controller) {
                                           return MenuWithValues(
+                                            focusNode: controller.focusNode4,
+                                            nextFocusNode:
+                                                controller.focusNode5,
                                             labelText: 'Branch',
                                             headerLqabel: 'Branches',
                                             dialogWidth: 600,
@@ -427,6 +431,8 @@ Widget addNewIssueOrEdit({
                                     GetBuilder<IssueItemsController>(
                                       builder: (controller) {
                                         return MenuWithValues(
+                                          focusNode: controller.focusNode5,
+                                          nextFocusNode: controller.focusNode6,
                                           labelText: 'Issue To',
                                           headerLqabel: 'Issue To',
                                           dialogWidth: 600,
@@ -472,7 +478,7 @@ Widget addNewIssueOrEdit({
                           Expanded(
                             child: myTextFormFieldWithBorder(
                               controller: controller.note.value,
-                              focusNode: controller.focusNode5,
+                              focusNode: controller.focusNode6,
                               labelText: 'Note',
                               maxLines: 7,
                               onChanged: (_) {
