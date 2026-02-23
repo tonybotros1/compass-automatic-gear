@@ -127,6 +127,7 @@ flutter:
     - assets/fonts/Amiri-Regular.ttf
     - assets/fonts/Amiri-Bold.ttf
     - assets/fonts/tahoma.ttf
+    - assets/fonts/RobotoMono-VariableFont_wght.ttf
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -2,17 +2,23 @@ import 'dart:convert';
 import 'package:datahubai/Controllers/Main%20screen%20controllers/car_brands_controller.dart';
 import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../../Models/car trading/capitals_outstanding_model.dart';
 import '../../Models/car trading/car_trade_model.dart';
 import '../../Models/car trading/car_trading_items_model.dart';
+import '../../Models/car trading/car_trading_purchase_agreement_model.dart';
 import '../../Models/car trading/general_expenses_model.dart';
 import '../../Models/car trading/last_changes_model.dart';
+import '../../Widgets/main screen widgets/job_cards_widgets/print_delivery_note.dart';
+import '../../Widgets/main screen widgets/job_cards_widgets/print_invoice_pdf.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import '../Main screen controllers/websocket_controller.dart';
@@ -94,6 +100,7 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> boughtFrom = TextEditingController().obs;
   Rx<TextEditingController> boughtBy = TextEditingController().obs;
   Rx<TextEditingController> year = TextEditingController().obs;
+  Rx<TextEditingController> vin = TextEditingController().obs;
   Rx<TextEditingController> soldTo = TextEditingController().obs;
   Rx<TextEditingController> soldBy = TextEditingController().obs;
   Rx<TextEditingController> serviceContractEndDate =
@@ -124,11 +131,18 @@ class CarTradingDashboardController extends GetxController {
   RxString itemId = RxString('');
   RxString nameId = RxString('');
   RxList<CarTradingItemsModel> addedItems = RxList([]);
+  RxList<CarTradingPurchaseAgreementModel> purchaseAgreementAddedItems = RxList(
+    [],
+  );
   RxDouble totalPays = RxDouble(0.0);
   RxDouble totalReceives = RxDouble(0.0);
   RxDouble totalNETs = RxDouble(0.0);
+  RxDouble totalPurchaseAgreementAmount = RxDouble(0.0);
+  RxDouble totalPurchaseAgreementDownPayment = RxDouble(0.0);
   RxList<CarTradingItemsModel> filteredAddedItems =
       RxList<CarTradingItemsModel>([]);
+  RxList<CarTradingPurchaseAgreementModel> filteredPurchaseAgreementAddedItems =
+      RxList<CarTradingPurchaseAgreementModel>([]);
   RxBool isCapitalLoading = RxBool(false);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
@@ -143,6 +157,7 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> maxAmount = TextEditingController().obs;
   RxBool carModified = RxBool(false);
   RxBool itemsModified = RxBool(false);
+  RxBool purchasedItemsModified = RxBool(false);
   final Uuid _uuid = const Uuid();
   RxBool searching = RxBool(false);
   RxBool changesSearching = RxBool(false);
@@ -173,6 +188,20 @@ class CarTradingDashboardController extends GetxController {
   final FocusNode focusNodeForBuySell2 = FocusNode();
   final FocusNode focusNodeForBuySell3 = FocusNode();
   final FocusNode focusNodeForBuySell4 = FocusNode();
+  RxBool addingPurchaseAgreement = RxBool(false);
+  TextEditingController agreementNumber = TextEditingController();
+  TextEditingController agreementdate = TextEditingController();
+  TextEditingController sellerName = TextEditingController();
+  TextEditingController sellerID = TextEditingController();
+  TextEditingController sellerPhone = TextEditingController();
+  TextEditingController sellerEmail = TextEditingController(text: '');
+  TextEditingController buyerName = TextEditingController();
+  TextEditingController buyerID = TextEditingController();
+  TextEditingController buyerPhone = TextEditingController();
+  TextEditingController buyerEmail = TextEditingController();
+  TextEditingController agreementNote = TextEditingController();
+  TextEditingController agreementTotal = TextEditingController();
+  TextEditingController agreementdownpayment = TextEditingController();
 
   RxList<Map<String, dynamic>> summaryData = RxList<Map<String, dynamic>>([
     {"category": "🚘  Cars"},
@@ -181,8 +210,15 @@ class CarTradingDashboardController extends GetxController {
     {"category": "📜  Expenses"},
   ]);
 
+  List<Widget> carsTabs = const [
+    Tab(text: 'Items'),
+    Tab(text: 'Purchase Agreement'),
+  ];
+  RxMap companyDetails = RxMap({});
+
   final DateFormat dateFormat = DateFormat('dd-MM-yyyy');
   final selectedRowIndex = (-1).obs;
+  RxString itemsPageName = RxString('');
 
   void selectRow(int index) {
     selectedRowIndex.value = index;
@@ -192,6 +228,7 @@ class CarTradingDashboardController extends GetxController {
   @override
   void onInit() async {
     connectWebSocket();
+    await getCompanyDetails();
     getCashOnHandOrBankBalance('CASH');
     getCashOnHandOrBankBalance('FAB BANK');
     getCapitalsOROutstandingSummary('capitals');
@@ -416,6 +453,29 @@ class CarTradingDashboardController extends GetxController {
           final deletedId = message["data"]["_id"];
           allGeneralExpenses.removeWhere((m) => m.id == deletedId);
           break;
+
+        case "purchase_agreement_item_created":
+          final newModel = CarTradingPurchaseAgreementModel.fromJson(
+            message["data"],
+          );
+          purchaseAgreementAddedItems.add(newModel);
+          break;
+        case "purchase_agreement_item_updated":
+          final updated = CarTradingPurchaseAgreementModel.fromJson(
+            message["data"],
+          );
+          final index = purchaseAgreementAddedItems.indexWhere(
+            (m) => m.id == updated.id,
+          );
+          if (index != -1) {
+            purchaseAgreementAddedItems[index] = updated;
+          }
+          break;
+
+        case "purchase_agreement_item_deleted":
+          final deletedId = message["data"]["_id"];
+          purchaseAgreementAddedItems.removeWhere((m) => m.id == deletedId);
+          break;
       }
     });
   }
@@ -468,6 +528,10 @@ class CarTradingDashboardController extends GetxController {
     return await helper.getModelsValues(brandId);
   }
 
+  Future<void> getCompanyDetails() async {
+    companyDetails.assignAll(await helper.getCurrentCompanyDetails());
+  }
+
   void addNewCapitalOrOutstandingOrGeneralExpenses(String type) async {
     switch (type) {
       case 'capitals':
@@ -518,6 +582,374 @@ class CarTradingDashboardController extends GetxController {
       default:
     }
   }
+
+  // PRINT SECTION
+  // ===========================================================================
+  void printPurchaseAgreement(CarTradingPurchaseAgreementModel data) async {
+    final pdfData = await generatePurchaseAgreementPdf(data);
+
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
+  }
+
+  Future<Uint8List> generatePurchaseAgreementPdf(
+    CarTradingPurchaseAgreementModel data,
+  ) async {
+    // final Font robotoMono = pw.Font.ttf(
+    //   await rootBundle.load('assets/fonts/RobotoMono-VariableFont_wght.ttf'),
+    // );
+
+    // var countryCurrency = await helper.getCountryCurrency(companyDetails['']);
+    var headerImage = await networkImageToPdf(
+      companyDetails.containsKey('header_url')
+          ? companyDetails['header_url'] ?? ''
+          : '',
+    );
+    var footerImage = await networkImageToPdf(
+      companyDetails.containsKey('footer_url')
+          ? companyDetails['footer_url'] ?? ''
+          : '',
+    );
+
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(0),
+        header: (context) => pw.Image(
+          headerImage,
+          height: 115,
+          fit: pw.BoxFit.fitWidth,
+          alignment: pw.Alignment.topCenter,
+        ),
+
+        footer: (context) => pw.Image(
+          footerImage,
+          height: 100,
+          fit: pw.BoxFit.fitWidth,
+          alignment: pw.Alignment.bottomCenter,
+        ),
+        build: (context) {
+          return [
+            ...List.generate(1, (pageIndex) {
+              return pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 10,
+                ),
+
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
+                  children: [
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
+                      children: [
+                        pw.Text(
+                          'PURCHASE AGREEMENT',
+                          style: const pw.TextStyle(
+                            color: PdfColors.red,
+                            fontSize: 20,
+                          ),
+                        ),
+                        pw.Text(
+                          "No. ${data.agreementNumber ?? ''}",
+                          style: const pw.TextStyle(
+                            color: PdfColors.grey,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                    pw.Divider(color: PdfColors.red),
+                    pw.SizedBox(height: 10),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.symmetric(vertical: 10),
+                      child: pw.Row(
+                        children: [
+                          pw.Text('Date: ', style: fontStyleForPDFLable),
+                          pw.Text(
+                            textToDate(data.agreementDate),
+                            style: fontStyleForPDFText,
+                          ),
+                        ],
+                      ),
+                    ),
+                    pw.SizedBox(height: 4),
+
+                    // pw.Row(
+                    //   children: [
+                    //     pw.Text(
+                    //       'Payment Method: ',
+                    //       style: fontStyleForPDFLable,
+                    //     ),
+                    //     pw.Text("", style: fontStyleForPDFText),
+                    //   ],
+                    // ),
+
+                    // pw.SizedBox(height: 4),
+
+                    // pw.Row(
+                    //   children: [
+                    //     pw.Text('Reference No.: ', style: fontStyleForPDFLable),
+                    //     pw.Text("", style: fontStyleForPDFText),
+                    //   ],
+                    // ),
+                    pw.SizedBox(height: 10),
+
+                    pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Expanded(
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                'VEHICLE DETAILS',
+                                style: fontStyleForPDFLableGREY,
+                              ),
+                              pw.Divider(color: PdfColors.grey, thickness: 0.3),
+                              pw.SizedBox(
+                                height: 90,
+                                child: pw.Row(
+                                  children: [
+                                    pw.Container(
+                                      width: 3,
+                                      height: double.infinity,
+                                      decoration: const pw.BoxDecoration(
+                                        color: PdfColors.black,
+                                        borderRadius: pw.BorderRadius.only(
+                                          topLeft: pw.Radius.circular(5),
+                                          bottomLeft: pw.Radius.circular(5),
+                                        ),
+                                      ),
+                                    ),
+                                    pw.Expanded(
+                                      child: pw.Container(
+                                        width: double.infinity,
+                                        padding: const pw.EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 10,
+                                        ),
+                                        alignment: pw.Alignment.centerLeft,
+                                        decoration: const pw.BoxDecoration(
+                                          color: PdfColors.grey200,
+                                          borderRadius: pw.BorderRadius.only(
+                                            topRight: pw.Radius.circular(5),
+                                            bottomRight: pw.Radius.circular(5),
+                                          ),
+                                        ),
+                                        child: pw.Column(
+                                          children: [
+                                            infoRow(
+                                              title: 'Car Brand/Model:',
+                                              value:
+                                                  "${carBrand.value.text} ${carModel.value.text} ${year.value.text}",
+                                            ),
+                                            infoRow(
+                                              title: 'Car Year:',
+                                              value: year.value.text,
+                                            ),
+                                            infoRow(
+                                              title: 'Color in/out:',
+                                              value:
+                                                  "${colorIn.value.text} / ${colorOut.value.text} ",
+                                            ),
+                                            infoRow(
+                                              title: 'VIN:',
+                                              value: vin.value.text,
+                                            ),
+                                            infoRow(
+                                              title: 'Mileage:',
+                                              value: mileage.value.text,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        pw.SizedBox(width: 20),
+
+                        pw.Expanded(
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                'TOTALS',
+                                style: fontStyleForPDFLableGREY,
+                              ),
+                              pw.Divider(color: PdfColors.grey, thickness: 0.3),
+                              infoRow(
+                                isNumber: true,
+                                title: 'Vehicle Total Amount:',
+                                value: formatNum(data.amount ?? 0, priceFormat),
+                              ),
+                              pw.SizedBox(height: 5),
+                              infoRow(
+                                isNumber: true,
+                                title: 'Down Payment:',
+                                value: formatNum(
+                                  data.aownpayment ?? 0,
+                                  priceFormat,
+                                ),
+                              ),
+                              pw.SizedBox(height: 5),
+                              infoRow(
+                                isNumber: true,
+                                title: 'Remaning Amount:',
+                                value: formatNum(
+                                  (data.amount ?? 0) - (data.aownpayment ?? 0),
+                                  priceFormat,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 20),
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text('NOTES', style: fontStyleForPDFLableGREY),
+                        pw.Divider(color: PdfColors.grey, thickness: 0.3),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.fromLTRB(8, 0, 8, 16),
+                          child: pw.Text(
+                            data.note ?? '',
+                            style: fontStyleForPDFText,
+                          ),
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 20),
+
+                    pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Expanded(
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                'SELLER INFORMATION',
+                                style: fontStyleForPDFLableGREY,
+                              ),
+                              pw.Divider(color: PdfColors.grey, thickness: 0.3),
+                              infoRow(
+                                title: 'Name:',
+                                value: data.sellerName ?? '',
+                              ),
+                              pw.SizedBox(height: 5),
+                              infoRow(
+                                title: 'Emirates ID:',
+                                value: data.sellerID ?? '',
+                              ),
+                              pw.SizedBox(height: 5),
+                              infoRow(
+                                title: 'Phone:',
+                                value: data.sellerPhone ?? '',
+                              ),
+                              pw.SizedBox(height: 5),
+                              infoRow(
+                                title: 'Email:',
+                                value: data.sellerEmail ?? '',
+                              ),
+                              pw.SizedBox(height: 20),
+                            ],
+                          ),
+                        ),
+                        pw.SizedBox(width: 20),
+
+                        pw.Expanded(
+                          child: pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                'BUYER INFORMATION',
+                                style: fontStyleForPDFLableGREY,
+                              ),
+                              pw.Divider(color: PdfColors.grey, thickness: 0.3),
+                              infoRow(
+                                title: 'Name:',
+                                value: data.buyerName ?? '',
+                              ),
+                              pw.SizedBox(height: 5),
+                              infoRow(
+                                title: 'Emirates ID:',
+                                value: data.buyerID ?? '',
+                              ),
+                              pw.SizedBox(height: 5),
+                              infoRow(
+                                title: 'Phone:',
+                                value: data.buyerPhone ?? '',
+                              ),
+                              pw.SizedBox(height: 5),
+                              infoRow(
+                                title: 'Email:',
+                                value: data.buyerEmail ?? '',
+                              ),
+                              pw.SizedBox(height: 20),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    pw.Row(
+                      children: [
+                        pw.Expanded(
+                          child: pw.Column(
+                            children: [
+                              infoRow(
+                                title: 'Date:',
+                                value:
+                                    '---------------------------------------------',
+                              ),
+                              pw.SizedBox(height: 20),
+                              infoRow(
+                                title: 'Signature:',
+                                value:
+                                    '---------------------------------------------',
+                              ),
+                            ],
+                          ),
+                        ),
+                        pw.SizedBox(width: 20),
+
+                        pw.Expanded(
+                          child: pw.Column(
+                            children: [
+                              infoRow(
+                                title: 'Date:',
+                                value:
+                                    '---------------------------------------------',
+                              ),
+                              pw.SizedBox(height: 20),
+                              infoRow(
+                                title: 'Signature:',
+                                value:
+                                    '---------------------------------------------',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ];
+        },
+      ),
+    );
+    return pdf.save();
+  }
+
+  // ===========================================================================
 
   void clearCangesVariables() {
     lastChanges.clear();
@@ -1116,6 +1548,16 @@ class CarTradingDashboardController extends GetxController {
     totalNETs.value = totalReceives.value - totalPays.value;
   }
 
+  void calculatePurchaseAgreementTotals() {
+    totalPurchaseAgreementAmount.value = 0.0;
+    totalPurchaseAgreementDownPayment.value = 0.0;
+
+    for (var item in purchaseAgreementAddedItems) {
+      totalPurchaseAgreementAmount.value += item.amount!;
+      totalPurchaseAgreementDownPayment.value += item.aownpayment!;
+    }
+  }
+
   void addNewItem() {
     final String uniqueId = _uuid.v4();
 
@@ -1138,6 +1580,180 @@ class CarTradingDashboardController extends GetxController {
     );
     itemsModified.value = true;
     Get.back();
+  }
+
+  Future<void> getPurchaseAgreementForCurrentTrade(String tradeId) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/get_purchase_agreement_for_current_trade/$tradeId',
+      );
+
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List purchase = decoded['purchase_agreement_items'];
+        purchaseAgreementAddedItems.assignAll(
+          purchase.map(
+            (item) => CarTradingPurchaseAgreementModel.fromJson(item),
+          ),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getPurchaseAgreementForCurrentTrade(tradeId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<void> addNewPurchaseAgreementItem() async {
+    try {
+      if (currentTradId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: 'Save trade first');
+        return;
+      }
+      addingPurchaseAgreement.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/add_purchase_agreement_item',
+      );
+      Map data = {
+        "trade_id": currentTradId.value,
+        "agreement_date": convertDateToIson(agreementdate.text),
+        "seller_name": sellerName.text,
+        "seller_email": sellerEmail.text,
+        "seller_phone": sellerPhone.text,
+        "seller_ID": sellerID.text,
+        "buyer_ID": buyerID.text,
+        "buyer_name": buyerName.text,
+        "buyer_email": buyerEmail.text,
+        "buyer_phone": buyerPhone.text,
+        "note": agreementNote.text,
+        "agreement_amount": double.tryParse(agreementTotal.text) ?? 0,
+        "agreement_down_payment":
+            double.tryParse(agreementdownpayment.text) ?? 0,
+      };
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data),
+      );
+      if (response.statusCode == 200) {
+        Get.back();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewPurchaseAgreementItem();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      addingPurchaseAgreement.value = false;
+    } catch (e) {
+      addingPurchaseAgreement.value = false;
+    }
+  }
+
+  Future<void> updatePurchaseAgreementItem(String id) async {
+    try {
+      if (currentTradId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: 'Save trade first');
+        return;
+      }
+      addingPurchaseAgreement.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/update_purchase_agreement_item/$id',
+      );
+      Map data = {
+        "trade_id": currentTradId.value,
+        "agreement_date": convertDateToIson(agreementdate.text),
+        "seller_name": sellerName.text,
+        "seller_email": sellerEmail.text,
+        "seller_phone": sellerPhone.text,
+        "seller_ID": sellerID.text,
+        "buyer_ID": buyerID.text,
+        "buyer_name": buyerName.text,
+        "buyer_email": buyerEmail.text,
+        "buyer_phone": buyerPhone.text,
+        "note": agreementNote.text,
+        "agreement_amount": double.tryParse(agreementTotal.text) ?? 0,
+        "agreement_down_payment":
+            double.tryParse(agreementdownpayment.text) ?? 0,
+      };
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updatePurchaseAgreementItem(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      addingPurchaseAgreement.value = false;
+    } catch (e) {
+      addingPurchaseAgreement.value = false;
+    }
+  }
+
+  Future<void> deletePurchaseAgreementItem(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/delete_purchase_agreement_item/$id',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deletePurchaseAgreementItem(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      Get.back();
+    } catch (e) {
+      //
+    }
   }
 
   void updateIdsFromBackend(List response) {
@@ -1197,6 +1813,7 @@ class CarTradingDashboardController extends GetxController {
         'color_out': colorOutId.value,
         'year': yearId.value,
         'note': note.text,
+        'vin': vin.value.text,
         'items': addedItems.where((item) => item.deleted == false).map((item) {
           final isoDate = (item.date is DateTime)
               ? (item.date as DateTime).toIso8601String()
@@ -1632,6 +2249,7 @@ class CarTradingDashboardController extends GetxController {
     boughtFromId.value = data.boughtFromId ?? '';
     boughtById.value = data.boughtById ?? '';
     boughtBy.value.text = data.boughtBy ?? '';
+    vin.value.text = data.vin ?? '';
     soldById.value = data.soldById ?? '';
     soldBy.value.text = data.soldBy ?? '';
     soldTo.value.text = data.soldTo ?? '';
@@ -1667,9 +2285,12 @@ class CarTradingDashboardController extends GetxController {
     itemsModified.value = false;
     warrantyEndDate.value.text = textToDate(data.warrantyEndDate);
     serviceContractEndDate.value.text = textToDate(data.serviceContractEndDate);
+    await getPurchaseAgreementForCurrentTrade(data.id ?? '');
+    calculatePurchaseAgreementTotals();
   }
 
   void clearValues() {
+    purchaseAgreementAddedItems.clear();
     warrantyEndDate.value.clear();
     serviceContractEndDate.value.clear();
     boughtFrom.value.clear();
@@ -1702,6 +2323,7 @@ class CarTradingDashboardController extends GetxController {
     engineSize.value.clear();
     engineSizeId.value = '';
     year.value.clear();
+    vin.value.clear();
     yearId.value = '';
     note.clear();
     addedItems.clear();

@@ -18,7 +18,7 @@ Widget buySellSection({
     child: Container(
       padding: const EdgeInsets.all(20),
       decoration: containerDecor,
-      height: 225,
+      height: 285,
       width: constraints.maxWidth,
       child: SingleChildScrollView(
         controller: controller.scrollControllerForBuySell,

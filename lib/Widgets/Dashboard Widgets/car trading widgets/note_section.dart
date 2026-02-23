@@ -9,12 +9,12 @@ Widget noteSection({
   required CarTradingDashboardController controller,
 }) {
   return Container(
-    height: 225,
+    height: 285,
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     child: myTextFormFieldWithBorder(
       controller: controller.note,
-      maxLines: 8,
+      maxLines: 10,
       onChanged: (_) {
         controller.carModified.value = true;
       },

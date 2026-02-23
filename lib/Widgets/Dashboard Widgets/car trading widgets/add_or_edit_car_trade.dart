@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../Models/car trading/car_trading_items_model.dart';
+import '../../../Models/car trading/car_trading_purchase_agreement_model.dart';
 import '../../../consts.dart';
 import '../../main screen widgets/auto_size_box.dart';
 import 'buy_sell_section.dart';
 import 'car_information_section.dart';
 import 'item_dialog.dart';
 import 'note_section.dart';
+import 'purchase_agreement_item_dialog.dart';
 
 Widget addNewCarTradeOrEdit({
   required BuildContext context,
@@ -77,15 +79,6 @@ Widget addNewCarTradeOrEdit({
                   ),
 
                   const SizedBox(height: 10),
-                  labelContainer(
-                    lable: Row(
-                      children: [
-                        Text('Items', style: fontStyle1),
-                        const Spacer(),
-                        newItemButton(context, controller),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -93,41 +86,132 @@ Widget addNewCarTradeOrEdit({
               hasScrollBody: true,
               child: Container(
                 decoration: containerDecor,
-                child: Column(
-                  children: [
-                    // searchBar(
-                    //   onChanged: (_) {
-                    //     controller.filterItems();
-                    //   },
-                    //   onPressedForClearSearch: () {
-                    //     controller.searchForItems.value.clear();
-                    //     controller.filterItems();
-                    //   },
-                    //   search: controller.searchForItems,
-                    //   constraints: constraints,
-                    //   context: context,
-                    //   title: 'Search for Items',
-                    //   // button: newItemButton(context, controller),
-                    // ),
-                    Expanded(
-                      child: GetX<CarTradingDashboardController>(
-                        builder: (controller) {
-                          return SingleChildScrollView(
-                            scrollDirection: Axis.vertical,
-                            child: SizedBox(
-                              width: constraints.maxWidth,
-                              child: tableOfScreens(
-                                constraints: constraints,
-                                context: context,
-                                controller: controller,
-                              ),
-                            ),
-                          );
-                        },
+                child: DefaultTabController(
+                  length: controller.carsTabs.length,
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: BoxBorder.fromLTRB(
+                            top: const BorderSide(color: Colors.grey),
+                            bottom: const BorderSide(color: Colors.grey),
+                          ),
+                        ),
+                        child: TabBar(
+                          onTap: (i) {
+                            if (i == 0) {
+                              controller.itemsPageName.value = 'items';
+                            } else {
+                              controller.itemsPageName.value =
+                                  'purchase agreement items';
+                            }
+                          },
+                          unselectedLabelColor: Colors.grey,
+                          tabAlignment: TabAlignment.start,
+                          isScrollable: true,
+                          indicatorColor: mainColor,
+                          labelColor: mainColor,
+                          splashBorderRadius: BorderRadius.circular(5),
+                          dividerColor: Colors.transparent,
+
+                          tabs: controller.carsTabs,
+                        ),
                       ),
-                    ),
-                  ],
+
+                      Expanded(
+                        child: TabBarView(
+                          children: [
+                            Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  color: Colors.white,
+                                  child: Row(
+                                    children: [
+                                      newItemButton(context, controller),
+                                      const Spacer(),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: GetX<CarTradingDashboardController>(
+                                    builder: (controller) {
+                                      return SingleChildScrollView(
+                                        scrollDirection: Axis.vertical,
+                                        child: SizedBox(
+                                          width: constraints.maxWidth,
+                                          child: tableOfScreens(
+                                            constraints: constraints,
+                                            context: context,
+                                            controller: controller,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  color: Colors.white,
+                                  child: Row(
+                                    children: [
+                                      newItemButtonForPurchaseAgreement(
+                                        context,
+                                        controller,
+                                      ),
+                                      const Spacer(),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: GetX<CarTradingDashboardController>(
+                                    builder: (controller) {
+                                      return SingleChildScrollView(
+                                        scrollDirection: Axis.vertical,
+                                        child: SizedBox(
+                                          width: constraints.maxWidth,
+                                          child:
+                                              tableOfScreensForPurchaseAgreement(
+                                                constraints: constraints,
+                                                context: context,
+                                                controller: controller,
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                //  Expanded(
+                //   child: GetX<CarTradingDashboardController>(
+                //     builder: (controller) {
+                //       return SingleChildScrollView(
+                //         scrollDirection: Axis.vertical,
+                //         child: SizedBox(
+                //           width: constraints.maxWidth,
+                //           child: tableOfScreens(
+                //             constraints: constraints,
+                //             context: context,
+                //             controller: controller,
+                //           ),
+                //         ),
+                //       );
+                //     },
+                //   ),
+                // ),
               ),
             ),
           ],
@@ -137,39 +221,66 @@ Widget addNewCarTradeOrEdit({
         padding: const EdgeInsets.only(top: 8, right: 4),
         child: GetX<CarTradingDashboardController>(
           builder: (controller) {
-            return Row(
-              spacing: 10,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Text(
-                  'Total Paid:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                textForDataRowInTable(
-                  text: '${controller.totalPays.value}',
-                  color: Colors.red,
-                  isBold: true,
-                ),
-                const Text(
-                  'Total Received:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                textForDataRowInTable(
-                  text: '${controller.totalReceives.value}',
-                  color: Colors.green,
-                  isBold: true,
-                ),
-                const Text(
-                  'Net:',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                textForDataRowInTable(
-                  text: '${controller.totalNETs.value}',
-                  color: Colors.blueGrey,
-                  isBold: true,
-                ),
-              ],
-            );
+            return controller.itemsPageName.value.toLowerCase() == 'items'
+                ? Row(
+                    spacing: 10,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const Text(
+                        'Total Paid:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      textForDataRowInTable(
+                        text: '${controller.totalPays.value}',
+                        color: Colors.red,
+                        isBold: true,
+                      ),
+                      const Text(
+                        'Total Received:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      textForDataRowInTable(
+                        text: '${controller.totalReceives.value}',
+                        color: Colors.green,
+                        isBold: true,
+                      ),
+                      const Text(
+                        'Net:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      textForDataRowInTable(
+                        text: '${controller.totalNETs.value}',
+                        color: Colors.blueGrey,
+                        isBold: true,
+                      ),
+                    ],
+                  )
+                : Row(
+                    spacing: 10,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const Text(
+                        'Total Amount:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      textForDataRowInTable(
+                        text:
+                            '${controller.totalPurchaseAgreementAmount.value}',
+                        color: Colors.green,
+                        isBold: true,
+                      ),
+                      const Text(
+                        'Total Down Payment:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      textForDataRowInTable(
+                        text:
+                            '${controller.totalPurchaseAgreementDownPayment.value}',
+                        color: Colors.red,
+                        isBold: true,
+                      ),
+                    ],
+                  );
           },
         ),
       ),
@@ -188,9 +299,6 @@ Widget tableOfScreens({
     dataRowMinHeight: 30,
     columnSpacing: 10,
     showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       const DataColumn(label: Text('')),
       DataColumn(
@@ -316,6 +424,39 @@ IconButton deleteSection(
   );
 }
 
+IconButton deleteSectionForPurchaseAgreement(
+  CarTradingDashboardController controller,
+  BuildContext context,
+  CarTradingPurchaseAgreementModel itemData,
+) {
+  return IconButton(
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: 'Are you sure you want to delete purchase agreement item?',
+        onPressed: () async {
+          await controller.deletePurchaseAgreementItem(itemData.id ?? '');
+          controller.calculatePurchaseAgreementTotals();
+        },
+      );
+    },
+    icon: deleteIcon,
+  );
+}
+
+IconButton printeSectionForPurchaseAgreement(
+  CarTradingDashboardController controller,
+  BuildContext context,
+  CarTradingPurchaseAgreementModel itemData,
+) {
+  return IconButton(
+    onPressed: () {
+     controller.printPurchaseAgreement(itemData);
+    },
+    icon: printIcons,
+  );
+}
+
 IconButton editSection(
   BuildContext context,
   CarTradingDashboardController controller,
@@ -389,6 +530,42 @@ IconButton editSection(
   );
 }
 
+IconButton editSectionForPurchaseAgreement(
+  BuildContext context,
+  CarTradingDashboardController controller,
+  CarTradingPurchaseAgreementModel itemData,
+  BoxConstraints constraints,
+) {
+  return IconButton(
+    onPressed: () async {
+      controller.agreementNumber.text = itemData.agreementNumber ?? '';
+      controller.agreementdate.text = textToDate(itemData.agreementDate);
+      controller.buyerName.text = itemData.buyerName ?? '';
+      controller.buyerID.text = itemData.buyerID ?? '';
+      controller.buyerEmail.text = itemData.buyerEmail ?? '';
+      controller.buyerPhone.text = itemData.buyerPhone ?? '';
+      controller.sellerName.text = itemData.sellerName ?? '';
+      controller.sellerID.text = itemData.sellerID ?? '';
+      controller.sellerEmail.text = itemData.sellerEmail ?? '';
+      controller.sellerPhone.text = itemData.sellerPhone ?? '';
+      controller.agreementTotal.text = itemData.amount?.toString() ?? '0';
+      controller.agreementdownpayment.text =
+          itemData.aownpayment?.toString() ?? '0';
+      controller.agreementNote.text = itemData.note ?? '';
+      purchaseAgreementItemDialog(
+        controller: controller,
+        canEdit: true,
+        onPressed: () async {
+          await controller.updatePurchaseAgreementItem(itemData.id ?? '');
+          controller.calculatePurchaseAgreementTotals();
+          Get.back();
+        },
+      );
+    },
+    icon: editIcon,
+  );
+}
+
 ElevatedButton newItemButton(
   BuildContext context,
   CarTradingDashboardController controller,
@@ -414,7 +591,149 @@ ElevatedButton newItemButton(
         },
       );
     },
-    style: new2ButtonStyle,
+    style: newButtonStyle,
     child: const Text('New Line'),
+  );
+}
+
+Widget tableOfScreensForPurchaseAgreement({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required CarTradingDashboardController controller,
+}) {
+  return DataTable(
+    horizontalMargin: horizontalMarginForTable,
+    dataRowMaxHeight: 40,
+    dataRowMinHeight: 30,
+    columnSpacing: 10,
+    showBottomBorder: true,
+    columns: [
+      const DataColumn(label: Text('')),
+      DataColumn(
+        label: AutoSizedText(text: 'Agreement No.', constraints: constraints),
+      ),
+      DataColumn(
+        label: AutoSizedText(constraints: constraints, text: 'Agreement Date'),
+      ),
+      DataColumn(
+        label: AutoSizedText(constraints: constraints, text: 'Seller Name'),
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.start,
+
+        label: AutoSizedText(constraints: constraints, text: 'Buyer Name'),
+      ),
+      DataColumn(
+        numeric: true,
+        label: AutoSizedText(constraints: constraints, text: 'Total Amount'),
+      ),
+      DataColumn(
+        numeric: true,
+        label: AutoSizedText(constraints: constraints, text: 'Downpayment'),
+      ),
+    ],
+    rows:
+        controller.filteredPurchaseAgreementAddedItems.isEmpty &&
+            controller.searchForItems.value.text.isEmpty
+        ? controller.purchaseAgreementAddedItems
+              .where((item) => item.deleted == false)
+              .map<DataRow>((item) {
+                return dataRowForTheTableForPurchaseAgreemnt(
+                  item,
+                  context,
+                  constraints,
+                  controller,
+                );
+              })
+              .toList()
+        : controller.filteredPurchaseAgreementAddedItems
+              .where((item) => item.deleted == false)
+              .map<DataRow>((item) {
+                return dataRowForTheTableForPurchaseAgreemnt(
+                  item,
+                  context,
+                  constraints,
+                  controller,
+                );
+              })
+              .toList(),
+  );
+}
+
+DataRow dataRowForTheTableForPurchaseAgreemnt(
+  CarTradingPurchaseAgreementModel itemData,
+  BuildContext context,
+  BoxConstraints constraints,
+  CarTradingDashboardController controller,
+) {
+  return DataRow(
+    cells: [
+      DataCell(
+        Row(
+          spacing: 5,
+          children: [
+            deleteSectionForPurchaseAgreement(controller, context, itemData),
+            editSectionForPurchaseAgreement(
+              context,
+              controller,
+              itemData,
+              constraints,
+            ),
+            printeSectionForPurchaseAgreement(controller, context, itemData),
+          ],
+        ),
+      ),
+      DataCell(Text(itemData.agreementNumber ?? '')),
+      DataCell(Text(textToDate(itemData.agreementDate))),
+      DataCell(Text(itemData.sellerName.toString())),
+      DataCell(Text(itemData.buyerName.toString())),
+      DataCell(
+        textForDataRowInTable(
+          text: itemData.amount?.toString() ?? '0',
+          isBold: true,
+          color: Colors.green,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: itemData.aownpayment?.toString() ?? "0",
+          isBold: true,
+          color: Colors.red,
+        ),
+      ),
+    ],
+  );
+}
+
+ElevatedButton newItemButtonForPurchaseAgreement(
+  BuildContext context,
+  CarTradingDashboardController controller,
+) {
+  return ElevatedButton(
+    onPressed: () {
+      controller.agreementNumber.clear();
+      controller.agreementdate.text = textToDate(DateTime.now());
+      controller.buyerName.text = '';
+      controller.buyerID.text = '';
+      controller.buyerEmail.text = '';
+      controller.buyerPhone.text = '';
+      controller.sellerName.text = 'ISSA HASSAN YAKOUB';
+      controller.sellerID.text = '784-1988-2628387-5';
+      controller.sellerEmail.text = 'sales@compass-at.com';
+      controller.sellerPhone.text = '054 567 6644';
+      controller.agreementTotal.clear();
+      controller.agreementdownpayment.clear();
+      controller.agreementNote.clear();
+      purchaseAgreementItemDialog(
+        controller: controller,
+        canEdit: true,
+        onPressed: () async {
+          await controller.addNewPurchaseAgreementItem();
+          controller.calculatePurchaseAgreementTotals();
+        },
+      );
+    },
+    style: newButtonStyle,
+    child: const Text('New Purchase Agreement'),
   );
 }

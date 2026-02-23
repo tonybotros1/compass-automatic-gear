@@ -767,7 +767,6 @@ class Helpers {
 
       final decoded = jsonDecode(buffer.toString());
       final List<dynamic> customers = decoded['customers'];
-      print(customers[0]);
 
       return {for (final customer in customers) customer['_id']: customer};
     } catch (e) {

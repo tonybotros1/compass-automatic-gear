@@ -577,11 +577,21 @@ class JobCardController extends GetxController {
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(0),
         header: (context) => withHeader
-            ? pw.Image(headerImage, height: 115, fit: pw.BoxFit.fitWidth)
+            ? pw.Image(
+                headerImage,
+                height: 115,
+                fit: pw.BoxFit.fitWidth,
+                alignment: pw.Alignment.topCenter,
+              )
             : pw.SizedBox(height: 115),
 
         footer: (context) => withHeader
-            ? pw.Image(footerImage, height: 100, fit: pw.BoxFit.fitWidth)
+            ? pw.Image(
+                footerImage,
+                height: 100,
+                fit: pw.BoxFit.fitWidth,
+                alignment: pw.Alignment.bottomCenter,
+              )
             : pw.SizedBox(height: 100),
         build: (context) {
           return [

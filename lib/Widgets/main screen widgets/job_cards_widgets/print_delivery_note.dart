@@ -4,7 +4,12 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
 import '../../../consts.dart';
 
-pw.Widget infoRow({required String title, required String value}) {
+pw.Widget infoRow({
+  required String title,
+  required String value,
+  bool? isNumber = false,
+  pw.Font? font
+}) {
   return pw.Padding(
     padding: const pw.EdgeInsets.only(bottom: 4),
     child: pw.Row(
@@ -18,7 +23,12 @@ pw.Widget infoRow({required String title, required String value}) {
         ),
         pw.Expanded(
           flex: 2,
-          child: pw.Text(value, style: fontStyleForPDFText, softWrap: true),
+          child: pw.Text(
+            value,
+            style: fontStyleForPDFText,
+            softWrap: true,
+            textAlign: isNumber == true ? pw.TextAlign.end : null,
+          ),
         ),
       ],
     ),
