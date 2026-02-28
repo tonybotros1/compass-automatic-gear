@@ -95,11 +95,8 @@ Widget tableOfScreens({
     dataRowMinHeight: 30,
     columnSpacing: 5,
     showBottomBorder: true,
-    dataTextStyle: regTextStyle,
-    headingTextStyle: fontStyleForTableHeader,
     sortColumnIndex: controller.sortColumnIndex.value,
     sortAscending: controller.isAscending.value,
-    headingRowColor: WidgetStatePropertyAll(Colors.grey[300]),
     columns: [
       DataColumn(
         label: AutoSizedText(text: 'Code', constraints: constraints),

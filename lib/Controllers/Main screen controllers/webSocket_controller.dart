@@ -11,11 +11,14 @@ class WebSocketService extends GetxService {
   final _events = StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<Map<String, dynamic>> get events => _events.stream;
-
-  void connect() {
+  String? _userId;
+  bool manualClose = false;
+  void connect(String? userId) {
+    _userId = userId;
     if (channel != null) return; // don’t reconnect per screen
     try {
-      channel = WebSocketChannel.connect(Uri.parse(webSocketURL));
+      manualClose = false;
+      channel = WebSocketChannel.connect(Uri.parse('$webSocketURL/$userId'));
 
       channel!.stream.listen(
         (event) {
@@ -29,26 +32,36 @@ class WebSocketService extends GetxService {
         onError: (error) {
           // print("⚠️ WebSocket error: $error");
           channel = null;
-          Future.delayed(
-            const Duration(seconds: 2),
-            connect,
-          ); // 🔁 auto reconnect
+          if (manualClose || _userId == null) return;
+          Future.delayed(const Duration(seconds: 2), () {
+            if (channel == null && _userId != null) {
+              connect(_userId!);
+            }
+          }); // 🔁 auto reconnect
         },
         onDone: () {
           // print("🔌 WebSocket disconnected, reconnecting...");
           channel = null;
-          Future.delayed(
-            const Duration(seconds: 2),
-            connect,
-          ); // 🔁 auto reconnect
+          Future.delayed(const Duration(seconds: 2), () {
+            if (channel == null && _userId != null) {
+              connect(_userId!);
+            }
+          }); // 🔁 auto reconnect
         },
       );
     } catch (e) {
       channel = null;
-      Future.delayed(
-        const Duration(seconds: 3),
-        connect,
-      ); // Retry after short delay
+      Future.delayed(const Duration(seconds: 3), () {
+        if (channel == null && _userId != null) {
+          connect(_userId!);
+        }
+      }); // Retry after short delay
     }
+  }
+
+  void disconnect() {
+    manualClose = true;
+    channel?.sink.close();
+    channel = null;
   }
 }

@@ -28,6 +28,11 @@ class DataMigrationController extends GetxController {
     '5': {'name': 'AP Invoices'},
     '6': {'name': 'Receiving'},
     '7': {'name': 'Receiving Items'},
+    '8': {'name': 'Time Sheets'},
+    '9': {'name': 'Converters'},
+    '10': {'name': 'Issuing Header'},
+    '11': {'name': 'Issuing Items Details'},
+    '12': {'name': 'Issuing Converters Details'},
   });
   @override
   void onInit() async {

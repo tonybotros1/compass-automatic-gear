@@ -130,7 +130,6 @@ class IssueItemsController extends GetxController {
   RxInt initStatusPickersValue = RxInt(1);
   RxMap companyDetails = RxMap({});
 
-
   @override
   void onInit() async {
     // filterSearch();

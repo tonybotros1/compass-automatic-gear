@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../consts.dart';
 import '../../text_button.dart';
-import 'add_new_purchase_agreement_item_or_edit.dart';
+import 'add_new_sales_agreement_item_or_edit.dart';
 
-Future<dynamic> purchaseAgreementItemDialog({
+Future<dynamic> salesAgreementItemDialog({
   required CarTradingDashboardController controller,
   required bool canEdit,
   required void Function()? onPressed,
@@ -35,7 +35,7 @@ Future<dynamic> purchaseAgreementItemDialog({
                     spacing: 10,
                     children: [
                       Text(
-                        '🧾 Purchase Agreement Items',
+                        '🧾 Sales Agreement Items',
                         style: fontStyleForScreenNameUsedInButtons,
                       ),
                       const Spacer(),
@@ -57,7 +57,7 @@ Future<dynamic> purchaseAgreementItemDialog({
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: addNewPurchaseAgreementItemOrEdit(
+                    child: addNewSalesAgreementItemOrEdit(
                       constraints: constraints,
                       context: context,
                       controller: controller,

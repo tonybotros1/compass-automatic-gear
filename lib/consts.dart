@@ -17,16 +17,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://172.168.0.69:8000';
-String webSocketURL = "ws://172.168.0.69:8000/ws"; // mobile : 192.168.43.58
+// String backendTestURI = 'http://172.168.1.18:8000';
+// String webSocketURL = "ws://172.168.1.18:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
 // String webSocketURL = "ws://10.0.2.2:8000/ws";
 
 // ======== production urls ========
-// String backendTestURI = 'https://datahubai-backend.onrender.com';
-// String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
+String backendTestURI = 'https://datahubai-backend.onrender.com';
+String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
 
 final formatter = CurrencyInputFormatter();
 
@@ -556,6 +556,13 @@ var findButtonStyle = ElevatedButton.styleFrom(
 
 var lastChangesButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.orange,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+  minimumSize: const Size(100, 40),
+);
+
+var closeTaskButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: Colors.black54,
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
@@ -1105,7 +1112,7 @@ Container statusBox(
     decoration: BoxDecoration(
       // border: Border.all(color: Colors.grey.shade300, width: 2),
       borderRadius: BorderRadius.circular(5),
-      color: status == 'New' || status == "Active"
+      color: status == 'New' || status == "Active" || status == 'Open'
           ? Colors.green.withAlpha(alpha)
           : status == 'Posted' || status == 'Sold' || status == "Probation"
           ? Colors.teal.withAlpha(alpha)
@@ -1259,13 +1266,22 @@ Widget closeIcon() {
   );
 }
 
+// String? convertDateToIson(String date) {
+//   if (date.isEmpty) {
+//     return null;
+//   }
+//   final parsedDate = format.parse(date);
+//   final isoDate = parsedDate.toIso8601String();
+//   return isoDate;
+// }
+
 String? convertDateToIson(String date) {
-  if (date.isEmpty) {
+  if (date.trim().isEmpty) return null;
+  try {
+    return format.parseStrict(date).toIso8601String();
+  } on FormatException {
     return null;
   }
-  final parsedDate = format.parse(date);
-  final isoDate = parsedDate.toIso8601String();
-  return isoDate;
 }
 
 // bool isBeforeToday(String dateStr) {

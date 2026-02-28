@@ -39,6 +39,7 @@ import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dar
 import '../../Screens/Main screens/System Administrator/Setup/receiving.dart';
 import '../../Screens/Main screens/System Administrator/Setup/system_variables.dart';
 import '../../Screens/Main screens/System Administrator/Setup/time_sheets.dart';
+import '../../Screens/Main screens/System Administrator/Setup/to_do_list.dart';
 import '../../Screens/Main screens/System Administrator/User Management/data_migration.dart';
 import '../../Screens/Main screens/System Administrator/User Management/menus.dart';
 import '../../Screens/Main screens/System Administrator/User Management/responsibilities.dart';
@@ -80,10 +81,12 @@ class MainScreenController extends GetxController {
   String backendUrl = backendTestURI;
   final secureStorage = const FlutterSecureStorage();
   Helpers helper = Helpers();
+  final unreadChatCount = 0.obs;
 
   @override
   void onInit() async {
     connectWebSocket();
+    loadUnreadCount();
     getCompanyDetails();
     getFavoriteScreens();
     getScreens();
@@ -104,6 +107,25 @@ class MainScreenController extends GetxController {
           break;
       }
     });
+  }
+
+  Future<void> loadUnreadCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final accessToken = '${prefs.getString('accessToken')}';
+
+    final url = Uri.parse('$backendUrl/to_do_list/chat/unread_count');
+    final res = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (res.statusCode == 200) {
+      final body = jsonDecode(res.body);
+      unreadChatCount.value = (body['unread_total'] ?? 0) as int;
+    }
   }
 
   // this function is to get company details
@@ -229,6 +251,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: DataMigration());
       case '/jobCardDashboard':
         return const SizedBox(child: JobCardsDashboard());
+      case '/toDoList':
+        return const SizedBox(child: ToDoList());
 
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));

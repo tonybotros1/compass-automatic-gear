@@ -377,7 +377,7 @@ Widget tableOfScreens({
         DataColumn2(
           size: ColumnSize.M,
           label: AutoSizedText(
-            text: 'Job / Converter',
+            text: 'Issue Type',
             constraints: constraints,
           ),
           // onSort: controller.onSort,

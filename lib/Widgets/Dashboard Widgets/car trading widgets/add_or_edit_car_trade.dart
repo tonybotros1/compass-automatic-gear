@@ -9,7 +9,7 @@ import 'buy_sell_section.dart';
 import 'car_information_section.dart';
 import 'item_dialog.dart';
 import 'note_section.dart';
-import 'purchase_agreement_item_dialog.dart';
+import 'sales_agreement_item_dialog.dart';
 
 Widget addNewCarTradeOrEdit({
   required BuildContext context,
@@ -177,7 +177,7 @@ Widget addNewCarTradeOrEdit({
                                         child: SizedBox(
                                           width: constraints.maxWidth,
                                           child:
-                                              tableOfScreensForPurchaseAgreement(
+                                              tableOfScreensForSalesAgreement(
                                                 constraints: constraints,
                                                 context: context,
                                                 controller: controller,
@@ -451,7 +451,7 @@ IconButton printeSectionForPurchaseAgreement(
 ) {
   return IconButton(
     onPressed: () {
-     controller.printPurchaseAgreement(itemData);
+      controller.printPurchaseAgreement(itemData);
     },
     icon: printIcons,
   );
@@ -552,7 +552,7 @@ IconButton editSectionForPurchaseAgreement(
       controller.agreementdownpayment.text =
           itemData.aownpayment?.toString() ?? '0';
       controller.agreementNote.text = itemData.note ?? '';
-      purchaseAgreementItemDialog(
+      salesAgreementItemDialog(
         controller: controller,
         canEdit: true,
         onPressed: () async {
@@ -596,7 +596,7 @@ ElevatedButton newItemButton(
   );
 }
 
-Widget tableOfScreensForPurchaseAgreement({
+Widget tableOfScreensForSalesAgreement({
   required BoxConstraints constraints,
   required BuildContext context,
   required CarTradingDashboardController controller,
@@ -724,7 +724,7 @@ ElevatedButton newItemButtonForPurchaseAgreement(
       controller.agreementTotal.clear();
       controller.agreementdownpayment.clear();
       controller.agreementNote.clear();
-      purchaseAgreementItemDialog(
+      salesAgreementItemDialog(
         controller: controller,
         canEdit: true,
         onPressed: () async {
@@ -734,6 +734,6 @@ ElevatedButton newItemButtonForPurchaseAgreement(
       );
     },
     style: newButtonStyle,
-    child: const Text('New Purchase Agreement'),
+    child: const Text('New Sales Agreement'),
   );
 }

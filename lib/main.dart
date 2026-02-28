@@ -28,7 +28,8 @@ void main() async {
   globalPrefs = await SharedPreferences.getInstance();
 
   final ws = Get.put(WebSocketService());
-  ws.connect();
+  
+  ws.connect(null);
   runApp(const MyApp());
 }
 

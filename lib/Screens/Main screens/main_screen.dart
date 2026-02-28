@@ -50,6 +50,51 @@ class MainScreen extends StatelessWidget {
                       spacing: 20,
                       children: [
                         Obx(() {
+                          return Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: Colors.blueGrey,
+                                radius: 25,
+                                child: IconButton(
+                                  tooltip: 'Notifications',
+                                  onPressed: () {},
+                                  icon: const Icon(
+                                    Icons.notifications,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                              if (mainScreenController.unreadChatCount.value >
+                                  0)
+                                Positioned(
+                                  right: 2,
+                                  top: 2,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Text(
+                                      mainScreenController
+                                                  .unreadChatCount
+                                                  .value >
+                                              99
+                                          ? '99+'
+                                          : '${mainScreenController.unreadChatCount.value}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        }),
+                        Obx(() {
                           final currentRoute =
                               mainScreenController.selectedScreenRoute.value;
                           final isFavorite = mainScreenController

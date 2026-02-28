@@ -2,7 +2,7 @@ import 'base_model_for_issing_items.dart';
 
 class IssuingModel {
   String? id;
-  String? date;
+  DateTime? date;
   String? branch;
   String? issueType;
   String? jobCardId;
@@ -10,8 +10,8 @@ class IssuingModel {
   String? note;
   String? receivedBy;
   String? status;
-  String? createdAt;
-  String? updatedAt;
+  DateTime? createdAt;
+  DateTime? updatedAt;
   String? companyId;
   String? issuingNumber;
   String? branchName;
@@ -22,58 +22,117 @@ class IssuingModel {
   List<BaseModelForIssuingItems>? itemsDetailsSection;
   List<BaseModelForIssuingItems>? convertersDetailsSection;
 
-  IssuingModel(
-      {this.id,
-      this.date,
-      this.branch,
-      this.issueType,
-      this.jobCardId,
-      this.converterId,
-      this.note,
-      this.receivedBy,
-      this.status,
-      this.createdAt,
-      this.updatedAt,
-      this.companyId,
-      this.issuingNumber,
-      this.branchName,
-      this.issueTypeName,
-      this.receivedByName,
-      this.detailsString,
-      this.itemsDetailsSection,
-      this.total,
-      this.convertersDetailsSection});
-
+  IssuingModel({
+    this.id,
+    this.date,
+    this.branch,
+    this.issueType,
+    this.jobCardId,
+    this.converterId,
+    this.note,
+    this.receivedBy,
+    this.status,
+    this.createdAt,
+    this.updatedAt,
+    this.companyId,
+    this.issuingNumber,
+    this.branchName,
+    this.issueTypeName,
+    this.receivedByName,
+    this.detailsString,
+    this.itemsDetailsSection,
+    this.total,
+    this.convertersDetailsSection,
+  });
   IssuingModel.fromJson(Map<String, dynamic> json) {
-    id = json['_id'];
-    date = json['date'];
-    branch = json['branch'];
-    issueType = json['issue_type'];
-    jobCardId = json['job_card_id'];
-    converterId = json['converter_id'];
-    note = json['note'];
-    receivedBy = json['received_by'];
-    status = json['status'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
-    companyId = json['company_id'];
-    issuingNumber = json['issuing_number'];
-    branchName = json['branch_name'];
-    issueTypeName = json['issue_type_name'];
-    receivedByName = json['received_by_name'];
-    detailsString = json['details_string'];
-    total = json['totals'];
-    if (json['items_details_section'] != null) {
-      itemsDetailsSection = <BaseModelForIssuingItems>[];
-      json['items_details_section'].forEach((v) {
-        itemsDetailsSection!.add(BaseModelForIssuingItems.fromJsonForInventoryItems(v));
-      });
-    }
-    if (json['converters_details_section'] != null) {
-      convertersDetailsSection = <BaseModelForIssuingItems>[];
-      json['converters_details_section'].forEach((v) {
-        convertersDetailsSection!.add(BaseModelForIssuingItems.fromJsonForConverters(v));
-      });
+    try {
+      id = json.containsKey('_id') ? json['_id'] ?? '' : '';
+
+      date = json.containsKey('date') && json['date'] != null
+          ? DateTime.tryParse(json['date'].toString())
+          : null;
+
+      branch = json.containsKey('branch') ? json['branch'] ?? '' : '';
+
+      issueType = json.containsKey('issue_type')
+          ? json['issue_type'] ?? ''
+          : '';
+
+      jobCardId = json.containsKey('job_card_id')
+          ? json['job_card_id'] ?? ''
+          : '';
+
+      converterId = json.containsKey('converter_id')
+          ? json['converter_id'] ?? ''
+          : '';
+
+      note = json.containsKey('note') ? json['note'] ?? '' : '';
+
+      receivedBy = json.containsKey('received_by')
+          ? json['received_by'] ?? ''
+          : '';
+
+      status = json.containsKey('status') ? json['status'] ?? '' : '';
+
+      createdAt = json.containsKey('createdAt') && json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString())
+          : null;
+
+      updatedAt = json.containsKey('updatedAt') && json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'].toString())
+          : null;
+
+      companyId = json.containsKey('company_id')
+          ? json['company_id'] ?? ''
+          : '';
+
+      issuingNumber = json.containsKey('issuing_number')
+          ? json['issuing_number']?.toString() ?? ''
+          : '';
+
+      branchName = json.containsKey('branch_name')
+          ? json['branch_name'] ?? ''
+          : '';
+
+      issueTypeName = json.containsKey('issue_type_name')
+          ? json['issue_type_name'] ?? ''
+          : '';
+
+      receivedByName = json.containsKey('received_by_name')
+          ? json['received_by_name'] ?? ''
+          : '';
+
+      detailsString = json.containsKey('details_string')
+          ? json['details_string'] ?? ''
+          : '';
+
+      total = json.containsKey('totals')
+          ? json['totals'] ?? 0.0
+          : 0.0;
+
+      if (json.containsKey('items_details_section') &&
+          json['items_details_section'] != null) {
+        itemsDetailsSection = <BaseModelForIssuingItems>[];
+        for (var v in json['items_details_section']) {
+          itemsDetailsSection!.add(
+            BaseModelForIssuingItems.fromJsonForInventoryItems(v),
+          );
+        }
+      }
+
+      if (json.containsKey('converters_details_section') &&
+          json['converters_details_section'] != null) {
+        convertersDetailsSection = <BaseModelForIssuingItems>[];
+        for (var v in json['converters_details_section']) {
+          convertersDetailsSection!.add(
+            BaseModelForIssuingItems.fromJsonForConverters(v),
+          );
+        }
+      }
+    } catch (e) {
+    //   print('❌ Error parsing IssuingModel: $e');
+    // print('StackTrace: $stackTrace');
+    // print('JSON data: $json');
     }
   }
 
@@ -97,12 +156,14 @@ class IssuingModel {
     data['received_by_name'] = receivedByName;
     data['details_string'] = detailsString;
     if (itemsDetailsSection != null) {
-      data['items_details_section'] =
-          itemsDetailsSection!.map((v) => v.toJsonForinventoryItems()).toList();
+      data['items_details_section'] = itemsDetailsSection!
+          .map((v) => v.toJsonForinventoryItems())
+          .toList();
     }
     if (convertersDetailsSection != null) {
-      data['converters_details_section'] =
-          convertersDetailsSection!.map((v) => v.toJsonForConverters()).toList();
+      data['converters_details_section'] = convertersDetailsSection!
+          .map((v) => v.toJsonForConverters())
+          .toList();
     }
     return data;
   }

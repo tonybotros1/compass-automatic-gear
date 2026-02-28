@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 
-Widget addNewPurchaseAgreementItemOrEdit({
+Widget addNewSalesAgreementItemOrEdit({
   required BoxConstraints constraints,
   required BuildContext context,
   required CarTradingDashboardController controller,

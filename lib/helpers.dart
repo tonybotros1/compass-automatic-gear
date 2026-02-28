@@ -853,6 +853,39 @@ class Helpers {
     }
   }
 
+  Future<Map<String, dynamic>> getSysUsersForLOV() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendTestURI/users/get_all_users_for_lov');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decode = jsonDecode(response.body);
+        List<dynamic> jsonData = decode['users'];
+        Map<String, dynamic> map = {
+          for (var user in jsonData) user['_id']: user,
+        };
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getSysUsers();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      return {};
+    } catch (e) {
+      return {};
+    }
+  }
+
   Future<Map<String, dynamic>> getInvoiceItems() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -212,7 +212,7 @@ class CarTradingDashboardController extends GetxController {
 
   List<Widget> carsTabs = const [
     Tab(text: 'Items'),
-    Tab(text: 'Purchase Agreement'),
+    Tab(text: 'Sales Agreement'), // note previous name was purchase agreement
   ];
   RxMap companyDetails = RxMap({});
 
@@ -644,7 +644,7 @@ class CarTradingDashboardController extends GetxController {
                       crossAxisAlignment: pw.CrossAxisAlignment.end,
                       children: [
                         pw.Text(
-                          'PURCHASE AGREEMENT',
+                          'SALES AGREEMENT',
                           style: const pw.TextStyle(
                             color: PdfColors.red,
                             fontSize: 20,
