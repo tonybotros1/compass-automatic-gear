@@ -109,10 +109,12 @@ class ToDoListController extends GetxController {
               (message["unread_total"] ?? 0) as int;
           break;
 
-        case "new_task_description_note_added":
-          final newNote = ToDoListDescriptionModel.fromJson(message["data"]);
-          allDescriptionNotes.add(newNote);
-          break;
+        // case "new_task_description_note_added":
+        //   print('yes added');
+        //   print(message["data"]);
+        //   final newNote = ToDoListDescriptionModel.fromJson(message["data"]);
+        //   allDescriptionNotes.add(newNote);
+        //   break;
 
         case "task_status_updated":
           final taskId = message["data"]['_id'];

@@ -428,13 +428,13 @@ DataRow dataRowForTheTable(
   return DataRow(
     selected: controller.selectedRowIndex.value == index,
     onSelectChanged: (selected) async {
+      int i = controller.allToDoLists.indexWhere((t)=> t.id == toDoListId);
+      controller.allToDoLists[i].unreadNotes = 0;
+      controller.allToDoLists.refresh();
       controller.currentTaskId.value = toDoListId;
       controller.selectRow(index);
       await controller.getTaskDescriptions(toDoListId);
       await controller.markTaskAsRead(toDoListId);
-      int i = controller.allToDoLists.indexWhere((t)=> t.id == toDoListId);
-      controller.allToDoLists[i].unreadNotes = 0;
-      controller.allToDoLists.refresh();
     },
     color: WidgetStateProperty.resolveWith<Color?>((states) {
       if (states.contains(WidgetState.selected)) {
