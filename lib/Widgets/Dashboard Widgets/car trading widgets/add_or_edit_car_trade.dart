@@ -450,10 +450,25 @@ IconButton printeSectionForPurchaseAgreement(
   CarTradingPurchaseAgreementModel itemData,
 ) {
   return IconButton(
+    tooltip: 'Print Sales Agreement',
     onPressed: () {
-      controller.printPurchaseAgreement(itemData);
+      controller.printPurchaseAgreementOrQuotation(itemData, 'sales agreement');
     },
     icon: printIcons,
+  );
+}
+
+IconButton printeSectionForQuotation(
+  CarTradingDashboardController controller,
+  BuildContext context,
+  CarTradingPurchaseAgreementModel itemData,
+) {
+  return IconButton(
+    tooltip: 'Print Quotation',
+    onPressed: () {
+      controller.printPurchaseAgreementOrQuotation(itemData, 'quotation');
+    },
+    icon: printQuotationIcons,
   );
 }
 
@@ -461,7 +476,7 @@ IconButton editSection(
   BuildContext context,
   CarTradingDashboardController controller,
   CarTradingItemsModel itemData,
-  constraints,
+  BoxConstraints constraints,
 ) {
   return IconButton(
     onPressed: () async {
@@ -680,6 +695,7 @@ DataRow dataRowForTheTableForPurchaseAgreemnt(
               constraints,
             ),
             printeSectionForPurchaseAgreement(controller, context, itemData),
+            printeSectionForQuotation(controller, context, itemData),
           ],
         ),
       ),

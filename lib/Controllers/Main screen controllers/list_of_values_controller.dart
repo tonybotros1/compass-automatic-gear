@@ -38,9 +38,12 @@ class ListOfValuesController extends GetxController {
   RxString masteredByIdForValues = RxString('');
   WebSocketService ws = Get.find<WebSocketService>();
   String backendUrl = backendTestURI;
+  RxList lovAmin = RxList([]);
+  RxBool isAdmin = RxBool(false);
 
   @override
-  void onInit() {
+  void onInit() async {
+    getSystemVariables();
     connectWebSocket();
     getLists();
 
@@ -92,6 +95,14 @@ class ListOfValuesController extends GetxController {
           break;
       }
     });
+  }
+
+  Future<void> getSystemVariables() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? useremail = prefs.getString('userEmail');
+    lovAmin.assignAll(await helper.getSystemVariablesValues('LOV_ADMIN'));
+    isAdmin.value = lovAmin.contains(useremail?.toLowerCase() ?? '');
   }
 
   // ===================================== Lists Section =============================================

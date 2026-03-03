@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/last_changes_dialog.dart';
+import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_accounts_details.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_summary_details.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_car_trading.dart';
 import '../../Widgets/my_text_field.dart';
@@ -552,13 +553,9 @@ class CarTradingDashboard extends StatelessWidget {
                                                     controller
                                                         .filterGeneralExpensesSearch();
                                                     controller
-                                                        .getCashOnHandOrBankBalance(
-                                                          'CASH',
-                                                        );
+                                                        .getCashOnHandOrBankBalance();
                                                     controller
-                                                        .getCashOnHandOrBankBalance(
-                                                          'FAB BANK',
-                                                        );
+                                                        .getCashOnHandOrBankBalance();
                                                     controller
                                                         .getCapitalsOROutstandingSummary(
                                                           'capitals',
@@ -600,94 +597,56 @@ class CarTradingDashboard extends StatelessWidget {
                       ),
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 10)),
-
                     SliverToBoxAdapter(
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: 10,
                         children: [
-                          Expanded(
-                            child: tableOfSummaryDetails(context: context),
+                          Expanded(child: tableOfSummaryDetails()),
+                          SizedBox(
+                            width: 500,
+                            height: 197,
+                            child: tableOfAccountsDetails(),
                           ),
                           GetX<CarTradingDashboardController>(
                             builder: (controller) {
-                              return Row(
-                                spacing: 10,
-                                children: [
-                                  SizedBox(
-                                    height: 200,
-                                    width: 300,
-                                    child: Column(
-                                      spacing: 10,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: SummaryBox(
-                                            title: 'BANK BALANCE',
-                                            value:
-                                                '${controller.totalNETsForBanckBalance.value}',
-                                            icon: Icons.account_balance,
-                                            iconColor: const Color(
-                                              0xFFACBAC4,
-                                            ).withValues(alpha: 0.8),
-                                            textColor: Colors.grey[700],
-                                            showRefreshIcon: false,
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: SummaryBox(
-                                            title: 'TOTAL MONEY',
-                                            value:
-                                                '${controller.totalNETsForBanckBalance.value + controller.totalNETsForAll.value}',
-                                            icon: Icons.trolley,
-                                            iconColor: const Color(
-                                              0xFFD8C9A7,
-                                            ).withValues(alpha: 0.8),
-                                            textColor: const Color(0xFF434E78),
-                                            showRefreshIcon: false,
-                                          ),
-                                        ),
-                                      ],
+                              return SizedBox(
+                                height: 197,
+                                width: 300,
+                                child: Column(
+                                  spacing: 10,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: SummaryBox(
+                                        title: 'TOTAL MONEY',
+                                        value:
+                                            '${controller.totalMoneyForAccounts.value}',
+                                        icon: Icons.trolley,
+                                        iconColor: const Color(
+                                          0xFFD8C9A7,
+                                        ).withValues(alpha: 0.8),
+                                        textColor: const Color(0xFF434E78),
+                                        showRefreshIcon: false,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    height: 200,
-                                    width: 300,
-                                    child: Column(
-                                      spacing: 10,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: SummaryBox(
-                                            title: 'CASH ON HAND',
-                                            value:
-                                                '${controller.totalNETsForAll.value}',
-                                            icon: Icons.wallet,
-                                            iconColor: const Color(
-                                              0xFFFFE8D9,
-                                            ).withValues(alpha: 0.8),
-                                            textColor: Colors.grey[700],
-                                            showRefreshIcon: false,
-                                          ),
-                                        ),
-                                        Expanded(
-                                          child: SummaryBox(
-                                            title: 'NET PROFIT',
-                                            value:
-                                                '${controller.totalNetProfit.value}',
-                                            icon: Icons.pie_chart,
-                                            iconColor: const Color(
-                                              0xffB4EBE6,
-                                            ).withValues(alpha: 0.8),
-                                            textColor: Colors.green.shade700,
-                                            showRefreshIcon: false,
-                                          ),
-                                        ),
-                                      ],
+
+                                    Expanded(
+                                      child: SummaryBox(
+                                        title: 'NET PROFIT',
+                                        value:
+                                            '${controller.totalNetProfit.value}',
+                                        icon: Icons.pie_chart,
+                                        iconColor: const Color(
+                                          0xffB4EBE6,
+                                        ).withValues(alpha: 0.8),
+                                        textColor: Colors.green.shade700,
+                                        showRefreshIcon: false,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               );
                             },
                           ),

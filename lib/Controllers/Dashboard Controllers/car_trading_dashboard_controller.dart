@@ -11,12 +11,14 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import '../../Models/car trading/accounts_summary_model.dart';
 import '../../Models/car trading/capitals_outstanding_model.dart';
 import '../../Models/car trading/car_trade_model.dart';
 import '../../Models/car trading/car_trading_items_model.dart';
 import '../../Models/car trading/car_trading_purchase_agreement_model.dart';
 import '../../Models/car trading/general_expenses_model.dart';
 import '../../Models/car trading/last_changes_model.dart';
+import '../../Models/car trading/transfer_model.dart';
 import '../../Widgets/main screen widgets/job_cards_widgets/print_delivery_note.dart';
 import '../../Widgets/main screen widgets/job_cards_widgets/print_invoice_pdf.dart';
 import '../../consts.dart';
@@ -74,8 +76,9 @@ class CarTradingDashboardController extends GetxController {
   RxDouble totalPaysForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalReceivesForAllGeneralExpenses = RxDouble(0.0);
   RxDouble totalNETsForAllGeneralExpenses = RxDouble(0.0);
-  RxDouble totalNETsForAll = RxDouble(0.0);
-  RxDouble totalNETsForBanckBalance = RxDouble(0.0);
+  // RxDouble totalNETsForAll = RxDouble(0.0);
+  // RxDouble totalNETsForBanckBalance = RxDouble(0.0);
+  RxDouble totalMoneyForAccounts = RxDouble(0.0);
   RxDouble totalNetProfit = RxDouble(0.0);
   DateFormat inputFormat = DateFormat("dd-MM-yyyy");
   RxBool isNewStatusSelected = RxBool(false);
@@ -88,7 +91,9 @@ class CarTradingDashboardController extends GetxController {
   RxString currentTradId = RxString('');
   RxString colorOutId = RxString('');
   RxBool addingNewValue = RxBool(false);
+  RxBool addingNewTransferValue = RxBool(false);
   Rx<TextEditingController> searchForItems = TextEditingController().obs;
+  Rx<TextEditingController> searchForTransfers = TextEditingController().obs;
   Rx<TextEditingController> date = TextEditingController().obs;
   Rx<TextEditingController> mileage = TextEditingController().obs;
   Rx<TextEditingController> colorOut = TextEditingController().obs;
@@ -135,6 +140,7 @@ class CarTradingDashboardController extends GetxController {
     [],
   );
   RxDouble totalPays = RxDouble(0.0);
+  RxDouble totalTransfersAmount = RxDouble(0.0);
   RxDouble totalReceives = RxDouble(0.0);
   RxDouble totalNETs = RxDouble(0.0);
   RxDouble totalPurchaseAgreementAmount = RxDouble(0.0);
@@ -144,6 +150,7 @@ class CarTradingDashboardController extends GetxController {
   RxList<CarTradingPurchaseAgreementModel> filteredPurchaseAgreementAddedItems =
       RxList<CarTradingPurchaseAgreementModel>([]);
   RxBool isCapitalLoading = RxBool(false);
+  RxBool isTransfersLoading = RxBool(false);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
   RxBool gettingCapitalsSummary = RxBool(false);
@@ -194,7 +201,7 @@ class CarTradingDashboardController extends GetxController {
   TextEditingController sellerName = TextEditingController();
   TextEditingController sellerID = TextEditingController();
   TextEditingController sellerPhone = TextEditingController();
-  TextEditingController sellerEmail = TextEditingController(text: '');
+  TextEditingController sellerEmail = TextEditingController();
   TextEditingController buyerName = TextEditingController();
   TextEditingController buyerID = TextEditingController();
   TextEditingController buyerPhone = TextEditingController();
@@ -203,12 +210,25 @@ class CarTradingDashboardController extends GetxController {
   TextEditingController agreementTotal = TextEditingController();
   TextEditingController agreementdownpayment = TextEditingController();
 
+  // transfers:
+  Rx<TextEditingController> transferDate = TextEditingController().obs;
+  TextEditingController fromAccount = TextEditingController();
+  RxString fromAccountId = RxString('');
+  TextEditingController toAccount = TextEditingController();
+  RxString toAccountId = RxString('');
+  TextEditingController transferAmount = TextEditingController();
+  Rx<TextEditingController> transferComments = TextEditingController().obs;
+
   RxList<Map<String, dynamic>> summaryData = RxList<Map<String, dynamic>>([
     {"category": "🚘  Cars"},
     {"category": "🏷️  Capital Docs"},
     {"category": "⚠️  Outstanding"},
     {"category": "📜  Expenses"},
   ]);
+
+  RxList<AccountSummaryModel> accountsSummary = RxList<AccountSummaryModel>([]);
+  RxList<TransferModel> alltransfers = RxList<TransferModel>([]);
+  RxList<TransferModel> filteredTransfers = RxList<TransferModel>([]);
 
   List<Widget> carsTabs = const [
     Tab(text: 'Items'),
@@ -229,8 +249,7 @@ class CarTradingDashboardController extends GetxController {
   void onInit() async {
     connectWebSocket();
     await getCompanyDetails();
-    getCashOnHandOrBankBalance('CASH');
-    getCashOnHandOrBankBalance('FAB BANK');
+    getCashOnHandOrBankBalance();
     getCapitalsOROutstandingSummary('capitals');
     getCapitalsOROutstandingSummary('outstanding');
     filterGeneralExpensesSearch();
@@ -476,6 +495,22 @@ class CarTradingDashboardController extends GetxController {
           final deletedId = message["data"]["_id"];
           purchaseAgreementAddedItems.removeWhere((m) => m.id == deletedId);
           break;
+
+        case "transfer_created":
+          final newModel = TransferModel.fromJson(message["data"]);
+          alltransfers.add(newModel);
+          break;
+        case "transfer_deleted":
+          final deletedId = message["data"]["_id"];
+          alltransfers.removeWhere((m) => m.id == deletedId);
+          break;
+        case "transfer_updated":
+          final updated = TransferModel.fromJson(message["data"]);
+          final index = alltransfers.indexWhere((m) => m.id == updated.id);
+          if (index != -1) {
+            alltransfers[index] = updated;
+          }
+          break;
       }
     });
   }
@@ -585,14 +620,18 @@ class CarTradingDashboardController extends GetxController {
 
   // PRINT SECTION
   // ===========================================================================
-  void printPurchaseAgreement(CarTradingPurchaseAgreementModel data) async {
-    final pdfData = await generatePurchaseAgreementPdf(data);
+  void printPurchaseAgreementOrQuotation(
+    CarTradingPurchaseAgreementModel data,
+    String type,
+  ) async {
+    final pdfData = await generatePurchaseAgreementOrQuotationPdf(data, type);
 
     await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
   }
 
-  Future<Uint8List> generatePurchaseAgreementPdf(
+  Future<Uint8List> generatePurchaseAgreementOrQuotationPdf(
     CarTradingPurchaseAgreementModel data,
+    String type,
   ) async {
     // final Font robotoMono = pw.Font.ttf(
     //   await rootBundle.load('assets/fonts/RobotoMono-VariableFont_wght.ttf'),
@@ -644,7 +683,9 @@ class CarTradingDashboardController extends GetxController {
                       crossAxisAlignment: pw.CrossAxisAlignment.end,
                       children: [
                         pw.Text(
-                          'SALES AGREEMENT',
+                          type == 'sales agreement'
+                              ? 'SALES AGREEMENT'
+                              : 'QUOTATION',
                           style: const pw.TextStyle(
                             color: PdfColors.red,
                             fontSize: 20,
@@ -749,9 +790,9 @@ class CarTradingDashboardController extends GetxController {
                                               value: year.value.text,
                                             ),
                                             infoRow(
-                                              title: 'Color in/out:',
+                                              title: 'Color out/in:',
                                               value:
-                                                  "${colorIn.value.text} / ${colorOut.value.text} ",
+                                                  "${colorOut.value.text} / ${colorIn.value.text} ",
                                             ),
                                             infoRow(
                                               title: 'VIN:',
@@ -788,23 +829,30 @@ class CarTradingDashboardController extends GetxController {
                                 value: formatNum(data.amount ?? 0, priceFormat),
                               ),
                               pw.SizedBox(height: 5),
-                              infoRow(
-                                isNumber: true,
-                                title: 'Down Payment:',
-                                value: formatNum(
-                                  data.aownpayment ?? 0,
-                                  priceFormat,
-                                ),
-                              ),
-                              pw.SizedBox(height: 5),
-                              infoRow(
-                                isNumber: true,
-                                title: 'Remaning Amount:',
-                                value: formatNum(
-                                  (data.amount ?? 0) - (data.aownpayment ?? 0),
-                                  priceFormat,
-                                ),
-                              ),
+                              type == 'sales agreement'
+                                  ? pw.Column(
+                                      children: [
+                                        infoRow(
+                                          isNumber: true,
+                                          title: 'Down Payment:',
+                                          value: formatNum(
+                                            data.aownpayment ?? 0,
+                                            priceFormat,
+                                          ),
+                                        ),
+                                        pw.SizedBox(height: 5),
+                                        infoRow(
+                                          isNumber: true,
+                                          title: 'Remaning Amount:',
+                                          value: formatNum(
+                                            (data.amount ?? 0) -
+                                                (data.aownpayment ?? 0),
+                                            priceFormat,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : pw.SizedBox(),
                             ],
                           ),
                         ),
@@ -898,46 +946,48 @@ class CarTradingDashboardController extends GetxController {
                         ),
                       ],
                     ),
-                    pw.Row(
-                      children: [
-                        pw.Expanded(
-                          child: pw.Column(
+                    type == 'sales agreement'
+                        ? pw.Row(
                             children: [
-                              infoRow(
-                                title: 'Date:',
-                                value:
-                                    '---------------------------------------------',
+                              pw.Expanded(
+                                child: pw.Column(
+                                  children: [
+                                    infoRow(
+                                      title: 'Date:',
+                                      value:
+                                          '---------------------------------------------',
+                                    ),
+                                    pw.SizedBox(height: 20),
+                                    infoRow(
+                                      title: 'Signature:',
+                                      value:
+                                          '---------------------------------------------',
+                                    ),
+                                  ],
+                                ),
                               ),
-                              pw.SizedBox(height: 20),
-                              infoRow(
-                                title: 'Signature:',
-                                value:
-                                    '---------------------------------------------',
-                              ),
-                            ],
-                          ),
-                        ),
-                        pw.SizedBox(width: 20),
+                              pw.SizedBox(width: 20),
 
-                        pw.Expanded(
-                          child: pw.Column(
-                            children: [
-                              infoRow(
-                                title: 'Date:',
-                                value:
-                                    '---------------------------------------------',
-                              ),
-                              pw.SizedBox(height: 20),
-                              infoRow(
-                                title: 'Signature:',
-                                value:
-                                    '---------------------------------------------',
+                              pw.Expanded(
+                                child: pw.Column(
+                                  children: [
+                                    infoRow(
+                                      title: 'Date:',
+                                      value:
+                                          '---------------------------------------------',
+                                    ),
+                                    pw.SizedBox(height: 20),
+                                    infoRow(
+                                      title: 'Signature:',
+                                      value:
+                                          '---------------------------------------------',
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
-                          ),
-                        ),
-                      ],
-                    ),
+                          )
+                        : pw.SizedBox(),
                   ],
                 ),
               );
@@ -958,6 +1008,175 @@ class CarTradingDashboardController extends GetxController {
     minAmount.value.clear();
     maxAmount.value.clear();
   }
+  // =============================== trnsfers section ============================================
+
+  Future<void> getAllTransferes() async {
+    try {
+      isTransfersLoading.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/car_trading/get_all_transfers');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List transferes = decoded['transfers'];
+        alltransfers.assignAll(
+          transferes.map((tr) => TransferModel.fromJson(tr)),
+        );
+        calculateTransfersAmount();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllTransferes();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      isTransfersLoading.value = false;
+    } catch (e) {
+      isTransfersLoading.value = false;
+    }
+  }
+
+  Future<void> addNewTransfer() async {
+    try {
+      if (fromAccountId.value.isEmpty || toAccountId.value.isEmpty) {
+        alertMessage(
+          context: Get.context!,
+          content: 'Please add both accounts',
+        );
+        return;
+      }
+      addingNewTransferValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/car_trading/add_new_transfer');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "date": convertDateToIson(transferDate.value.text),
+          "from_account": fromAccountId.value,
+          "to_account": toAccountId.value,
+          "amount": double.tryParse(transferAmount.text) ?? 0.0,
+          "comment": transferComments.value.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        calculateTransfersAmount();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewTransfer();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      Get.back();
+      addingNewTransferValue.value = false;
+    } catch (e) {
+      addingNewTransferValue.value = false;
+      Get.back();
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> updateTransfer(String id) async {
+    try {
+      if (fromAccountId.value.isEmpty || toAccountId.value.isEmpty) {
+        alertMessage(
+          context: Get.context!,
+          content: 'Please add both accounts',
+        );
+        return;
+      }
+      addingNewTransferValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/car_trading/update_new_transfer/$id');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "date": convertDateToIson(transferDate.value.text),
+          "from_account": fromAccountId.value,
+          "to_account": toAccountId.value,
+          "amount": double.tryParse(transferAmount.text) ?? 0.0,
+          "comment": transferComments.value.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        calculateTransfersAmount();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateTransfer(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      Get.back();
+      addingNewTransferValue.value = false;
+    } catch (e) {
+      addingNewTransferValue.value = false;
+      Get.back();
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> deleteTransfer(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/car_trading/delete_transfer/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        calculateTransfersAmount();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteTransfer(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      Get.back();
+    } catch (e) {
+      //
+    }
+  }
+
+  // ===========================================================================
 
   void filterLastChangesSearch() async {
     Map body = {};
@@ -1546,6 +1765,13 @@ class CarTradingDashboardController extends GetxController {
     }
 
     totalNETs.value = totalReceives.value - totalPays.value;
+  }
+
+  void calculateTransfersAmount() {
+    totalTransfersAmount.value = 0.0;
+    for (var item in alltransfers) {
+      totalTransfersAmount.value += item.amount!;
+    }
   }
 
   void calculatePurchaseAgreementTotals() {
@@ -2143,14 +2369,14 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> getCashOnHandOrBankBalance(String accountName) async {
+  Future<void> getCashOnHandOrBankBalance() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString('accessToken') ?? '';
       final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
 
       final url = Uri.parse(
-        '$backendUrl/car_trading/get_cash_on_hand_or_bank_balance/$accountName',
+        '$backendUrl/car_trading/get_cash_on_hand_or_bank_balance',
       );
       final response = await http.get(
         url,
@@ -2158,15 +2384,21 @@ class CarTradingDashboardController extends GetxController {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        if (accountName == 'CASH') {
-          totalNETsForAll.value = decoded['totals']['final_net'];
-        } else {
-          totalNETsForBanckBalance.value = decoded['totals']['final_net'];
-        }
+        Map data = decoded['totals'];
+        List totals = data['all_accounts'];
+        totalMoneyForAccounts.value = data['total_final_net'];
+        accountsSummary.assignAll(
+          totals.map((acc) => AccountSummaryModel.fromJson(acc)),
+        );
+        // if (accountName == 'CASH') {
+        //   totalNETsForAll.value = decoded['totals']['final_net'];
+        // } else {
+        //   totalNETsForBanckBalance.value = decoded['totals']['final_net'];
+        // }
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCashOnHandOrBankBalance(accountName);
+          await getCashOnHandOrBankBalance();
         } else {
           logout();
         }
@@ -2239,6 +2471,27 @@ class CarTradingDashboardController extends GetxController {
               payStr.contains(query) ||
               commentStr.contains(query) ||
               receiveStr.contains(query);
+        }).toList(),
+      );
+    }
+  }
+
+  void filterTransfers() {
+    final query = searchForTransfers.value.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      filteredTransfers.clear();
+    } else {
+      filteredTransfers.assignAll(
+        alltransfers.where((item) {
+          final dateStr = item.date.toString().toLowerCase();
+          final fromAccountName = item.fromAccountName.toString().toLowerCase();
+          final toAccountName = item.toAccountName.toString().toLowerCase();
+          final comment = item.comment.toString().toLowerCase();
+
+          return dateStr.contains(query) ||
+              toAccountName.contains(query) ||
+              fromAccountName.contains(query) ||
+              comment.contains(query);
         }).toList(),
       );
     }

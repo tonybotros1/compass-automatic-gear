@@ -59,7 +59,7 @@ Widget tableOfCarTrades({
             DataColumn(label: Text('Model')),
             DataColumn(label: Text('Year')),
             DataColumn(label: Text('Status')),
-            DataColumn(label: Text('Color in')),
+            // DataColumn(label: Text('Color in')),
             DataColumn(label: Text('Color out')),
             DataColumn(label: Text('Specification')),
             DataColumn(label: Text('Engine Size')),
@@ -123,12 +123,12 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(statusBox(tradeData.status.toString(), hieght: 35)),
-      DataCell(
-        textForDataRowInTable(
-          text: tradeData.colorIn.toString(),
-          formatDouble: false,
-        ),
-      ),
+      // DataCell(
+      //   textForDataRowInTable(
+      //     text: tradeData.colorIn.toString(),
+      //     formatDouble: false,
+      //   ),
+      // ),
       DataCell(
         textForDataRowInTable(
           text: tradeData.colorOut.toString(),

@@ -6,7 +6,7 @@ import 'capital_dialog.dart';
 import 'car_trade_dialog.dart';
 import 'outstanding_capitals_dialog2.dart';
 
-Widget tableOfSummaryDetails({required BuildContext context}) {
+Widget tableOfSummaryDetails() {
   return GetX<CarTradingDashboardController>(
     builder: (controller) {
       return Container(
@@ -186,6 +186,7 @@ DataRow dataRowForTheTable(
             } else {
               controller.searchForCapitalsOrOutstandingOrGeneralExpenses.value
                   .clear();
+              controller.filterGeneralExpensesSearch();
               controller.allGeneralExpenses.clear();
               controller.getAllGeneralExpenses();
               capitalOrOutstandingOrGeneralExpensesDialog(

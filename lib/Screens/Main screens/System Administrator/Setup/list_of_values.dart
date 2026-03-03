@@ -41,7 +41,9 @@ class ListOfValues extends StatelessWidget {
                         constraints: constraints,
                         context: context,
                         title: 'Search for Lists',
-                        button: newListButton(context, constraints, controller),
+                        button: controller.isAdmin.value
+                            ? newListButton(context, constraints, controller)
+                            : const SizedBox(),
                       );
                     },
                   ),
@@ -160,8 +162,25 @@ DataRow dataRowForTheTable(
           spacing: 5,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            deleteSection(controller, listId, context),
-            editButton(controller, listData, listId, context, constraints),
+            GetX<ListOfValuesController>(
+              builder: (controller) {
+                return controller.isAdmin.value
+                    ? Row(
+                        children: [
+                          deleteSection(controller, listId, context),
+
+                          editButton(
+                            controller,
+                            listData,
+                            listId,
+                            context,
+                            constraints,
+                          ),
+                        ],
+                      )
+                    : const SizedBox();
+              },
+            ),
             valSectionInTheTable(
               controller,
               listId,
@@ -246,11 +265,7 @@ IconButton valSectionInTheTable(
                     ],
                   ),
                 ),
-                Expanded(
-                  child: valuesSection(
-                    context: context,
-                  ),
-                ),
+                Expanded(child: valuesSection(context: context)),
               ],
             ),
           ),
