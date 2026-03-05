@@ -34,13 +34,13 @@ Widget tableOfAccountsDetails() {
                     const Text('ACCOUNT NAME'),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 2,
+                        horizontal: 6,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.white),
+                        color: Colors.blue.shade400,
+                        borderRadius: BorderRadius.circular(5),
                       ),
                       child: ClickableHoverText(
                         text: 'TRANSFERS',

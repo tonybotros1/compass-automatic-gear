@@ -156,6 +156,7 @@ DataRow dataRowForTheTable(
               controller.searchForCapitalsOrOutstandingOrGeneralExpenses.value
                   .clear();
               controller.allCapitals.clear();
+              controller.filteredCapitals.clear();
               controller.getAllCapitalsOROutstanding('capitals');
               capitalOrOutstandingOrGeneralExpensesDialog(
                 isGeneralExpenses: false,
@@ -172,6 +173,7 @@ DataRow dataRowForTheTable(
               controller.searchForCapitalsOrOutstandingOrGeneralExpenses.value
                   .clear();
               controller.allOutstanding.clear();
+              controller.filteredOutstanding.clear();
               controller.getAllCapitalsOROutstanding('outstanding');
               capitalOrOutstanding(
                 search:
@@ -186,8 +188,8 @@ DataRow dataRowForTheTable(
             } else {
               controller.searchForCapitalsOrOutstandingOrGeneralExpenses.value
                   .clear();
-              controller.filterGeneralExpensesSearch();
               controller.allGeneralExpenses.clear();
+              controller.filteredGeneralExpenses.clear();
               controller.getAllGeneralExpenses();
               capitalOrOutstandingOrGeneralExpensesDialog(
                 isGeneralExpenses: true,

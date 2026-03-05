@@ -28,7 +28,7 @@ Widget addNewCarTradeOrEdit({
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 10,
+                    spacing: 7,
                     children: [
                       Expanded(
                         flex: 5,
@@ -46,7 +46,7 @@ Widget addNewCarTradeOrEdit({
                         ),
                       ),
                       Expanded(
-                        flex: 4,
+                        flex: 3,
                         child: Column(
                           children: [
                             labelContainer(
@@ -61,7 +61,7 @@ Widget addNewCarTradeOrEdit({
                         ),
                       ),
                       Expanded(
-                        flex: 3,
+                        flex: 5,
                         child: Column(
                           children: [
                             labelContainer(
@@ -130,8 +130,8 @@ Widget addNewCarTradeOrEdit({
                                   color: Colors.white,
                                   child: Row(
                                     children: [
-                                      newItemButton(context, controller),
                                       const Spacer(),
+                                      newItemButton(context, controller),
                                     ],
                                   ),
                                 ),
@@ -161,11 +161,11 @@ Widget addNewCarTradeOrEdit({
                                   color: Colors.white,
                                   child: Row(
                                     children: [
-                                      newItemButtonForPurchaseAgreement(
+                                      const Spacer(),
+                                      newItemButtonForSalesAgreement(
                                         context,
                                         controller,
                                       ),
-                                      const Spacer(),
                                     ],
                                   ),
                                 ),
@@ -195,23 +195,6 @@ Widget addNewCarTradeOrEdit({
                     ],
                   ),
                 ),
-                //  Expanded(
-                //   child: GetX<CarTradingDashboardController>(
-                //     builder: (controller) {
-                //       return SingleChildScrollView(
-                //         scrollDirection: Axis.vertical,
-                //         child: SizedBox(
-                //           width: constraints.maxWidth,
-                //           child: tableOfScreens(
-                //             constraints: constraints,
-                //             context: context,
-                //             controller: controller,
-                //           ),
-                //         ),
-                //       );
-                //     },
-                //   ),
-                // ),
               ),
             ),
           ],
@@ -398,27 +381,14 @@ IconButton deleteSection(
 ) {
   return IconButton(
     onPressed: () {
-      final index = controller.addedItems.indexWhere(
-        (item) => item.id == itemData.id,
+      alertDialog(
+        context: context,
+        content: 'This will be deleted permanently',
+        onPressed: () async {
+          await controller.deleteItem(itemData.id ?? '');
+          controller.calculateTotals();
+        },
       );
-      final indexForFilteredItems = controller.filteredAddedItems.indexWhere(
-        (item) => item.id == itemData.id,
-      );
-      if (index != -1) {
-        controller.addedItems[index].deleted = true;
-        controller.addedItems[index].modified = true;
-        controller.addedItems[index].added = false;
-        controller.itemsModified.value = true;
-      }
-      if (indexForFilteredItems != -1) {
-        controller.filteredAddedItems[index].deleted = true;
-        controller.filteredAddedItems[index].modified = true;
-        controller.addedItems[index].added = false;
-        controller.itemsModified.value = true;
-      }
-      controller.addedItems.refresh();
-      controller.filteredAddedItems.refresh();
-      controller.calculateTotals();
     },
     icon: deleteIcon,
   );
@@ -493,51 +463,9 @@ IconButton editSection(
         isTrade: true,
         controller: controller,
         canEdit: true,
-        onPressed: () {
-          int index = controller.addedItems.indexWhere(
-            (item) => item.id == itemData.id,
-          );
-          int indexForFilteredItems = controller.filteredAddedItems.indexWhere(
-            (item) => item.id == itemData.id,
-          );
-          if (index != -1) {
-            controller.addedItems[index] = CarTradingItemsModel(
-              id: itemData.id,
-              comment: controller.comments.value.text,
-              date: controller.inputFormat.parse(
-                controller.itemDate.value.text,
-              ),
-              item: controller.item.text,
-              itemId: controller.itemId.value,
-              accountName: controller.accountName.text,
-              accountNameId: controller.accountNameId.value,
-              pay: double.tryParse(controller.pay.value.text) ?? 0,
-              receive: double.tryParse(controller.receive.value.text) ?? 0,
-              modified: true,
-              deleted: false,
-            );
-            controller.itemsModified.value = true;
-          }
-          if (indexForFilteredItems != -1) {
-            controller.filteredAddedItems[index] = CarTradingItemsModel(
-              id: itemData.id,
-              comment: controller.comments.value.text,
-              date: controller.inputFormat.parse(
-                controller.itemDate.value.text,
-              ),
-              item: controller.item.text,
-              itemId: controller.itemId.value,
-              accountName: controller.accountName.text,
-              accountNameId: controller.accountNameId.value,
-              pay: double.tryParse(controller.pay.value.text) ?? 0,
-              receive: double.tryParse(controller.receive.value.text) ?? 0,
-              modified: true,
-              deleted: false,
-            );
-            controller.itemsModified.value = true;
-          }
+        onPressed: () async {
+          await controller.updateItem(itemData.id ?? '');
           controller.calculateTotals();
-          Get.back();
         },
       );
     },
@@ -587,6 +515,10 @@ ElevatedButton newItemButton(
 ) {
   return ElevatedButton(
     onPressed: () {
+      if (controller.currentTradId.value.isEmpty) {
+        alertMessage(context: context, content: 'Please save trade first');
+        return;
+      }
       controller.item.clear();
       controller.itemId.value = '';
       controller.pay.text = '';
@@ -600,8 +532,8 @@ ElevatedButton newItemButton(
         isTrade: true,
         controller: controller,
         canEdit: true,
-        onPressed: () {
-          controller.addNewItem();
+        onPressed: () async {
+          await controller.addNewItem();
           controller.calculateTotals();
         },
       );
@@ -721,12 +653,16 @@ DataRow dataRowForTheTableForPurchaseAgreemnt(
   );
 }
 
-ElevatedButton newItemButtonForPurchaseAgreement(
+ElevatedButton newItemButtonForSalesAgreement(
   BuildContext context,
   CarTradingDashboardController controller,
 ) {
   return ElevatedButton(
     onPressed: () {
+      if (controller.currentTradId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: 'Save trade first');
+        return;
+      }
       controller.agreementNumber.clear();
       controller.agreementdate.text = textToDate(DateTime.now());
       controller.buyerName.text = '';

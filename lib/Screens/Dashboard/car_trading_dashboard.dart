@@ -235,39 +235,39 @@ class CarTradingDashboard extends StatelessWidget {
                                                   .getBuyersAndSellers();
                                             },
                                           ),
-                                          CustomDropdown(
-                                            width: 200,
-                                            hintText: 'Sold To',
+                                          // CustomDropdown(
+                                          //   width: 200,
+                                          //   hintText: 'Sold To',
 
-                                            textcontroller: controller
-                                                .carSoldToFilter
-                                                .value
-                                                .text,
-                                            showedSelectedName: 'name',
-                                            onChanged: (key, value) {
-                                              controller
-                                                      .carSoldToFilter
-                                                      .value
-                                                      .text =
-                                                  value['name'];
-                                              controller
-                                                      .carSoldToFilterId
-                                                      .value =
-                                                  key;
-                                            },
-                                            onDelete: () {
-                                              controller.carSoldToFilter.value
-                                                  .clear();
-                                              controller
-                                                      .carSoldToFilterId
-                                                      .value =
-                                                  '';
-                                            },
-                                            onOpen: () {
-                                              return controller
-                                                  .getBuyersAndSellers();
-                                            },
-                                          ),
+                                          //   textcontroller: controller
+                                          //       .carSoldToFilter
+                                          //       .value
+                                          //       .text,
+                                          //   showedSelectedName: 'name',
+                                          //   onChanged: (key, value) {
+                                          //     controller
+                                          //             .carSoldToFilter
+                                          //             .value
+                                          //             .text =
+                                          //         value['name'];
+                                          //     controller
+                                          //             .carSoldToFilterId
+                                          //             .value =
+                                          //         key;
+                                          //   },
+                                          //   onDelete: () {
+                                          //     controller.carSoldToFilter.value
+                                          //         .clear();
+                                          //     controller
+                                          //             .carSoldToFilterId
+                                          //             .value =
+                                          //         '';
+                                          //   },
+                                          //   onOpen: () {
+                                          //     return controller
+                                          //         .getBuyersAndSellers();
+                                          //   },
+                                          // ),
                                           CustomDropdown(
                                             width: 200,
                                             hintText: 'Bought By',

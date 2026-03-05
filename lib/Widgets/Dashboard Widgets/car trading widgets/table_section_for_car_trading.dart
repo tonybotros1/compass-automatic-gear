@@ -59,14 +59,14 @@ Widget tableOfCarTrades({
             DataColumn(label: Text('Model')),
             DataColumn(label: Text('Year')),
             DataColumn(label: Text('Status')),
-            // DataColumn(label: Text('Color in')),
             DataColumn(label: Text('Color out')),
+            DataColumn(label: Text('Color in')),
             DataColumn(label: Text('Specification')),
             DataColumn(label: Text('Engine Size')),
             DataColumn(label: Text('Mileage')),
-            DataColumn(label: Text('Bought From')),
-            DataColumn(label: Text('Sold To')),
+            DataColumn(label: Text('Bought By')),
             DataColumn(label: Text('Buy Date')),
+            DataColumn(label: Text('Sold By')),
             DataColumn(label: Text('Sell Date')),
             DataColumn(numeric: true, label: Text('Paid')),
             DataColumn(numeric: true, label: Text('Received')),
@@ -123,15 +123,16 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(statusBox(tradeData.status.toString(), hieght: 35)),
-      // DataCell(
-      //   textForDataRowInTable(
-      //     text: tradeData.colorIn.toString(),
-      //     formatDouble: false,
-      //   ),
-      // ),
+
       DataCell(
         textForDataRowInTable(
           text: tradeData.colorOut.toString(),
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: tradeData.colorIn.toString(),
           formatDouble: false,
         ),
       ),
@@ -157,24 +158,25 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: tradeData.boughtFrom.toString(),
+          text: tradeData.boughtBy.toString(),
           formatDouble: false,
           maxWidth: null,
         ),
       ),
-      DataCell(
-        textForDataRowInTable(
-          text: tradeData.soldTo.toString(),
-          formatDouble: false,
-          maxWidth: null,
-        ),
-      ),
+
       DataCell(
         textForDataRowInTable(
           text: textToDate(tradeData.buyDate ?? ''),
           formatDouble: false,
           color: Colors.purple,
           isBold: true,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: tradeData.soldBy.toString(),
+          formatDouble: false,
+          maxWidth: null,
         ),
       ),
       DataCell(

@@ -47,7 +47,7 @@ Future<dynamic> itemDialog({
                           onTap: isTrade && controller.addingNewValue.isTrue
                               ? null
                               : onPressed,
-                          text: isTrade == true ? 'Ok' : 'Save',
+                          text:  'Save',
                         ),
                       ),
                       separator(),

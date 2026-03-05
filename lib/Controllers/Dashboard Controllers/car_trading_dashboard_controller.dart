@@ -10,7 +10,6 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 import '../../Models/car trading/accounts_summary_model.dart';
 import '../../Models/car trading/capitals_outstanding_model.dart';
 import '../../Models/car trading/car_trade_model.dart';
@@ -163,9 +162,8 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> minAmount = TextEditingController().obs;
   Rx<TextEditingController> maxAmount = TextEditingController().obs;
   RxBool carModified = RxBool(false);
-  RxBool itemsModified = RxBool(false);
+  // RxBool itemsModified = RxBool(false);
   RxBool purchasedItemsModified = RxBool(false);
-  final Uuid _uuid = const Uuid();
   RxBool searching = RxBool(false);
   RxBool changesSearching = RxBool(false);
   final ScrollController scrollControllerForTable = ScrollController();
@@ -196,6 +194,7 @@ class CarTradingDashboardController extends GetxController {
   final FocusNode focusNodeForBuySell3 = FocusNode();
   final FocusNode focusNodeForBuySell4 = FocusNode();
   RxBool addingPurchaseAgreement = RxBool(false);
+  RxBool addingTradeItem = RxBool(false);
   TextEditingController agreementNumber = TextEditingController();
   TextEditingController agreementdate = TextEditingController();
   TextEditingController sellerName = TextEditingController();
@@ -510,6 +509,22 @@ class CarTradingDashboardController extends GetxController {
           if (index != -1) {
             alltransfers[index] = updated;
           }
+          break;
+
+        case "trade_item_added":
+          final newModel = CarTradingItemsModel.fromJson(message["data"]);
+          addedItems.add(newModel);
+          break;
+        case "trade_item_updated":
+          final updated = CarTradingItemsModel.fromJson(message["data"]);
+          final index = addedItems.indexWhere((m) => m.id == updated.id);
+          if (index != -1) {
+            addedItems[index] = updated;
+          }
+          break;
+        case "trade_item_deleted":
+          final deletedId = message["data"]["_id"];
+          addedItems.removeWhere((m) => m.id == deletedId);
           break;
       }
     });
@@ -1784,28 +1799,132 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  void addNewItem() {
-    final String uniqueId = _uuid.v4();
+  Future<void> addNewItem() async {
+    try {
+      if (currentTradId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: 'Save trade first');
+        return;
+      }
+      addingTradeItem.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/car_trading/add_trade_item');
+      Map data = {
+        "trade_id": currentTradId.value,
+        "date": convertDateToIson(itemDate.value.text),
+        "item": itemId.value,
+        "account_name": accountNameId.value,
+        "pay": double.tryParse(pay.value.text) ?? 0,
+        "receive": double.tryParse(receive.value.text) ?? 0,
+        "comment": comments.value.text,
+      };
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data),
+      );
+      if (response.statusCode == 200) {
+        Get.back();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewItem();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingTradeItem.value = false;
+    } catch (e) {
+      addingTradeItem.value = false;
+    }
+  }
 
-    final parsedDate = inputFormat.parse(itemDate.value.text);
-    addedItems.add(
-      CarTradingItemsModel(
-        id: uniqueId,
-        date: parsedDate,
-        tradeId: currentTradId.value,
-        item: item.text,
-        itemId: itemId.value,
-        accountName: accountName.text,
-        accountNameId: accountNameId.value,
-        pay: double.tryParse(pay.value.text) ?? 0,
-        receive: double.tryParse(receive.value.text) ?? 0,
-        comment: comments.value.text,
-        added: true,
-        modified: true,
-      ),
-    );
-    itemsModified.value = true;
-    Get.back();
+  Future<void> updateItem(String tradeItemID) async {
+    try {
+      if (currentTradId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: 'Save trade first');
+        return;
+      }
+      addingTradeItem.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/update_trade_item/$tradeItemID',
+      );
+      Map data = {
+        "trade_id": currentTradId.value,
+        "date": convertDateToIson(itemDate.value.text),
+        "item": itemId.value,
+        "account_name": accountNameId.value,
+        "pay": double.tryParse(pay.value.text) ?? 0,
+        "receive": double.tryParse(receive.value.text) ?? 0,
+        "comment": comments.value.text,
+      };
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(data),
+      );
+      if (response.statusCode == 200) {
+        Get.back();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateItem(tradeItemID);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingTradeItem.value = false;
+    } catch (e) {
+      addingTradeItem.value = false;
+    }
+  }
+
+  Future<void> deleteItem(String tradeItemID) async {
+    try {
+      if (currentTradId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: 'Save trade first');
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/delete_trade_item/$tradeItemID',
+      );
+
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        Get.back();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteItem(tradeItemID);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      //
+    }
   }
 
   Future<void> getPurchaseAgreementForCurrentTrade(String tradeId) async {
@@ -1846,10 +1965,6 @@ class CarTradingDashboardController extends GetxController {
 
   Future<void> addNewPurchaseAgreementItem() async {
     try {
-      if (currentTradId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Save trade first');
-        return;
-      }
       addingPurchaseAgreement.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -1982,19 +2097,19 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  void updateIdsFromBackend(List response) {
-    for (var map in response) {
-      final uuid = map['uuid'];
-      final realId = map['db_id'];
+  // void updateIdsFromBackend(List response) {
+  //   for (var map in response) {
+  //     final uuid = map['uuid'];
+  //     final realId = map['db_id'];
 
-      final index = addedItems.indexWhere((item) => item.id == uuid);
-      if (index != -1) {
-        addedItems[index].id = realId; // replace temp uuid with real id
-        addedItems[index].modified = false; // reset if needed
-        addedItems.refresh();
-      }
-    }
-  }
+  //     final index = addedItems.indexWhere((item) => item.id == uuid);
+  //     if (index != -1) {
+  //       addedItems[index].id = realId; // replace temp uuid with real id
+  //       addedItems[index].modified = false; // reset if needed
+  //       addedItems.refresh();
+  //     }
+  //   }
+  // }
 
   Future<void> addNewTrade() async {
     try {
@@ -2014,9 +2129,6 @@ class CarTradingDashboardController extends GetxController {
       Uri addUrl = Uri.parse('$backendUrl/car_trading/add_new_trade');
       Uri updateTradeUrl = Uri.parse(
         '$backendUrl/car_trading/update_trade/${currentTradId.value}',
-      );
-      Uri updateTradeItemUrl = Uri.parse(
-        '$backendUrl/car_trading/update_trade_items',
       );
 
       Map<String, String> headers = {
@@ -2040,21 +2152,6 @@ class CarTradingDashboardController extends GetxController {
         'year': yearId.value,
         'note': note.text,
         'vin': vin.value.text,
-        'items': addedItems.where((item) => item.deleted == false).map((item) {
-          final isoDate = (item.date is DateTime)
-              ? (item.date as DateTime).toIso8601String()
-              : DateTime.parse(item.date.toString()).toIso8601String();
-
-          return {
-            "item_id": item.itemId,
-            "date": isoDate,
-            "comment": item.comment,
-            "pay": item.pay,
-            "account_name": accountNameId.value,
-            "receive": item.receive,
-            "uuid": item.id,
-          };
-        }).toList(),
       };
 
       final rawDate = warrantyEndDate.value.text.trim();
@@ -2096,11 +2193,8 @@ class CarTradingDashboardController extends GetxController {
         final decoded = jsonDecode(response.body);
         if (response.statusCode == 200) {
           String tradeId = decoded["trade_id"];
-          final uuids = decoded["items_map"];
-          updateIdsFromBackend(uuids);
           currentTradId.value = tradeId;
           status.value = 'New';
-          itemsModified.value = false;
           carModified.value = false;
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -2120,55 +2214,7 @@ class CarTradingDashboardController extends GetxController {
         }
       } else {
         // ---------- UPDATE ----------
-        http.Response? itemsResponse;
         http.Response? carResponse;
-
-        if (itemsModified.isTrue) {
-          itemsResponse = await http.patch(
-            updateTradeItemUrl,
-            headers: headers,
-            body: jsonEncode(
-              addedItems.where((item) => item.modified == true).map((item) {
-                return {
-                  "uuid": item.id,
-                  "item": item.item,
-                  "item_id": item.itemId,
-                  "pay": item.pay,
-                  "account_name": accountNameId.value,
-                  "trade_id": item.tradeId,
-                  "receive": item.receive,
-                  "comment": item.comment,
-                  "date": item.date?.toIso8601String(),
-                  "deleted": item.deleted,
-                  "modified": item.modified,
-                  "added": item.added,
-                };
-              }).toList(),
-            ),
-          );
-          final decoded = jsonDecode(itemsResponse.body);
-          if (itemsResponse.statusCode == 200) {
-            final uuids = decoded["items_map"];
-            updateIdsFromBackend(uuids);
-            itemsModified.value = false;
-          } else if (itemsResponse.statusCode == 401 &&
-              refreshToken.isNotEmpty) {
-            final refreshed = await helper.refreshAccessToken(refreshToken);
-            if (refreshed == RefreshResult.success) {
-              await addNewTrade();
-            } else if (refreshed == RefreshResult.invalidToken) {
-              logout();
-            }
-          } else if (itemsResponse.statusCode == 401) {
-            logout();
-          } else {
-            alertMessage(
-              title: 'Error',
-              content: decoded["detail"] ?? "Failed to update trade",
-              context: Get.context!,
-            );
-          }
-        }
 
         if (carModified.isTrue) {
           body.remove("items");
@@ -2498,6 +2544,7 @@ class CarTradingDashboardController extends GetxController {
   }
 
   Future loadValues(CarTradeModel data) async {
+    itemsPageName.value = 'items';
     boughtFrom.value.text = data.boughtFrom ?? '';
     boughtFromId.value = data.boughtFromId ?? '';
     boughtById.value = data.boughtById ?? '';
@@ -2535,7 +2582,6 @@ class CarTradingDashboardController extends GetxController {
     status.value = data.status ?? '';
     currentTradId.value = data.id ?? '';
     carModified.value = false;
-    itemsModified.value = false;
     warrantyEndDate.value.text = textToDate(data.warrantyEndDate);
     serviceContractEndDate.value.text = textToDate(data.serviceContractEndDate);
     await getPurchaseAgreementForCurrentTrade(data.id ?? '');
@@ -2543,6 +2589,7 @@ class CarTradingDashboardController extends GetxController {
   }
 
   void clearValues() {
+    itemsPageName.value = 'items';
     purchaseAgreementAddedItems.clear();
     warrantyEndDate.value.clear();
     serviceContractEndDate.value.clear();
