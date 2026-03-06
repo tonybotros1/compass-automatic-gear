@@ -101,7 +101,7 @@ Widget addNewCarTradeOrEdit({
                         ),
                         child: TabBar(
                           onTap: (i) {
-                            if (i == 0) {
+                            if (i == 1) {
                               controller.itemsPageName.value = 'items';
                             } else {
                               controller.itemsPageName.value =
@@ -131,37 +131,6 @@ Widget addNewCarTradeOrEdit({
                                   child: Row(
                                     children: [
                                       const Spacer(),
-                                      newItemButton(context, controller),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: GetX<CarTradingDashboardController>(
-                                    builder: (controller) {
-                                      return SingleChildScrollView(
-                                        scrollDirection: Axis.vertical,
-                                        child: SizedBox(
-                                          width: constraints.maxWidth,
-                                          child: tableOfScreens(
-                                            constraints: constraints,
-                                            context: context,
-                                            controller: controller,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  color: Colors.white,
-                                  child: Row(
-                                    children: [
-                                      const Spacer(),
                                       newItemButtonForSalesAgreement(
                                         context,
                                         controller,
@@ -182,6 +151,37 @@ Widget addNewCarTradeOrEdit({
                                                 context: context,
                                                 controller: controller,
                                               ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  color: Colors.white,
+                                  child: Row(
+                                    children: [
+                                      const Spacer(),
+                                      newItemButton(context, controller),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  child: GetX<CarTradingDashboardController>(
+                                    builder: (controller) {
+                                      return SingleChildScrollView(
+                                        scrollDirection: Axis.vertical,
+                                        child: SizedBox(
+                                          width: constraints.maxWidth,
+                                          child: tableOfScreens(
+                                            constraints: constraints,
+                                            context: context,
+                                            controller: controller,
+                                          ),
                                         ),
                                       );
                                     },

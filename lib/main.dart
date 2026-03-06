@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:datahubai/Middleware/route_middleware.dart';
 import 'package:datahubai/Screens/mobile%20Screens/card_images_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -24,11 +26,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   kIsWeb
       ? await Firebase.initializeApp(options: options)
-      : await Firebase.initializeApp();
+      : Platform.isAndroid
+      ? await Firebase.initializeApp()
+      : const SizedBox();
   globalPrefs = await SharedPreferences.getInstance();
 
   final ws = Get.put(WebSocketService());
-  
+
   ws.connect(null);
   runApp(const MyApp());
 }

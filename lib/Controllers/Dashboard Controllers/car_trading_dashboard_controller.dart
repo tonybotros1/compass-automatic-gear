@@ -230,8 +230,8 @@ class CarTradingDashboardController extends GetxController {
   RxList<TransferModel> filteredTransfers = RxList<TransferModel>([]);
 
   List<Widget> carsTabs = const [
-    Tab(text: 'Items'),
     Tab(text: 'Sales Agreement'), // note previous name was purchase agreement
+    Tab(text: 'Items'),
   ];
   RxMap companyDetails = RxMap({});
 
@@ -2544,7 +2544,7 @@ class CarTradingDashboardController extends GetxController {
   }
 
   Future loadValues(CarTradeModel data) async {
-    itemsPageName.value = 'items';
+    itemsPageName.value = 'sales agreement';
     boughtFrom.value.text = data.boughtFrom ?? '';
     boughtFromId.value = data.boughtFromId ?? '';
     boughtById.value = data.boughtById ?? '';
@@ -2589,7 +2589,7 @@ class CarTradingDashboardController extends GetxController {
   }
 
   void clearValues() {
-    itemsPageName.value = 'items';
+    itemsPageName.value = 'sales agreement';
     purchaseAgreementAddedItems.clear();
     warrantyEndDate.value.clear();
     serviceContractEndDate.value.clear();
