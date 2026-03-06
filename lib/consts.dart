@@ -643,7 +643,10 @@ DocumentSnapshot<Object?>? getDocumentById(
 
 var deleteIcon = const Icon(Icons.delete_forever, color: Colors.red);
 var printIcons = const Icon(Icons.print_rounded, color: Colors.orange);
-var printQuotationIcons =  Icon(Icons.print_rounded, color: Colors.green.shade400);
+var printQuotationIcons = Icon(
+  Icons.print_rounded,
+  color: Colors.green.shade400,
+);
 
 var editIcon = const Icon(Icons.edit_note_rounded, color: Colors.blue);
 var valuesIcon = const Icon(

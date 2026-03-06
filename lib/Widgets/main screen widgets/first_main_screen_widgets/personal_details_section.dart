@@ -1,4 +1,7 @@
+import 'package:datahubai/Widgets/my_text_field.dart';
+import 'package:datahubai/Widgets/text_button.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/main_screen_contro.dart';
 import '../../../consts.dart';
 import '../../overlay_button.dart';
@@ -113,25 +116,124 @@ SmartInfoOverlay personalDetailsSection(
                 ),
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                spacing: 10,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton(
-                    style: logoutButtonStyle,
-                    onPressed: () async {
-                      dismiss();
-                      alertDialog(
-                        context: context,
-                        content: "Are you sure you want to logout?",
-                        onPressed: () async {
-                          // await globalPrefs?.remove('userId');
-                          // await globalPrefs?.remove('companyId');
-                          // await globalPrefs?.remove('userEmail');
-                          // Get.offAllNamed('/');
-                         logout();
-                        },
-                      );
-                    },
-                    child: const Text('Logout', style: TextStyle(fontSize: 14)),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: logoutButtonStyle,
+                      onPressed: () async {
+                        dismiss();
+                        Get.dialog(
+                          barrierDismissible: false,
+                          Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: SizedBox(
+                              height: 350,
+                              width: 600,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(15),
+                                        topRight: Radius.circular(15),
+                                      ),
+                                      color: mainColor,
+                                    ),
+                                    child: Row(
+                                      spacing: 10,
+                                      children: [
+                                        Text(
+                                          "🎫 Change Password",
+                                          style:
+                                              fontStyleForScreenNameUsedInButtons,
+                                        ),
+                                        const Spacer(),
+                                        GetX<MainScreenController>(
+                                          builder: (controller) =>
+                                              ClickableHoverText(
+                                                onTap: () {
+                                                  controller.changePassword();
+                                                },
+                                                text:
+                                                    controller
+                                                            .changingPassword
+                                                            .value ==
+                                                        false
+                                                    ? 'Save'
+                                                    : "•••",
+                                              ),
+                                        ),
+                                        separator(),
+                                        closeIcon(),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: SingleChildScrollView(
+                                        child: GetBuilder<MainScreenController>(
+                                          builder: (controller) {
+                                            return Column(
+                                              spacing: 20,
+                                              children: [
+                                                myTextFormFieldWithBorder(
+                                                  labelText: 'Old Password',
+                                                  controller:
+                                                      controller.oldPass,
+                                                ),
+                                                myTextFormFieldWithBorder(
+                                                  labelText: 'New Password',
+                                                  controller:
+                                                      controller.newPass,
+                                                ),
+                                                myTextFormFieldWithBorder(
+                                                  labelText: 'Confirm Password',
+                                                  controller:
+                                                      controller.confirmPass,
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Change Password',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: logoutButtonStyle,
+                      onPressed: () async {
+                        dismiss();
+                        alertDialog(
+                          context: context,
+                          content: "Are you sure you want to logout?",
+                          onPressed: () async {
+                            logout();
+                          },
+                        );
+                      },
+                      child: const Text(
+                        'Logout',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -140,7 +242,7 @@ SmartInfoOverlay personalDetailsSection(
         ),
       ],
     ),
-    maxWidth: 400,
+    maxWidth: 450,
     horizontalEdgeMargin: 12,
     verticalOffset: 8,
   );

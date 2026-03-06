@@ -82,6 +82,10 @@ class MainScreenController extends GetxController {
   final secureStorage = const FlutterSecureStorage();
   Helpers helper = Helpers();
   final unreadChatCount = 0.obs;
+  RxBool changingPassword = RxBool(false);
+  TextEditingController oldPass = TextEditingController();
+  TextEditingController newPass = TextEditingController();
+  TextEditingController confirmPass = TextEditingController();
 
   @override
   void onInit() async {
@@ -107,6 +111,39 @@ class MainScreenController extends GetxController {
           break;
       }
     });
+  }
+
+  Future<void> changePassword() async {
+    try {
+      changingPassword.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      var url = Uri.parse('$backendUrl/users/change_user_password');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "old_pass": oldPass.text,
+          "new_pass": newPass.text,
+          "confirm_pass": confirmPass.text,
+        }),
+      );
+      var responseData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        logout();
+      }
+      if (response.statusCode == 401 || response.statusCode == 400) {
+        alertMessage(context: Get.context!, content: responseData['detail']);
+      } else if (response.statusCode == 404) {
+        alertMessage(context: Get.context!, content: responseData['detail']);
+      }
+      changingPassword.value = false;
+    } catch (e) {
+      changingPassword.value = false;
+    }
   }
 
   Future<void> loadUnreadCount() async {
