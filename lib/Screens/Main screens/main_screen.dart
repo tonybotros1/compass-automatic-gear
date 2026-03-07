@@ -58,7 +58,20 @@ class MainScreen extends StatelessWidget {
                                 radius: 25,
                                 child: IconButton(
                                   tooltip: 'Notifications',
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    mainScreenController.selectedScreen.value =
+                                        mainScreenController.getScreenFromRoute(
+                                          "/toDoList",
+                                        );
+                                    mainScreenController
+                                            .selectedScreenRoute
+                                            .value =
+                                        "/toDoList";
+                                    mainScreenController
+                                            .selectedScreenName
+                                            .value =
+                                        "🧾 To Do List";
+                                  },
                                   icon: const Icon(
                                     Icons.notifications,
                                     color: Colors.white,

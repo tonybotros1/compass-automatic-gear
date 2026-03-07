@@ -89,12 +89,21 @@ class MainScreenController extends GetxController {
 
   @override
   void onInit() async {
+    ensureWebSocketConnected();
     connectWebSocket();
     loadUnreadCount();
     getCompanyDetails();
     getFavoriteScreens();
     getScreens();
     super.onInit();
+  }
+
+  Future<void> ensureWebSocketConnected() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userId')?.trim() ?? '';
+    if (userId.isNotEmpty) {
+      ws.connect(userId);
+    }
   }
 
   void connectWebSocket() {
@@ -108,6 +117,9 @@ class MainScreenController extends GetxController {
         case "favourite_deleted":
           final deletedId = message["data"]["_id"];
           favoriteScreens.removeWhere((m) => m.id == deletedId);
+          break;
+        case "chat_unread":
+          unreadChatCount.value = (message["unread_total"] ?? 0) as int;
           break;
       }
     });

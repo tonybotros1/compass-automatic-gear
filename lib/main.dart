@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:datahubai/Middleware/route_middleware.dart';
 import 'package:datahubai/Screens/mobile%20Screens/card_images_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -8,12 +7,10 @@ import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'Controllers/Main screen controllers/websocket_controller.dart';
 import 'Middleware/auth_middleware.dart';
 import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';
-import 'Screens/Auth Screens/register_screen.dart';
 import 'Screens/Main screens/main_screen.dart';
 import 'Screens/mobile Screens/main_screen_fro_mobile.dart';
 import 'Widgets/main screen widgets/job_cards_widgets/image_gallery_viewer.dart';
@@ -31,9 +28,11 @@ void main() async {
       : const SizedBox();
   globalPrefs = await SharedPreferences.getInstance();
 
-  final ws = Get.put(WebSocketService());
-
-  ws.connect(null);
+  final ws = Get.put(WebSocketService(), permanent: true);
+  final savedUserId = globalPrefs?.getString('userId')?.trim() ?? '';
+  if (savedUserId.isNotEmpty) {
+    ws.connect(savedUserId);
+  }
   runApp(const MyApp());
 }
 
@@ -107,7 +106,7 @@ class MyApp extends StatelessWidget {
           middlewares: [InitialRedirectMiddleware()],
         ),
         GetPage(name: '/loginScreen', page: () => LoginScreen()),
-        GetPage(name: '/registerScreen', page: () => const RegisterScreen()),
+        // GetPage(name: '/registerScreen', page: () => const RegisterScreen()),
         GetPage(
           name: '/imageViewer',
           page: () => ImageGalleryViewer(),

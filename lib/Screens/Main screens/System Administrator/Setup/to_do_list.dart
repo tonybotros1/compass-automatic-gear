@@ -190,28 +190,7 @@ class ToDoList extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
 
                           children: [
-                            Row(
-                              spacing: 10,
-                              children: [
-                                newTaskButton(context, constraints, controller),
-                                const SizedBox(width: 20),
-                                closeTaskButton(
-                                  context,
-                                  constraints,
-                                  controller,
-                                ),
-                                cancelTaskTaskButton(
-                                  context,
-                                  constraints,
-                                  controller,
-                                ),
-                                reOpenTaskButton(
-                                  context,
-                                  constraints,
-                                  controller,
-                                ),
-                              ],
-                            ),
+                            newTaskButton(context, constraints, controller),
                             Row(
                               spacing: 10,
                               children: [
@@ -282,6 +261,7 @@ class ToDoList extends StatelessWidget {
                                 ),
                               ],
                             ),
+
                             Row(
                               spacing: 10,
                               children: [
@@ -394,11 +374,11 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Due Date'),
       ),
       DataColumn2(
-        size: ColumnSize.L,
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Created By'),
       ),
       DataColumn2(
-        size: ColumnSize.L,
+        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Assigned To'),
       ),
       DataColumn2(
@@ -406,6 +386,7 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Status'),
       ),
       const DataColumn2(size: ColumnSize.S, label: SizedBox()),
+      const DataColumn2(size: ColumnSize.L, label: SizedBox()),
     ],
     source: CardDataSourceForToDoList(
       cards: controller.allToDoLists.isEmpty ? [] : controller.allToDoLists,
@@ -424,18 +405,8 @@ DataRow dataRowForTheTable(
   ToDoListController controller,
   int index,
 ) {
-  // final bool isSelected = controller.selectedRowIndex.value == index;
   return DataRow(
     selected: controller.selectedRowIndex.value == index,
-    onSelectChanged: (selected) async {
-      int i = controller.allToDoLists.indexWhere((t)=> t.id == toDoListId);
-      controller.allToDoLists[i].unreadNotes = 0;
-      controller.allToDoLists.refresh();
-      controller.currentTaskId.value = toDoListId;
-      controller.selectRow(index);
-      await controller.getTaskDescriptions(toDoListId);
-      await controller.markTaskAsRead(toDoListId);
-    },
     color: WidgetStateProperty.resolveWith<Color?>((states) {
       if (states.contains(WidgetState.selected)) {
         return Colors.yellow.shade200;
@@ -446,18 +417,9 @@ DataRow dataRowForTheTable(
       DataCell(textForDataRowInTable(text: data.number ?? '')),
       DataCell(textForDataRowInTable(text: textToDate(data.date))),
       DataCell(
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            border: BoxBorder.all(color: Colors.green),
-            borderRadius: BorderRadius.circular(2),
-          ),
-          child: textForDataRowInTable(
-            text: textToDate(data.dueDate),
-            color: isBeforeToday(data.dueDate.toString())
-                ? Colors.orange
-                : Colors.green,
-          ),
+        textForDataRowInTable(
+          text: textToDate(data.dueDate),
+          color: controller.giveColorToDateForToDoTask(data.dueDate),
         ),
       ),
       DataCell(
@@ -466,9 +428,18 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(text: data.assignedTo ?? '', maxWidth: null),
       ),
-      DataCell(statusBox(data.status ?? '', hieght: 35)),
       DataCell(
-        data.unreadNotes! > 0
+        textForDataRowInTable(
+          text: data.status ?? '',
+          color: data.status == 'Open'
+              ? Colors.green
+              : data.status == "Closed"
+              ? Colors.red
+              : Colors.black,
+        ),
+      ),
+      DataCell(
+        (data.unreadNotes ?? 0) > 0
             ? Container(
                 padding: const EdgeInsets.all(7),
                 decoration: const BoxDecoration(
@@ -476,11 +447,25 @@ DataRow dataRowForTheTable(
                   shape: BoxShape.circle,
                 ),
                 child: Text(
-                  data.unreadNotes! > 99 ? '99+' : '${data.unreadNotes}',
+                  (data.unreadNotes ?? 0) > 99
+                      ? '99+'
+                      : '${data.unreadNotes ?? 0}',
                   style: const TextStyle(color: Colors.white, fontSize: 10),
                 ),
               )
             : const SizedBox(),
+      ),
+      DataCell(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          spacing: 5,
+          children: [
+            closeTaskButton(context, constraints, controller, toDoListId),
+            cancelTaskTaskButton(context, constraints, controller, toDoListId),
+            reOpenTaskButton(context, constraints, controller, toDoListId),
+            viewButton(context, constraints, controller, toDoListId, index),
+          ],
+        ),
       ),
     ],
   );
@@ -524,24 +509,21 @@ ElevatedButton closeTaskButton(
   BuildContext context,
   BoxConstraints constraints,
   ToDoListController controller,
+  String id,
 ) {
   return ElevatedButton(
     onPressed: () {
-      if (controller.currentTaskId.value.isEmpty) {
-        alertMessage(context: context, content: 'Select task first');
-        return;
-      }
       alertDialog(
         context: context,
         content: 'Are you sure you want to close this task?',
         onPressed: () {
-          controller.updateTaskStatus(controller.currentTaskId.value, 'Closed');
+          controller.updateTaskStatus(id, 'Closed');
           Get.back();
         },
       );
     },
     style: closeTaskButtonStyle,
-    child: const Text('Close Task'),
+    child: const Text('Close'),
   );
 }
 
@@ -549,27 +531,21 @@ ElevatedButton cancelTaskTaskButton(
   BuildContext context,
   BoxConstraints constraints,
   ToDoListController controller,
+  String id,
 ) {
   return ElevatedButton(
     onPressed: () {
-      if (controller.currentTaskId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Select task first');
-        return;
-      }
       alertDialog(
         context: context,
         content: 'Are you sure you want to Cancel this task?',
         onPressed: () {
-          controller.updateTaskStatus(
-            controller.currentTaskId.value,
-            'Cancelled',
-          );
+          controller.updateTaskStatus(id, 'Cancelled');
           Get.back();
         },
       );
     },
-    style: deleteButtonStyle,
-    child: const Text('Cancel Task'),
+    style: cancelTaskButtonStyle,
+    child: const Text('Cancel'),
   );
 }
 
@@ -577,24 +553,43 @@ ElevatedButton reOpenTaskButton(
   BuildContext context,
   BoxConstraints constraints,
   ToDoListController controller,
+  String id,
 ) {
   return ElevatedButton(
     onPressed: () {
-      if (controller.currentTaskId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Select task first');
-        return;
-      }
       alertDialog(
         context: context,
         content: 'Are you sure you want to reopen this task?',
         onPressed: () {
-          controller.updateTaskStatus(controller.currentTaskId.value, 'Open');
+          controller.updateTaskStatus(id, 'Open');
           Get.back();
         },
       );
     },
-    style: innvoiceItemsButtonStyle,
-    child: const Text('Reopen Task'),
+    style: reOpenTaskButtonStyle,
+    child: const Text('Reopen'),
+  );
+}
+
+ElevatedButton viewButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  ToDoListController controller,
+  String toDoListId,
+  int index,
+) {
+  return ElevatedButton(
+    onPressed: () async {
+      int i = controller.allToDoLists.indexWhere((t) => t.id == toDoListId);
+      controller.allToDoLists[i].unreadNotes = 0;
+      controller.allToDoLists.refresh();
+      controller.currentTaskId.value = toDoListId;
+      controller.selectRow(index);
+      await controller.getTaskDescriptions(toDoListId);
+      await controller.markTaskAsRead(toDoListId);
+    },
+    style: viewTaskButtonStyle,
+    child: const Text('View'),
   );
 }
 

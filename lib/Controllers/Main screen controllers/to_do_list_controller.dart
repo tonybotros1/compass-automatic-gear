@@ -54,9 +54,12 @@ class ToDoListController extends GetxController {
   WebSocketService ws = Get.find<WebSocketService>();
   StreamSubscription<Map<String, dynamic>>? _wsSub;
   MainScreenController mainScreenController = Get.find<MainScreenController>();
+  RxString userId = RxString('');
   @override
   void onInit() async {
-    getUserId();
+    await getUserId();
+    initSocket(userId.value);
+
     await getCompanyDetails();
     statusFilter.text = 'Open';
     filterSearch();
@@ -77,36 +80,52 @@ class ToDoListController extends GetxController {
     companyDetails.assignAll(await helper.getCurrentCompanyDetails());
   }
 
-  void getUserId() async {
+  Future<void> getUserId() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String? userId = prefs.getString('userId');
-    initSocket(userId ?? '');
+    userId.value = (prefs.getString('userId') ?? '').trim();
   }
 
   void initSocket(String userId) {
-    ws.connect(userId);
+    final normalizedUserId = userId.trim();
+    if (normalizedUserId.isNotEmpty) {
+      ws.connect(normalizedUserId);
+    }
+
     _wsSub?.cancel();
     _wsSub = ws.events.listen((message) async {
       switch (message["type"]) {
         case "chat_message":
           final taskId = (message["task_id"] ?? "").toString();
+          final payload = message["data"];
           if (taskId == currentTaskId.value) {
-            final newNote = ToDoListDescriptionModel.fromJson(message["data"]);
-            allDescriptionNotes.add(newNote);
-            allDescriptionNotes.refresh();
-            await markTaskAsRead(taskId);
+            if (payload is Map<String, dynamic>) {
+              final newNote = ToDoListDescriptionModel.fromJson(payload);
+              allDescriptionNotes.add(newNote);
+              allDescriptionNotes.refresh();
+              await markTaskAsRead(taskId);
+            } else if (payload is Map) {
+              final newNote = ToDoListDescriptionModel.fromJson(
+                Map<String, dynamic>.from(payload),
+              );
+              allDescriptionNotes.add(newNote);
+              allDescriptionNotes.refresh();
+              await markTaskAsRead(taskId);
+            }
           }
           break;
 
         case 'new_task_created':
-          final newTask = ToDoListModel.fromJson(message["data"]);
-          allToDoLists.add(newTask);
-          break;
-
-        case "chat_unread":
-          mainScreenController.unreadChatCount.value =
-              (message["unread_total"] ?? 0) as int;
+          final payload = message["data"];
+          if (payload is Map<String, dynamic>) {
+            final newTask = ToDoListModel.fromJson(payload);
+            allToDoLists.add(newTask);
+          } else if (payload is Map) {
+            final newTask = ToDoListModel.fromJson(
+              Map<String, dynamic>.from(payload),
+            );
+            allToDoLists.add(newTask);
+          }
           break;
 
         // case "new_task_description_note_added":
@@ -117,12 +136,24 @@ class ToDoListController extends GetxController {
         //   break;
 
         case "task_status_updated":
-          final taskId = message["data"]['_id'];
-          final taskStatus = message["data"]['status'];
-          final index = allToDoLists.indexWhere((m) => m.id == taskId);
-          if (index != -1) {
-            allToDoLists[index].status = taskStatus;
-            allToDoLists.refresh();
+          final payload = message["data"];
+          if (payload is Map<String, dynamic>) {
+            final taskId = payload['_id']?.toString() ?? '';
+            final taskStatus = payload['status']?.toString();
+            final index = allToDoLists.indexWhere((m) => m.id == taskId);
+            if (index != -1) {
+              allToDoLists[index].status = taskStatus;
+              allToDoLists.refresh();
+            }
+          } else if (payload is Map) {
+            final normalized = Map<String, dynamic>.from(payload);
+            final taskId = normalized['_id']?.toString() ?? '';
+            final taskStatus = normalized['status']?.toString();
+            final index = allToDoLists.indexWhere((m) => m.id == taskId);
+            if (index != -1) {
+              allToDoLists[index].status = taskStatus;
+              allToDoLists.refresh();
+            }
           }
           break;
       }
@@ -146,6 +177,45 @@ class ToDoListController extends GetxController {
       final body = jsonDecode(res.body);
       mainScreenController.unreadChatCount.value =
           (body['unread_total'] ?? 0) as int;
+    }
+  }
+
+  Color giveColorToDateForToDoTask(dynamic dateInput) {
+    if (dateInput == null) return Colors.black;
+
+    // Convert input to DateTime if it's not already
+    DateTime? date;
+    if (dateInput is DateTime) {
+      date = dateInput;
+    } else if (dateInput is String) {
+      try {
+        date = DateTime.parse(dateInput);
+      } catch (e) {
+        return Colors.black; // invalid string format
+      }
+    } else {
+      return Colors.black; // unsupported type
+    }
+
+    // Normalize dates to remove time component
+    final today = DateTime.now();
+    final todayDateOnly = DateTime(today.year, today.month, today.day);
+    final inputDateOnly = DateTime(date.year, date.month, date.day);
+
+    final diffDays = todayDateOnly.difference(inputDateOnly).inDays;
+
+    if (diffDays < 0) {
+      // Date already passed
+      return Colors.red;
+    } else if (diffDays <= 0) {
+      // Today
+      return Colors.green;
+    } else if (diffDays <= 15) {
+      // Tomorrow up to +15 days
+      return Colors.orange;
+    } else {
+      // Beyond 15 days
+      return Colors.red;
     }
   }
 
@@ -318,7 +388,7 @@ class ToDoListController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewTask();
+          await addNewTaskDescriptionNote();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -370,10 +440,6 @@ class ToDoListController extends GetxController {
 
   Future<void> updateTaskStatus(String id, String status) async {
     try {
-      if (currentTaskId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Select task first');
-        return;
-      }
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
