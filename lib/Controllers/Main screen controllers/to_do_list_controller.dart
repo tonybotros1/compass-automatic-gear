@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -55,6 +56,10 @@ class ToDoListController extends GetxController {
   StreamSubscription<Map<String, dynamic>>? _wsSub;
   MainScreenController mainScreenController = Get.find<MainScreenController>();
   RxString userId = RxString('');
+  Rx<Uint8List?> fileBytes = Rx<Uint8List?>(null);
+  RxString fileType = RxString('');
+  RxString fileName = RxString('');
+
   @override
   void onInit() async {
     await getUserId();
@@ -359,7 +364,10 @@ class ToDoListController extends GetxController {
     }
   }
 
-  Future<void> addNewTaskDescriptionNote() async {
+  Future<void> addNewTaskDescriptionNote(
+    String toDoListId,
+    Map<String, dynamic> note,
+  ) async {
     try {
       if (currentTaskId.value.isEmpty) {
         alertMessage(context: Get.context!, content: 'Select task first');
@@ -370,25 +378,49 @@ class ToDoListController extends GetxController {
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse(
-        '$backendUrl/to_do_list/add_new_task_description_note',
+        '$backendUrl/to_do_list/add_new_task_description_note/$toDoListId',
       );
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "to_do_list_id": currentTaskId.value,
-          "type": 'text',
-          "description": noteMessage.value.trim(),
-        }),
-      );
+      final request = http.MultipartRequest('POST', url);
+      request.headers.addAll({
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'multipart/form-data',
+      });
+      if (note.containsKey('note_type')) {
+        if (note['note_type'] == 'text') {
+          request.fields['note'] = note['note'];
+          request.fields['note_type'] = note['note_type'];
+        } else {
+          request.fields['file_name'] = note['file_name'];
+          request.fields['note_type'] = note['note_type'];
+          request.files.add(
+            http.MultipartFile.fromBytes(
+              'media_note',
+              note['media_note'],
+              filename: note['file_name'],
+            ),
+          );
+        }
+      }
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      // final response = await http.post(
+      //   url,
+      //   headers: {
+      //     'Authorization': 'Bearer $accessToken',
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: jsonEncode({
+      //     "to_do_list_id": currentTaskId.value,
+      //     "type": 'text',
+      //     "description": noteMessage.value.trim(),
+      //   }),
+      // );
       if (response.statusCode == 200) {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewTaskDescriptionNote();
+          await addNewTaskDescriptionNote(toDoListId, note);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../../../Controllers/Main screen controllers/to_do_list_controller.dart';
 import '../../../Models/to do list/to_do_list_description_model.dart';
+import '../../../web_functions.dart';
 
 Widget detailsSection(
   ToDoListController controller,
@@ -72,6 +73,13 @@ Widget detailsSection(
 
                 List<ToDoListDescriptionModel> items =
                     controller.allDescriptionNotes;
+
+                // Filter only valid image URLs from the notes.
+                List<String> listOfImages = [
+                  for (int i = 0; i < items.length; i++)
+                    if (items[i].type.toString().startsWith('image'))
+                      items[i].description.toString(),
+                ];
 
                 return ListView.builder(
                   controller: controller.scrollControllerForNotes,
@@ -165,12 +173,127 @@ Widget detailsSection(
                                     8,
                                     0,
                                   ),
-                                  child: Text(
-                                    textAlign: TextAlign.start,
-                                    note.description ?? '',
-                                    style: TextStyle(color: Colors.grey[800]),
-                                  ),
+                                  child:
+                                      note.type.toString().toLowerCase() ==
+                                          'text'
+                                      ? Text(
+                                          textAlign: TextAlign.start,
+                                          note.description ?? '',
+                                          style: TextStyle(
+                                            color: Colors.grey[800],
+                                          ),
+                                        )
+                                      : note.type.toString().startsWith("image")
+                                      ? InkWell(
+                                          onTap: () {
+                                            // Calculate the tapped image index within the filtered list.
+                                            final tappedIndex = listOfImages
+                                                .indexWhere(
+                                                  (url) => url == note.description,
+                                                );
+                                            openImageViewer(
+                                              listOfImages,
+                                              tappedIndex,
+                                            );
+                                          },
+                                          child: Image.network(
+                                            note.description ?? '',
+                                            fit: BoxFit.contain,
+                                            height: 200,
+                                          ),
+                                        )
+                                      : InkWell(
+                                          onTap: () {
+                                            var openFile = FilePickerService();
+                                            openFile.openFile(
+                                              note.description ?? '',
+                                              note.fileName ?? '',
+                                            );
+                                          },
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.all(
+                                                  8.0,
+                                                ),
+                                                // Using a Builder to compute the asset path dynamically
+                                                child: Builder(
+                                                  builder: (context) {
+                                                    // Retrieve the file name; if null, use an empty string
+                                                    String fileName =
+                                                        note.fileName ?? "";
+                                                    // Check if there's a dot in the filename to extract the extension
+                                                    final extension =
+                                                        fileName.contains('.')
+                                                        ? fileName
+                                                              .split('.')
+                                                              .last
+                                                              .toLowerCase()
+                                                        : "";
+                                                    // Determine asset path based on extension
+                                                    String assetPath;
+                                                    switch (extension) {
+                                                      case 'pdf':
+                                                        assetPath =
+                                                            'assets/pdf.png';
+                                                        break;
+                                                      case 'doc':
+                                                      case 'docx':
+                                                        assetPath =
+                                                            'assets/word.png';
+                                                        break;
+                                                      case 'xls':
+                                                      case 'xlsx':
+                                                        assetPath =
+                                                            'assets/excel.png';
+                                                        break;
+                                                      case 'ppt':
+                                                      case 'pptx':
+                                                        assetPath =
+                                                            'assets/powerpoint.png';
+                                                        break;
+                                                      // Add more cases as needed
+                                                      default:
+                                                        assetPath =
+                                                            'assets/file.png';
+                                                    }
+                                                    return Image.asset(
+                                                      assetPath,
+                                                      width: 50,
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Text(
+                                                  note.fileName ?? 'No Name',
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    color: Colors.grey[800],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                 ),
+                                // Padding(
+                                //   padding: const EdgeInsets.fromLTRB(
+                                //     8,
+                                //     8,
+                                //     8,
+                                //     0,
+                                //   ),
+                                //   child: Text(
+                                //     textAlign: TextAlign.start,
+                                //     note.description ?? '',
+                                //     style: TextStyle(color: Colors.grey[800]),
+                                //   ),
+                                // ),
                               ],
                             ),
                           ),
@@ -191,35 +314,110 @@ Widget detailsSection(
             builder: (controller) {
               return Row(
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 10, 16, 16),
-                      child: TextFormField(
-                        enabled: controller.currentTaskId.value.isNotEmpty,
-                        textInputAction: TextInputAction.newline,
-                        onFieldSubmitted: (value) {
-                          Future.delayed(const Duration(milliseconds: 100), () {
-                            controller.textFieldFocusNode.requestFocus();
-                          });
-                        },
-                        focusNode: controller.textFieldFocusNode,
-                        controller: controller.descriptionNote.value,
-                        minLines: 1,
-                        maxLines: null,
-                        onChanged: (value) {
-                          controller.noteMessage.value = value;
-                        },
-                        decoration: InputDecoration(
-                          hintStyle: const TextStyle(color: Colors.grey),
-                          hintText: 'Type here...',
-                          labelStyle: TextStyle(color: Colors.grey.shade700),
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          disabledBorder: InputBorder.none,
-                        ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 10, 0, 16),
+                    child: InkWell(
+                      onTap: controller.currentTaskId.value.isNotEmpty
+                          ? () {
+                              FilePickerService.pickFile(
+                                controller.fileBytes,
+                                controller.fileType,
+                                controller.fileName,
+                              );
+                            }
+                          : null,
+                      child: const Icon(
+                        Icons.attach_file_rounded,
+                        color: Colors.grey,
                       ),
                     ),
                   ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 10, 16, 16),
+                      child: controller.fileBytes.value != null
+                          ? controller.fileType.value.startsWith('image/')
+                                ? Row(
+                                    spacing: 20,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          controller.fileBytes.value = null;
+                                        },
+                                        icon: const Icon(Icons.clear),
+                                      ),
+                                      Image.memory(
+                                        controller.fileBytes.value!,
+                                        height: 200,
+                                      ),
+                                    ],
+                                  )
+                                : controller.fileType.value.startsWith(
+                                    'application/pdf',
+                                  )
+                                ? Row(
+                                    spacing: 20,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          controller.fileBytes.value = null;
+                                        },
+                                        icon: const Icon(Icons.clear),
+                                      ),
+                                      const Text(
+                                        "PDF Selected: Cannot preview",
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    spacing: 20,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          controller.fileBytes.value = null;
+                                        },
+                                        icon: const Icon(Icons.clear),
+                                      ),
+                                      const Text(
+                                        'File selected:  Cannot preview',
+                                      ),
+                                    ],
+                                  )
+                          : TextFormField(
+                              textInputAction: TextInputAction.newline,
+                              onFieldSubmitted: (value) {
+                                Future.delayed(
+                                  const Duration(milliseconds: 100),
+                                  () {
+                                    controller.textFieldFocusNode
+                                        .requestFocus();
+                                  },
+                                );
+                              },
+                              focusNode: controller.textFieldFocusNode,
+                              controller: controller.descriptionNote.value,
+                              enabled:
+                                  controller.currentTaskId.value.isNotEmpty,
+                              minLines: 1,
+                              maxLines: null,
+                              onChanged: (value) {
+                                controller.noteMessage.value = value;
+                              },
+                              decoration: InputDecoration(
+                                hintStyle: const TextStyle(color: Colors.grey),
+                                hintText: 'Type here...',
+                                labelStyle: TextStyle(
+                                  color: Colors.grey.shade700,
+                                ),
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                              ),
+                            ),
+                    ),
+                  ),
+
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: GetX<ToDoListController>(
@@ -231,9 +429,29 @@ Widget detailsSection(
                                       .trim()
                                       .isNotEmpty) {
                                     controller.descriptionNote.value.clear();
-                                    await controller
-                                        .addNewTaskDescriptionNote();
+                                    await controller.addNewTaskDescriptionNote(
+                                      controller.currentTaskId.value,
+                                      {
+                                        'note_type': 'text',
+                                        'note': controller.noteMessage.value
+                                            .trim(),
+                                      },
+                                    );
                                     controller.noteMessage.value = '';
+                                  } else if (controller.fileBytes.value !=
+                                      null) {
+                                    await controller.addNewTaskDescriptionNote(
+                                      controller.currentTaskId.value,
+                                      {
+                                        'file_name': controller.fileName.value,
+                                        'note_type': controller.fileType.value,
+                                        'media_note':
+                                            controller.fileBytes.value,
+                                      },
+                                    );
+                                    controller.fileBytes.value = null;
+                                    controller.fileType.value = '';
+                                    controller.fileName.value = '';
                                   }
                                   Future.delayed(
                                     const Duration(milliseconds: 100),

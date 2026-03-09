@@ -5,6 +5,7 @@ class ToDoListDescriptionModel {
   String? userName;
   String? type;
   String? description;
+  String? fileName;
   String? companyId;
   bool? isThisUserTheCurrentUser;
   DateTime? createdAt;
@@ -20,6 +21,7 @@ class ToDoListDescriptionModel {
     this.createdAt,
     this.updatedAt,
     this.isThisUserTheCurrentUser,
+    this.fileName,
   });
 
   ToDoListDescriptionModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,7 @@ class ToDoListDescriptionModel {
     createdAt = json.containsKey('createdAt')
         ? DateTime.tryParse(json['createdAt'])
         : null;
+    fileName = json.containsKey('file_name') ? json['file_name'] ?? '' : '';
     updatedAt = json.containsKey('updatedAt')
         ? DateTime.tryParse(json['updatedAt'])
         : null;
