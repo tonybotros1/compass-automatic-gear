@@ -17,19 +17,22 @@ Widget jobsDialySummaryTable() {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(5),
           child: DataTable2(
-            headingRowHeight: 30,
-            dataRowHeight: 35,
+            headingRowHeight: 25,
+            dataRowHeight: 25,
             showCheckboxColumn: false,
             horizontalMargin: horizontalMarginForTable,
             columnSpacing: 5,
             dividerThickness: .3,
+            lmRatio: 2.4,
+            dataTextStyle: controller.dataRowTextStyle,
+            headingTextStyle: controller.headerRowTextStyle,
             columns: [
-              const DataColumn2(size: ColumnSize.L, label: Text('Branch')),
+              const DataColumn2(size: ColumnSize.L, label: Text('BRANCH')),
               DataColumn2(
-                size: ColumnSize.S,
+                size: ColumnSize.M,
                 numeric: true,
                 label: ClickableHoverText(
-                  text: 'Posted',
+                  text: 'POSTED',
                   onTap: () {
                     if (controller.isPostedSelected.isFalse) {
                       controller.isPostedSelected.value = true;
@@ -50,10 +53,10 @@ Widget jobsDialySummaryTable() {
                 ),
               ),
               DataColumn2(
-                size: ColumnSize.S,
+                size: ColumnSize.M,
                 numeric: true,
                 label: ClickableHoverText(
-                  text: 'New',
+                  text: 'NEW',
                   onTap: () {
                     if (controller.isNewSelected.isFalse) {
                       controller.isNewSelected.value = true;
@@ -76,17 +79,17 @@ Widget jobsDialySummaryTable() {
               const DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('Total'),
+                label: Text('TOTAL'),
               ),
               const DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('Net'),
+                label: Text('NET'),
               ),
               const DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('Paid'),
+                label: Text('PAID'),
               ),
             ],
             rows: controller.jobDailySummary.asMap().entries.map((entry) {

@@ -10,6 +10,7 @@ class DynamicBoxesLineModel {
   final double? labelFontSize;
   final bool? isFormated;
   final Color? iconColor;
+  final double? iconSize;
 
   DynamicBoxesLineModel({
     required this.label,
@@ -21,5 +22,6 @@ class DynamicBoxesLineModel {
     this.valueFontSize,
     this.isFormated,
     this.iconColor,
+    this.iconSize,
   });
 }

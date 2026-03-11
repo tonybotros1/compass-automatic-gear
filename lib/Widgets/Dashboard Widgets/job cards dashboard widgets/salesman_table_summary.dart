@@ -16,33 +16,35 @@ Widget jobsSalesmanSummaryTable() {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(5),
           child: DataTable2(
-            headingRowHeight: 30,
-            dataRowHeight: 35,
+            headingRowHeight: 25,
+            dataRowHeight: 25,
             showCheckboxColumn: false,
             horizontalMargin: horizontalMarginForTable,
             columnSpacing: 5,
             dividerThickness: .3,
+            dataTextStyle: controller.dataRowTextStyle,
+            headingTextStyle: controller.headerRowTextStyle,
             columns: const [
-              DataColumn2(size: ColumnSize.L, label: Text('Branch')),
+              DataColumn2(size: ColumnSize.L, label: Text('SALESMAN')),
               DataColumn2(
                 size: ColumnSize.S,
-                label: Text('No. Of Jobs'),
+                label: Text('JOBS NO.'),
                 numeric: true,
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('Total'),
+                label: Text('TOTAL'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('Net'),
+                label: Text('NET'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('Paid'),
+                label: Text('PAID'),
               ),
             ],
             rows: controller.jobSalesmanSummary.asMap().entries.map((entry) {

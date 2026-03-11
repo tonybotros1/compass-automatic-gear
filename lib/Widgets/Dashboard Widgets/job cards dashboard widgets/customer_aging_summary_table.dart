@@ -16,63 +16,67 @@ Widget customerAgingTable({required BuildContext context}) {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(5),
           child: PaginatedDataTable2(
-            headingRowHeight: 30,
-            dataRowHeight: 35,
+            headingRowHeight: 25,
+            dataRowHeight: 30,
             showCheckboxColumn: false,
             horizontalMargin: horizontalMarginForTable,
             columnSpacing: 5,
             dividerThickness: .3,
+            dataTextStyle: controller.dataRowTextStyle,
+            headingTextStyle: controller.headerRowTextStyle,
+            autoRowsToHeight: true,
+            lmRatio: 3,
             columns: const [
-              DataColumn2(size: ColumnSize.L, label: Text('Group Name')),
+              DataColumn2(size: ColumnSize.L, label: Text('GROUP NAME')),
               DataColumn2(
                 size: ColumnSize.M,
-                label: Text('Total Out.'),
+                label: Text('TOTAL OUT.'),
                 numeric: true,
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('0 To 30'),
+                label: Text('0 TO 30'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('31 To 60'),
+                label: Text('31 TO 60'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('61 To 90'),
+                label: Text('61 TO 90'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('0 To 90'),
+                label: Text('0 TO 90'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('91 To 120'),
+                label: Text('91 TO 120'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('121 To 150'),
+                label: Text('121 TO 150'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('151 To 180'),
+                label: Text('151 TO 180'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('91 To 180'),
+                label: Text('91 TO 180'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('181 To 460'),
+                label: Text('181 TO 460'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
@@ -82,7 +86,7 @@ Widget customerAgingTable({required BuildContext context}) {
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('Last Pay-Date'),
+                label: Text('LAST PAY-DATE'),
               ),
             ],
             source: CardDataSource(
@@ -109,17 +113,21 @@ DataRow dataRowForTheTable(
   int index,
   JobCardsDashboardController controller,
 ) {
-  bool isLastRow = controller.jobSalesmanSummary.length == index;
+  bool isEven = index % 2 != 0;
   return DataRow(
     color: WidgetStateProperty.resolveWith<Color?>((states) {
       if (states.contains(WidgetState.selected)) {
         return Colors.yellow;
       }
-      return isLastRow ? Colors.grey.shade200 : Colors.white;
+      return isEven ? coolColor : Colors.white;
     }),
     cells: [
       DataCell(
-        textForDataRowInTable(text: data.groupName ?? '', formatDouble: false),
+        textForDataRowInTable(
+          text: data.groupName ?? '',
+          formatDouble: false,
+          maxWidth: null,
+        ),
       ),
       DataCell(
         textForDataRowInTable(
@@ -192,7 +200,11 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           text: textToDate(data.lastPaymentDate),
-          color: Colors.black,
+          color: textColorDependingOnDateTime(
+            data.lastPaymentDate,
+            30,
+            Colors.red,
+          ),
         ),
       ),
     ],

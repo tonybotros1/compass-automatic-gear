@@ -34,6 +34,17 @@ class JobCardsDashboardController extends GetxController {
   RxBool isApprovedSelected = RxBool(false);
   RxBool isReturnedSelected = RxBool(false);
   RxBool isScreenLoading = RxBool(false);
+  TextStyle dataRowTextStyle = TextStyle(
+    fontSize: 10,
+    fontWeight: FontWeight.bold,
+    color: Colors.grey[700],
+  );
+
+  TextStyle headerRowTextStyle = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.bold,
+    color: Colors.grey[700],
+  );
 
   @override
   void onInit() {

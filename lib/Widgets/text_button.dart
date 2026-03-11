@@ -8,6 +8,7 @@ class ClickableHoverText extends StatefulWidget {
   final Color? color1;
   final Color? color2;
   final bool? underLine;
+  final double? fontSize;
 
   const ClickableHoverText({
     super.key,
@@ -18,6 +19,7 @@ class ClickableHoverText extends StatefulWidget {
     this.color2,
     this.underLine,
     this.onSecondaryTap,
+    this.fontSize,
   });
 
   @override
@@ -40,6 +42,7 @@ class _ClickableHoverTextState extends State<ClickableHoverText> {
             ? Text(
                 widget.text ?? '',
                 style: TextStyle(
+                  fontSize: widget.fontSize,
                   decoration: widget.underLine == true
                       ? TextDecoration.underline
                       : null,

@@ -17,16 +17,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-// String backendTestURI = 'http://172.168.1.18:8000';
-// String webSocketURL = "ws://172.168.1.18:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://172.168.1.18:8000';
+String webSocketURL = "ws://172.168.1.18:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
 // String webSocketURL = "ws://10.0.2.2:8000/ws";
 
 // ======== production urls ========
-String backendTestURI = 'https://datahubai-backend.onrender.com';
-String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
+// String backendTestURI = 'https://datahubai-backend.onrender.com';
+// String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
 
 final formatter = CurrencyInputFormatter();
 
@@ -71,6 +71,42 @@ IconButton dateRange({
     },
     icon: const Icon(Icons.date_range),
   );
+}
+
+Color textColorDependingOnDateTime(
+  dynamic dateInput,
+  int days,
+  Color textColor,
+) {
+  if (dateInput == null) return Colors.black;
+
+  // Convert input to DateTime if it's not already
+  DateTime? date;
+  if (dateInput is DateTime) {
+    date = dateInput;
+  } else if (dateInput is String) {
+    try {
+      date = DateTime.parse(dateInput);
+    } catch (e) {
+      return Colors.black; // invalid string format
+    }
+  } else {
+    return Colors.black; // unsupported type
+  }
+
+  // Normalize dates to remove time component
+  final today = DateTime.now();
+  final todayDateOnly = DateTime(today.year, today.month, today.day);
+  final inputDateOnly = DateTime(date.year, date.month, date.day);
+
+  final diffDays = todayDateOnly.difference(inputDateOnly).inDays;
+
+  if (diffDays <= days) {
+    // Date already passed
+    return Colors.black;
+  } else {
+    return textColor;
+  }
 }
 
 var fontStyleForPDFLable = pw.TextStyle(
@@ -575,7 +611,6 @@ var cancelTaskButtonStyle = ElevatedButton.styleFrom(
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(80, 40),
-
 );
 
 var reOpenTaskButtonStyle = ElevatedButton.styleFrom(
@@ -584,7 +619,6 @@ var reOpenTaskButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.teal,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(80, 40),
-
 );
 var viewTaskButtonStyle = ElevatedButton.styleFrom(
   padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -1033,7 +1067,7 @@ Widget textForDataRowInTable({
   double? maxWidth = 150,
   Color? color,
   bool isBold = false,
-  double? fontSize = 12,
+  double? fontSize,
   bool isSelectable = true,
   bool formatDouble = true,
   TextStyle? style,

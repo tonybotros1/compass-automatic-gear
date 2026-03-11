@@ -693,6 +693,7 @@ class SummaryBox extends StatelessWidget {
   final void Function()? onPressedForRefreshIcon;
   final bool? isFormated;
   final double? width;
+  final double? iconSize;
   const SummaryBox({
     super.key,
     required this.title,
@@ -704,6 +705,7 @@ class SummaryBox extends StatelessWidget {
     this.onPressedForRefreshIcon,
     this.isFormated,
     this.width,
+    this.iconSize,
   });
 
   @override
@@ -763,7 +765,7 @@ class SummaryBox extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Icon(icon, size: 70, color: iconColor),
+            child: Icon(icon, size: iconSize ?? 70, color: iconColor),
           ),
         ],
       ),

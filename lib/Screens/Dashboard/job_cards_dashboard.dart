@@ -66,11 +66,7 @@ class _DashBoardBody extends StatelessWidget {
                                     labelPadding: const EdgeInsets.symmetric(
                                       horizontal: 8,
                                     ),
-                                    labelStyle: TextStyle(
-                                      color: Colors.grey[700],
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
+                                    labelStyle: controller.headerRowTextStyle,
                                     dividerHeight: 0,
                                     indicatorPadding: EdgeInsetsGeometry.zero,
                                     padding: EdgeInsets.zero,
@@ -133,10 +129,7 @@ class _DashBoardBody extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Divider(
-                                      color: Colors.black,
-                                      thickness: 0.5,
-                                    ),
+                                    const SizedBox(height: 4),
                                     Expanded(child: jobsDialySummaryTable()),
                                     DefaultTabController(
                                       length: 1,
@@ -145,7 +138,7 @@ class _DashBoardBody extends StatelessWidget {
                                         labelStyle: TextStyle(
                                           color: Colors.grey[700],
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 12,
+                                          fontSize: 11,
                                         ),
                                         dividerHeight: 0,
                                         indicatorPadding:
@@ -159,23 +152,22 @@ class _DashBoardBody extends StatelessWidget {
                                         splashBorderRadius:
                                             BorderRadius.circular(5),
                                         dividerColor: Colors.transparent,
-                                        tabs: const [Tab(text: 'NEW SUMMARY')],
+                                        tabs: const [
+                                          Tab(text: 'NEW JOBS SUMMARY'),
+                                        ],
                                       ),
                                     ),
-                                    const Divider(
-                                      color: Colors.black,
-                                      thickness: 0.5,
-                                    ),
+                                    const SizedBox(height: 4),
                                     Expanded(child: newJobsDialySummaryTable()),
                                   ],
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                                padding: const EdgeInsets.fromLTRB(8, 8, 2, 0),
                                 child: jobsMonthlySummaryTable(),
                               ),
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                                padding: const EdgeInsets.fromLTRB(8, 8, 2, 0),
                                 child: jobsSalesmanSummaryTable(),
                               ),
                             ],
@@ -202,11 +194,7 @@ class _DashBoardBody extends StatelessWidget {
                                     labelPadding: const EdgeInsets.symmetric(
                                       horizontal: 8,
                                     ),
-                                    labelStyle: TextStyle(
-                                      color: Colors.grey[700],
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                    ),
+                                    labelStyle: controller.headerRowTextStyle,
                                     dividerHeight: 0,
                                     indicatorPadding: EdgeInsetsGeometry.zero,
                                     padding: EdgeInsets.zero,
@@ -235,11 +223,78 @@ class _DashBoardBody extends StatelessWidget {
                             );
                           },
                         ),
+                        // GetBuilder<JobCardsDashboardController>(
+                        //   builder: (controller) {
+                        //     return SizedBox(
+                        //       height: 50,
+                        //       // padding: const EdgeInsets.all(4),
+                        //       child: dynamicBoxesLine(
+                        //         dynamicConfigs: [
+                        //           DynamicBoxesLineModel(
+                        //             isFormated: false,
+                        //             width: 200,
+                        //             label: 'NUMBER OF JOBS',
+                        //             value: '',
+                        //             valueColor: mainColor,
+                        //             icon: counterIcon,
+                        //             iconColor: mainColorWithAlpha,
+                        //             iconSize: 10,
+                        //           ),
+                        //           DynamicBoxesLineModel(
+                        //             icon: moneyIcon,
+                        //             iconColor: Colors.green.shade100,
+                        //             width: 100,
+                        //             label: 'TOTAL AMOUNT',
+                        //             value: '',
+                        //             valueColor: Colors.green,
+                        //             iconSize: 10,
+                        //           ),
+                        //           DynamicBoxesLineModel(
+                        //             icon: moneyIcon,
+                        //             iconColor: Colors.blue.shade100,
+                        //             width: 100,
+                        //             label: 'VAT AMOUNT',
+                        //             value: '',
+                        //             valueColor: Colors.blue,
+                        //             iconSize: 10,
+                        //           ),
+                        //           DynamicBoxesLineModel(
+                        //             icon: moneyIcon,
+                        //             iconColor: Colors.blueGrey.shade100,
+                        //             width: 100,
+                        //             label: 'NET AMOUNT',
+                        //             value: '',
+                        //             valueColor: Colors.blueGrey,
+                        //             iconSize: 10,
+                        //           ),
+                        //           DynamicBoxesLineModel(
+                        //             icon: moneyIcon,
+                        //             iconColor: Colors.orange.shade100,
+                        //             width: 100,
+                        //             label: 'PAID AMOUNT',
+                        //             value: '',
+                        //             valueColor: Colors.orange,
+                        //             iconSize: 10,
+                        //           ),
+                        //           DynamicBoxesLineModel(
+                        //             icon: moneyIcon,
+                        //             iconColor: Colors.red.shade100,
+                        //             width: 100,
+                        //             label: 'OUTSTANDING AMOUNT',
+                        //             value: '',
+                        //             valueColor: Colors.red,
+                        //             iconSize: 10,
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     );
+                        //   },
+                        // ),
                         Expanded(
                           child: TabBarView(
                             children: [
                               Padding(
-                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                                padding: const EdgeInsets.fromLTRB(2, 4, 8, 0),
                                 child: customerAgingTable(context: context),
                               ),
                             ],

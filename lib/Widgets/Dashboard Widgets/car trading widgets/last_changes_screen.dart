@@ -1,4 +1,5 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
+import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:datahubai/consts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +57,23 @@ Widget lastChangesScreen({
                           controller.toDateForChanges.value.text,
                           controller.toDateForChanges.value,
                         );
+                      },
+                    ),
+                    CustomDropdown(
+                      width: 300,
+                      hintText: 'Account',
+                      showedSelectedName: 'name',
+                      textcontroller:
+                          controller.accountForLastChanges.value.text,
+                      onChanged: (key, value) {
+                        controller.accountForLastChanges.value.text =
+                            value['name'];
+                      },
+                      onDelete: (){
+                         controller.accountForLastChanges.value.clear();
+                      },
+                      onOpen: (){
+                        return controller.getNamesOfAccount();
                       },
                     ),
                     CustomSlidingSegmentedControl<int>(

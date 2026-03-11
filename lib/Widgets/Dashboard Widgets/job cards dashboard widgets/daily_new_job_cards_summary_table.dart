@@ -17,25 +17,27 @@ Widget newJobsDialySummaryTable() {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(5),
           child: DataTable2(
-            headingRowHeight: 30,
-            dataRowHeight: 35,
+            headingRowHeight: 25,
+            dataRowHeight: 25,
             showCheckboxColumn: false,
             horizontalMargin: horizontalMarginForTable,
             columnSpacing: 5,
             dividerThickness: .3,
+            lmRatio: 2.4,
+            dataTextStyle: controller.dataRowTextStyle,
+            headingTextStyle: controller.headerRowTextStyle,
             columns: [
-              const DataColumn2(size: ColumnSize.L, label: Text('Branch')),
+              const DataColumn2(size: ColumnSize.L, label: Text('BRANCH')),
               const DataColumn2(
-                size: ColumnSize.S,
+                size: ColumnSize.M,
                 numeric: true,
-                label: Text('No Of Jobs'),
+                label: Text('JOBS NO.'),
               ),
               DataColumn2(
-                size: ColumnSize.S,
-
+                size: ColumnSize.M,
                 numeric: true,
                 label: ClickableHoverText(
-                  text: 'Not Approved',
+                  text: 'Not APPRO.',
                   onTap: () {
                     if (controller.isNotApprovedSelected.isFalse) {
                       controller.isNotApprovedSelected.value = true;
@@ -58,11 +60,11 @@ Widget newJobsDialySummaryTable() {
                 ),
               ),
               DataColumn2(
-                size: ColumnSize.S,
+                size: ColumnSize.M,
 
                 numeric: true,
                 label: ClickableHoverText(
-                  text: 'Approved',
+                  text: 'APPRO.',
                   onTap: () {
                     if (controller.isApprovedSelected.isFalse) {
                       controller.isApprovedSelected.value = true;
@@ -85,11 +87,11 @@ Widget newJobsDialySummaryTable() {
                 ),
               ),
               DataColumn2(
-                size: ColumnSize.S,
+                size: ColumnSize.M,
 
                 numeric: true,
                 label: ClickableHoverText(
-                  text: 'Ready',
+                  text: 'READY',
                   onTap: () {
                     if (controller.isReadySelected.isFalse) {
                       controller.isReadySelected.value = true;
@@ -112,11 +114,11 @@ Widget newJobsDialySummaryTable() {
                 ),
               ),
               DataColumn2(
-                size: ColumnSize.S,
+                size: ColumnSize.M,
 
                 numeric: true,
                 label: ClickableHoverText(
-                  text: 'Returned',
+                  text: 'RETURNED',
                   onTap: () {
                     if (controller.isReturnedSelected.isFalse) {
                       controller.isReturnedSelected.value = true;
@@ -166,7 +168,11 @@ DataRow dataRowForTheTable(
     }),
     cells: [
       DataCell(
-        textForDataRowInTable(text: data.name ?? '', formatDouble: false),
+        textForDataRowInTable(
+          text: data.name ?? '',
+          formatDouble: false,
+          maxWidth: null,
+        ),
       ),
       DataCell(
         textForDataRowInTable(

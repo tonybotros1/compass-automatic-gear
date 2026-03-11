@@ -161,6 +161,7 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> toDateForChanges = TextEditingController().obs;
   Rx<TextEditingController> minAmount = TextEditingController().obs;
   Rx<TextEditingController> maxAmount = TextEditingController().obs;
+  Rx<TextEditingController> accountForLastChanges = TextEditingController().obs;
   RxBool carModified = RxBool(false);
   // RxBool itemsModified = RxBool(false);
   RxBool purchasedItemsModified = RxBool(false);
@@ -1022,6 +1023,7 @@ class CarTradingDashboardController extends GetxController {
     toDateForChanges.value.clear();
     minAmount.value.clear();
     maxAmount.value.clear();
+    accountForLastChanges.value.clear();
   }
   // =============================== trnsfers section ============================================
 
@@ -1206,6 +1208,9 @@ class CarTradingDashboardController extends GetxController {
     }
     if (maxAmount.value.text.isNotEmpty) {
       body['max_amount'] = maxAmount.value.text;
+    }
+    if (accountForLastChanges.value.text.isNotEmpty) {
+      body['account'] = accountForLastChanges.value.text;
     }
     await getLastChanges(body);
   }
