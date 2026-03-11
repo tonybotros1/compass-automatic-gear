@@ -1,12 +1,11 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../Models/job cards dashboard/customer_aging_model.dart';
 import '../../Models/job cards dashboard/daily_jobs_summary_model.dart';
 import '../../Models/job cards dashboard/daily_new_jobs_summary_model.dart';
 import '../../consts.dart';
@@ -18,6 +17,9 @@ class JobCardsDashboardController extends GetxController {
   RxList<JobsDailySummary> jobDailySummary = RxList<JobsDailySummary>([]);
   RxList<JobsDailySummary> jobMonthlySummary = RxList<JobsDailySummary>([]);
   RxList<JobsDailySummary> jobSalesmanSummary = RxList<JobsDailySummary>([]);
+  RxList<CustomerAgingModel> customerAgingSummary = RxList<CustomerAgingModel>(
+    [],
+  );
   RxList<NewJobsDailySummary> newJobDailySummary = RxList<NewJobsDailySummary>(
     [],
   );
@@ -35,8 +37,10 @@ class JobCardsDashboardController extends GetxController {
 
   @override
   void onInit() {
+    // getCustomersAging();
+    date.value.text = textToDate(DateTime.now());
+    filterSearch('day');
     getNewJobsDailySummary();
-
     super.onInit();
   }
 
@@ -112,52 +116,11 @@ class JobCardsDashboardController extends GetxController {
     if (isPostedSelected.isTrue) {
       body['status'] = 'Posted';
     }
-    // if (isNotApprovedSelected.isTrue) {
-    //   body['status'] = 'not approved';
-    // }
-    // if (isApprovedSelected.isTrue) {
-    //   body['status'] = 'Approved';
-    // }
-    // if (isReadySelected.isTrue) {
-    //   body['status'] = 'Ready';
-    // }
-    // if (isReturnedSelected.isTrue) {
-    //   body['label'] = 'Returned';
-    // }
     if (body.isNotEmpty) {
       await jonCardController.searchEngine(body);
     }
     isScreenLoading.value = false;
   }
-
-  // void showDatePicker(BuildContext context) {
-  //   showCupertinoModalPopup(
-  //     context: context,
-  //     builder: (_) => Container(
-  //       height: 250,
-  //       color: Colors.white,
-  //       child: Column(
-  //         children: [
-  //           SizedBox(
-  //             height: 180,
-  //             child: CupertinoDatePicker(
-  //               mode: CupertinoDatePickerMode.date,
-  //               initialDateTime: DateTime.now(),
-  //               onDateTimeChanged: (val) {
-  //                 print(val);
-  //               },
-  //             ),
-  //           ),
-  //           // Close the modal
-  //           CupertinoButton(
-  //             child: const Text('OK'),
-  //             onPressed: () => Navigator.of(context).pop(),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Future<Map<String, dynamic>> getJobsDate(String type) async {
     try {
@@ -179,6 +142,40 @@ class JobCardsDashboardController extends GetxController {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getJobsDate(type);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      return {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  Future<Map<String, dynamic>> getCustomersAging() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards_dashboard/get_customer_aging_summary',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List customersAging = decoded['customers_aging'];
+        customerAgingSummary.assignAll(
+          customersAging.map((cus) => CustomerAgingModel.fromJson(cus)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getCustomersAging();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Dashboard Controllers/job_cards_dashboard_controller.dart';
 import '../../Controllers/Main screen controllers/job_card_controller.dart';
+import '../../Widgets/Dashboard Widgets/job cards dashboard widgets/customer_aging_summary_table.dart';
 import '../../Widgets/Dashboard Widgets/job cards dashboard widgets/daily_job_cards_summary_table.dart';
 import '../../Widgets/Dashboard Widgets/job cards dashboard widgets/daily_new_job_cards_summary_table.dart';
 import '../../Widgets/Dashboard Widgets/job cards dashboard widgets/monthly_job_cards_summary_table.dart';
@@ -49,6 +50,7 @@ class _DashBoardBody extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
+                  flex: 3,
                   child: DefaultTabController(
                     length: 3,
                     child: Column(
@@ -183,7 +185,70 @@ class _DashBoardBody extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Expanded(flex: 2, child: SizedBox()),
+                Expanded(
+                  flex: 8,
+                  child: DefaultTabController(
+                    length: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      // spacing: 10,
+                      children: [
+                        GetBuilder<JobCardsDashboardController>(
+                          builder: (controller) {
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: TabBar(
+                                    labelPadding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    labelStyle: TextStyle(
+                                      color: Colors.grey[700],
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                    dividerHeight: 0,
+                                    indicatorPadding: EdgeInsetsGeometry.zero,
+                                    padding: EdgeInsets.zero,
+                                    unselectedLabelColor: Colors.grey,
+                                    tabAlignment: TabAlignment.start,
+                                    isScrollable: true,
+                                    indicatorColor: mainColor,
+                                    labelColor: mainColor,
+                                    splashBorderRadius: BorderRadius.circular(
+                                      5,
+                                    ),
+                                    dividerColor: Colors.transparent,
+                                    tabs: const [Tab(text: 'CUSTOMERS AGING')],
+                                    // onTap: (i) {
+                                    //   controller.onClickForTabPage(i);
+                                    // },
+                                  ),
+                                ),
+                                TextButton.icon(
+                                  onPressed: () {
+                                    controller.getCustomersAging();
+                                  },
+                                  label: const Text('Refresh'),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        Expanded(
+                          child: TabBarView(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                                child: customerAgingTable(context: context),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

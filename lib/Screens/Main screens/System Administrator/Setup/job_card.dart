@@ -526,7 +526,7 @@ class JobCard extends StatelessWidget {
                                   iconColor: Colors.orange.shade100,
                                   width: 300,
                                   label: 'PAID AMOUNT',
-                                  value: '${controller.allJobsVATS.value}',
+                                  value: '${controller.allJobsPaid.value}',
                                   valueColor: Colors.orange,
                                 ),
                                 DynamicBoxesLineModel(
