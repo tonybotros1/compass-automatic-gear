@@ -1264,6 +1264,8 @@ class CustomDropdown extends StatefulWidget {
   final FocusNode? nextFocusNode;
   final void Function()? onDelete;
   final Future<Map<String, dynamic>> Function()? onOpen;
+  final double? fontSize;
+  final double? fieldheigth;
 
   const CustomDropdown({
     super.key,
@@ -1273,7 +1275,7 @@ class CustomDropdown extends StatefulWidget {
     this.onChanged,
     this.focusNode,
     this.nextFocusNode,
-    this.hintText = "Select an option",
+    this.hintText = "",
     this.dropdownDecoration,
     this.disabledDecoration,
     this.width = 150,
@@ -1285,6 +1287,8 @@ class CustomDropdown extends StatefulWidget {
     this.showedResult,
     this.onDelete,
     this.onOpen,
+    this.fontSize,
+    this.fieldheigth,
   });
 
   @override
@@ -1393,6 +1397,9 @@ class _CustomDropdownState extends State<CustomDropdown> {
                                       ),
                                       child: Text(
                                         value[widget.showedSelectedName],
+                                        style: TextStyle(
+                                          fontSize: widget.fontSize,
+                                        ),
                                       ),
                                     );
                                   },
@@ -1456,6 +1463,9 @@ class _CustomDropdownState extends State<CustomDropdown> {
                                         ),
                                         child: Text(
                                           v[widget.showedSelectedName],
+                                          style: TextStyle(
+                                            fontSize: widget.fontSize,
+                                          ),
                                         ),
                                       );
                                     },
@@ -1486,19 +1496,21 @@ class _CustomDropdownState extends State<CustomDropdown> {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 2),
-                            child: Text(
-                              widget.hintText,
-                              style: textFieldLabelStyle,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
+                          widget.hintText != ''
+                              ? Padding(
+                                  padding: const EdgeInsets.only(left: 2),
+                                  child: Text(
+                                    widget.hintText,
+                                    style: widget.fontSize != null
+                                        ? TextStyle(fontSize: widget.fontSize)
+                                        : textFieldLabelStyle,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                )
+                              : const SizedBox(),
                           Container(
-                            height: textFieldHeight,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                            ),
+                            height: widget.fieldheigth ?? textFieldHeight,
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
                             decoration: controller.isValid.isFalse
                                 ? BoxDecoration(
                                     color: Colors.grey.shade200,
@@ -1511,21 +1523,17 @@ class _CustomDropdownState extends State<CustomDropdown> {
                                         color: Colors.white,
                                         border: Border.all(
                                           color:
-                                              widget.focusNode?.hasFocus ==
-                                                  true
+                                              widget.focusNode?.hasFocus == true
                                               ? Colors.blue
                                               : controller.isValid.value
                                               ? Colors.grey
                                               : Colors.red,
                                           width:
-                                              widget.focusNode?.hasFocus ==
-                                                  true
+                                              widget.focusNode?.hasFocus == true
                                               ? 2
                                               : 1,
                                         ),
-                                        borderRadius: BorderRadius.circular(
-                                          4,
-                                        ),
+                                        borderRadius: BorderRadius.circular(4),
                                       ))
                                 : (widget.disabledDecoration ??
                                       defaultDisabledDecoration),
@@ -1555,9 +1563,7 @@ class _CustomDropdownState extends State<CustomDropdown> {
                                                               ?.toString() ??
                                                           ''
                                                     : ''
-                                              : controller
-                                                    .textController
-                                                    .value,
+                                              : controller.textController.value,
                                           style: isEnabled
                                               ? (widget.enabledTextStyle ??
                                                     (controller
@@ -1568,12 +1574,22 @@ class _CustomDropdownState extends State<CustomDropdown> {
                                                                 .selectedKey
                                                                 .isEmpty
                                                         ? TextStyle(
-                                                            fontSize: 14,
+                                                            fontSize:
+                                                                widget
+                                                                    .fontSize ??
+                                                                14,
                                                             color: Colors
                                                                 .grey
                                                                 .shade700,
                                                           )
-                                                        : textFieldFontStyle))
+                                                        : widget.fontSize ==
+                                                              null
+                                                        ? textFieldFontStyle
+                                                        : TextStyle(
+                                                            fontSize:
+                                                                widget.fontSize,
+                                                            color: Colors.black,
+                                                          )))
                                               : (widget.disabledTextStyle ??
                                                     defaultDisabledTextStyle),
                                           overflow: TextOverflow.ellipsis,
@@ -1581,15 +1597,10 @@ class _CustomDropdownState extends State<CustomDropdown> {
                                 ),
                                 Icon(
                                   Icons.arrow_drop_down,
-                                  color: isEnabled
-                                      ? Colors.black
-                                      : Colors.grey,
+                                  color: isEnabled ? Colors.black : Colors.grey,
                                 ),
                                 if (controller.selectedKey.isNotEmpty ||
-                                    controller
-                                        .textController
-                                        .value
-                                        .isNotEmpty)
+                                    controller.textController.value.isNotEmpty)
                                   ExcludeFocus(
                                     child: InkWell(
                                       focusNode: FocusNode(

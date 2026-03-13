@@ -17,7 +17,7 @@ Widget customerAgingTable({required BuildContext context}) {
           borderRadius: BorderRadius.circular(5),
           child: PaginatedDataTable2(
             headingRowHeight: 25,
-            dataRowHeight: 30,
+            dataRowHeight: 25,
             showCheckboxColumn: false,
             horizontalMargin: horizontalMarginForTable,
             columnSpacing: 5,
@@ -76,7 +76,7 @@ Widget customerAgingTable({required BuildContext context}) {
               DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('181 TO 460'),
+                label: Text('181 TO 360'),
               ),
               DataColumn2(
                 size: ColumnSize.M,
@@ -122,13 +122,7 @@ DataRow dataRowForTheTable(
       return isEven ? coolColor : Colors.white;
     }),
     cells: [
-      DataCell(
-        textForDataRowInTable(
-          text: data.groupName ?? '',
-          formatDouble: false,
-          maxWidth: null,
-        ),
-      ),
+      DataCell(SelectableText(data.groupName ?? '', maxLines: 1)),
       DataCell(
         textForDataRowInTable(
           text: data.totalOutstanding?.toString() ?? '0',

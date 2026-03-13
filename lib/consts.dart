@@ -17,8 +17,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://172.168.1.18:8000';
-String webSocketURL = "ws://172.168.1.18:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://172.168.1.104:8000';
+String webSocketURL = "ws://172.168.1.104:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
@@ -72,6 +72,12 @@ IconButton dateRange({
     icon: const Icon(Icons.date_range),
   );
 }
+
+TextStyle headeTextStyle = const TextStyle(
+  fontSize: 11,
+  fontWeight: FontWeight.bold,
+  color: Colors.white,
+);
 
 Color textColorDependingOnDateTime(
   dynamic dateInput,

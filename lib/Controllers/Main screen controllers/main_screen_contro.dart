@@ -26,6 +26,7 @@ import '../../Screens/Dashboard/car_trading_dashboard.dart';
 import '../../Screens/Dashboard/job_cards_dashboard.dart';
 import '../../Screens/Dashboard/trading_dashboard.dart';
 import '../../Screens/Main screens/System Administrator/Setup/AP_payment_type.dart';
+import '../../Screens/Main screens/System Administrator/Setup/account_transfers.dart';
 import '../../Screens/Main screens/System Administrator/Setup/ap_invoices.dart';
 import '../../Screens/Main screens/System Administrator/Setup/banks_and_others.dart';
 import '../../Screens/Main screens/System Administrator/Setup/branches.dart';
@@ -302,6 +303,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: JobCardsDashboard());
       case '/toDoList':
         return const SizedBox(child: ToDoList());
+      case '/accountTransfers':
+        return const SizedBox(child: AccountTransfers());
 
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));

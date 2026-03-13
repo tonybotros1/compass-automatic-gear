@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -13,7 +12,8 @@ import '../../helpers.dart';
 import '../Main screen controllers/job_card_controller.dart';
 
 class JobCardsDashboardController extends GetxController {
-  Rx<TextEditingController> date = TextEditingController().obs;
+  Rx<TextEditingController> monthlyDateController = TextEditingController().obs;
+  Rx<TextEditingController> dailyDateController = TextEditingController().obs;
   RxList<JobsDailySummary> jobDailySummary = RxList<JobsDailySummary>([]);
   RxList<JobsDailySummary> jobMonthlySummary = RxList<JobsDailySummary>([]);
   RxList<JobsDailySummary> jobSalesmanSummary = RxList<JobsDailySummary>([]);
@@ -33,7 +33,14 @@ class JobCardsDashboardController extends GetxController {
   RxBool isReadySelected = RxBool(false);
   RxBool isApprovedSelected = RxBool(false);
   RxBool isReturnedSelected = RxBool(false);
-  RxBool isScreenLoading = RxBool(false);
+  RxBool isScreenLoadingForJobCards = RxBool(false);
+  RxBool isScreenLoadingForJobDialyNewSummary = RxBool(false);
+  RxBool isScreenLoadingForCustomerAging = RxBool(false);
+  RxDouble customerAgingTotalOutstanding = RxDouble(0.0);
+  RxDouble customerAging0To90 = RxDouble(0.0);
+  RxDouble customerAging91To180 = RxDouble(0.0);
+  RxDouble customerAging181To360 = RxDouble(0.0);
+  RxDouble customerAgingMoreThan360 = RxDouble(0.0);
   TextStyle dataRowTextStyle = TextStyle(
     fontSize: 10,
     fontWeight: FontWeight.bold,
@@ -46,11 +53,17 @@ class JobCardsDashboardController extends GetxController {
     color: Colors.grey[700],
   );
 
+  TextStyle headeTextStyle = const TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  );
+
   @override
   void onInit() {
-    // getCustomersAging();
-    date.value.text = textToDate(DateTime.now());
+    dailyDateController.value.text = textToDate(DateTime.now());
     filterSearch('day');
+    getCustomersAging();
     getNewJobsDailySummary();
     super.onInit();
   }
@@ -68,27 +81,26 @@ class JobCardsDashboardController extends GetxController {
     super.onClose();
   }
 
-  void onClickForTabPage(int i) {
-    switch (i) {
-      case 0:
-        jobDatesType.value = 'day';
-        date.value = TextEditingController();
-        break;
-      case 1:
-        jobDatesType.value = 'month';
-        date.value = TextEditingController();
-        break;
-      default:
-        jobDatesType.value = 'month';
-        break;
+  void calculateCustomerAgingTotals() {
+    customerAgingTotalOutstanding.value = 0.0;
+    customerAging0To90.value = 0.0;
+    customerAging91To180.value = 0.0;
+    customerAging181To360.value = 0.0;
+    customerAgingMoreThan360.value = 0.0;
+    for (var element in customerAgingSummary) {
+      customerAgingTotalOutstanding.value += element.totalOutstanding ?? 0;
+      customerAging0To90.value += element.i0To90Days ?? 0;
+      customerAging91To180.value += element.i91To180Days ?? 0;
+      customerAging181To360.value += element.d181To360Days ?? 0;
+      customerAgingMoreThan360.value += element.moreThan360Days ?? 0;
     }
   }
 
   MonthRange monthToIsoRange(String monthYear) {
     final parts = monthYear.split('-');
-    if (parts.length != 2) {
-      throw FormatException('Expected "MM-YYYY", got "$monthYear"');
-    }
+    // if (parts.length != 2) {
+    //   throw FormatException('Expected "MM-YYYY", got "$monthYear"');
+    // }
 
     final month = int.parse(parts[0]);
     final year = int.parse(parts[1]);
@@ -101,22 +113,28 @@ class JobCardsDashboardController extends GetxController {
   }
 
   void onSelectForDate(String dateType) {
-    getJobsDailySummary(date.value.text, dateType);
+    if (dateType == 'day') {
+      getJobsDailySummary(dailyDateController.value.text, dateType);
+    } else {
+      getJobsDailySummary(monthlyDateController.value.text, dateType);
+    }
   }
 
   void filterSearch(String dateType) async {
-    isScreenLoading.value = true;
+    isScreenLoadingForJobCards.value = true;
     Map<String, dynamic> body = {};
 
-    if (date.value.text.isNotEmpty) {
+    if (dailyDateController.value.text.isNotEmpty) {
       if (dateType == 'day') {
         onSelectForDate(dateType);
-        body['from_date'] = convertDateToIson(date.value.text);
-        body['to_date'] = convertDateToIson(date.value.text);
+        body['from_date'] = convertDateToIson(dailyDateController.value.text);
+        body['to_date'] = convertDateToIson(dailyDateController.value.text);
       } else {
-        getJobsDailySummary(date.value.text, dateType);
-        getSalesmanSummary(date.value.text);
-        MonthRange monthlyDate = monthToIsoRange(date.value.text);
+        getJobsDailySummary(monthlyDateController.value.text, dateType);
+        getSalesmanSummary();
+        MonthRange monthlyDate = monthToIsoRange(
+          monthlyDateController.value.text,
+        );
         body['from_date'] = monthlyDate.fromIso;
         body['to_date'] = monthlyDate.toIso;
       }
@@ -130,7 +148,7 @@ class JobCardsDashboardController extends GetxController {
     if (body.isNotEmpty) {
       await jonCardController.searchEngine(body);
     }
-    isScreenLoading.value = false;
+    isScreenLoadingForJobCards.value = false;
   }
 
   Future<Map<String, dynamic>> getJobsDate(String type) async {
@@ -167,6 +185,7 @@ class JobCardsDashboardController extends GetxController {
 
   Future<Map<String, dynamic>> getCustomersAging() async {
     try {
+      isScreenLoadingForCustomerAging.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -183,6 +202,7 @@ class JobCardsDashboardController extends GetxController {
         customerAgingSummary.assignAll(
           customersAging.map((cus) => CustomerAgingModel.fromJson(cus)),
         );
+        calculateCustomerAgingTotals();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -193,8 +213,10 @@ class JobCardsDashboardController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       }
+      isScreenLoadingForCustomerAging.value = false;
       return {};
     } catch (e) {
+      isScreenLoadingForCustomerAging.value = false;
       return {};
     }
   }
@@ -273,11 +295,13 @@ class JobCardsDashboardController extends GetxController {
     }
   }
 
-  Future<void> getSalesmanSummary(String date) async {
+  Future<void> getSalesmanSummary() async {
     String fromDate;
     String toDate;
     try {
-      MonthRange monthlyDate = monthToIsoRange(date);
+      MonthRange monthlyDate = monthToIsoRange(
+        monthlyDateController.value.text,
+      );
       fromDate = monthlyDate.fromIso;
       toDate = monthlyDate.toIso;
 
@@ -305,7 +329,7 @@ class JobCardsDashboardController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getSalesmanSummary(date);
+          await getSalesmanSummary();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -329,32 +353,8 @@ class JobCardsDashboardController extends GetxController {
   }
 
   Future<void> getNewJobsDailySummary() async {
-    // String fromDate;
-    // String toDate;
     try {
-      // if (date != '') {
-      //   final parsed = DateFormat('dd-MM-yyyy').parseStrict(date);
-      //   fromDate = parsed.toIso8601String().split('T').first;
-      //   toDate = parsed
-      //       .add(const Duration(days: 1))
-      //       .toIso8601String()
-      //       .split('T')
-      //       .first;
-      // } else {
-      //   alertMessage(
-      //     context: Get.context!,
-      //     content: 'Please enter valid date 2',
-      //   );
-      //   return;
-      // }
-      // if (fromDate == '' || toDate == '') {
-      //   alertMessage(
-      //     context: Get.context!,
-      //     content: 'Please enter valid date 3',
-      //   );
-      //   return;
-      // }
-
+      isScreenLoadingForJobDialyNewSummary.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -363,11 +363,7 @@ class JobCardsDashboardController extends GetxController {
       );
       final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          // "Content-Type": "application/json",
-        },
-        // body: jsonEncode({'from_date': fromDate, 'to_date': toDate}),
+        headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -385,8 +381,9 @@ class JobCardsDashboardController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       }
+      isScreenLoadingForJobDialyNewSummary.value = false;
     } catch (e) {
-      //
+      isScreenLoadingForJobDialyNewSummary.value = false;
     }
   }
 }

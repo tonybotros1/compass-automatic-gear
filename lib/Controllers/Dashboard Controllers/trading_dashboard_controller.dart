@@ -17,13 +17,16 @@ class TradingDashboardController extends GetxController {
   final RxList<DocumentSnapshot> allTrades = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allCapitals = RxList<DocumentSnapshot>([]);
   final RxList<DocumentSnapshot> allOutstanding = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> allGeneralExpenses =
-      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> allGeneralExpenses = RxList<DocumentSnapshot>(
+    [],
+  );
   final RxList<DocumentSnapshot> filteredTrades = RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredCapitals =
-      RxList<DocumentSnapshot>([]);
-  final RxList<DocumentSnapshot> filteredOutstanding =
-      RxList<DocumentSnapshot>([]);
+  final RxList<DocumentSnapshot> filteredCapitals = RxList<DocumentSnapshot>(
+    [],
+  );
+  final RxList<DocumentSnapshot> filteredOutstanding = RxList<DocumentSnapshot>(
+    [],
+  );
   final RxList<DocumentSnapshot> filteredGeneralExpenses =
       RxList<DocumentSnapshot>([]);
   RxMap allYears = RxMap({});
@@ -74,7 +77,6 @@ class TradingDashboardController extends GetxController {
   RxBool isYearSelected = RxBool(false);
   RxBool isMonthSelected = RxBool(false);
   RxBool isDaySelected = RxBool(false);
- 
 
   @override
   void onInit() async {
@@ -87,14 +89,17 @@ class TradingDashboardController extends GetxController {
     getYears();
     getMonths();
     getItems();
-    everAll([
-      totalNETsForAllTrades,
-      totalNETsForAllCapitals,
-      totalNETsForAllGeneralExpenses,
-      totalNETsForAllOutstanding
-    ], (values) {
-      calculateTotalsForAllAndNetProfit();
-    });
+    everAll(
+      [
+        totalNETsForAllTrades,
+        totalNETsForAllCapitals,
+        totalNETsForAllGeneralExpenses,
+        totalNETsForAllOutstanding,
+      ],
+      (values) {
+        calculateTotalsForAllAndNetProfit();
+      },
+    );
 
     super.onInit();
   }
@@ -157,16 +162,15 @@ class TradingDashboardController extends GetxController {
         .orderBy('name', descending: true)
         .snapshots()
         .listen((year) {
-      allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
-    });
+          allYears.value = {for (var doc in year.docs) doc.id: doc.data()};
+        });
   }
 
   void getCarBrands() {
     try {
-      FirebaseFirestore.instance
-          .collection('all_brands')
-          .snapshots()
-          .listen((brands) {
+      FirebaseFirestore.instance.collection('all_brands').snapshots().listen((
+        brands,
+      ) {
         allBrands.value = {for (var doc in brands.docs) doc.id: doc.data()};
       });
     } catch (e) {
@@ -182,8 +186,8 @@ class TradingDashboardController extends GetxController {
           .collection('values')
           .snapshots()
           .listen((models) {
-        allModels.value = {for (var doc in models.docs) doc.id: doc.data()};
-      });
+            allModels.value = {for (var doc in models.docs) doc.id: doc.data()};
+          });
     } catch (e) {
       //
     }
@@ -205,8 +209,8 @@ class TradingDashboardController extends GetxController {
         .orderBy('added_date')
         .snapshots()
         .listen((item) {
-      allItems.value = {for (var doc in item.docs) doc.id: doc.data()};
-    });
+          allItems.value = {for (var doc in item.docs) doc.id: doc.data()};
+        });
   }
 
   // this function is to get years
@@ -225,8 +229,8 @@ class TradingDashboardController extends GetxController {
         .orderBy('added_date')
         .snapshots()
         .listen((year) {
-      allMonths.value = {for (var doc in year.docs) doc.id: doc.data()};
-    });
+          allMonths.value = {for (var doc in year.docs) doc.id: doc.data()};
+        });
   }
 
   void getAllTrades() {
@@ -237,12 +241,12 @@ class TradingDashboardController extends GetxController {
           .orderBy('date', descending: true)
           .snapshots()
           .listen((trade) {
-        allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
-        filteredTrades.assignAll(allTrades);
-        calculateTotalsForAllTrades();
-        numberOfCars.value = allTrades.length;
-        isScreenLoding.value = false;
-      });
+            allTrades.assignAll(List<DocumentSnapshot>.from(trade.docs));
+            filteredTrades.assignAll(allTrades);
+            calculateTotalsForAllTrades();
+            numberOfCars.value = allTrades.length;
+            isScreenLoding.value = false;
+          });
     } catch (e) {
       isScreenLoding.value = false;
     }
@@ -256,11 +260,11 @@ class TradingDashboardController extends GetxController {
           .orderBy('date', descending: true)
           .snapshots()
           .listen((trade) {
-        allCapitals.assignAll(List<DocumentSnapshot>.from(trade.docs));
-        filteredCapitals.assignAll(allCapitals);
-        numberOfCapitalsDocs.value = allCapitals.length;
-        calculateTotalsForCapitals();
-      });
+            allCapitals.assignAll(List<DocumentSnapshot>.from(trade.docs));
+            filteredCapitals.assignAll(allCapitals);
+            numberOfCapitalsDocs.value = allCapitals.length;
+            calculateTotalsForCapitals();
+          });
     } catch (e) {
       //
     }
@@ -274,11 +278,11 @@ class TradingDashboardController extends GetxController {
           .orderBy('date', descending: true)
           .snapshots()
           .listen((trade) {
-        allOutstanding.assignAll(List<DocumentSnapshot>.from(trade.docs));
-        filteredOutstanding.assignAll(allOutstanding);
-        numberOfOutstandingDocs.value = allOutstanding.length;
-        calculateTotalsForOutstanding();
-      });
+            allOutstanding.assignAll(List<DocumentSnapshot>.from(trade.docs));
+            filteredOutstanding.assignAll(allOutstanding);
+            numberOfOutstandingDocs.value = allOutstanding.length;
+            calculateTotalsForOutstanding();
+          });
     } catch (e) {
       //
     }
@@ -292,11 +296,13 @@ class TradingDashboardController extends GetxController {
           .orderBy('date', descending: true)
           .snapshots()
           .listen((trade) {
-        allGeneralExpenses.assignAll(List<DocumentSnapshot>.from(trade.docs));
-        filteredGeneralExpenses.assignAll(allGeneralExpenses);
-        numberOfGeneralExpensesDocs.value = allGeneralExpenses.length;
-        calculateTotalsForGeneralExpenses();
-      });
+            allGeneralExpenses.assignAll(
+              List<DocumentSnapshot>.from(trade.docs),
+            );
+            filteredGeneralExpenses.assignAll(allGeneralExpenses);
+            numberOfGeneralExpensesDocs.value = allGeneralExpenses.length;
+            calculateTotalsForGeneralExpenses();
+          });
     } catch (e) {
       //
     }
@@ -304,16 +310,14 @@ class TradingDashboardController extends GetxController {
 
   String getdataName(String id, Map allData, {title = 'name'}) {
     try {
-      final data = allData.entries.firstWhere(
-        (data) => data.key == id,
-      );
+      final data = allData.entries.firstWhere((data) => data.key == id);
       return data.value[title];
     } catch (e) {
       return '';
     }
   }
 
-  Future<String> getCarModelName(String brandId,String modelId) async {
+  Future<String> getCarModelName(String brandId, String modelId) async {
     try {
       var name = await FirebaseFunctions.instance
           .httpsCallable('get_model_name')
@@ -424,7 +428,8 @@ class TradingDashboardController extends GetxController {
   }
 
   void calculateTotalsForAllAndNetProfit() {
-    totalNETsForAll.value = totalNETsForAllCapitals.value +
+    totalNETsForAll.value =
+        totalNETsForAllCapitals.value +
         totalNETsForAllGeneralExpenses.value +
         totalNETsForAllOutstanding.value +
         totalNETsForAllTrades.value;
@@ -488,13 +493,15 @@ class TradingDashboardController extends GetxController {
     try {
       final DateTime now = DateTime.now();
 
-      int? selectedYear =
-          year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
+      int? selectedYear = year.value.text.isNotEmpty
+          ? int.tryParse(year.value.text)
+          : null;
       int? selectedMonth = month.value.text.isNotEmpty
           ? monthNameToNumber(month.value.text)
           : null;
-      int? selectedDay =
-          day.value.text.isNotEmpty ? int.tryParse(day.value.text) : null;
+      int? selectedDay = day.value.text.isNotEmpty
+          ? int.tryParse(day.value.text)
+          : null;
 
       // 2. If partial date provided, default missing parts to 'now'
       if (selectedDay != null) {
@@ -505,12 +512,12 @@ class TradingDashboardController extends GetxController {
       }
       final String mode =
           (selectedYear != null && selectedMonth != null && selectedDay != null)
-              ? 'day'
-              : (selectedYear != null && selectedMonth != null)
-                  ? 'month'
-                  : (selectedYear != null)
-                      ? 'year'
-                      : 'all';
+          ? 'day'
+          : (selectedYear != null && selectedMonth != null)
+          ? 'month'
+          : (selectedYear != null)
+          ? 'year'
+          : 'all';
 
       switch (mode) {
         case 'year':
@@ -520,8 +527,11 @@ class TradingDashboardController extends GetxController {
           carsNumber.assignAll(List.filled(12, 0.0));
           break;
         case 'month':
-          final daysInMonth =
-              DateTime(selectedYear!, selectedMonth! + 1, 0).day;
+          final daysInMonth = DateTime(
+            selectedYear!,
+            selectedMonth! + 1,
+            0,
+          ).day;
           revenue.assignAll(List.filled(daysInMonth, 0.0));
           expenses.assignAll(List.filled(daysInMonth, 0.0));
           net.assignAll(List.filled(daysInMonth, 0.0));
@@ -589,18 +599,22 @@ class TradingDashboardController extends GetxController {
   }
 
   void filterTradesByDate() {
-    final int? selectedYear =
-        year.value.text.isNotEmpty ? int.tryParse(year.value.text) : null;
+    final int? selectedYear = year.value.text.isNotEmpty
+        ? int.tryParse(year.value.text)
+        : null;
     final int? selectedMonth = month.value.text.isNotEmpty
         ? monthNameToNumber(month.value.text)
         : null;
-    final int? selectedDay =
-        day.value.text.isNotEmpty ? int.tryParse(day.value.text) : null;
+    final int? selectedDay = day.value.text.isNotEmpty
+        ? int.tryParse(day.value.text)
+        : null;
 
-    final String? selectedBrand =
-        carBrandId.value != '' ? carBrandId.value : null;
-    final String? selectedModel =
-        carModelId.value != '' ? carModelId.value : null;
+    final String? selectedBrand = carBrandId.value != ''
+        ? carBrandId.value
+        : null;
+    final String? selectedModel = carModelId.value != ''
+        ? carModelId.value
+        : null;
 
     // 1️⃣ New: read “new status” toggle
     final bool isNewSelected = isNewStatusSelected.value;
@@ -645,10 +659,7 @@ class TradingDashboardController extends GetxController {
       }
 
       if (latestForThisTrade != null) {
-        temp.add({
-          'trade': trade,
-          'date': latestForThisTrade,
-        });
+        temp.add({'trade': trade, 'date': latestForThisTrade});
       }
     }
 
@@ -658,8 +669,9 @@ class TradingDashboardController extends GetxController {
       );
     }
 
-    filteredTrades.value =
-        temp.map((e) => e['trade'] as DocumentSnapshot<Object?>).toList();
+    filteredTrades.value = temp
+        .map((e) => e['trade'] as DocumentSnapshot<Object?>)
+        .toList();
 
     calculateTotalsForAllTrades();
     filterTradesForChart();
@@ -734,8 +746,4 @@ class TradingDashboardController extends GetxController {
   //   filterTradesForChart();
   //   numberOfCars.value = filteredTrades.length;
   // }
-
-  
-
- 
 }

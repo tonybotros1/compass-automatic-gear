@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
 import '../../../../Widgets/dynamic_boxes_line.dart';
-import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/job_card_buttons.dart';
 import '../../../../Widgets/menu_dialog.dart';
@@ -569,6 +568,7 @@ class JobCard extends StatelessWidget {
                               context: context,
                               controller: controller,
                               data: controller.allJobCards,
+                              isDashboard: false,
                             ),
                           ),
                         );
@@ -623,6 +623,7 @@ Widget tableOfScreensForMainJobCards({
   required List<JobCardModel> data,
   required ScrollController scrollController,
   required bool showHistoryButton,
+  required bool isDashboard,
 }) {
   bool isJobsLoading = data.isEmpty;
   return DataTableTheme(
@@ -642,10 +643,21 @@ Widget tableOfScreensForMainJobCards({
       lmRatio: 3,
       autoRowsToHeight: true,
       showCheckboxColumn: false,
-      headingRowHeight: 60,
+      headingRowHeight: isDashboard ? 40 : 60,
       columnSpacing: 5,
       showFirstLastButtons: true,
       horizontalMargin: 5,
+      dataRowHeight: isDashboard ? 30 : 40,
+      dataTextStyle: TextStyle(
+        fontSize: isDashboard ? 10 : 12,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[700],
+      ),
+      headingTextStyle: TextStyle(
+        fontSize: isDashboard ? 11 : 13,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[700],
+      ),
       sortColumnIndex: controller.sortColumnIndex.value,
       sortAscending: controller.isAscending.value,
       columns: [
@@ -661,61 +673,61 @@ Widget tableOfScreensForMainJobCards({
         ),
         DataColumn2(
           size: ColumnSize.S,
-          label: columnForTable(constraints, '', 'Type'),
+          label: columnForTable('', 'Type'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, '', 'Number'),
+          label: columnForTable('', 'Number'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, '', 'Date'),
+          label: columnForTable('', 'Date'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, '', 'Status'),
+          label: columnForTable('', 'Status'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, 'Invoice', 'Number'),
+          label: columnForTable('Invoice', 'Number'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, '', 'Date'),
+          label: columnForTable('', 'Date'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, 'LPO', 'Number'),
+          label: columnForTable('LPO', 'Number'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, 'Car', 'Brand'),
+          label: columnForTable('Car', 'Brand'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, '', 'Model'),
+          label: columnForTable('', 'Model'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, 'Plate', 'Number'),
+          label: columnForTable('Plate', 'Number'),
           // onSort: controller.onSort,
         ),
         // DataColumn(label: columnForTable(constraints, '', 'Code')
@@ -728,13 +740,13 @@ Widget tableOfScreensForMainJobCards({
           // size: ColumnSize.L
           size: ColumnSize.L,
 
-          label: columnForTable(constraints, '', 'Customer Name'),
+          label: columnForTable('', 'Customer Name'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
-          label: columnForTable(constraints, '', 'Branch'),
+          label: columnForTable('', 'Branch'),
           // onSort: controller.onSort,
         ),
         // DataColumn2(
@@ -747,35 +759,35 @@ Widget tableOfScreensForMainJobCards({
           size: ColumnSize.M,
 
           numeric: true,
-          label: columnForTable(constraints, '', 'Totals'),
+          label: columnForTable('', 'Totals'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
           numeric: true,
-          label: columnForTable(constraints, '', 'VAT'),
+          label: columnForTable('', 'VAT'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
           numeric: true,
-          label: columnForTable(constraints, '', 'NET'),
+          label: columnForTable('', 'NET'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
           numeric: true,
-          label: columnForTable(constraints, '', 'Paid'),
+          label: columnForTable('', 'Paid'),
           // onSort: controller.onSort,
         ),
         DataColumn2(
           size: ColumnSize.M,
 
           numeric: true,
-          label: columnForTable(constraints, 'Out-', 'standing'),
+          label: columnForTable('Out-', 'standing'),
           // onSort: controller.onSort,
         ),
       ],
@@ -789,19 +801,12 @@ Widget tableOfScreensForMainJobCards({
   );
 }
 
-Column columnForTable(
-  BoxConstraints constraints,
-  String title1,
-  String title2,
-) {
+Column columnForTable(String title1, String title2) {
   return Column(
     spacing: 5,
     mainAxisAlignment: MainAxisAlignment.end,
     crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      AutoSizedText(text: title1, constraints: constraints),
-      AutoSizedText(text: title2, constraints: constraints),
-    ],
+    children: [Text(title1), Text(title2)],
   );
 }
 
