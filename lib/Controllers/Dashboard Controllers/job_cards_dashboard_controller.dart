@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../Models/job cards dashboard/account_summary_model.dart';
 import '../../Models/job cards dashboard/customer_aging_model.dart';
 import '../../Models/job cards dashboard/daily_jobs_summary_model.dart';
 import '../../Models/job cards dashboard/daily_new_jobs_summary_model.dart';
@@ -23,6 +24,7 @@ class JobCardsDashboardController extends GetxController {
   RxList<NewJobsDailySummary> newJobDailySummary = RxList<NewJobsDailySummary>(
     [],
   );
+  RxList<AccountSummary> accountSummaryList = RxList<AccountSummary>([]);
   String backendUrl = backendTestURI;
   Rx<TextEditingController> dailyDate = TextEditingController().obs;
   final jonCardController = Get.put(JobCardController());
@@ -35,12 +37,14 @@ class JobCardsDashboardController extends GetxController {
   RxBool isReturnedSelected = RxBool(false);
   RxBool isScreenLoadingForJobCards = RxBool(false);
   RxBool isScreenLoadingForJobDialyNewSummary = RxBool(false);
+  RxBool isScreenLoadingForAccountSummary = RxBool(false);
   RxBool isScreenLoadingForCustomerAging = RxBool(false);
   RxDouble customerAgingTotalOutstanding = RxDouble(0.0);
   RxDouble customerAging0To90 = RxDouble(0.0);
   RxDouble customerAging91To180 = RxDouble(0.0);
   RxDouble customerAging181To360 = RxDouble(0.0);
   RxDouble customerAgingMoreThan360 = RxDouble(0.0);
+  RxDouble accountSummaryTotalAmount = RxDouble(0.0);
   TextStyle dataRowTextStyle = TextStyle(
     fontSize: 10,
     fontWeight: FontWeight.bold,
@@ -65,6 +69,7 @@ class JobCardsDashboardController extends GetxController {
     filterSearch('day');
     getCustomersAging();
     getNewJobsDailySummary();
+    getAccountSummary();
     super.onInit();
   }
 
@@ -93,6 +98,14 @@ class JobCardsDashboardController extends GetxController {
       customerAging91To180.value += element.i91To180Days ?? 0;
       customerAging181To360.value += element.d181To360Days ?? 0;
       customerAgingMoreThan360.value += element.moreThan360Days ?? 0;
+    }
+  }
+
+  void calculateAccountSummaryTotals() {
+    accountSummaryTotalAmount.value = 0.0;
+
+    for (var element in accountSummaryList) {
+      accountSummaryTotalAmount.value += element.amount ?? 0;
     }
   }
 
@@ -384,6 +397,42 @@ class JobCardsDashboardController extends GetxController {
       isScreenLoadingForJobDialyNewSummary.value = false;
     } catch (e) {
       isScreenLoadingForJobDialyNewSummary.value = false;
+    }
+  }
+
+  Future<void> getAccountSummary() async {
+    try {
+      isScreenLoadingForAccountSummary.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards_dashboard/get_account_transfers',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List daily = decoded['accounts_summary'];
+        accountSummaryList.assignAll(
+          daily.map((d) => AccountSummary.fromJson(d)),
+        );
+        calculateAccountSummaryTotals();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAccountSummary();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      isScreenLoadingForAccountSummary.value = false;
+    } catch (e) {
+      isScreenLoadingForAccountSummary.value = false;
     }
   }
 }

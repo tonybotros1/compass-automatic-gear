@@ -572,7 +572,7 @@ class CashManagementReceiptsController extends CashManagementBaseController {
     }
     note.text = data.note ?? '';
     receiptType.text = data.receiptTypeName ?? '';
-    receiptType.text == 'Cheque'
+    receiptType.text.toLowerCase() == 'cheque'
         ? isChequeSelected.value = true
         : isChequeSelected.value = false;
     receiptTypeId.value = data.receiptType ?? '';

@@ -347,7 +347,7 @@ DataRow dataRowForTheTable(
           maxWidth: null,
           formatDouble: false,
           text: entityData.fromAccountName ?? '',
-          color: Colors.blueGrey,
+          color: Colors.red,
         ),
       ),
       DataCell(
@@ -370,7 +370,7 @@ DataRow dataRowForTheTable(
           maxWidth: null,
           formatDouble: true,
           text: entityData.amount?.toString() ?? '0',
-          color: Colors.red,
+          color: Colors.blueGrey,
         ),
       ),
     ],

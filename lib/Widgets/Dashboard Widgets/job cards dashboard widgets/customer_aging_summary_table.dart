@@ -8,100 +8,94 @@ import '../../../consts.dart';
 Widget customerAgingTable({required BuildContext context}) {
   return GetX<JobCardsDashboardController>(
     builder: (controller) {
-      return Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(5),
-          child: PaginatedDataTable2(
-            headingRowHeight: 25,
-            dataRowHeight: 25,
-            showCheckboxColumn: false,
-            horizontalMargin: horizontalMarginForTable,
-            columnSpacing: 5,
-            dividerThickness: .3,
-            dataTextStyle: controller.dataRowTextStyle,
-            headingTextStyle: controller.headerRowTextStyle,
-            autoRowsToHeight: true,
-            lmRatio: 3,
-            columns: const [
-              DataColumn2(size: ColumnSize.L, label: Text('GROUP NAME')),
-              DataColumn2(
-                size: ColumnSize.M,
-                label: Text('TOTAL OUT.'),
-                numeric: true,
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('0 TO 30'),
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('31 TO 60'),
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('61 TO 90'),
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('0 TO 90'),
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('91 TO 120'),
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('121 TO 150'),
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('151 TO 180'),
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('91 TO 180'),
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('181 TO 360'),
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('+ 360'),
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                numeric: true,
-                label: Text('LAST PAY-DATE'),
-              ),
-            ],
-            source: CardDataSource(
-              cards: controller.customerAgingSummary.isEmpty
-                  ? []
-                  : controller.customerAgingSummary,
-              context: context,
-              controller: controller,
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(5),
+        child: PaginatedDataTable2(
+          headingRowHeight: 25,
+          dataRowHeight: 25,
+          showCheckboxColumn: false,
+          horizontalMargin: horizontalMarginForTable,
+          columnSpacing: 5,
+          dividerThickness: .3,
+          dataTextStyle: controller.dataRowTextStyle,
+          headingTextStyle: controller.headerRowTextStyle,
+          autoRowsToHeight: true,
+          lmRatio: 3,
+          columns: const [
+            DataColumn2(size: ColumnSize.L, label: Text('GROUP NAME')),
+            DataColumn2(
+              size: ColumnSize.M,
+              label: Text('TOTAL OUT.'),
+              numeric: true,
             ),
-            // rows: controller.customerAgingSummary.asMap().entries.map((entry) {
-            //   final index = entry.key + 1; // 1-based index
-            //   final data = entry.value;
-            //   return dataRowForTheTable(data, index, controller);
-            // }).toList(),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('0 TO 30'),
+            ),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('31 TO 60'),
+            ),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('61 TO 90'),
+            ),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('0 TO 90'),
+            ),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('91 TO 120'),
+            ),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('121 TO 150'),
+            ),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('151 TO 180'),
+            ),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('91 TO 180'),
+            ),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('181 TO 360'),
+            ),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('+ 360'),
+            ),
+            DataColumn2(
+              size: ColumnSize.M,
+              numeric: true,
+              label: Text('LAST PAY-DATE'),
+            ),
+          ],
+          source: CardDataSource(
+            cards: controller.customerAgingSummary.isEmpty
+                ? []
+                : controller.customerAgingSummary,
+            context: context,
+            controller: controller,
           ),
+          // rows: controller.customerAgingSummary.asMap().entries.map((entry) {
+          //   final index = entry.key + 1; // 1-based index
+          //   final data = entry.value;
+          //   return dataRowForTheTable(data, index, controller);
+          // }).toList(),
         ),
       );
     },

@@ -26,14 +26,16 @@ class JobCardsDashboard extends StatelessWidget {
             cursor:
                 controller.isScreenLoadingForJobCards.value ||
                     controller.isScreenLoadingForCustomerAging.value ||
-                    controller.isScreenLoadingForJobDialyNewSummary.value
+                    controller.isScreenLoadingForJobDialyNewSummary.value ||
+                    controller.isScreenLoadingForAccountSummary.value
                 ? SystemMouseCursors.wait
                 : SystemMouseCursors.basic,
             child: AbsorbPointer(
               absorbing:
                   controller.isScreenLoadingForJobCards.value ||
                   controller.isScreenLoadingForCustomerAging.value ||
-                  controller.isScreenLoadingForJobDialyNewSummary.value,
+                  controller.isScreenLoadingForJobDialyNewSummary.value ||
+                  controller.isScreenLoadingForAccountSummary.value,
               child: const _DashBoardBody(),
             ),
           ),
@@ -54,271 +56,334 @@ class _DashBoardBody extends StatelessWidget {
         children: [
           Expanded(
             flex: 4,
-
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: DefaultTabController(
-                    length: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      // spacing: 10,
-                      children: [
-                        GetBuilder<JobCardsDashboardController>(
-                          builder: (controller) {
-                            return TabBar(
-                              labelPadding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                              ),
-                              labelStyle: controller.headerRowTextStyle,
-                              dividerHeight: 0,
-                              indicatorPadding: EdgeInsetsGeometry.zero,
-                              padding: EdgeInsets.zero,
-                              unselectedLabelColor: Colors.grey,
-                              tabAlignment: TabAlignment.start,
-                              isScrollable: true,
-                              indicatorColor: mainColor,
-                              labelColor: mainColor,
-                              splashBorderRadius: BorderRadius.circular(5),
-                              dividerColor: Colors.transparent,
-                              tabs: const [
-                                Tab(text: 'SUMMARY'),
-                                Tab(text: 'MONTHLY JOB SUMMARY'),
-                              ],
-                            );
-                          },
-                        ),
-                        Expanded(
-                          child: TabBarView(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    GetX<JobCardsDashboardController>(
-                                      builder: (controller) {
-                                        return CustomDropdown(
-                                          fieldheigth: 30,
-                                          fontSize: 11,
-                                          textcontroller: controller
-                                              .dailyDateController
-                                              .value
-                                              .text,
-                                          width: 200,
-                                          showedSelectedName: 'date',
-                                          onChanged: (key, value) {
-                                            controller
-                                                    .dailyDateController
-                                                    .value
-                                                    .text =
-                                                value['date'];
-                                            controller.filterSearch(
-                                              controller.jobDatesType.value,
-                                            );
-                                          },
-                                          onDelete: () {
-                                            controller.dailyDateController.value
-                                                .clear();
-                                          },
-                                          onOpen: () {
-                                            return controller.getJobsDate(
-                                              'day',
-                                            );
-                                          },
-                                        );
-                                      },
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 5,
-                                      ),
-                                      alignment: Alignment.centerLeft,
-                                      height: 25,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        color: Colors.blueGrey.shade400,
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-                                      child:
-                                          GetBuilder<
-                                            JobCardsDashboardController
-                                          >(
-                                            builder: (controller) {
-                                              return Text(
-                                                'DAILY JOB CARDS SUMMARY',
-                                                style:
-                                                    controller.headeTextStyle,
-                                              );
-                                            },
-                                          ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Expanded(child: jobsDialySummaryTable()),
-                                    const SizedBox(height: 5),
-                                    GetBuilder<JobCardsDashboardController>(
-                                      builder: (controller) {
-                                        return HeaderBuilder(
-                                          lable: 'NEW JOB CARDS SUMMARY',
-                                          onTap: () {
-                                            controller.getNewJobsDailySummary();
-                                          },
-                                        );
-                                      },
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Expanded(child: newJobsDialySummaryTable()),
-                                    GetBuilder<JobCardsDashboardController>(
-                                      builder: (controller) {
-                                        return HeaderBuilder(
-                                          lable: 'ACCOUNTS SUMMARY',
-                                          onTap: () {
-                                            // controller.getNewJobsDailySummary();
-                                          },
-                                        );
-                                      },
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: accountsSummaryTable(),
-                                    ),
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Row(
+                spacing: 4,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      padding: const EdgeInsets.only(bottom: 3),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: DefaultTabController(
+                        length: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          // spacing: 10,
+                          children: [
+                            GetBuilder<JobCardsDashboardController>(
+                              builder: (controller) {
+                                return TabBar(
+                                  labelPadding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  labelStyle: controller.headerRowTextStyle,
+                                  dividerHeight: 0,
+                                  indicatorPadding: EdgeInsetsGeometry.zero,
+                                  padding: EdgeInsets.zero,
+                                  unselectedLabelColor: Colors.grey,
+                                  tabAlignment: TabAlignment.start,
+                                  isScrollable: true,
+                                  indicatorColor: mainColor,
+                                  labelColor: mainColor,
+                                  splashBorderRadius: BorderRadius.circular(5),
+                                  dividerColor: Colors.transparent,
+                                  tabs: const [
+                                    Tab(text: 'SUMMARY'),
+                                    Tab(text: 'MONTHLY JOB SUMMARY'),
                                   ],
-                                ),
-                              ),
-                              monthyJobsAndSalesmenSection(),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 8,
-                  child: DefaultTabController(
-                    length: 1,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      // spacing: 10,
-                      children: [
-                        GetBuilder<JobCardsDashboardController>(
-                          builder: (controller) {
-                            return Row(
-                              children: [
-                                Expanded(
-                                  child: TabBar(
-                                    labelPadding: const EdgeInsets.symmetric(
+                                );
+                              },
+                            ),
+                            Expanded(
+                              child: TabBarView(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
                                       horizontal: 8,
                                     ),
-                                    labelStyle: controller.headerRowTextStyle,
-                                    dividerHeight: 0,
-                                    indicatorPadding: EdgeInsetsGeometry.zero,
-                                    padding: EdgeInsets.zero,
-                                    unselectedLabelColor: Colors.grey,
-                                    tabAlignment: TabAlignment.start,
-                                    isScrollable: true,
-                                    indicatorColor: mainColor,
-                                    labelColor: mainColor,
-                                    splashBorderRadius: BorderRadius.circular(
-                                      5,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        GetX<JobCardsDashboardController>(
+                                          builder: (controller) {
+                                            return CustomDropdown(
+                                              fieldheigth: 30,
+                                              fontSize: 11,
+                                              textcontroller: controller
+                                                  .dailyDateController
+                                                  .value
+                                                  .text,
+                                              width: 200,
+                                              showedSelectedName: 'date',
+                                              onChanged: (key, value) {
+                                                controller
+                                                        .dailyDateController
+                                                        .value
+                                                        .text =
+                                                    value['date'];
+                                                controller.filterSearch(
+                                                  controller.jobDatesType.value,
+                                                );
+                                              },
+                                              onDelete: () {
+                                                controller
+                                                    .dailyDateController
+                                                    .value
+                                                    .clear();
+                                              },
+                                              onOpen: () {
+                                                return controller.getJobsDate(
+                                                  'day',
+                                                );
+                                              },
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 5,
+                                          ),
+                                          alignment: Alignment.centerLeft,
+                                          height: 25,
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            color: Colors.blueGrey.shade400,
+                                            borderRadius: BorderRadius.circular(
+                                              5,
+                                            ),
+                                          ),
+                                          child:
+                                              GetBuilder<
+                                                JobCardsDashboardController
+                                              >(
+                                                builder: (controller) {
+                                                  return Text(
+                                                    'DAILY JOB CARDS SUMMARY',
+                                                    style: controller
+                                                        .headeTextStyle,
+                                                  );
+                                                },
+                                              ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Expanded(
+                                          child: jobsDialySummaryTable(),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        GetBuilder<JobCardsDashboardController>(
+                                          builder: (controller) {
+                                            return HeaderBuilder(
+                                              lable: 'NEW JOB CARDS SUMMARY',
+                                              onTap: () {
+                                                controller
+                                                    .getNewJobsDailySummary();
+                                              },
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Expanded(
+                                          child: newJobsDialySummaryTable(),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        GetBuilder<JobCardsDashboardController>(
+                                          builder: (controller) {
+                                            return HeaderBuilder(
+                                              lable: 'ACCOUNTS SUMMARY',
+                                              onTap: () {
+                                                controller.getAccountSummary();
+                                              },
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(height: 5),
+                                        GetX<JobCardsDashboardController>(
+                                          builder: (controller) {
+                                            return SizedBox(
+                                              height: 80,
+
+                                              // padding: const EdgeInsets.all(4),
+                                              child: dynamicBoxesLine(
+                                                dynamicConfigs: [
+                                                  DynamicBoxesLineModel(
+                                                    icon: moneyIcon,
+                                                    iconColor:
+                                                        Colors.green.shade100,
+                                                    width: 300,
+                                                    label: 'TOTAL AMOUNT',
+                                                    value:
+                                                        '${controller.accountSummaryTotalAmount.value}',
+                                                    valueColor: Colors.green,
+                                                    iconSize: 30,
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Expanded(
+                                          flex: 2,
+                                          child: accountsSummaryTable(),
+                                        ),
+                                      ],
                                     ),
-                                    dividerColor: Colors.transparent,
-                                    tabs: const [Tab(text: 'CUSTOMERS AGING')],
                                   ),
-                                ),
-                                RefreshButton(
-                                  onPressed: controller.getCustomersAging,
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8, top: 4),
-                          child: GetX<JobCardsDashboardController>(
-                            builder: (controller) {
-                              return SizedBox(
-                                height: 80,
-
-                                // padding: const EdgeInsets.all(4),
-                                child: dynamicBoxesLine(
-                                  dynamicConfigs: [
-                                    DynamicBoxesLineModel(
-                                      icon: moneyIcon,
-                                      iconColor: Colors.blue.shade100,
-                                      width: 250,
-                                      label: 'TOTAL OUTSTANDING',
-                                      value:
-                                          '${controller.customerAgingTotalOutstanding.value}',
-                                      valueColor: Colors.blue,
-                                      iconSize: 30,
-                                    ),
-                                    DynamicBoxesLineModel(
-                                      icon: moneyIcon,
-                                      iconColor: Colors.green.shade100,
-                                      width: 250,
-                                      label: '0 TO 90 DAYS',
-                                      value:
-                                          '${controller.customerAging0To90.value}',
-                                      valueColor: Colors.green,
-                                      iconSize: 30,
-                                    ),
-                                    DynamicBoxesLineModel(
-                                      icon: moneyIcon,
-                                      iconColor: Colors.orange.shade100,
-                                      width: 250,
-                                      label: '91 TO 180 DAYS',
-                                      value:
-                                          '${controller.customerAging91To180.value}',
-                                      valueColor: Colors.orange,
-                                      iconSize: 30,
-                                    ),
-                                    DynamicBoxesLineModel(
-                                      icon: moneyIcon,
-                                      iconColor: Colors.red.shade100,
-                                      width: 250,
-                                      label: '181 TO 360 DAYS',
-                                      value:
-                                          '${controller.customerAging181To360.value}',
-                                      valueColor: Colors.red,
-                                      iconSize: 30,
-                                    ),
-                                    DynamicBoxesLineModel(
-                                      icon: moneyIcon,
-                                      iconColor: Colors.black54,
-                                      width: 250,
-                                      label: '+ 360 DAYS',
-                                      value:
-                                          '${controller.customerAgingMoreThan360.value}',
-                                      valueColor: Colors.black,
-                                      iconSize: 30,
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                        Expanded(
-                          child: TabBarView(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(2, 4, 8, 0),
-                                child: customerAgingTable(context: context),
+                                  monthyJobsAndSalesmenSection(),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  Expanded(
+                    flex: 8,
+                    child: Container(
+                      padding: const EdgeInsets.only(left: 5),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: DefaultTabController(
+                        length: 1,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          // spacing: 10,
+                          children: [
+                            GetBuilder<JobCardsDashboardController>(
+                              builder: (controller) {
+                                return Row(
+                                  children: [
+                                    Expanded(
+                                      child: TabBar(
+                                        labelPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                            ),
+                                        labelStyle:
+                                            controller.headerRowTextStyle,
+                                        dividerHeight: 0,
+                                        indicatorPadding:
+                                            EdgeInsetsGeometry.zero,
+                                        padding: EdgeInsets.zero,
+                                        unselectedLabelColor: Colors.grey,
+                                        tabAlignment: TabAlignment.start,
+                                        isScrollable: true,
+                                        indicatorColor: mainColor,
+                                        labelColor: mainColor,
+                                        splashBorderRadius:
+                                            BorderRadius.circular(5),
+                                        dividerColor: Colors.transparent,
+                                        tabs: const [
+                                          Tab(text: 'CUSTOMERS AGING'),
+                                        ],
+                                      ),
+                                    ),
+                                    RefreshButton(
+                                      onPressed: controller.getCustomersAging,
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8, top: 4),
+                              child: GetX<JobCardsDashboardController>(
+                                builder: (controller) {
+                                  return SizedBox(
+                                    height: 80,
+
+                                    // padding: const EdgeInsets.all(4),
+                                    child: dynamicBoxesLine(
+                                      dynamicConfigs: [
+                                        DynamicBoxesLineModel(
+                                          icon: moneyIcon,
+                                          iconColor: Colors.blue.shade100,
+                                          width: 250,
+                                          label: 'TOTAL OUTSTANDING',
+                                          value:
+                                              '${controller.customerAgingTotalOutstanding.value}',
+                                          valueColor: Colors.blue,
+                                          iconSize: 30,
+                                        ),
+                                        DynamicBoxesLineModel(
+                                          icon: moneyIcon,
+                                          iconColor: Colors.green.shade100,
+                                          width: 250,
+                                          label: '0 TO 90 DAYS',
+                                          value:
+                                              '${controller.customerAging0To90.value}',
+                                          valueColor: Colors.green,
+                                          iconSize: 30,
+                                        ),
+                                        DynamicBoxesLineModel(
+                                          icon: moneyIcon,
+                                          iconColor: Colors.orange.shade100,
+                                          width: 250,
+                                          label: '91 TO 180 DAYS',
+                                          value:
+                                              '${controller.customerAging91To180.value}',
+                                          valueColor: Colors.orange,
+                                          iconSize: 30,
+                                        ),
+                                        DynamicBoxesLineModel(
+                                          icon: moneyIcon,
+                                          iconColor: Colors.red.shade100,
+                                          width: 250,
+                                          label: '181 TO 360 DAYS',
+                                          value:
+                                              '${controller.customerAging181To360.value}',
+                                          valueColor: Colors.red,
+                                          iconSize: 30,
+                                        ),
+                                        DynamicBoxesLineModel(
+                                          icon: moneyIcon,
+                                          iconColor: Colors.black54,
+                                          width: 250,
+                                          label: '+ 360 DAYS',
+                                          value:
+                                              '${controller.customerAgingMoreThan360.value}',
+                                          valueColor: Colors.black,
+                                          iconSize: 30,
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+
+                            Expanded(
+                              child: TabBarView(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      2,
+                                      4,
+                                      8,
+                                      0,
+                                    ),
+                                    child: customerAgingTable(context: context),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           // const Divider(),
@@ -464,7 +529,12 @@ class HeaderBuilder extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(lable ?? '', style: headeTextStyle),
-          ClickableHoverText(text: 'REFRESH', onTap: onTap, fontSize: 12),
+          ClickableHoverText(
+            text: 'REFRESH',
+            onTap: onTap,
+            fontSize: 12,
+            color2: Colors.yellow,
+          ),
         ],
       ),
     );
