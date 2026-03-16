@@ -60,7 +60,7 @@ DataRow dataRowForTheTable(
     cells: [
       DataCell(
         textForDataRowInTable(
-          text: data.sId ?? '', // sId is same for account number
+          text: data.accountNumber ?? '', // sId is same for account number
           formatDouble: false,
           maxWidth: null,
         ),

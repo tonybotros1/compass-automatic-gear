@@ -33,6 +33,7 @@ class DataMigrationController extends GetxController {
     '10': {'name': 'Issuing Header'},
     '11': {'name': 'Issuing Items Details'},
     '12': {'name': 'Issuing Converters Details'},
+    '13': {'name': 'Account Transfers'},
   });
   @override
   void onInit() async {

@@ -1,5 +1,7 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -46,6 +48,12 @@ class AccountTransfers extends StatelessWidget {
                                 Row(
                                   spacing: 10,
                                   children: [
+                                    myTextFormFieldWithBorder(
+                                      width: 120,
+                                      labelText: 'Transfer No.',
+                                      controller:
+                                          controller.transferCounterFilter,
+                                    ),
                                     MenuWithValues(
                                       labelText: 'From Account',
                                       headerLqabel: 'Accounts',
@@ -148,7 +156,7 @@ class AccountTransfers extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 20),
                     GetX<AccountTransfersController>(
                       builder: (controller) {
                         return SingleChildScrollView(
@@ -161,10 +169,41 @@ class AccountTransfers extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                newContactButton(
+                                newTransferButton(
                                   context,
                                   constraints,
                                   controller,
+                                ),
+                                CustomSlidingSegmentedControl<int>(
+                                  height: 30,
+                                  initialValue:
+                                      controller.initStatusPickersValue.value,
+                                  children: const {
+                                    1: Text('ALL'),
+                                    2: Text('NEW'),
+                                    3: Text('POSTED'),
+                                  },
+                                  decoration: BoxDecoration(
+                                    color: CupertinoColors.lightBackgroundGray,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  thumbDecoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withAlpha(1),
+                                        blurRadius: 4.0,
+                                        spreadRadius: 1.0,
+                                        offset: const Offset(0.0, 2.0),
+                                      ),
+                                    ],
+                                  ),
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInToLinear,
+                                  onValueChanged: (v) {
+                                    controller.onChooseForStatusPicker(v);
+                                  },
                                 ),
                                 Row(
                                   spacing: 10,
@@ -280,6 +319,14 @@ Widget tableOfScreens({
       const DataColumn(label: Text('')),
       DataColumn2(
         size: ColumnSize.M,
+        label: AutoSizedText(text: 'Transfer Number', constraints: constraints),
+      ),
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(text: 'Status', constraints: constraints),
+      ),
+      DataColumn2(
+        size: ColumnSize.M,
         label: AutoSizedText(text: 'Date', constraints: constraints),
       ),
       DataColumn2(
@@ -334,6 +381,19 @@ DataRow dataRowForTheTable(
             editSection(context, controller, entityData, transferId),
           ],
         ),
+      ),
+
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: null,
+          formatDouble: false,
+          text: entityData.transferCounter ?? '',
+        ),
+      ),
+      DataCell(
+        entityData.status != ''
+            ? statusBox(entityData.status ?? '')
+            : const SizedBox(),
       ),
       DataCell(
         textForDataRowInTable(
@@ -410,11 +470,30 @@ IconButton editSection(
       controller.toAccount.text = itemData.toAccountName ?? '';
       controller.fromAccountId.value = itemData.fromAccount ?? '';
       controller.toAccountId.value = itemData.toAccount ?? '';
+      controller.status.value = itemData.status ?? '';
       controller.transferDate.value.text = textToDate(itemData.date);
+      controller.transferCounter.text = itemData.transferCounter ?? '';
       accounTransferItemDialog(
         controller: controller,
         onPressed: () {
           controller.updateTransfer(transferId);
+        },
+        onPressedForPosted: () {
+          if (controller.status.value == "Posted") {
+            alertMessage(
+              context: context,
+              content: 'Transfer is already Posted',
+            );
+            return;
+          }
+          alertDialog(
+            context: context,
+            content: 'Do you want to post this transfer?',
+            onPressed: () {
+              controller.status.value = 'Posted';
+              controller.updateTransfer(transferId);
+            },
+          );
         },
       );
     },
@@ -422,7 +501,7 @@ IconButton editSection(
   );
 }
 
-ElevatedButton newContactButton(
+ElevatedButton newTransferButton(
   BuildContext context,
   BoxConstraints constraints,
   AccountTransfersController controller,
@@ -436,11 +515,14 @@ ElevatedButton newContactButton(
       controller.fromAccountId.value = '';
       controller.toAccountId.value = '';
       controller.transferDate.value.text = textToDate(DateTime.now());
+      controller.status.value = '';
+      controller.transferCounter.clear();
       accounTransferItemDialog(
         controller: controller,
         onPressed: () {
           controller.addNewTransfer();
         },
+        onPressedForPosted: null,
       );
     },
     style: newButtonStyle,

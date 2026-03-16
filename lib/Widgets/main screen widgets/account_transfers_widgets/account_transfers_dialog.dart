@@ -8,6 +8,7 @@ import 'add_new_account_transfer_or_edit.dart';
 Future<dynamic> accounTransferItemDialog({
   required AccountTransfersController controller,
   required void Function()? onPressed,
+  required void Function()? onPressedForPosted,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -48,6 +49,21 @@ Future<dynamic> accounTransferItemDialog({
                               : 'Save',
                         ),
                       ),
+                      onPressedForPosted != null
+                          ? Row(
+                              spacing: 10,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                point(),
+                                GetBuilder<AccountTransfersController>(
+                                  builder: (controller) => ClickableHoverText(
+                                    onTap: onPressedForPosted,
+                                    text: 'Post',
+                                  ),
+                                ),
+                              ],
+                            )
+                          : const SizedBox(),
                       separator(),
                       closeIcon(),
                     ],

@@ -72,7 +72,6 @@ Widget addNewPaymentOrEdit({
                           ],
                         ),
                         const SizedBox(width: 20),
-                        const SizedBox(height: 10),
                         // Invoices button
                         labelContainer(
                           lable: Row(

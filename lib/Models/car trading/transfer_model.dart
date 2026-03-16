@@ -1,6 +1,8 @@
 class TransferModel {
   String? id;
   String? date;
+  String? status;
+  String? transferCounter;
   String? fromAccount;
   String? fromAccountName;
   String? toAccount;
@@ -21,6 +23,8 @@ class TransferModel {
     this.comment,
     this.createdAt,
     this.updatedAt,
+    this.status,
+    this.transferCounter,
   });
 
   TransferModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +35,10 @@ class TransferModel {
     toAccount = json['to_account'];
     toAccountName = json['to_account_name'];
     amount = json['amount'];
+    status = json.containsKey('status') ? json['status'] ?? '' : '';
+    transferCounter = json.containsKey('transfer_number')
+        ? json['transfer_number'] ?? ''
+        : '';
     comment = json['comment'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];

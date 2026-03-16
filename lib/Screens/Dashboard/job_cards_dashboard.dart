@@ -129,6 +129,7 @@ class _DashBoardBody extends StatelessWidget {
                                                     value['date'];
                                                 controller.filterSearch(
                                                   controller.jobDatesType.value,
+                                                  '',
                                                 );
                                               },
                                               onDelete: () {
@@ -448,7 +449,7 @@ class _DashBoardBody extends StatelessWidget {
                 showedSelectedName: 'date',
                 onChanged: (key, value) {
                   controller.monthlyDateController.value.text = value['date'];
-                  controller.filterSearch(controller.jobDatesType.value);
+                  controller.filterSearch(controller.jobDatesType.value, '');
                 },
                 onDelete: () {
                   controller.monthlyDateController.value.clear();

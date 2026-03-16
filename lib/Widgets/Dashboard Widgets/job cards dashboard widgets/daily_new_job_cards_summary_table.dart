@@ -5,6 +5,7 @@ import '../../../Controllers/Dashboard Controllers/job_cards_dashboard_controlle
 import '../../../Models/job cards dashboard/daily_new_jobs_summary_model.dart';
 import '../../../consts.dart';
 import '../../text_button.dart';
+import 'job_cards_dialog_for_dashoboard.dart';
 
 Widget newJobsDialySummaryTable() {
   return GetX<JobCardsDashboardController>(
@@ -39,24 +40,14 @@ Widget newJobsDialySummaryTable() {
                 label: ClickableHoverText(
                   text: 'Not APPRO.',
                   onTap: () {
-                    if (controller.isNotApprovedSelected.isFalse) {
-                      controller.isNotApprovedSelected.value = true;
-                      controller.isApprovedSelected.value = false;
-                      controller.isReadySelected.value = false;
-                      controller.isReturnedSelected.value = false;
-                      controller.isPostedSelected.value = false;
-                      controller.isNewSelected.value = false;
-                    } else {
-                      controller.isNotApprovedSelected.value = false;
-                    }
+                    controller.jonCardController.allJobCards.clear();
                     controller.jonCardController.searchEngine({
                       'status': 'not approved',
                     });
+                    jobsDialog();
                   },
                   color1: Colors.blueGrey,
-                  color2: controller.isNotApprovedSelected.isFalse
-                      ? Colors.blue
-                      : Colors.red,
+                  color2: Colors.blue,
                 ),
               ),
               DataColumn2(
@@ -66,24 +57,14 @@ Widget newJobsDialySummaryTable() {
                 label: ClickableHoverText(
                   text: 'APPRO.',
                   onTap: () {
-                    if (controller.isApprovedSelected.isFalse) {
-                      controller.isApprovedSelected.value = true;
-                      controller.isNotApprovedSelected.value = false;
-                      controller.isReadySelected.value = false;
-                      controller.isReturnedSelected.value = false;
-                      controller.isPostedSelected.value = false;
-                      controller.isNewSelected.value = false;
-                    } else {
-                      controller.isApprovedSelected.value = false;
-                    }
+                    controller.jonCardController.allJobCards.clear();
                     controller.jonCardController.searchEngine({
                       'status': 'Approved',
                     });
+                    jobsDialog();
                   },
                   color1: Colors.blueGrey,
-                  color2: controller.isApprovedSelected.isFalse
-                      ? Colors.blue
-                      : Colors.red,
+                  color2: Colors.blue,
                 ),
               ),
               DataColumn2(
@@ -93,24 +74,14 @@ Widget newJobsDialySummaryTable() {
                 label: ClickableHoverText(
                   text: 'READY',
                   onTap: () {
-                    if (controller.isReadySelected.isFalse) {
-                      controller.isReadySelected.value = true;
-                      controller.isApprovedSelected.value = false;
-                      controller.isNotApprovedSelected.value = false;
-                      controller.isReturnedSelected.value = false;
-                      controller.isPostedSelected.value = false;
-                      controller.isNewSelected.value = false;
-                    } else {
-                      controller.isReadySelected.value = false;
-                    }
+                    controller.jonCardController.allJobCards.clear();
                     controller.jonCardController.searchEngine({
                       'status': 'Ready',
                     });
+                    jobsDialog();
                   },
                   color1: Colors.blueGrey,
-                  color2: controller.isReadySelected.isFalse
-                      ? Colors.blue
-                      : Colors.red,
+                  color2: Colors.blue,
                 ),
               ),
               DataColumn2(
@@ -120,24 +91,14 @@ Widget newJobsDialySummaryTable() {
                 label: ClickableHoverText(
                   text: 'RETURNED',
                   onTap: () {
-                    if (controller.isReturnedSelected.isFalse) {
-                      controller.isReturnedSelected.value = true;
-                      controller.isReadySelected.value = false;
-                      controller.isApprovedSelected.value = false;
-                      controller.isNotApprovedSelected.value = false;
-                      controller.isPostedSelected.value = false;
-                      controller.isNewSelected.value = false;
-                    } else {
-                      controller.isReturnedSelected.value = false;
-                    }
+                    controller.jonCardController.allJobCards.clear();
                     controller.jonCardController.searchEngine({
                       'label': 'Returned',
                     });
+                    jobsDialog();
                   },
                   color1: Colors.blueGrey,
-                  color2: controller.isReturnedSelected.isFalse
-                      ? Colors.blue
-                      : Colors.red,
+                  color2: Colors.blue,
                 ),
               ),
             ],

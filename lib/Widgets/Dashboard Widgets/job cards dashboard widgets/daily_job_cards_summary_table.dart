@@ -5,6 +5,7 @@ import '../../../Controllers/Dashboard Controllers/job_cards_dashboard_controlle
 import '../../../Models/job cards dashboard/daily_jobs_summary_model.dart';
 import '../../../consts.dart';
 import '../../text_button.dart';
+import 'job_cards_dialog_for_dashoboard.dart';
 
 Widget jobsDialySummaryTable() {
   return GetX<JobCardsDashboardController>(
@@ -34,22 +35,12 @@ Widget jobsDialySummaryTable() {
                 label: ClickableHoverText(
                   text: 'POSTED',
                   onTap: () {
-                    if (controller.isPostedSelected.isFalse) {
-                      controller.isPostedSelected.value = true;
-                      controller.isNewSelected.value = false;
-                      controller.isReturnedSelected.value = false;
-                      controller.isReadySelected.value = false;
-                      controller.isApprovedSelected.value = false;
-                      controller.isNotApprovedSelected.value = false;
-                    } else {
-                      controller.isPostedSelected.value = false;
-                    }
-                    controller.filterSearch('day');
+                    controller.jonCardController.allJobCards.clear();
+                    controller.filterSearch('day', 'Posted');
+                    jobsDialog();
                   },
                   color1: Colors.blueGrey,
-                  color2: controller.isPostedSelected.isFalse
-                      ? Colors.blue
-                      : Colors.red,
+                  color2: Colors.blue,
                 ),
               ),
               DataColumn2(
@@ -58,22 +49,12 @@ Widget jobsDialySummaryTable() {
                 label: ClickableHoverText(
                   text: 'NEW',
                   onTap: () {
-                    if (controller.isNewSelected.isFalse) {
-                      controller.isNewSelected.value = true;
-                      controller.isPostedSelected.value = false;
-                      controller.isReturnedSelected.value = false;
-                      controller.isReadySelected.value = false;
-                      controller.isApprovedSelected.value = false;
-                      controller.isNotApprovedSelected.value = false;
-                    } else {
-                      controller.isNewSelected.value = false;
-                    }
-                    controller.filterSearch('day');
+                    controller.jonCardController.allJobCards.clear();
+                    controller.filterSearch('day', 'New');
+                    jobsDialog();
                   },
                   color1: Colors.blueGrey,
-                  color2: controller.isNewSelected.isFalse
-                      ? Colors.blue
-                      : Colors.red,
+                  color2: Colors.blue,
                 ),
               ),
               const DataColumn2(

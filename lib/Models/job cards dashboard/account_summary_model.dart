@@ -1,17 +1,17 @@
 class AccountSummary {
-  String? sId;
+  String? accountNumber;
   double? amount;
 
-  AccountSummary({this.sId, this.amount});
+  AccountSummary({this.accountNumber, this.amount});
 
   AccountSummary.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'] ?? '';
+    accountNumber = json['account_number'] ?? '';
     amount = json['amount'] ?? 0;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['_id'] = sId;
+    data['account_number'] = accountNumber;
     data['amount'] = amount;
     return data;
   }

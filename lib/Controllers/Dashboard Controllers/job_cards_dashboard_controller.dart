@@ -29,12 +29,6 @@ class JobCardsDashboardController extends GetxController {
   Rx<TextEditingController> dailyDate = TextEditingController().obs;
   final jonCardController = Get.put(JobCardController());
   RxString jobDatesType = RxString('day');
-  RxBool isPostedSelected = RxBool(false);
-  RxBool isNewSelected = RxBool(false);
-  RxBool isNotApprovedSelected = RxBool(false);
-  RxBool isReadySelected = RxBool(false);
-  RxBool isApprovedSelected = RxBool(false);
-  RxBool isReturnedSelected = RxBool(false);
   RxBool isScreenLoadingForJobCards = RxBool(false);
   RxBool isScreenLoadingForJobDialyNewSummary = RxBool(false);
   RxBool isScreenLoadingForAccountSummary = RxBool(false);
@@ -66,7 +60,12 @@ class JobCardsDashboardController extends GetxController {
   @override
   void onInit() {
     dailyDateController.value.text = textToDate(DateTime.now());
-    filterSearch('day');
+    monthlyDateController.value.text = DateFormat(
+      'MM-yyyy',
+    ).format(DateTime.now());
+    getJobsDailySummary(dailyDateController.value.text, 'day');
+    getJobsDailySummary(monthlyDateController.value.text, 'month');
+    getSalesmanSummary();
     getCustomersAging();
     getNewJobsDailySummary();
     getAccountSummary();
@@ -133,7 +132,7 @@ class JobCardsDashboardController extends GetxController {
     }
   }
 
-  void filterSearch(String dateType) async {
+  void filterSearch(String dateType, String status) async {
     isScreenLoadingForJobCards.value = true;
     Map<String, dynamic> body = {};
 
@@ -152,10 +151,10 @@ class JobCardsDashboardController extends GetxController {
         body['to_date'] = monthlyDate.toIso;
       }
     }
-    if (isNewSelected.isTrue) {
+    if (status.toLowerCase() == 'new') {
       body['status'] = 'New';
     }
-    if (isPostedSelected.isTrue) {
+    if (status.toLowerCase() == 'posted') {
       body['status'] = 'Posted';
     }
     if (body.isNotEmpty) {

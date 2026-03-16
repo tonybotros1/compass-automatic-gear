@@ -18,6 +18,10 @@ class AccountTransfersController extends GetxController {
   Rx<TextEditingController> transferDate = TextEditingController().obs;
   TextEditingController fromAccount = TextEditingController();
   TextEditingController fromAccountFilter = TextEditingController();
+  TextEditingController transferCounter = TextEditingController();
+  TextEditingController transferCounterFilter = TextEditingController();
+  RxString status = RxString('');
+  RxString statusFilter = RxString('');
   RxString fromAccountId = RxString('');
   RxString fromAccountIdFilter = RxString('');
   TextEditingController toAccount = TextEditingController();
@@ -34,19 +38,83 @@ class AccountTransfersController extends GetxController {
   Rx<TextEditingController> fromDate = TextEditingController().obs;
   Rx<TextEditingController> toDate = TextEditingController().obs;
   RxInt countOfTransfers = RxInt(0);
-  // @override
-  // void onInit() {
-  //   super.onInit();
-  // }
+  RxInt initStatusPickersValue = RxInt(1);
+  RxMap companyDetails = RxMap({});
+
+  @override
+  void onInit() {
+    getCompanyDetails();
+    super.onInit();
+  }
+
+  Future<void> getCompanyDetails() async {
+    companyDetails.assignAll(await helper.getCurrentCompanyDetails());
+  }
 
   Future<Map<String, dynamic>> getAllAccounts() async {
     return await helper.getAllBanksAndOthers();
+  }
+
+  Future getAccountTransferStatus(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendTestURI/account_transfers/get_account_transfer_status/$id',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final status = decoded['data'];
+        return status;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getAccountTransferStatus(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
   }
 
   String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
     return mainScreenController.selectedScreenName.value;
+  }
+
+  void onChooseForStatusPicker(int i) {
+    switch (i) {
+      case 1:
+        initStatusPickersValue.value = 1;
+        statusFilter.value = '';
+        filterSearch();
+        break;
+      case 2:
+        initStatusPickersValue.value = 2;
+        statusFilter.value = 'New';
+        filterSearch();
+        break;
+      case 3:
+        initStatusPickersValue.value = 3;
+        statusFilter.value = 'Posted';
+        filterSearch();
+        break;
+
+      default:
+        break;
+    }
   }
 
   Future<void> getAllTransferes() async {
@@ -111,10 +179,12 @@ class AccountTransfersController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
+        status.value = 'New';
         final decoded = jsonDecode(response.body);
         TransferModel newTransfer = TransferModel.fromJson(decoded['transfer']);
         alltransfers.insert(0, newTransfer);
         countOfTransfers.value += 1;
+        transferCounter.text = newTransfer.transferCounter ?? '';
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -139,6 +209,20 @@ class AccountTransfersController extends GetxController {
 
   Future<void> updateTransfer(String id) async {
     try {
+      if (companyDetails.containsKey('is_admin')
+          ? companyDetails['is_admin'] == false
+          : false) {
+        Map jobStatus = await getAccountTransferStatus(id);
+        String status1 = jobStatus['status'];
+        if (status1 != 'New' && status1 != '') {
+          alertMessage(
+            context: Get.context!,
+            content: 'Only new jobs can be edited',
+          );
+          return;
+        }
+      }
+
       if (fromAccountId.value.isEmpty || toAccountId.value.isEmpty) {
         alertMessage(
           context: Get.context!,
@@ -165,6 +249,7 @@ class AccountTransfersController extends GetxController {
           "to_account": toAccountId.value,
           "amount": double.tryParse(transferAmount.text) ?? 0.0,
           "comment": transferComments.value.text,
+          "status": status.value,
         }),
       );
       if (response.statusCode == 200) {
@@ -176,6 +261,8 @@ class AccountTransfersController extends GetxController {
         alltransfers[index].toAccountName = toAccount.text;
         alltransfers[index].comment = transferComments.value.text;
         alltransfers[index].date = textToDate(transferDate.value.text);
+        alltransfers[index].status = status.value;
+        alltransfers[index].transferCounter = transferCounter.text;
         alltransfers.refresh();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -233,13 +320,18 @@ class AccountTransfersController extends GetxController {
     if (fromAccountIdFilter.value.isNotEmpty) {
       body["from_account"] = fromAccountIdFilter.value;
     }
+    if (transferCounterFilter.text.isNotEmpty) {
+      body["transfer_number"] = transferCounterFilter.text;
+    }
     if (toAccountIdFilter.value.isNotEmpty) {
       body["to_account"] = toAccountIdFilter.value;
     }
     if (commentsFilter.text.isNotEmpty) {
       body["comment"] = commentsFilter.text;
     }
-
+    if (statusFilter.value.isNotEmpty) {
+      body["status"] = statusFilter.value;
+    }
     if (fromDate.value.text.isNotEmpty) {
       body["from_date"] = convertDateToIson(fromDate.value.text);
     }
