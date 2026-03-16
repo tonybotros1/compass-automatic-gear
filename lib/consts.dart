@@ -1016,7 +1016,7 @@ String textToDate(
     final raw = inputDate.trim();
     if (raw.isEmpty) return '';
 
-    final ddMMyyyy = RegExp(r'^\d{2}-\d{2}-\d{4}$');
+    final  ddMMyyyy = RegExp(r'^\d{2}-\d{2}-\d{4}$');
     if (ddMMyyyy.hasMatch(raw)) {
       if (withTime) return '$raw 00:00:00';
       return raw;

@@ -69,11 +69,12 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           text: (data.amount?.toString() ?? '0'),
           formatDouble: true,
-          color: (data.amount ?? 0) > 0
-              ? Colors.green
-              : data.amount == 0
-              ? Colors.grey
-              : Colors.red,
+          color:data.amount == 0 ? Colors.grey : (data.amount! > 0) ? Colors.green : Colors.red
+          //  (data.amount ?? 0) > 0
+          //     ? Colors.green
+          //     : data.amount == 0
+          //     ? Colors.grey
+          //     : Colors.red,
         ),
       ),
     ],

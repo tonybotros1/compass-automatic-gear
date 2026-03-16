@@ -44,13 +44,23 @@ Widget tableOfScreens<T extends CashManagementBaseController>({
   required T controller,
   required bool isPayment,
 }) {
-  return DataTable2(
+  final filtered = isPayment
+      ? controller.availablePayments
+      : controller.availableReceipts;
+
+  final source = InvoicesSource(
+    items: filtered,
+    controller: controller,
+    isPayment: isPayment,
+  );
+  return PaginatedDataTable2(
     lmRatio: 4,
     checkboxHorizontalMargin: 2,
     showCheckboxColumn: true,
     columnSpacing: 5,
     horizontalMargin: horizontalMarginForTable,
-    showBottomBorder: true,
+    // showBottomBorder: true,
+    autoRowsToHeight: true,
     onSelectAll: (allSelected) {
       if (allSelected != null) {
         isPayment
@@ -88,49 +98,50 @@ Widget tableOfScreens<T extends CashManagementBaseController>({
       ),
     ],
 
-    rows: isPayment
-        ? controller.availablePayments
-              .where(
-                (r) => !controller.selectedAvailablePayments.any(
-                  (sel) =>
-                      (sel.apInvoiceId == r.apInvoiceId) &&
-                      (sel.isDeleted != true),
-                ),
-              )
-              .map((entry) {
-                final originalIndex = controller.availablePayments.indexWhere(
-                  (r) => r.apInvoiceId == entry.apInvoiceId,
-                );
-                return dataRowForTheTable(
-                  entry,
-                  context,
-                  constraints,
-                  controller,
-                  originalIndex,
-                  isPayment,
-                );
-              })
-              .toList()
-        : controller.availableReceipts
-              .where(
-                (r) => !controller.selectedAvailableReceipts.any(
-                  (sel) => (sel.jobId == r.jobId) && (sel.isDeleted != true),
-                ),
-              )
-              .map((entry) {
-                final originalIndex = controller.availableReceipts.indexWhere(
-                  (r) => r.jobId == entry.jobId,
-                );
-                return dataRowForTheTable(
-                  entry,
-                  context,
-                  constraints,
-                  controller,
-                  originalIndex,
-                  isPayment,
-                );
-              })
-              .toList(),
+    source: source,
+    // isPayment
+    //     ? controller.availablePayments
+    //           .where(
+    //             (r) => !controller.selectedAvailablePayments.any(
+    //               (sel) =>
+    //                   (sel.apInvoiceId == r.apInvoiceId) &&
+    //                   (sel.isDeleted != true),
+    //             ),
+    //           )
+    //           .map((entry) {
+    //             final originalIndex = controller.availablePayments.indexWhere(
+    //               (r) => r.apInvoiceId == entry.apInvoiceId,
+    //             );
+    //             return dataRowForTheTable(
+    //               entry,
+    //               context,
+    //               constraints,
+    //               controller,
+    //               originalIndex,
+    //               isPayment,
+    //             );
+    //           })
+    //           .toList()
+    //     : controller.availableReceipts
+    //           .where(
+    //             (r) => !controller.selectedAvailableReceipts.any(
+    //               (sel) => (sel.jobId == r.jobId) && (sel.isDeleted != true),
+    //             ),
+    //           )
+    //           .map((entry) {
+    //             final originalIndex = controller.availableReceipts.indexWhere(
+    //               (r) => r.jobId == entry.jobId,
+    //             );
+    //             return dataRowForTheTable(
+    //               entry,
+    //               context,
+    //               constraints,
+    //               controller,
+    //               originalIndex,
+    //               isPayment,
+    //             );
+    //           })
+    //           .toList(),
   );
 }
 
@@ -185,4 +196,71 @@ DataRow dataRowForTheTable<
       ),
     ],
   );
+}
+
+class InvoicesSource<
+  T extends CashManagementBaseController,
+  D extends BaseModelForReceiptsAndPayments
+>
+    extends DataTableSource {
+  InvoicesSource({
+    required this.items,
+    required this.controller,
+    required this.isPayment,
+  });
+
+  final List<D> items;
+  final T controller;
+  final bool isPayment;
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= items.length) return null;
+    final row = items[index];
+
+    return DataRow.byIndex(
+      index: index,
+      selected: row.isSelected,
+      onSelectChanged: (value) {
+        if (value == null) return;
+        if (isPayment) {
+          controller.selectPayment(row.apInvoiceId, value);
+        } else {
+          controller.selectJobReceipt(row.jobId, value);
+        }
+      },
+      color: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.selected)) return Colors.yellow;
+        return index.isOdd ? coolColor : Colors.white;
+      }),
+      cells: [
+        DataCell(Text(row.invoiceNumber)),
+        DataCell(Text(textToDate(row.invoiceDate))),
+        DataCell(Text(row.notes)),
+        DataCell(
+          Align(
+            alignment: Alignment.centerRight,
+            child: textForDataRowInTable(text: row.invoiceAmount.toString()),
+          ),
+        ),
+        DataCell(
+          Align(
+            alignment: Alignment.centerRight,
+            child: textForDataRowInTable(
+              text: row.outstandingAmount.toString(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => items.length;
+
+  @override
+  int get selectedRowCount => items.where((e) => e.isSelected).length;
 }
