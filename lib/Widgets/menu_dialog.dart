@@ -197,6 +197,24 @@ class _MenuWithValuesState extends State<MenuWithValues> {
               }
             },
             child: TextFormField(
+              onTap: () {
+                showResponsiveDialog(
+                  context,
+                  widget.dialogWidth,
+                  widget.controller,
+                  widget.dialogHeight,
+                  flexList: widget.flexList,
+                  // initialSearch: widget.controller.text,
+                  data: widget.data,
+                  onOpen: widget.onOpen,
+                  displayKeys: widget.displayKeys,
+                  displaySelectedKeys: widget.displaySelectedKeys,
+                  onSelected: widget.onSelected,
+                  headerLqabel: widget.headerLqabel,
+                  nextFocusNode: widget.nextFocusNode,
+                  focusNode: widget.focusNode,
+                );
+              },
               canRequestFocus: true,
               readOnly: widget.readOnly ?? true,
               onTapOutside: widget.onTapOutside,
@@ -256,27 +274,28 @@ class _MenuWithValuesState extends State<MenuWithValues> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              MiniIcon(
+                              const MiniIcon(
                                 icon: Icons.more_horiz,
-                                onTap: () {
-                                  showResponsiveDialog(
-                                    context,
-                                    widget.dialogWidth,
-                                    widget.controller,
-                                    widget.dialogHeight,
-                                    flexList: widget.flexList,
-                                    // initialSearch: widget.controller.text,
-                                    data: widget.data,
-                                    onOpen: widget.onOpen,
-                                    displayKeys: widget.displayKeys,
-                                    displaySelectedKeys:
-                                        widget.displaySelectedKeys,
-                                    onSelected: widget.onSelected,
-                                    headerLqabel: widget.headerLqabel,
-                                    nextFocusNode: widget.nextFocusNode,
-                                    focusNode: widget.focusNode,
-                                  );
-                                },
+                                onTap: null,
+                                //  () {
+                                //   // showResponsiveDialog(
+                                //   //   context,
+                                //   //   widget.dialogWidth,
+                                //   //   widget.controller,
+                                //   //   widget.dialogHeight,
+                                //   //   flexList: widget.flexList,
+                                //   //   // initialSearch: widget.controller.text,
+                                //   //   data: widget.data,
+                                //   //   onOpen: widget.onOpen,
+                                //   //   displayKeys: widget.displayKeys,
+                                //   //   displaySelectedKeys:
+                                //   //       widget.displaySelectedKeys,
+                                //   //   onSelected: widget.onSelected,
+                                //   //   headerLqabel: widget.headerLqabel,
+                                //   //   nextFocusNode: widget.nextFocusNode,
+                                //   //   focusNode: widget.focusNode,
+                                //   // );
+                                // },
                               ),
                               if (hasText)
                                 MiniIcon(

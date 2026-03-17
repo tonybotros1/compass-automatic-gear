@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/job cards dashboard/account_summary_model.dart';
+import '../../Models/job cards dashboard/cashflow_summary_model.dart';
 import '../../Models/job cards dashboard/customer_aging_model.dart';
 import '../../Models/job cards dashboard/daily_jobs_summary_model.dart';
 import '../../Models/job cards dashboard/daily_new_jobs_summary_model.dart';
@@ -14,8 +15,12 @@ import '../Main screen controllers/job_card_controller.dart';
 
 class JobCardsDashboardController extends GetxController {
   Rx<TextEditingController> monthlyDateController = TextEditingController().obs;
+  Rx<TextEditingController> dialyCashflowDateController =
+      TextEditingController().obs;
   Rx<TextEditingController> dailyDateController = TextEditingController().obs;
   RxList<JobsDailySummary> jobDailySummary = RxList<JobsDailySummary>([]);
+  RxList<CashflowSummaryModel> cashflowDialySummaryList =
+      RxList<CashflowSummaryModel>([]);
   RxList<JobsDailySummary> jobMonthlySummary = RxList<JobsDailySummary>([]);
   RxList<JobsDailySummary> jobSalesmanSummary = RxList<JobsDailySummary>([]);
   RxList<CustomerAgingModel> customerAgingSummary = RxList<CustomerAgingModel>(
@@ -60,6 +65,7 @@ class JobCardsDashboardController extends GetxController {
   @override
   void onInit() {
     dailyDateController.value.text = textToDate(DateTime.now());
+    dialyCashflowDateController.value.text = textToDate(DateTime.now());
     monthlyDateController.value.text = DateFormat(
       'MM-yyyy',
     ).format(DateTime.now());
@@ -69,6 +75,7 @@ class JobCardsDashboardController extends GetxController {
     getCustomersAging();
     getNewJobsDailySummary();
     getAccountSummary();
+    getCashflowDialySummary(dialyCashflowDateController.value.text);
     super.onInit();
   }
 
@@ -195,6 +202,36 @@ class JobCardsDashboardController extends GetxController {
     }
   }
 
+  Future<Map<String, dynamic>> getCashflowDate() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/job_cards_dashboard/get_cashflow_dates');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        Map<String, dynamic> dates = decoded['cashflow_dates'];
+        return dates;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getCashflowDate();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      return {};
+    } catch (e) {
+      return {};
+    }
+  }
+
   Future<Map<String, dynamic>> getCustomersAging() async {
     try {
       isScreenLoadingForCustomerAging.value = true;
@@ -296,6 +333,57 @@ class JobCardsDashboardController extends GetxController {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           await getJobsDailySummary(date, dateType);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      //
+    }
+  }
+
+  Future<void> getCashflowDialySummary(String date) async {
+    String fromDate;
+    String toDate;
+    try {
+      if (date != '') {
+        final parsed = DateFormat('dd-MM-yyyy').parseStrict(date);
+        fromDate = parsed.toIso8601String().split('T').first;
+        toDate = parsed
+            .add(const Duration(days: 1))
+            .toIso8601String()
+            .split('T')
+            .first;
+      } else {
+        alertMessage(context: Get.context!, content: 'please enter valid date');
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards_dashboard/get_cashflow_summary',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({'from_date': fromDate, 'to_date': toDate}),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List daily = decoded['summary'];
+        cashflowDialySummaryList.assignAll(
+          daily.map((d) => CashflowSummaryModel.fromJson(d)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getCashflowDialySummary(date);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }

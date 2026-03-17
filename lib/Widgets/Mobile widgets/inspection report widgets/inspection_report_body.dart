@@ -37,7 +37,7 @@ Padding buildInspectionReportBody(BuildContext context) {
                         ],
                       ),
                     ),
-                    GetX<CardsScreenController>(
+                    GetBuilder<CardsScreenController>(
                       builder: (controller) {
                         return Container(
                           padding: const EdgeInsets.all(10),
@@ -60,23 +60,23 @@ Padding buildInspectionReportBody(BuildContext context) {
                                 isDate: true,
                                 controller: controller.date,
                               ),
-                              MenuWithValues(
-                                flexList: const [1],
-                                labelText: 'Technician',
-                                controller: controller.technicianName.value,
-                                displayKeys: const ['name'],
-                                displaySelectedKeys: const ['name'],
-                                onOpen: () {
-                                  return controller.getTechnicians();
-                                },
-                                onDelete: () {
-                                  controller.technicianName.value.clear();
-                                  controller.technicianId.value = "";
-                                },
-                                onSelected: (value) {
-                                  controller.technicianId.value = value['_id'];
-                                },
-                              ),
+                              // MenuWithValues(
+                              //   flexList: const [1],
+                              //   labelText: 'Technician',
+                              //   controller: controller.technicianName.value,
+                              //   displayKeys: const ['name'],
+                              //   displaySelectedKeys: const ['name'],
+                              //   onOpen: () {
+                              //     return controller.getTechnicians();
+                              //   },
+                              //   onDelete: () {
+                              //     controller.technicianName.value.clear();
+                              //     controller.technicianId.value = "";
+                              //   },
+                              //   onSelected: (value) {
+                              //     controller.technicianId.value = value['_id'];
+                              //   },
+                              // ),
                               // CustomDropdown(
                               //   width: double.infinity,
                               //   textcontroller:
