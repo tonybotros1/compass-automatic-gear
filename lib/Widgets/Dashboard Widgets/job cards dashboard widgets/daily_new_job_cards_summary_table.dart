@@ -32,7 +32,7 @@ Widget newJobsDialySummaryTable() {
               const DataColumn2(
                 size: ColumnSize.M,
                 numeric: true,
-                label: Text('JOBS NO.'),
+                label: Text('JOB NO.'),
               ),
               DataColumn2(
                 size: ColumnSize.M,

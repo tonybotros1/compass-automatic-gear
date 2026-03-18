@@ -28,7 +28,7 @@ Widget jobsMonthlySummaryTable() {
               DataColumn2(size: ColumnSize.L, label: Text('BRANCH')),
               DataColumn2(
                 size: ColumnSize.S,
-                label: Text('JOBS NO.'),
+                label: Text('JOB NO.'),
                 numeric: true,
               ),
               DataColumn2(

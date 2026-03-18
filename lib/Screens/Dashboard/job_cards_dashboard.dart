@@ -10,6 +10,7 @@ import '../../Widgets/Dashboard Widgets/job cards dashboard widgets/customer_agi
 import '../../Widgets/Dashboard Widgets/job cards dashboard widgets/daily_job_cards_summary_table.dart';
 import '../../Widgets/Dashboard Widgets/job cards dashboard widgets/daily_new_job_cards_summary_table.dart';
 import '../../Widgets/Dashboard Widgets/job cards dashboard widgets/monthly_job_cards_summary_table.dart';
+import '../../Widgets/Dashboard Widgets/job cards dashboard widgets/post_dated_cheques_table.dart';
 import '../../Widgets/Dashboard Widgets/job cards dashboard widgets/salesman_table_summary.dart';
 import '../../Widgets/dynamic_boxes_line.dart';
 import '../../consts.dart';
@@ -28,7 +29,8 @@ class JobCardsDashboard extends StatelessWidget {
                 controller.isScreenLoadingForJobCards.value ||
                     controller.isScreenLoadingForCustomerAging.value ||
                     controller.isScreenLoadingForJobDialyNewSummary.value ||
-                    controller.isScreenLoadingForAccountSummary.value
+                    controller.isScreenLoadingForAccountSummary.value ||
+                    controller.isScreenLoadingForPostDatedCheques.value
                 ? SystemMouseCursors.wait
                 : SystemMouseCursors.basic,
             child: AbsorbPointer(
@@ -36,7 +38,8 @@ class JobCardsDashboard extends StatelessWidget {
                   controller.isScreenLoadingForJobCards.value ||
                   controller.isScreenLoadingForCustomerAging.value ||
                   controller.isScreenLoadingForJobDialyNewSummary.value ||
-                  controller.isScreenLoadingForAccountSummary.value,
+                  controller.isScreenLoadingForAccountSummary.value ||
+                  controller.isScreenLoadingForPostDatedCheques.value,
               child: const _DashBoardBody(),
             ),
           ),
@@ -241,7 +244,7 @@ class _DashBoardBody extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     // spacing: 10,
                     children: [
-                      GetBuilder<JobCardsDashboardController>(
+                      GetX<JobCardsDashboardController>(
                         builder: (controller) {
                           return Row(
                             children: [
@@ -250,6 +253,19 @@ class _DashBoardBody extends StatelessWidget {
                                   labelPadding: const EdgeInsets.symmetric(
                                     horizontal: 8,
                                   ),
+                                  onTap: (i) {
+                                    if (i == 0) {
+                                      controller
+                                              .showRefreshButtonForCustomerAging
+                                              .value =
+                                          true;
+                                    } else {
+                                      controller
+                                              .showRefreshButtonForCustomerAging
+                                              .value =
+                                          false;
+                                    }
+                                  },
                                   labelStyle: controller.headerRowTextStyle,
                                   dividerHeight: 0,
                                   indicatorPadding: EdgeInsetsGeometry.zero,
@@ -267,9 +283,13 @@ class _DashBoardBody extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              RefreshButton(
-                                onPressed: controller.getCustomersAging,
-                              ),
+                              controller
+                                      .showRefreshButtonForCustomerAging
+                                      .isTrue
+                                  ? RefreshButton(
+                                      onPressed: controller.getCustomersAging,
+                                    )
+                                  : const SizedBox(),
                             ],
                           );
                         },
@@ -400,8 +420,151 @@ class _DashBoardBody extends StatelessWidget {
                                       },
                                     ),
                                   ),
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                    ),
+                                    alignment: Alignment.centerLeft,
+                                    height: 25,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: Colors.blueGrey.shade400,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child:
+                                        GetBuilder<JobCardsDashboardController>(
+                                          builder: (controller) {
+                                            return Text(
+                                              'CASHFLOW NET SUMMARY',
+                                              style: controller.headeTextStyle,
+                                            );
+                                          },
+                                        ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 4.0,
+                                      left: 4,
+                                      right: 4,
+                                    ),
+                                    child: GetX<JobCardsDashboardController>(
+                                      builder: (controller) {
+                                        return SizedBox(
+                                          height: 80,
+                                          child: dynamicBoxesLine(
+                                            dynamicConfigs: [
+                                              DynamicBoxesLineModel(
+                                                icon: moneyIcon,
+                                                iconColor:
+                                                    Colors.orange.shade100,
+                                                width: 250,
+                                                label: 'TOTAL NET',
+                                                value:
+                                                    '${controller.cashflowTotalNet.value}',
+                                                valueColor: Colors.orange,
+                                                iconSize: 30,
+                                              ),
+                                              DynamicBoxesLineModel(
+                                                icon: moneyIcon,
+                                                iconColor:
+                                                    Colors.green.shade100,
+                                                width: 250,
+                                                label: 'TOTAL CR',
+                                                value:
+                                                    '${controller.cashflowTotalCR.value}',
+                                                valueColor: Colors.green,
+                                                iconSize: 30,
+                                              ),
+                                              DynamicBoxesLineModel(
+                                                icon: moneyIcon,
+                                                iconColor: Colors.red.shade100,
+                                                width: 250,
+                                                label: 'TOTAL DR',
+                                                value:
+                                                    '${controller.cashflowTotalDR.value}',
+                                                valueColor: Colors.red,
+                                                iconSize: 30,
+                                              ),
+                                              DynamicBoxesLineModel(
+                                                icon: moneyIcon,
+                                                iconColor:
+                                                    Colors.green.shade100,
+                                                width: 250,
+                                                label: 'TOTAL TRANS. IN',
+                                                value:
+                                                    '${controller.cashflowTotalTransIn.value}',
+                                                valueColor: Colors.green,
+                                                iconSize: 30,
+                                              ),
+                                              DynamicBoxesLineModel(
+                                                icon: moneyIcon,
+                                                iconColor: Colors.red.shade100,
+                                                width: 250,
+                                                label: 'TOTAL TRANS. OUT',
+                                                value:
+                                                    '${controller.cashflowTotalTransOut.value}',
+                                                valueColor: Colors.red,
+                                                iconSize: 30,
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
                                   Expanded(child: cashflowSummaryTable()),
-                                  const Expanded(child: SizedBox()),
+                                  GetBuilder<JobCardsDashboardController>(
+                                    builder: (controller) {
+                                      return HeaderBuilder(
+                                        lable: 'POST DATED CHEQUES',
+                                        onTap: () {
+                                          controller.getPostDatedCheques();
+                                        },
+                                      );
+                                    },
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 4.0,
+                                      left: 4,
+                                      right: 4,
+                                    ),
+                                    child: GetX<JobCardsDashboardController>(
+                                      builder: (controller) {
+                                        return SizedBox(
+                                          height: 80,
+                                          child: dynamicBoxesLine(
+                                            dynamicConfigs: [
+                                              DynamicBoxesLineModel(
+                                                icon: moneyIcon,
+                                                iconColor:
+                                                    Colors.green.shade100,
+                                                width: 250,
+                                                label: 'TOTAL RECEIVED',
+                                                value:
+                                                    '${controller.posteDatedChequesReceived.value}',
+                                                valueColor: Colors.green,
+                                                iconSize: 30,
+                                              ),
+                                              DynamicBoxesLineModel(
+                                                icon: moneyIcon,
+                                                iconColor: Colors.red.shade100,
+                                                width: 250,
+                                                label: 'TOTAL PAID',
+                                                value:
+                                                    '${controller.posteDatedChequesPaid.value}',
+                                                valueColor: Colors.red,
+                                                iconSize: 30,
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+
+                                  Expanded(child: postDatedChequesTable()),
                                 ],
                               ),
                             ),
@@ -435,7 +598,7 @@ class _DashBoardBody extends StatelessWidget {
                 showedSelectedName: 'date',
                 onChanged: (key, value) {
                   controller.monthlyDateController.value.text = value['date'];
-                  controller.filterSearch(controller.jobDatesType.value, '');
+                  controller.filterSearch('month', '');
                 },
                 onDelete: () {
                   controller.monthlyDateController.value.clear();

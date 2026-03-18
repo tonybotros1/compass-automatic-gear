@@ -9,6 +9,7 @@ import '../../Models/job cards dashboard/cashflow_summary_model.dart';
 import '../../Models/job cards dashboard/customer_aging_model.dart';
 import '../../Models/job cards dashboard/daily_jobs_summary_model.dart';
 import '../../Models/job cards dashboard/daily_new_jobs_summary_model.dart';
+import '../../Models/job cards dashboard/post_dated_cheques_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import '../Main screen controllers/job_card_controller.dart';
@@ -23,6 +24,8 @@ class JobCardsDashboardController extends GetxController {
       RxList<CashflowSummaryModel>([]);
   RxList<JobsDailySummary> jobMonthlySummary = RxList<JobsDailySummary>([]);
   RxList<JobsDailySummary> jobSalesmanSummary = RxList<JobsDailySummary>([]);
+  RxList<PostDatedChequesModel> postDatedChequesList =
+      RxList<PostDatedChequesModel>([]);
   RxList<CustomerAgingModel> customerAgingSummary = RxList<CustomerAgingModel>(
     [],
   );
@@ -38,12 +41,26 @@ class JobCardsDashboardController extends GetxController {
   RxBool isScreenLoadingForJobDialyNewSummary = RxBool(false);
   RxBool isScreenLoadingForAccountSummary = RxBool(false);
   RxBool isScreenLoadingForCustomerAging = RxBool(false);
+  RxBool isScreenLoadingForPostDatedCheques = RxBool(false);
+  // customers aging totals
   RxDouble customerAgingTotalOutstanding = RxDouble(0.0);
   RxDouble customerAging0To90 = RxDouble(0.0);
   RxDouble customerAging91To180 = RxDouble(0.0);
   RxDouble customerAging181To360 = RxDouble(0.0);
   RxDouble customerAgingMoreThan360 = RxDouble(0.0);
   RxDouble accountSummaryTotalAmount = RxDouble(0.0);
+  // cashflow totals
+  RxDouble cashflowTotalNet = RxDouble(0.0);
+  RxDouble cashflowTotalCR = RxDouble(0.0);
+  RxDouble cashflowTotalDR = RxDouble(0.0);
+  RxDouble cashflowTotalTransIn = RxDouble(0.0);
+  RxDouble cashflowTotalTransOut = RxDouble(0.0);
+  // post dated cheques
+  RxDouble posteDatedChequesReceived = RxDouble(0.0);
+  RxDouble posteDatedChequesPaid = RxDouble(0.0);
+
+  RxBool showRefreshButtonForCustomerAging = RxBool(true);
+
   TextStyle dataRowTextStyle = TextStyle(
     fontSize: 10,
     fontWeight: FontWeight.bold,
@@ -76,6 +93,7 @@ class JobCardsDashboardController extends GetxController {
     getNewJobsDailySummary();
     getAccountSummary();
     getCashflowDialySummary(dialyCashflowDateController.value.text);
+    getPostDatedCheques();
     super.onInit();
   }
 
@@ -104,6 +122,30 @@ class JobCardsDashboardController extends GetxController {
       customerAging91To180.value += element.i91To180Days ?? 0;
       customerAging181To360.value += element.d181To360Days ?? 0;
       customerAgingMoreThan360.value += element.moreThan360Days ?? 0;
+    }
+  }
+
+  void calculatePostedDatedChequesTotals() {
+    posteDatedChequesReceived.value = 0.0;
+    posteDatedChequesPaid.value = 0.0;
+    for (var element in postDatedChequesList) {
+      posteDatedChequesReceived.value += element.received ?? 0;
+      posteDatedChequesPaid.value += element.paid ?? 0;
+    }
+  }
+
+  void calculateCashflowTotals() {
+    cashflowTotalCR.value = 0.0;
+    cashflowTotalDR.value = 0.0;
+    cashflowTotalNet.value = 0.0;
+    cashflowTotalTransIn.value = 0.0;
+    cashflowTotalTransOut.value = 0.0;
+    for (var element in cashflowDialySummaryList) {
+      cashflowTotalCR.value += element.totalReceived ?? 0;
+      cashflowTotalDR.value += element.totalPaid ?? 0;
+      cashflowTotalNet.value += element.net ?? 0;
+      cashflowTotalTransIn.value += element.totalTransIn ?? 0;
+      cashflowTotalTransOut.value += element.totalTransOut ?? 0;
     }
   }
 
@@ -149,13 +191,14 @@ class JobCardsDashboardController extends GetxController {
         body['from_date'] = convertDateToIson(dailyDateController.value.text);
         body['to_date'] = convertDateToIson(dailyDateController.value.text);
       } else {
+        print("month");
         getJobsDailySummary(monthlyDateController.value.text, dateType);
         getSalesmanSummary();
-        MonthRange monthlyDate = monthToIsoRange(
-          monthlyDateController.value.text,
-        );
-        body['from_date'] = monthlyDate.fromIso;
-        body['to_date'] = monthlyDate.toIso;
+        // MonthRange monthlyDate = monthToIsoRange(
+        //   monthlyDateController.value.text,
+        // );
+        // body['from_date'] = monthlyDate.fromIso;
+        // body['to_date'] = monthlyDate.toIso;
       }
     }
     if (status.toLowerCase() == 'new') {
@@ -270,6 +313,44 @@ class JobCardsDashboardController extends GetxController {
     }
   }
 
+  Future<Map<String, dynamic>> getPostDatedCheques() async {
+    try {
+      isScreenLoadingForPostDatedCheques.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/job_cards_dashboard/get_post_dated_cheques',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List postDated = decoded['summary'];
+        postDatedChequesList.assignAll(
+          postDated.map((cus) => PostDatedChequesModel.fromJson(cus)),
+        );
+        calculatePostedDatedChequesTotals();
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getPostDatedCheques();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      isScreenLoadingForPostDatedCheques.value = false;
+      return {};
+    } catch (e) {
+      isScreenLoadingForPostDatedCheques.value = false;
+      return {};
+    }
+  }
+
   Future<void> getJobsDailySummary(String date, String dateType) async {
     String fromDate;
     String toDate;
@@ -380,6 +461,7 @@ class JobCardsDashboardController extends GetxController {
         cashflowDialySummaryList.assignAll(
           daily.map((d) => CashflowSummaryModel.fromJson(d)),
         );
+        calculateCashflowTotals();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
