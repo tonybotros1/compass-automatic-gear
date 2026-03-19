@@ -191,7 +191,6 @@ class JobCardsDashboardController extends GetxController {
         body['from_date'] = convertDateToIson(dailyDateController.value.text);
         body['to_date'] = convertDateToIson(dailyDateController.value.text);
       } else {
-        print("month");
         getJobsDailySummary(monthlyDateController.value.text, dateType);
         getSalesmanSummary();
         // MonthRange monthlyDate = monthToIsoRange(

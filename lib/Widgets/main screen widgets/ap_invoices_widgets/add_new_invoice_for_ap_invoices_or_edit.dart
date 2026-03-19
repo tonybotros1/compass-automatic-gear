@@ -63,6 +63,51 @@ Widget addNewinvoiceForApInvoicesOrEdit({
                 // );
               },
             ),
+            MenuWithValues(
+              labelText: 'Received Number',
+              headerLqabel: 'Receiving List',
+              dialogWidth: constraints.maxWidth,
+              width: double.infinity,
+              controller: controller.receivedNumber,
+              displayKeys: const [
+                'receiving_number',
+                'reference_number',
+                'date',
+                'vendor_name',
+                'branch_name',
+                'note',
+                'total',
+                'vat',
+                'net',
+              ],
+              headerKeys: const [
+                'Received #',
+                "Reference #",
+                'Date',
+                "Vendor",
+                "Branch",
+                "Note",
+                "Total",
+                "Vat",
+                "Net",
+              ],
+              flexList: const [1, 1, 1, 3, 2, 3, 1, 1, 1],
+              displaySelectedKeys: const ['receiving_number'],
+              onOpen: () {
+                return controller.getReceivedNumbersList();
+              },
+              onDelete: () {
+                controller.receivedNumber.clear();
+                controller.receivedNumberId.value = '';
+              },
+              onSelected: (value) {
+                controller.receivedNumber.text = value['receiving_number'];
+                controller.receivedNumberId.value = value['_id'];
+                controller.amount.text = value['total']?.toString() ?? '0';
+                controller.vat.text = value['vat']?.toString() ?? '0';
+                controller.invoiceNote.text = value['note'] ?? '';
+              },
+            ),
             Row(
               spacing: 10,
               children: [
@@ -90,11 +135,12 @@ Widget addNewinvoiceForApInvoicesOrEdit({
                 ),
               ],
             ),
-            myTextFormFieldWithBorder(
-              width: 150,
-              labelText: 'Received Number',
-              controller: controller.receivedNumber,
-            ),
+
+            // myTextFormFieldWithBorder(
+            //   width: 150,
+            //   labelText: 'Received Number',
+            //   controller: controller.receivedNumber,
+            // ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [

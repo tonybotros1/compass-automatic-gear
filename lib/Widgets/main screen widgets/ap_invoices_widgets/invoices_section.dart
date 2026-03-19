@@ -220,9 +220,13 @@ Widget editSection(
             invoiceItemsData.transactionTypeName ?? '';
         controller.transactionTypeId.value = invoiceItemsData.transactionType;
         controller.invoiceNote.text = invoiceItemsData.note;
-        controller.vat.text = invoiceItemsData.vat.toString();
-        controller.amount.text = invoiceItemsData.amount.toString();
+        controller.vat.text = invoiceItemsData.vat.toStringAsFixed(2);
+        controller.amount.text = invoiceItemsData.amount.toStringAsFixed(2);
         controller.jobNumber.text = invoiceItemsData.jobNumber;
+        controller.receivedNumber.text = invoiceItemsData.receivedNumber ?? '';
+        controller.receivedNumberId.value =
+            invoiceItemsData.receivedNumberId ?? '';
+        controller.jobNumberId.text = invoiceItemsData.jobNumberId;
         invoiceItemsForapInvoicesDialog(
           controller: controller,
           constraints: constraints,

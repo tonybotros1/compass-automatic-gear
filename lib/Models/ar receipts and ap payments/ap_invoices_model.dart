@@ -140,6 +140,7 @@ class ApInvoicesItem {
     this.isDeleted,
     this.isModified,
     this.receivedNumber,
+    this.receivedNumberId,
   });
 
   final String? id;
@@ -158,6 +159,7 @@ class ApInvoicesItem {
   bool? isDeleted;
   bool? isModified;
   String? receivedNumber;
+  String? receivedNumberId;
 
   factory ApInvoicesItem.fromJson(Map<String, dynamic> json) {
     return ApInvoicesItem(
@@ -187,6 +189,9 @@ class ApInvoicesItem {
       receivedNumber: json.containsKey('received_number')
           ? json["received_number"]?.toString()
           : '',
+      receivedNumberId: json.containsKey('received_number_id')
+          ? json["received_number_id"]?.toString()
+          : '',
     );
   }
 
@@ -198,6 +203,7 @@ class ApInvoicesItem {
     "job_number_id": jobNumberId,
     "note": note,
     "received_number": receivedNumber,
+    "received_number_id": receivedNumberId,
     "transaction_type": transactionType,
     "vat": vat,
     "ap_invoice_id": apInvoiceId,

@@ -33,6 +33,7 @@ class MenuWithValues extends StatefulWidget {
     this.flexList = const [],
     this.nextFocusNode,
     this.previousFocusNode,
+    this.headerKeys,
   });
   final TextEditingController controller;
   final double? width;
@@ -53,6 +54,7 @@ class MenuWithValues extends StatefulWidget {
   final double? dialogHeight;
   final dynamic data;
   final List<String> displayKeys;
+  final List<String>? headerKeys;
   final List<int> flexList;
   final List<String> displaySelectedKeys;
   final Future<dynamic> Function()? onOpen;
@@ -213,6 +215,7 @@ class _MenuWithValuesState extends State<MenuWithValues> {
                   headerLqabel: widget.headerLqabel,
                   nextFocusNode: widget.nextFocusNode,
                   focusNode: widget.focusNode,
+                  headerKeys: widget.headerKeys ?? [],
                 );
               },
               canRequestFocus: true,
@@ -237,6 +240,7 @@ class _MenuWithValuesState extends State<MenuWithValues> {
                   headerLqabel: widget.headerLqabel,
                   nextFocusNode: widget.nextFocusNode,
                   focusNode: widget.focusNode,
+                  headerKeys: widget.headerKeys ?? [],
                 );
                 widget.onFieldSubmitted?.call(value);
               },
@@ -365,6 +369,7 @@ Future<void> showResponsiveDialog(
   String? initialSearch,
   dynamic data,
   List<String> displayKeys = const ['name'],
+  List<String> headerKeys = const [],
   List<int> flexList = const [],
   List<String> displaySelectedKeys = const ['name'],
   Map<String, String>? labels,
@@ -391,6 +396,7 @@ Future<void> showResponsiveDialog(
       onOpen: onOpen,
       nextFocusNode: nextFocusNode,
       focusNode: focusNode,
+      headerKeys: headerKeys,
     ),
   );
 }
@@ -410,6 +416,7 @@ class _LargeDataDialog extends StatefulWidget {
     required this.initialSearch,
     required this.nextFocusNode,
     required this.focusNode,
+    required this.headerKeys,
   });
 
   final double? width;
@@ -417,6 +424,7 @@ class _LargeDataDialog extends StatefulWidget {
   final TextEditingController? controller;
   final dynamic data;
   final List<String> displayKeys;
+  final List<String> headerKeys;
   final List<int> flexList;
   final List<String> displaySelectedKeys;
   final Function(dynamic selected)? onSelected;
@@ -851,88 +859,147 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
                     : Scrollbar(
                         controller: _scrollController,
                         thumbVisibility: true,
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: _visibleIndexes.length,
-                          itemExtent: 52,
-                          itemBuilder: (context, rowIndex) {
-                            final item = _items[_visibleIndexes[rowIndex]];
-                            // final isEven = rowIndex % 2 == 0;
-                            final isSelected = rowIndex == _selectedIndex;
-                            return Material(
-                              // borderRadius: rowIndex == 0
-                              //     ? const BorderRadius.only(
-                              //         topLeft: Radius.circular(15),
-                              //         topRight: Radius.circular(15),
-                              //       )
-                              //     : rowIndex == _visibleIndexes.length - 1
-                              //     ? const BorderRadius.only(
-                              //         bottomLeft: Radius.circular(15),
-                              //         bottomRight: Radius.circular(15),
-                              //       )
-                              //     : null,
-                              color: Colors.white,
-                              child: Column(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      color: isSelected
-                                          ? Colors.blue.shade100
-                                          : Colors.white,
-                                      child: InkWell(
-                                        onTap: () => _selectItem(item),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              for (
-                                                var i = 0;
-                                                i < _effectiveKeys.length;
-                                                i++
-                                              )
-                                                Expanded(
-                                                  flex:
-                                                      (i <
-                                                              widget
-                                                                  .flexList
-                                                                  .length &&
-                                                          widget.flexList[i] >
-                                                              0)
-                                                      ? widget.flexList[i]
-                                                      : 1,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          right: 12,
-                                                        ),
-                                                    child: Text(
-                                                      item[_effectiveKeys[i]]
-                                                              ?.toString() ??
-                                                          '-',
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: const TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
+                        child: Column(
+                          children: [
+                            widget.headerKeys.length == _effectiveKeys.length &&
+                                    widget.headerKeys.isNotEmpty
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade700,
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          for (
+                                            var i = 0;
+                                            i < _effectiveKeys.length;
+                                            i++
+                                          )
+                                            Expanded(
+                                              flex:
+                                                  (i < widget.flexList.length &&
+                                                      widget.flexList[i] > 0)
+                                                  ? widget.flexList[i]
+                                                  : 1,
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                  right: 12,
+                                                ),
+                                                child: Text(
+                                                  widget.headerKeys[i]
+                                                      .toString(),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
-                                            ],
-                                          ),
-                                        ),
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                     ),
-                                  ),
-                                  const Divider(),
-                                ],
+                                  )
+                                : const SizedBox(),
+                            Expanded(
+                              child: ListView.builder(
+                                controller: _scrollController,
+                                itemCount: _visibleIndexes.length,
+                                itemExtent: 52,
+                                itemBuilder: (context, rowIndex) {
+                                  final item =
+                                      _items[_visibleIndexes[rowIndex]];
+                                  // final isEven = rowIndex % 2 == 0;
+                                  final isSelected = rowIndex == _selectedIndex;
+                                  return Material(
+                                    // borderRadius: rowIndex == 0
+                                    //     ? const BorderRadius.only(
+                                    //         topLeft: Radius.circular(15),
+                                    //         topRight: Radius.circular(15),
+                                    //       )
+                                    //     : rowIndex == _visibleIndexes.length - 1
+                                    //     ? const BorderRadius.only(
+                                    //         bottomLeft: Radius.circular(15),
+                                    //         bottomRight: Radius.circular(15),
+                                    //       )
+                                    //     : null,
+                                    color: Colors.white,
+                                    child: Column(
+                                      children: [
+                                        Expanded(
+                                          child: Container(
+                                            color: isSelected
+                                                ? Colors.blue.shade100
+                                                : Colors.white,
+                                            child: InkWell(
+                                              onTap: () => _selectItem(item),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                    ),
+                                                child: Row(
+                                                  children: [
+                                                    for (
+                                                      var i = 0;
+                                                      i < _effectiveKeys.length;
+                                                      i++
+                                                    )
+                                                      Expanded(
+                                                        flex:
+                                                            (i <
+                                                                    widget
+                                                                        .flexList
+                                                                        .length &&
+                                                                widget.flexList[i] >
+                                                                    0)
+                                                            ? widget.flexList[i]
+                                                            : 1,
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets.only(
+                                                                right: 12,
+                                                              ),
+                                                          child: Text(
+                                                            item[_effectiveKeys[i]]
+                                                                    ?.toString() ??
+                                                                '-',
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const Divider(),
+                                      ],
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
+                            ),
+                          ],
                         ),
                       ),
               ),

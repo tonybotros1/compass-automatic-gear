@@ -31,6 +31,7 @@ class ApInvoicesController extends GetxController {
   TextEditingController invoiceNumber = TextEditingController();
   TextEditingController vat = TextEditingController();
   TextEditingController receivedNumber = TextEditingController();
+  RxString receivedNumberId = RxString('');
   TextEditingController amount = TextEditingController();
   TextEditingController transactionType = TextEditingController();
   TextEditingController invoiceNote = TextEditingController();
@@ -199,6 +200,42 @@ class ApInvoicesController extends GetxController {
     for (var element in allInvoices.where((inv) => inv.isDeleted != true)) {
       calculatedAmountForInvoiceItems.value += element.amount;
       calculatedVatForInvoiceItems.value += element.vat;
+    }
+  }
+
+  Future<Map<String, dynamic>> getReceivedNumbersList() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendUrl/ap_invoices/get_received_number_list');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decode = jsonDecode(response.body);
+        List<dynamic> jsonData = decode['received'];
+        Map<String, dynamic> map = {
+          for (var model in jsonData) model['_id']: model,
+        };
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getReceivedNumbersList();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
     }
   }
 
@@ -706,6 +743,7 @@ class ApInvoicesController extends GetxController {
         note: invoiceNote.text,
         transactionType: transactionTypeId.value,
         receivedNumber: receivedNumber.text,
+        receivedNumberId: receivedNumberId.value,
         vat: double.tryParse(vat.text) ?? 0,
         apInvoiceId: currentApInvoiceId.value,
         transactionTypeName: transactionType.text,
@@ -732,6 +770,7 @@ class ApInvoicesController extends GetxController {
         note: invoiceNote.text,
         transactionType: transactionTypeId.value,
         receivedNumber: receivedNumber.text,
+        receivedNumberId: receivedNumberId.value,
         vat: double.tryParse(vat.text) ?? 0,
         apInvoiceId: currentApInvoiceId.value,
         transactionTypeName: transactionType.text,
