@@ -157,7 +157,7 @@ class CountriesController extends GetxController {
       request.fields["currency_name"] = currencyName.text;
       request.fields["currency_code"] = currencyCode.text;
       request.fields["subunit_name"] = subunitName.text;
-      request.fields["subuinit_code"] = subunitCode.text;
+      request.fields["subunit_code"] = subunitCode.text;
       request.fields["vat"] = vat.text;
       request.fields["currency_code"] = currencyCode.text;
       if (imageBytes.value.isNotEmpty) {
