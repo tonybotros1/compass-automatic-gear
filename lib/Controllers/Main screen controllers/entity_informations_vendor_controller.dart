@@ -100,34 +100,61 @@ class EntityInformationsVendorController extends GetxController {
 
   void connectWebSocket() {
     ws.events.listen((message) {
-      switch (message["type"]) {
-        case "entity_created_vendor":
-          final newCounter = EntityInformationModel.fromJson(message["data"]);
-          allEntities.add(newCounter);
-          break;
+      try {
+        final type = message["type"];
+        final data = message["data"];
 
-        case "entity_status_updated":
-          final entityId = message["data"]['_id'];
-          final entityStatus = message["data"]['status'];
-          final index = allEntities.indexWhere((m) => m.id == entityId);
-          if (index != -1) {
-            allEntities[index].status = entityStatus;
-            allEntities.refresh();
-          }
-          break;
+        if (type == null || data == null || data is! Map) return;
 
-        case "entity_updated_vendor":
-          final updated = EntityInformationModel.fromJson(message["data"]);
-          final index = allEntities.indexWhere((m) => m.id == updated.id);
-          if (index != -1) {
-            allEntities[index] = updated;
-          }
-          break;
+        switch (type) {
+          case "entity_created_vendor":
+            try {
+              final newEntity = EntityInformationModel.fromJson(
+                Map<String, dynamic>.from(data),
+              );
+              allEntities.add(newEntity);
+            } catch (_) {}
+            break;
 
-        case "entity_deleted":
-          final deletedId = message["data"]["_id"];
-          allEntities.removeWhere((m) => m.id == deletedId);
-          break;
+          case "entity_status_updated":
+            final entityId = data['_id']?.toString();
+            final entityStatus = data['status'];
+
+            if (entityId == null) return;
+
+            final index = allEntities.indexWhere((m) => m.id == entityId);
+
+            if (index != -1) {
+              allEntities[index].status = entityStatus;
+              allEntities.refresh();
+            }
+            break;
+
+          case "entity_updated_vendor":
+            try {
+              final updated = EntityInformationModel.fromJson(
+                Map<String, dynamic>.from(data),
+              );
+
+              final index = allEntities.indexWhere((m) => m.id == updated.id);
+
+              if (index != -1) {
+                allEntities[index] = updated;
+                allEntities.refresh();
+              }
+            } catch (_) {}
+            break;
+
+          case "entity_deleted":
+            final deletedId = data["_id"]?.toString();
+
+            if (deletedId == null) return;
+
+            allEntities.removeWhere((m) => m.id == deletedId);
+            break;
+        }
+      } catch (_) {
+        // 🔇 ignore ANY unexpected error (no crash)
       }
     });
   }
