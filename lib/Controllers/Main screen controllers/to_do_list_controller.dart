@@ -56,6 +56,7 @@ class ToDoListController extends GetxController {
   StreamSubscription<Map<String, dynamic>>? _wsSub;
   MainScreenController mainScreenController = Get.find<MainScreenController>();
   RxString userId = RxString('');
+  RxString companyId = RxString('');
   Rx<Uint8List?> fileBytes = Rx<Uint8List?>(null);
   RxString fileType = RxString('');
   RxString fileName = RxString('');
@@ -89,12 +90,14 @@ class ToDoListController extends GetxController {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     userId.value = (prefs.getString('userId') ?? '').trim();
+    companyId.value = (prefs.getString('companyId') ?? '').trim();
   }
 
   void initSocket(String userId) {
     final normalizedUserId = userId.trim();
-    if (normalizedUserId.isNotEmpty) {
-      ws.connect(normalizedUserId);
+    final normalizedCompanyId = companyId.trim();
+    if (normalizedUserId.isNotEmpty && normalizedCompanyId.isNotEmpty) {
+      ws.connect(normalizedUserId, normalizedCompanyId);
     }
 
     _wsSub?.cancel();

@@ -25,73 +25,69 @@ Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
                     Row(
                       spacing: 10,
                       children: [
-                        Expanded(
-                          flex: 3,
-                          child: MenuWithValues(
-                            focusNode: controller.focusNodePayementHeader1,
-                            nextFocusNode: controller.focusNodePayementHeader2,
-                            labelText: 'Invoice Type',
-                            headerLqabel: 'Invoice Types',
-                            dialogWidth: constraints.maxWidth / 3,
-                            dialogHeight: 400,
-                            controller: controller.invoiceType,
-                            displayKeys: const ['name'],
-                            displaySelectedKeys: const ['name'],
-                            onSelected: (value) {
-                              controller.invoiceTypeId.value = value['_id'];
-                              controller.invoiceType.text = value['name'];
-                              controller.isInvoiceModified.value = true;
-                            },
-                            onOpen: () {
-                              return controller.getInvoiceTypes();
-                            },
-                            onDelete: () {
-                              controller.invoiceTypeId.value = '';
-                              controller.invoiceType.clear();
-                              controller.isInvoiceModified.value = true;
-                            },
-                          ),
+                        // Expanded(
+                        //   flex: 3,
+                        //   child: MenuWithValues(
+                        //     focusNode: controller.focusNodePayementHeader1,
+                        //     nextFocusNode: controller.focusNodePayementHeader2,
+                        //     labelText: 'Invoice Type',
+                        //     headerLqabel: 'Invoice Types',
+                        //     dialogWidth: constraints.maxWidth / 3,
+                        //     dialogHeight: 400,
+                        //     controller: controller.invoiceType,
+                        //     displayKeys: const ['name'],
+                        //     displaySelectedKeys: const ['name'],
+                        //     onSelected: (value) {
+                        //       controller.invoiceTypeId.value = value['_id'];
+                        //       controller.invoiceType.text = value['name'];
+                        //       controller.isInvoiceModified.value = true;
+                        //     },
+                        //     onOpen: () {
+                        //       return controller.getInvoiceTypes();
+                        //     },
+                        //     onDelete: () {
+                        //       controller.invoiceTypeId.value = '';
+                        //       controller.invoiceType.clear();
+                        //       controller.isInvoiceModified.value = true;
+                        //     },
+                        //   ),
+                        // ),
+                        myTextFormFieldWithBorder(
+                          width: 200,
+                          controller: controller.referenceNumber,
+                          isEnabled: false,
+                          labelText: 'Reference NO.',
+                          onChanged: (_) {
+                            controller.isInvoiceModified.value = true;
+                          },
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: myTextFormFieldWithBorder(
-                            controller: controller.referenceNumber,
-                            isEnabled: false,
-                            labelText: 'Reference NO.',
-                            onChanged: (_) {
+                        myTextFormFieldWithBorder(
+                          width: 200,
+                          focusNode: controller.focusNodePayementHeader2,
+                          nextFocusNode: controller.focusNodePayementHeader3,
+                          isDate: true,
+                          suffixIcon: IconButton(
+                            focusNode: FocusNode(skipTraversal: true),
+                            onPressed: () {
                               controller.isInvoiceModified.value = true;
-                            },
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: myTextFormFieldWithBorder(
-                            focusNode: controller.focusNodePayementHeader2,
-                            nextFocusNode: controller.focusNodePayementHeader3,
-                            isDate: true,
-                            suffixIcon: IconButton(
-                              focusNode: FocusNode(skipTraversal: true),
-                              onPressed: () {
-                                controller.isInvoiceModified.value = true;
-                                selectDateContext(
-                                  context,
-                                  controller.transactionDate,
-                                );
-                              },
-                              icon: const Icon(Icons.date_range),
-                            ),
-                            controller: controller.transactionDate,
-                            onFieldSubmitted: (_) {
-                              normalizeDate(
-                                controller.transactionDate.text,
+                              selectDateContext(
+                                context,
                                 controller.transactionDate,
                               );
                             },
-                            onChanged: (_) {
-                              controller.isInvoiceModified.value = true;
-                            },
-                            labelText: 'Transaction Date',
+                            icon: const Icon(Icons.date_range),
                           ),
+                          controller: controller.transactionDate,
+                          onFieldSubmitted: (_) {
+                            normalizeDate(
+                              controller.transactionDate.text,
+                              controller.transactionDate,
+                            );
+                          },
+                          onChanged: (_) {
+                            controller.isInvoiceModified.value = true;
+                          },
+                          labelText: 'Transaction Date',
                         ),
                         const Expanded(flex: 5, child: SizedBox()),
                       ],
@@ -99,54 +95,49 @@ Widget paymentHeader(BuildContext context, BoxConstraints constraints) {
                     Row(
                       spacing: 10,
                       children: [
-                        Expanded(
-                          flex: 3,
-                          child: myTextFormFieldWithBorder(
-                            focusNode: controller.focusNodePayementHeader3,
-                            nextFocusNode: controller.focusNodePayementHeader4,
-                            onEditingComplete: () {
-                              FocusScope.of(
-                                context,
-                              ).requestFocus(controller.focusNode5);
-                            },
-                            textInputAction: TextInputAction.next,
-                            labelText: 'Invoice Number',
-                            controller: controller.invoiceNumber,
-                            onChanged: (_) {
-                              controller.isInvoiceModified.value = true;
-                            },
-                          ),
+                        myTextFormFieldWithBorder(
+                          width: 200,
+                          focusNode: controller.focusNodePayementHeader3,
+                          nextFocusNode: controller.focusNodePayementHeader4,
+                          onEditingComplete: () {
+                            FocusScope.of(
+                              context,
+                            ).requestFocus(controller.focusNode5);
+                          },
+                          textInputAction: TextInputAction.next,
+                          labelText: 'Invoice Number',
+                          controller: controller.invoiceNumber,
+                          onChanged: (_) {
+                            controller.isInvoiceModified.value = true;
+                          },
                         ),
-                        Expanded(
-                          flex: 3,
-                          child: myTextFormFieldWithBorder(
-                            focusNode: controller.focusNodePayementHeader4,
-                            nextFocusNode: controller.focusNodePayementHeader5,
-
-                            onChanged: (_) {
+                        myTextFormFieldWithBorder(
+                          width: 200,
+                          focusNode: controller.focusNodePayementHeader4,
+                          nextFocusNode: controller.focusNodePayementHeader5,
+                          onChanged: (_) {
+                            controller.isInvoiceModified.value = true;
+                          },
+                          isDate: true,
+                          suffixIcon: IconButton(
+                            focusNode: FocusNode(skipTraversal: true),
+                            onPressed: () {
                               controller.isInvoiceModified.value = true;
-                            },
-                            isDate: true,
-                            suffixIcon: IconButton(
-                              focusNode: FocusNode(skipTraversal: true),
-                              onPressed: () {
-                                controller.isInvoiceModified.value = true;
-                                selectDateContext(
-                                  context,
-                                  controller.invoiceDate,
-                                );
-                              },
-                              icon: const Icon(Icons.date_range),
-                            ),
-                            controller: controller.invoiceDate,
-                            onFieldSubmitted: (_) {
-                              normalizeDate(
-                                controller.invoiceDate.text,
+                              selectDateContext(
+                                context,
                                 controller.invoiceDate,
                               );
                             },
-                            labelText: 'Invoice Date',
+                            icon: const Icon(Icons.date_range),
                           ),
+                          controller: controller.invoiceDate,
+                          onFieldSubmitted: (_) {
+                            normalizeDate(
+                              controller.invoiceDate.text,
+                              controller.invoiceDate,
+                            );
+                          },
+                          labelText: 'Invoice Date',
                         ),
                         const SizedBox(),
                         const Expanded(flex: 7, child: SizedBox()),

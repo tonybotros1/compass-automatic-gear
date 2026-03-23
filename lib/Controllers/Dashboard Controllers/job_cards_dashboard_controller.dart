@@ -389,13 +389,17 @@ class JobCardsDashboardController extends GetxController {
       Uri url = Uri.parse(
         '$backendUrl/job_cards_dashboard/get_job_cards_daily_summary',
       );
+      Map data = {'from_date': fromDate, 'to_date': toDate};
+      if (dateType == 'month') {
+        data['type'] = 'month';
+      }
       final response = await http.post(
         url,
         headers: {
           'Authorization': 'Bearer $accessToken',
           "Content-Type": "application/json",
         },
-        body: jsonEncode({'from_date': fromDate, 'to_date': toDate}),
+        body: jsonEncode(data),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);

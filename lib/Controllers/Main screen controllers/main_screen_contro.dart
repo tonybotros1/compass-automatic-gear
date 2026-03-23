@@ -50,6 +50,7 @@ import '../../consts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../helpers.dart';
+import '../../main.dart';
 import 'websocket_controller.dart';
 
 class MainScreenController extends GetxController {
@@ -102,8 +103,10 @@ class MainScreenController extends GetxController {
   Future<void> ensureWebSocketConnected() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userId')?.trim() ?? '';
+    final companyId = globalPrefs?.getString('companyId')?.trim() ?? '';
+
     if (userId.isNotEmpty) {
-      ws.connect(userId);
+      ws.connect(userId, companyId);
     }
   }
 

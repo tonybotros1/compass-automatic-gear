@@ -78,7 +78,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.jobCounts?.toString() ?? '0',
+          text: data.totalPosted?.toString() ?? '0',
           formatDouble: false,
         ),
       ),

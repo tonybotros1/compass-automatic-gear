@@ -13,9 +13,11 @@ class WebSocketService extends GetxService {
   Stream<Map<String, dynamic>> get events => _events.stream;
   String? _userId;
   bool manualClose = false;
-  void connect(String? userId) {
+  void connect(String? userId, String? companyId) {
     final normalizedUserId = (userId ?? '').trim();
-    if (normalizedUserId.isEmpty) return;
+      final normalizedCompanyId = (companyId ?? '').trim();
+
+    if (normalizedUserId.isEmpty || normalizedCompanyId.isEmpty) return;
 
     if (channel != null && _userId == normalizedUserId) return;
 
@@ -28,7 +30,7 @@ class WebSocketService extends GetxService {
     try {
       manualClose = false;
       channel = WebSocketChannel.connect(
-        Uri.parse('$webSocketURL/$normalizedUserId'),
+        Uri.parse('$webSocketURL/$normalizedCompanyId/$normalizedUserId'),
       );
 
       channel!.stream.listen(
@@ -73,7 +75,7 @@ class WebSocketService extends GetxService {
           if (manualClose || _userId == null || _userId!.isEmpty) return;
           Future.delayed(const Duration(seconds: 2), () {
             if (channel == null && _userId != null && _userId!.isNotEmpty) {
-              connect(_userId);
+              connect(_userId,companyId);
             }
           }); // 🔁 auto reconnect
         },
@@ -83,7 +85,7 @@ class WebSocketService extends GetxService {
           if (manualClose || _userId == null || _userId!.isEmpty) return;
           Future.delayed(const Duration(seconds: 2), () {
             if (channel == null && _userId != null && _userId!.isNotEmpty) {
-              connect(_userId);
+              connect(_userId,companyId);
             }
           }); // 🔁 auto reconnect
         },
@@ -92,7 +94,7 @@ class WebSocketService extends GetxService {
       channel = null;
       Future.delayed(const Duration(seconds: 3), () {
         if (channel == null && _userId != null && _userId!.isNotEmpty) {
-          connect(_userId);
+          connect(_userId,companyId);
         }
       }); // Retry after short delay
     }

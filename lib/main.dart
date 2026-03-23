@@ -30,8 +30,10 @@ void main() async {
 
   final ws = Get.put(WebSocketService(), permanent: true);
   final savedUserId = globalPrefs?.getString('userId')?.trim() ?? '';
-  if (savedUserId.isNotEmpty) {
-    ws.connect(savedUserId);
+  final companyId = globalPrefs?.getString('companyId')?.trim() ?? '';
+
+  if (savedUserId.isNotEmpty && companyId.isNotEmpty) {
+    ws.connect(savedUserId, companyId);
   }
   runApp(const MyApp());
 }

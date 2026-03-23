@@ -46,30 +46,30 @@ class ApInvoices extends StatelessWidget {
                                   spacing: 10,
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    MenuWithValues(
-                                      labelText: 'Invoice Type',
-                                      headerLqabel: 'Invoice Types',
-                                      dialogWidth: constraints.maxWidth / 3,
-                                      width: 150,
-                                      dialogHeight: 300,
-                                      controller: controller.invoiceTypeFilter,
-                                      displayKeys: const ['name'],
-                                      displaySelectedKeys: const ['name'],
-                                      onOpen: () {
-                                        return controller.getInvoiceTypes();
-                                      },
-                                      onDelete: () {
-                                        controller.invoiceTypeFilter.clear();
-                                        controller.invoiceTypeFilterId.value =
-                                            '';
-                                      },
-                                      onSelected: (value) {
-                                        controller.invoiceTypeFilter.text =
-                                            value['name'];
-                                        controller.invoiceTypeFilterId.value =
-                                            value['_id'];
-                                      },
-                                    ),
+                                    // MenuWithValues(
+                                    //   labelText: 'Invoice Type',
+                                    //   headerLqabel: 'Invoice Types',
+                                    //   dialogWidth: constraints.maxWidth / 3,
+                                    //   width: 200,
+                                    //   dialogHeight: 300,
+                                    //   controller: controller.invoiceTypeFilter,
+                                    //   displayKeys: const ['name'],
+                                    //   displaySelectedKeys: const ['name'],
+                                    //   onOpen: () {
+                                    //     return controller.getInvoiceTypes();
+                                    //   },
+                                    //   onDelete: () {
+                                    //     controller.invoiceTypeFilter.clear();
+                                    //     controller.invoiceTypeFilterId.value =
+                                    //         '';
+                                    //   },
+                                    //   onSelected: (value) {
+                                    //     controller.invoiceTypeFilter.text =
+                                    //         value['name'];
+                                    //     controller.invoiceTypeFilterId.value =
+                                    //         value['_id'];
+                                    //   },
+                                    // ),
 
                                     myTextFormFieldWithBorder(
                                       width: 150,
@@ -365,11 +365,11 @@ Widget tableOfScreens({
       lmRatio: 2.5,
       columns: [
         const DataColumn2(size: ColumnSize.S, label: SizedBox()),
-        DataColumn2(
-          size: ColumnSize.M,
-          label: AutoSizedText(text: 'Invoice Type', constraints: constraints),
-          // onSort: controller.onSort,
-        ),
+        // DataColumn2(
+        //   size: ColumnSize.M,
+        //   label: AutoSizedText(text: 'Invoice Type', constraints: constraints),
+        //   // onSort: controller.onSort,
+        // ),
         DataColumn2(
           size: ColumnSize.M,
           label: AutoSizedText(text: 'Status', constraints: constraints),
@@ -458,7 +458,7 @@ DataRow dataRowForTheTable(
           ],
         ),
       ),
-      DataCell(textForDataRowInTable(text: typeData.invoiceTypeName ?? '')),
+      // DataCell(textForDataRowInTable(text: typeData.invoiceTypeName ?? '')),
       DataCell(
         statusBox(
           typeData.status ?? '',
