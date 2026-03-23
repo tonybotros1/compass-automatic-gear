@@ -233,14 +233,7 @@ Widget tableOfScreens({
         label: AutoSizedText(text: 'Type', constraints: constraints),
         onSort: controller.onSort,
       ),
-      DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(
-          text: 'Customer / Vendor',
-          constraints: constraints,
-        ),
-        onSort: controller.onSort,
-      ),
+
       DataColumn2(
         size: ColumnSize.M,
         label: AutoSizedText(text: 'Country', constraints: constraints),
@@ -314,13 +307,7 @@ DataRow dataRowForTheTable(
           text: entityData.entityStatus ?? '',
         ),
       ),
-      DataCell(
-        textForDataRowInTable(
-          maxWidth: null,
-          formatDouble: false,
-          text: entityData.entityCode!.map((i) => i).toString(),
-        ),
-      ),
+
       DataCell(
         textForDataRowInTable(
           maxWidth: null,

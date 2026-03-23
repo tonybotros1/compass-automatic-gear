@@ -1,0 +1,595 @@
+import 'package:data_table_2/data_table_2.dart';
+import 'package:datahubai/Models/entity%20information/entity_information_model.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:get/get.dart';
+import '../../../../Controllers/Main screen controllers/entity_informations_vendor_controller.dart';
+import '../../../../Models/dynamic_boxes_line_model.dart';
+import '../../../../Widgets/dynamic_boxes_line.dart';
+import '../../../../Widgets/main screen widgets/entity_informations_vendor_widgets/add_new_entity_or_edit.dart';
+import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/menu_dialog.dart';
+import '../../../../Widgets/my_text_field.dart';
+import '../../../../Widgets/text_button.dart';
+import '../../../../consts.dart';
+
+class EntityInformationsVendors extends StatelessWidget {
+  const EntityInformationsVendors({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Padding(
+            padding: screenPadding,
+            child: SizedBox(
+              width: constraints.maxWidth,
+
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    GetX<EntityInformationsVendorController>(
+                      init: EntityInformationsVendorController(),
+                      builder: (controller) {
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minWidth: constraints.maxWidth - 28,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    myTextFormFieldWithBorder(
+                                      width: 300,
+                                      labelText: 'Name',
+                                      controller: controller.entityNameFilter,
+                                    ),
+                                    MenuWithValues(
+                                      labelText: 'Country',
+                                      headerLqabel: 'Countries',
+                                      dialogWidth: constraints.maxWidth / 3,
+                                      width: 200,
+                                      controller: controller.countryFilter,
+                                      displayKeys: const ['name'],
+                                      displaySelectedKeys: const ['name'],
+                                      onOpen: () {
+                                        return controller.getCountries();
+                                      },
+                                      onDelete: () {
+                                        controller.countryFilterId.value = '';
+                                        controller.countryFilter.clear();
+                                        controller.cityFilterId.value = '';
+                                        controller.cityFilter.text = '';
+                                      },
+                                      onSelected: (value) async {
+                                        // controller.getModelsByCarBrand(key);
+                                        controller.countryFilterId.value =
+                                            value['_id'];
+                                        controller.countryFilter.text =
+                                            value['name'];
+                                        controller.cityFilterId.value = '';
+                                        controller.cityFilter.text = '';
+                                      },
+                                    ),
+
+                                    MenuWithValues(
+                                      labelText: 'City',
+                                      headerLqabel: 'Cities',
+                                      dialogWidth: constraints.maxWidth / 3,
+                                      width: 200,
+                                      controller: controller.cityFilter,
+                                      displayKeys: const ['name'],
+                                      displaySelectedKeys: const ['name'],
+                                      onOpen: () {
+                                        return controller.getCitiesByCountryID(
+                                          controller.countryFilterId.value,
+                                        );
+                                      },
+                                      onDelete: () {
+                                        controller.cityFilterId.value = '';
+                                        controller.cityFilter.text = '';
+                                      },
+                                      onSelected: (value) async {
+                                        // controller.getModelsByCarBrand(key);
+                                        controller.cityFilterId.value =
+                                            value['_id'];
+                                        controller.cityFilter.text =
+                                            value['name'];
+                                      },
+                                    ),
+
+                                    myTextFormFieldWithBorder(
+                                      width: 200,
+                                      labelText: 'Phone Number',
+                                      controller: controller.phoneNumberFilter,
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  spacing: 10,
+                                  children: [
+                                    ElevatedButton(
+                                      style: findButtonStyle,
+                                      onPressed:
+                                          controller.isScreenLoding.isFalse
+                                          ? () async {
+                                              controller.filterSearch();
+                                            }
+                                          : null,
+                                      child: controller.isScreenLoding.isFalse
+                                          ? Text(
+                                              'Find',
+                                              style:
+                                                  fontStyleForElevatedButtons,
+                                            )
+                                          : loadingProcess,
+                                    ),
+                                    newContactButton(
+                                      context,
+                                      constraints,
+                                      controller,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: GetX<EntityInformationsVendorController>(
+                        builder: (controller) {
+                          return SizedBox(
+                            height: 100,
+                            child: dynamicBoxesLine(
+                              dynamicConfigs: [
+                                DynamicBoxesLineModel(
+                                  isFormated: false,
+                                  width: 300,
+                                  label: 'NUMBER OF ENTITIES',
+                                  value: '${controller.countOfEntities.value}',
+                                  valueColor: mainColor,
+                                  icon: counterIcon,
+                                  iconColor: mainColorWithAlpha,
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    GetX<EntityInformationsVendorController>(
+                      builder: (controller) {
+                        return Container(
+                          // padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(15),
+                              bottomRight: Radius.circular(15),
+                              topLeft: Radius.circular(2),
+                              topRight: Radius.circular(2),
+                            ),
+                          ),
+                          child: SizedBox(
+                            width: constraints.maxWidth,
+                            height: constraints.maxHeight * 0.8,
+
+                            // constraints.maxHeight -
+                            // (constraints.maxHeight / 7),
+                            child: tableOfScreens(
+                              constraints: constraints,
+                              context: context,
+                              controller: controller,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+Widget tableOfScreens({
+  required BoxConstraints constraints,
+  required BuildContext context,
+  required EntityInformationsVendorController controller,
+}) {
+  return PaginatedDataTable2(
+    border: TableBorder.symmetric(
+      inside: BorderSide(color: Colors.grey.shade200, width: 0.5),
+    ),
+    lmRatio: 3,
+    autoRowsToHeight: true,
+    horizontalMargin: horizontalMarginForTable,
+    columnSpacing: 5,
+    showFirstLastButtons: true,
+    sortColumnIndex: controller.sortColumnIndex.value,
+    sortAscending: controller.isAscending.value,
+    columns: [
+      const DataColumn(label: Text('')),
+      DataColumn2(
+        size: ColumnSize.L,
+        label: AutoSizedText(text: 'Name', constraints: constraints),
+        onSort: controller.onSort,
+      ),
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(text: 'Type', constraints: constraints),
+        onSort: controller.onSort,
+      ),
+
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(text: 'Country', constraints: constraints),
+        onSort: controller.onSort,
+      ),
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(text: 'City', constraints: constraints),
+        onSort: controller.onSort,
+      ),
+
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(text: 'Contact Person', constraints: constraints),
+      ),
+      DataColumn2(
+        size: ColumnSize.L,
+        label: AutoSizedText(text: 'Phone', constraints: constraints),
+      ),
+    ],
+    source: CardDataSource(
+      cards: controller.allEntities.isEmpty ? [] : controller.allEntities,
+      context: context,
+      constraints: constraints,
+      controller: controller,
+    ),
+  );
+}
+
+DataRow dataRowForTheTable(
+  EntityInformationModel entityData,
+  BuildContext context,
+  BoxConstraints constraints,
+  String entityId,
+  EntityInformationsVendorController controller,
+  int index,
+) {
+  final addresses = entityData.entityAddress;
+  final isEvenRow = index % 2 == 0;
+
+  return DataRow(
+    color: WidgetStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(WidgetState.selected)) {
+        return Colors.grey.shade400;
+      }
+      return isEvenRow ? Colors.white : Colors.grey.shade100;
+    }),
+    cells: [
+      DataCell(
+        Row(
+          spacing: 5,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            deleteSection(controller, entityId, context),
+            editSection(context, entityData, constraints, entityId),
+            activeInActiveSection(controller, entityData, entityId),
+          ],
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: null,
+          formatDouble: false,
+          text: entityData.entityName ?? '',
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: null,
+          formatDouble: false,
+          text: entityData.entityStatus ?? '',
+        ),
+      ),
+
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: null,
+          formatDouble: false,
+          text: (addresses != null && addresses.isNotEmpty)
+              ? addresses
+                    .where((address) => address.isPrimary == true)
+                    .map((address) => address.country ?? '')
+                    .first
+                    .toString()
+              : "",
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: null,
+          formatDouble: false,
+          text: (addresses != null && addresses.isNotEmpty)
+              ? addresses
+                    .where((address) => address.isPrimary == true)
+                    .map((address) => address.city ?? '')
+                    .first
+                    .toString()
+              : "",
+        ),
+      ),
+
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: 300,
+          formatDouble: false,
+          text: entityData.entityPhone!
+              .map((phoneData) => phoneData.name ?? '')
+              .take(2)
+              .join('/'),
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          maxWidth: 300,
+          formatDouble: false,
+          text: entityData.entityPhone!
+              .map((phoneData) => phoneData.number ?? '')
+              .take(2)
+              .join('/'),
+        ),
+      ),
+    ],
+  );
+}
+
+IconButton activeInActiveSection(
+  EntityInformationsVendorController controller,
+  EntityInformationModel entityData,
+  String entityId,
+) {
+  return IconButton(
+    tooltip: entityData.status == true ? 'Inactive' : 'Active',
+    onPressed: () {
+      bool status;
+      entityData.status == false ? status = true : status = false;
+
+      controller.changeEntityStatus(entityId, status);
+    },
+    icon: entityData.status == true ? activeIcon : inActiveIcon,
+  );
+}
+
+IconButton deleteSection(
+  EntityInformationsVendorController controller,
+  entityId,
+  context,
+) {
+  return IconButton(
+    tooltip: 'Delete',
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The entity will be deleted permanently",
+        onPressed: () {
+          controller.deleteEntity(entityId);
+        },
+      );
+    },
+    icon: deleteIcon,
+  );
+}
+
+Widget editSection(
+  BuildContext context,
+  EntityInformationModel entityData,
+  BoxConstraints constraints,
+  String entityId,
+) {
+  return GetX<EntityInformationsVendorController>(
+    builder: (controller) {
+      final isLoading = controller.buttonLoadingStates[entityId] ?? false;
+      return IconButton(
+        tooltip: 'Edit',
+        onPressed: () async {
+          controller.setButtonLoading(entityId, true);
+          await controller.loadEntityData(entityData);
+          controller.setButtonLoading(entityId, false);
+
+          Get.dialog(
+            barrierDismissible: false,
+            Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              insetPadding: const EdgeInsets.all(8),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        width: constraints.maxWidth,
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            topRight: Radius.circular(5),
+                          ),
+                          color: mainColor,
+                        ),
+                        child: Row(
+                          spacing: 10,
+                          children: [
+                            Text(
+                              controller.getScreenName(),
+                              style: fontStyleForScreenNameUsedInButtons,
+                            ),
+                            const Spacer(),
+                            GetX<EntityInformationsVendorController>(
+                              builder: (controller) {
+                                return ClickableHoverText(
+                                  onTap: controller.addingNewEntity.value
+                                      ? null
+                                      : () {
+                                          controller.updateEntity(entityId);
+                                        },
+                                  text:
+                                      controller.addingNewEntity.value == false
+                                      ? 'Save'
+                                      : '•••',
+                                );
+                              },
+                            ),
+                            separator(),
+                            closeIcon(),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: addNewVendorEntityOrEdit(
+                            controller: controller,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          );
+        },
+        icon: isLoading
+            ? const SpinKitDoubleBounce(color: Colors.grey, size: 20)
+            : editIcon,
+      );
+    },
+  );
+}
+
+ElevatedButton newContactButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  EntityInformationsVendorController controller,
+) {
+  return ElevatedButton(
+    onPressed: () {
+      controller.clearAllVariables();
+      Get.dialog(
+        barrierDismissible: false,
+        Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          insetPadding: const EdgeInsets.all(8),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    width: constraints.maxWidth,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(5),
+                        topRight: Radius.circular(5),
+                      ),
+                      color: mainColor,
+                    ),
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        Text(
+                          controller.getScreenName(),
+                          style: fontStyleForScreenNameUsedInButtons,
+                        ),
+                        const Spacer(),
+                        GetX<EntityInformationsVendorController>(
+                          builder: (controller) => ClickableHoverText(
+                            onTap: controller.addingNewEntity.value
+                                ? null
+                                : () async {
+                                    await controller.addNewEntity();
+                                  },
+                            text: controller.addingNewEntity.value == false
+                                ? 'Save'
+                                : '•••',
+                          ),
+                        ),
+                        separator(),
+                        closeIcon(),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: addNewVendorEntityOrEdit(controller: controller),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    },
+    style: newButtonStyle,
+    child: const Text('New Entity'),
+  );
+}
+
+class CardDataSource extends DataTableSource {
+  final List<EntityInformationModel> cards;
+  final BuildContext context;
+  final BoxConstraints constraints;
+  final EntityInformationsVendorController controller;
+
+  CardDataSource({
+    required this.cards,
+    required this.context,
+    required this.constraints,
+    required this.controller,
+  });
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= cards.length) return null;
+
+    final entityDate = cards[index];
+    final cardId = entityDate.id ?? '';
+
+    return dataRowForTheTable(
+      entityDate,
+      context,
+      constraints,
+      cardId,
+      controller,
+      index,
+    );
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => cards.length;
+
+  @override
+  int get selectedRowCount => 0;
+}

@@ -35,6 +35,7 @@ import '../../Screens/Main screens/System Administrator/Setup/cash_management_re
 import '../../Screens/Main screens/System Administrator/Setup/converters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/counters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
+import '../../Screens/Main screens/System Administrator/Setup/entity_informations_vendors.dart';
 import '../../Screens/Main screens/System Administrator/Setup/issue_items.dart';
 import '../../Screens/Main screens/System Administrator/Setup/quotation_card.dart';
 import '../../Screens/Main screens/System Administrator/Setup/receiving.dart';
@@ -246,6 +247,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: SystemVariables());
       case '/entityInformation':
         return const SizedBox(child: EntityInformations());
+      case '/entityInformationVendors':
+        return const SizedBox(child: EntityInformationsVendors());
       case '/salesMan':
         return const SizedBox(child: SalesMan());
       case '/counters':

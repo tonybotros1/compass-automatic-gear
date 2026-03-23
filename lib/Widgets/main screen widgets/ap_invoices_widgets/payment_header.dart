@@ -1,9 +1,8 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/ap_invoices_controller.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/entity_informations_vendors.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../../consts.dart';
 import '../../menu_dialog.dart';
 
@@ -224,7 +223,7 @@ IconButton addNewEntityButton() {
                       spacing: 10,
                       children: [
                         Text(
-                          'Entity Information',
+                          'Vendors',
                           style: fontStyleForScreenNameUsedInButtons,
                         ),
                         const Spacer(),
@@ -235,7 +234,7 @@ IconButton addNewEntityButton() {
                   const Expanded(
                     child: Padding(
                       padding: EdgeInsets.all(8),
-                      child: EntityInformations(),
+                      child: EntityInformationsVendors(),
                     ),
                   ),
                 ],

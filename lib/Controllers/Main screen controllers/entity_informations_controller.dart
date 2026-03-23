@@ -52,8 +52,8 @@ class EntityInformationsController extends GetxController {
   RxBool addingNewEntity = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
-  RxBool isVendorSelected = RxBool(false);
-  RxBool isCustomerSelected = RxBool(true);
+  // RxBool isVendorSelected = RxBool(false);
+  // RxBool isCustomerSelected = RxBool(true);
   RxBool isCompanySelected = RxBool(true);
   RxBool isIndividualSelected = RxBool(false);
   RxString logoUrl = RxString('');
@@ -101,7 +101,7 @@ class EntityInformationsController extends GetxController {
   void connectWebSocket() {
     ws.events.listen((message) {
       switch (message["type"]) {
-        case "entity_created":
+        case "entity_created_customer":
           final newCounter = EntityInformationModel.fromJson(message["data"]);
           allEntities.add(newCounter);
           break;
@@ -116,7 +116,7 @@ class EntityInformationsController extends GetxController {
           }
           break;
 
-        case "entity_updated":
+        case "entity_updated_customer":
           final updated = EntityInformationModel.fromJson(message["data"]);
           final index = allEntities.indexWhere((m) => m.id == updated.id);
           if (index != -1) {
@@ -167,6 +167,7 @@ class EntityInformationsController extends GetxController {
 
   void filterSearch() async {
     Map<String, dynamic> body = {};
+    body['code'] = 'Customer';
     if (countryFilterId.value.isNotEmpty) {
       body["country"] = countryFilterId.value;
     }
@@ -207,7 +208,7 @@ class EntityInformationsController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List entities = decoded['entities'];
-        countOfEntities.value =decoded['count']['grand_count'];
+        countOfEntities.value = decoded['count']['grand_count'];
         allEntities.assignAll(
           entities.map((ent) => EntityInformationModel.fromJson(ent)),
         );
@@ -228,39 +229,6 @@ class EntityInformationsController extends GetxController {
     }
   }
 
-  // Future<void> getEntities() async {
-  //   try {
-  //     isScreenLoding.value = true;
-  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //     var accessToken = '${prefs.getString('accessToken')}';
-  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-  //     Uri url = Uri.parse('$backendUrl/entity_information/get_all_entities');
-  //     final response = await http.get(
-  //       url,
-  //       headers: {'Authorization': 'Bearer $accessToken'},
-  //     );
-  //     if (response.statusCode == 200) {
-  //       final decoded = jsonDecode(response.body);
-  //       List entities = decoded['entities'];
-  //       allEntities.assignAll(
-  //         entities.map((ent) => EntityInformationModel.fromJson(ent)),
-  //       );
-  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
-  //       final refreshed = await helper.refreshAccessToken(refreshToken);
-  //       if (refreshed == RefreshResult.success) {
-  //         await getEntities();
-  //       } else if (refreshed == RefreshResult.invalidToken) {
-  //         logout();
-  //       }
-  //     } else if (response.statusCode == 401) {
-  //       logout();
-  //     }
-  //     isScreenLoding.value = false;
-  //   } catch (e) {
-  //     isScreenLoding.value = false;
-  //   }
-  // }
-
   Future<void> addNewEntity() async {
     try {
       addingNewEntity.value = true;
@@ -273,7 +241,7 @@ class EntityInformationsController extends GetxController {
       request.fields.addAll({
         "lpo_required": lpoReq.value.toString(),
         "entity_name": entityName.text.trim(),
-        "entity_code": entityCode.join(","),
+        "entity_code": 'Customer',
         "credit_limit": creditLimit.text.isEmpty
             ? '0'
             : creditLimit.text.trim(),
@@ -343,7 +311,7 @@ class EntityInformationsController extends GetxController {
       request.headers['Authorization'] = 'Bearer $accessToken';
       request.fields.addAll({
         "entity_name": entityName.text.trim(),
-        "entity_code": entityCode.join(","),
+        "entity_code": 'Customer',
         "credit_limit": creditLimit.text.isEmpty
             ? '0'
             : creditLimit.text.trim(),
@@ -478,12 +446,7 @@ class EntityInformationsController extends GetxController {
     trn.text = entityData.trn ?? '';
     warrantyDays.text = entityData.warrantyDays.toString();
 
-    isCustomerSelected.value =
-        entityData.entityCode?.contains('Customer') ?? false;
-    isVendorSelected.value = entityData.entityCode?.contains('Vendor') ?? false;
-
     // Updating entity-related fields
-    updateEntityCode(entityData.entityCode ?? []);
     updateEntityStatus(entityData.entityStatus ?? '');
 
     salesMAn.value.text = entityData.salesman ?? '';
@@ -509,7 +472,6 @@ class EntityInformationsController extends GetxController {
     lpoReq.value = false;
     warrantyDays.text = '0';
     entityCode.assign('Customer');
-    isVendorSelected.value = false;
     creditLimit.clear();
     salesMAn.value.clear();
     salesManId.value = '';
@@ -535,33 +497,6 @@ class EntityInformationsController extends GetxController {
 
   String formatPhrase(String phrase) {
     return phrase.replaceAll(' ', '_');
-  }
-
-  void selectVendor(bool value) {
-    isVendorSelected.value = value;
-    if (value == true) {
-      entityCode.add('Vendor');
-    } else {
-      entityCode.remove('Vendor');
-    }
-  }
-
-  void selectCustomer(bool value) {
-    isCustomerSelected.value = value;
-    if (value == true) {
-      entityCode.add('Customer');
-    } else {
-      entityCode.remove('Customer');
-    }
-  }
-
-  // this function is to set the entity code fro edit
-  void updateEntityCode(List entityCodes) {
-    isCustomerSelected.value = entityCodes.contains('Customer');
-    isVendorSelected.value = entityCodes.contains('Vendor');
-
-    entityCode.clear();
-    entityCode.addAll(entityCodes.toSet());
   }
 
   // this function is to set the entity status fro edit

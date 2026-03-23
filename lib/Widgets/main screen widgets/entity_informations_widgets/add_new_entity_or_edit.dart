@@ -48,48 +48,9 @@ Widget addNewEntityOrEdit({required EntityInformationsController controller}) {
                         child: Column(
                           children: [
                             labelContainer(
-                              lable: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      GetX<EntityInformationsController>(
-                                        builder: (controller) {
-                                          return CupertinoCheckbox(
-                                            checkColor: mainColor,
-                                            activeColor: Colors.white,
-                                            value: controller
-                                                .isCustomerSelected
-                                                .value,
-                                            onChanged: (value) {
-                                              controller.selectCustomer(value!);
-                                            },
-                                          );
-                                        },
-                                      ),
-                                      Text('Customer', style: fontStyle1),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      GetX<EntityInformationsController>(
-                                        builder: (controller) {
-                                          return CupertinoCheckbox(
-                                            checkColor: mainColor,
-                                            activeColor: Colors.white,
-                                            value: controller
-                                                .isVendorSelected
-                                                .value,
-                                            onChanged: (value) {
-                                              controller.selectVendor(value!);
-                                            },
-                                          );
-                                        },
-                                      ),
-                                      Text('Vendor', style: fontStyle1),
-                                    ],
-                                  ),
-                                ],
+                              lable: Text(
+                                'Main Information',
+                                style: fontStyle1,
                               ),
                             ),
                             customerSection(),

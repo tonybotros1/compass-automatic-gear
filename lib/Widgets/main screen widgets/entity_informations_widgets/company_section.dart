@@ -1,4 +1,5 @@
 import 'package:datahubai/Widgets/my_text_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/entity_informations_controller.dart';
@@ -11,13 +12,85 @@ Container companySection() {
     decoration: containerDecor,
     child: Column(
       children: [
-        GetBuilder<EntityInformationsController>(
-          builder: (controller) {
-            return myTextFormFieldWithBorder(
-              controller: controller.groupName,
-              labelText: 'Group Name',
-            );
-          },
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          spacing: 10,
+          children: [
+            GetBuilder<EntityInformationsController>(
+              builder: (controller) {
+                return myTextFormFieldWithBorder(
+                  width: 150,
+                  isDouble: true,
+                  obscureText: false,
+                  controller: controller.creditLimit,
+                  labelText: 'Credit Limit',
+                  validate: true,
+                );
+              },
+            ),
+            Expanded(
+              child: GetX<EntityInformationsController>(
+                builder: (controller) {
+                  return MenuWithValues(
+                    labelText: 'Salesman',
+                    headerLqabel: 'Salesmen',
+                    dialogWidth: 600,
+                    controller: controller.salesMAn.value,
+                    displayKeys: const ['name'],
+                    displaySelectedKeys: const ['name'],
+                    onOpen: () {
+                      return controller.getSalesMan();
+                    },
+                    onDelete: () {
+                      controller.salesMAn.value.clear();
+                      controller.salesManId.value = '';
+                    },
+                    onSelected: (value) async {
+                      controller.salesMAn.value.text = '${value['name']}';
+                      controller.salesManId.value = value['_id'];
+                    },
+                  );
+                },
+              ),
+            ),
+            GetBuilder<EntityInformationsController>(
+              builder: (controller) {
+                return myTextFormFieldWithBorder(
+                  width: 145,
+                  controller: controller.warrantyDays,
+                  isnumber: true,
+                  labelText: 'Warranty Days',
+                );
+              },
+            ),
+            GetBuilder<EntityInformationsController>(
+              builder: (controller) {
+                return Container(
+                  height: 35,
+                  width: 160,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.grey),
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CupertinoCheckbox(
+                          value: controller.lpoReq.value,
+                          onChanged: (value) {
+                            controller.lpoReq.value = value!;
+                          },
+                        ),
+                      ),
+                      Text('LPO Required', style: textFieldFontStyle),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         const SizedBox(height: 15),
         GetBuilder<EntityInformationsController>(

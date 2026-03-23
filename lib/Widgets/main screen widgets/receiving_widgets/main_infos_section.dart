@@ -1,9 +1,9 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/receiving_controller.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/entity_informations_vendors.dart';
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Screens/Main screens/System Administrator/Setup/branches.dart';
-import '../../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../../consts.dart';
 import '../../menu_dialog.dart';
 import 'add_new_value_for_screen_button.dart';
@@ -155,7 +155,7 @@ Widget mainInfosSection(
                   onPressed: () {
                     addNewValueToScreenButtonDialog(
                       screenName: '📞 Entity Information',
-                      widget: const EntityInformations(),
+                      widget: const EntityInformationsVendors(),
                     );
                   },
                   icon: const Icon(Icons.add_card),
