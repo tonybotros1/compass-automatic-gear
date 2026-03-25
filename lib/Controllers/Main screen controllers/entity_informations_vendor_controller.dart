@@ -235,7 +235,7 @@ class EntityInformationsVendorController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List entities = decoded['entities'];
-        countOfEntities.value = decoded['count']['grand_count'];
+        countOfEntities.value = decoded['count'];
         allEntities.assignAll(
           entities.map((ent) => EntityInformationModel.fromJson(ent)),
         );

@@ -14,6 +14,7 @@ Widget paymentHeader(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     width: double.infinity,
+    height: 280,
     child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Column(

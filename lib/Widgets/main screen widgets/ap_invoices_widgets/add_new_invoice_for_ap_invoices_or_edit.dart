@@ -42,25 +42,6 @@ Widget addNewinvoiceForApInvoicesOrEdit({
                     controller.transactionTypeId.value = value['_id'];
                   },
                 );
-                // CustomDropdown(
-                //   width: double.infinity,
-                //   focusNode: controller.focusNode1,
-                //   nextFocusNode: controller.focusNode2,
-                //   showedSelectedName: 'type',
-                //   textcontroller: controller.transactionType.text,
-                //   hintText: 'Transaction Type',
-                //   onChanged: (key, value) {
-                // controller.transactionType.text = value['type'];
-                // controller.transactionTypeId.value = key;
-                //   },
-                //   onDelete: () {
-                // controller.transactionType.clear();
-                // controller.transactionTypeId.value = '';
-                //   },
-                //   onOpen: () {
-                //     return controller.getTransactionTypes();
-                //   },
-                // );
               },
             ),
             MenuWithValues(
@@ -409,9 +390,9 @@ Future<dynamic> jobDialog(BoxConstraints constraints, BuildContext context) {
 
 DataRow dataRowForTheTable(
   JobCardModel jobData,
-  context,
-  constraints,
-  jobId,
+  BuildContext context,
+  BoxConstraints constraints,
+  String jobId,
   ApInvoicesController controller,
   int index,
 ) {

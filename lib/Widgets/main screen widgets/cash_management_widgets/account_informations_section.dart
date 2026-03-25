@@ -16,6 +16,7 @@ Widget accountInformations<T extends CashManagementBaseController>(
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     width: double.infinity,
+    height: 280,
     child: GetX<T>(
       builder: (controller) {
         return SingleChildScrollView(

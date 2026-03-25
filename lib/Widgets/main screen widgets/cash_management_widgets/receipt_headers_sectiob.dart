@@ -9,6 +9,7 @@ Widget receiptHeader(BuildContext context, BoxConstraints constraints) {
   return FocusTraversalGroup(
     child: Container(
       width: double.infinity,
+      height: 280,
       padding: const EdgeInsets.all(20),
       decoration: containerDecor,
       child: GetX<CashManagementReceiptsController>(

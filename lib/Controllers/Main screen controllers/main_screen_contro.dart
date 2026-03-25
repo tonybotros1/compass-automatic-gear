@@ -29,6 +29,7 @@ import '../../Screens/Main screens/System Administrator/Setup/AP_payment_type.da
 import '../../Screens/Main screens/System Administrator/Setup/account_transfers.dart';
 import '../../Screens/Main screens/System Administrator/Setup/ap_invoices.dart';
 import '../../Screens/Main screens/System Administrator/Setup/banks_and_others.dart';
+import '../../Screens/Main screens/System Administrator/Setup/batch_payment_process.dart';
 import '../../Screens/Main screens/System Administrator/Setup/branches.dart';
 import '../../Screens/Main screens/System Administrator/Setup/cash_management_payment.dart';
 import '../../Screens/Main screens/System Administrator/Setup/cash_management_receipts.dart';
@@ -311,7 +312,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: ToDoList());
       case '/accountTransfers':
         return const SizedBox(child: AccountTransfers());
-
+      case '/batchPaymentProcess':
+        return const SizedBox(child: BatchPaymentProcess());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }
