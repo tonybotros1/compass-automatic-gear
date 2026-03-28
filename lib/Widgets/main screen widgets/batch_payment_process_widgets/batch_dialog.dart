@@ -50,9 +50,9 @@ Future<dynamic> batchDialog({
                                   controller.getScreenName(),
                                   style: fontStyleForScreenNameUsedInButtons,
                                 ),
-                                controller.status.value.isNotEmpty
+                                controller.currentBatchStatus.value.isNotEmpty
                                     ? statusBox(
-                                        controller.status.value,
+                                        controller.currentBatchStatus.value,
                                         hieght: 35,
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 5,
@@ -69,7 +69,9 @@ Future<dynamic> batchDialog({
                                   onTap: controller.addingNewValue.isFalse
                                       ? onTapForSave
                                       : null,
-                                  text: 'Save',
+                                  text: controller.addingNewValue.isFalse
+                                      ? 'Save'
+                                      : '•••',
                                 ),
                                 if (onTapForDelete != null)
                                   Row(
@@ -90,8 +92,14 @@ Future<dynamic> batchDialog({
                                           separator(),
 
                                           ClickableHoverText(
-                                            onTap: onTapForPost,
-                                            text: 'Post',
+                                            onTap:
+                                                controller.postingBatch.isFalse
+                                                ? onTapForPost
+                                                : null,
+                                            text:
+                                                controller.postingBatch.isFalse
+                                                ? 'Post'
+                                                : '•••',
                                           ),
                                         ],
                                       )

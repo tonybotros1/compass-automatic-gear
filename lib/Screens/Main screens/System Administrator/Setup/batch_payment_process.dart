@@ -376,12 +376,11 @@ ElevatedButton newBatchButton(
 ) {
   return ElevatedButton(
     onPressed: () async {
-      // controller.clearValues();
+      controller.clearValues();
       batchDialog(
         controller: controller,
-
         onTapForSave: () async {
-          // await controller.addNewConverter();
+          await controller.addNewBatch();
         },
       );
     },
@@ -397,29 +396,18 @@ IconButton editConverterButton(
   BatchPaymentProcessModel data,
 ) {
   return IconButton(
-    onPressed: () {
-      // controller.loadValues(data);
-      // converterDialog(
-      //   controller: controller,
-      //   onTapForPost: () async {
-      //     controller.editPostedStatus(data.issues ?? []);
-      //   },
-      //   onTapForSave: () async {
-      //     await controller.addNewConverter();
-      //   },
-      //   onTapForDelete: () {
-      //     alertDialog(
-      //       context: context,
-      //       content: "This will be deleted permanently",
-      //       onPressed: () {
-      //         controller.deleteConverterCard(data.id ?? '');
-      //       },
-      //     );
-      //   },
-      //   onTapForCancel: () {
-      //     controller.editCancelledStatus();
-      //   },
-      // );
+    onPressed: () async {
+      await controller.loadValues(data.id ?? '');
+      batchDialog(
+        controller: controller,
+
+        onTapForSave: () async {
+          await controller.addNewBatch();
+        },
+        onTapForPost: () async {
+          await controller.postBatch(data.id ?? '');
+        },
+      );
     },
     icon: editIcon,
   );

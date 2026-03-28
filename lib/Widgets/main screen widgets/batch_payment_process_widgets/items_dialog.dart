@@ -44,12 +44,21 @@ Future<dynamic> batchItemsDialog({
                             children: [
                               separator(),
                               ClickableHoverText(
-                                onTap: controller.addingNewValue.isFalse
+                                onTap: controller.addingNewItemValue.isFalse
                                     ? onTapForSave
                                     : null,
-                                text: 'Save',
+                                text: controller.addingNewItemValue.isFalse
+                                    ? 'Save'
+                                    : '•••',
                               ),
 
+                              separator(),
+                              ClickableHoverText(
+                                onTap: () {
+                                  controller.clearItemValues();
+                                },
+                                text: 'Clear',
+                              ),
                               separator(),
                               closeIcon(),
                             ],

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
 import '../auto_size_box.dart';
+import 'items_dialog.dart';
 
 Widget itemsSection({
   required BuildContext context,
@@ -36,31 +37,20 @@ Widget tableOfScreens({
       columnSpacing: 5,
       horizontalMargin: horizontalMarginForTable,
       showBottomBorder: true,
-      dataTextStyle: regTextStyle,
-      headingTextStyle: fontStyleForTableHeader,
       lmRatio: 2.5,
       columns: [
+        const DataColumn2(label: SizedBox(), size: ColumnSize.S),
         DataColumn2(
-          size: ColumnSize.M,
+          size: ColumnSize.L,
           label: AutoSizedText(
             constraints: constraints,
             text: 'Transaction Type',
           ),
         ),
+
         DataColumn2(
           size: ColumnSize.M,
-          label: AutoSizedText(constraints: constraints, text: 'Amount'),
-        ),
-        DataColumn2(
-          size: ColumnSize.M,
-          label: AutoSizedText(constraints: constraints, text: 'Vat'),
-        ),
-        DataColumn2(
-          size: ColumnSize.M,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Invoice Number',
-          ),
+          label: AutoSizedText(constraints: constraints, text: 'Invoice #'),
         ),
         DataColumn2(
           size: ColumnSize.M,
@@ -76,14 +66,21 @@ Widget tableOfScreens({
         ),
         DataColumn2(
           size: ColumnSize.M,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Receiving Number',
-          ),
+          label: AutoSizedText(constraints: constraints, text: 'Receiving #'),
         ),
         DataColumn2(
           size: ColumnSize.M,
-          label: AutoSizedText(constraints: constraints, text: 'Job Number'),
+          label: AutoSizedText(constraints: constraints, text: 'Job #'),
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Amount'),
+          numeric: true,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Vat'),
+          numeric: true,
         ),
       ],
       rows: controller.items.map<DataRow>((invoiceItems) {
@@ -107,23 +104,21 @@ DataRow dataRowForTheTable(
   return DataRow(
     cells: [
       DataCell(
+        Row(
+          children: [
+            deleteItemButton(controller, data, context),
+            editItemButton(controller, data),
+          ],
+        ),
+      ),
+      DataCell(
         textForDataRowInTable(
           text: data.transactionTypeName ?? '',
           formatDouble: false,
+          maxWidth: null,
         ),
       ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.amount?.toString() ?? '0',
-          formatDouble: true,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.vat?.toString() ?? '0',
-          formatDouble: true,
-        ),
-      ),
+
       DataCell(
         textForDataRowInTable(
           text: data.invoiceNumber ?? '',
@@ -134,13 +129,22 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           text: textToDate(data.invoiceDate),
           formatDouble: false,
+          color: Colors.purple,
         ),
       ),
       DataCell(
-        textForDataRowInTable(text: data.vendorName ?? '', formatDouble: false),
+        textForDataRowInTable(
+          text: data.vendorName ?? '',
+          formatDouble: false,
+          maxWidth: null,
+        ),
       ),
       DataCell(
-        textForDataRowInTable(text: data.note ?? '', formatDouble: true),
+        textForDataRowInTable(
+          text: data.note ?? '',
+          formatDouble: true,
+          maxWidth: null,
+        ),
       ),
       DataCell(
         textForDataRowInTable(
@@ -151,11 +155,84 @@ DataRow dataRowForTheTable(
       DataCell(
         textForDataRowInTable(
           text: data.jobNumber ?? '',
-          color: Colors.green,
           isBold: true,
           formatDouble: false,
         ),
       ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.amount?.toString() ?? '0',
+          formatDouble: true,
+          color: Colors.red,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.vat?.toString() ?? '0',
+          formatDouble: true,
+          color: Colors.blue,
+        ),
+      ),
     ],
+  );
+}
+
+IconButton editItemButton(
+  BatchPaymentProcessController controller,
+  BatchPaymentProcessItemsModel data,
+) {
+  return IconButton(
+    onPressed: () async {
+      controller.transactionType.text = data.transactionTypeName ?? '';
+      controller.transactionTypeId.value = data.transactionType ?? '';
+      controller.receivedNumber.text = data.receivingNumber ?? '';
+      controller.receivedNumberId.value = data.receivingNumberId ?? '';
+      controller.vendor.text = data.vendorName ?? '';
+      controller.vendorId.value = data.vendor ?? '';
+      controller.amount.text = data.amount?.toString() ?? '0';
+      controller.vat.text = data.vat?.toString() ?? '0';
+      controller.invoiceNumber.text = data.invoiceNumber ?? '';
+      controller.invoiceDate.text = textToDate(data.invoiceDate);
+      controller.jobNumber.text = data.jobNumber ?? '';
+      controller.jobNumberId.text = data.jobNumberId ?? '';
+      controller.invoiceNote.text = data.note ?? '';
+      batchItemsDialog(
+        controller: controller,
+        onTapForSave: () async {
+          await controller.updateItem(data.id ?? '');
+        },
+      );
+    },
+    icon: editIcon,
+  );
+}
+
+IconButton deleteItemButton(
+  BatchPaymentProcessController controller,
+  BatchPaymentProcessItemsModel data,
+  BuildContext context,
+) {
+  return IconButton(
+    onPressed: () async {
+      Map status = await controller.getBatchStatus(
+        controller.currentBatchId.value,
+      );
+      String status1 = status['status'];
+      if ((status1 == 'Posted')) {
+        alertMessage(
+          context: Get.context!,
+          content: 'Can\'t delete items for posted batches',
+        );
+        return;
+      }
+      alertDialog(
+        context: Get.context!,
+        content: 'Are you sure you want to remove this item?',
+        onPressed: () {
+          controller.deleteItem(data.id ?? '');
+        },
+      );
+    },
+    icon: deleteIcon,
   );
 }
