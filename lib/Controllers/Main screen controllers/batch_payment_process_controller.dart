@@ -21,6 +21,7 @@ class BatchPaymentProcessController extends GetxController {
   RxInt initStatusPickersValue = RxInt(1);
   RxBool isScreenLoding = RxBool(false);
   RxBool postingBatch = RxBool(false);
+  RxBool postingAllNewBatchesBatch = RxBool(false);
   RxInt numberOfBatches = RxInt(0);
   RxString currentBatchStatus = RxString('');
   RxList<BatchPaymentProcessModel> batchesList =
@@ -657,6 +658,40 @@ class BatchPaymentProcessController extends GetxController {
       isScreenLoding.value = false;
     } catch (e) {
       isScreenLoding.value = false;
+    }
+  }
+
+  Future<void> postAllNewBatches() async {
+    try {
+      postingAllNewBatchesBatch.value = true;
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/batch_payment_process/post_all_new_batch_payment_process',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await postAllNewBatches();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      postingAllNewBatchesBatch.value = false;
+    } catch (e) {
+      postingAllNewBatchesBatch.value = false;
     }
   }
 

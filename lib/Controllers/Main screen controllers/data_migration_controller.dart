@@ -26,6 +26,8 @@ class DataMigrationController extends GetxController {
     '3': {'name': 'AR Receipts'},
     '4': {'name': 'AR Receipts Items'},
     '5': {'name': 'AP Invoices'},
+    '14': {'name': 'Batch Payment Process'},
+    '15': {'name': 'Batch Payment Items Process'},
     '6': {'name': 'Receiving'},
     '7': {'name': 'Receiving Items'},
     '8': {'name': 'Time Sheets'},

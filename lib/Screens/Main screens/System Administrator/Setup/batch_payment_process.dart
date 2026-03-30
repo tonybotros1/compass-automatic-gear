@@ -18,6 +18,29 @@ class BatchPaymentProcess extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return GetX<BatchPaymentProcessController>(
+      init: BatchPaymentProcessController(),
+      builder: (controller) {
+        return MouseRegion(
+          cursor: controller.postingAllNewBatchesBatch.value
+              ? SystemMouseCursors.wait
+              : SystemMouseCursors.basic,
+          child: AbsorbPointer(
+            absorbing: controller.postingAllNewBatchesBatch.value,
+            child: const _BatchPaymentprocessBody(),
+          ),
+        );
+      },
+    );
+    // const _BatchPaymentprocessBody();
+  }
+}
+
+class _BatchPaymentprocessBody extends StatelessWidget {
+  const _BatchPaymentprocessBody();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: LayoutBuilder(
@@ -29,7 +52,6 @@ class BatchPaymentProcess extends StatelessWidget {
               child: ListView(
                 children: [
                   GetBuilder<BatchPaymentProcessController>(
-                    init: BatchPaymentProcessController(),
                     builder: (controller) {
                       return SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
@@ -105,6 +127,11 @@ class BatchPaymentProcess extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               newBatchButton(context, constraints, controller),
+                              postAllNewBatchesButton(
+                                context,
+                                constraints,
+                                controller,
+                              ),
                               Row(
                                 spacing: 10,
                                 children: [
@@ -386,6 +413,27 @@ ElevatedButton newBatchButton(
     },
     style: newButtonStyle,
     child: const Text('New Batch'),
+  );
+}
+
+ElevatedButton postAllNewBatchesButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  BatchPaymentProcessController controller,
+) {
+  return ElevatedButton(
+    onPressed: () async {
+      alertDialog(
+        context: context,
+        content: 'Are you sure you want to post all new batches?',
+        onPressed: () {
+          controller.postAllNewBatches();
+          Get.back();
+        },
+      );
+    },
+    style: postButtonStyle,
+    child: const Text('Post all New'),
   );
 }
 
