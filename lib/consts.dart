@@ -714,6 +714,7 @@ var printQuotationIcons = Icon(
 );
 
 var editIcon = const Icon(Icons.edit_note_rounded, color: Colors.blue);
+var attachIcon = const Icon(Icons.attach_file, color: Colors.blueGrey);
 var valuesIcon = const Icon(
   Icons.dashboard_customize_outlined,
   color: Colors.purple,

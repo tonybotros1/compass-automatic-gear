@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/job_card_controller.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
+import '../../../../Widgets/attachments/attachment_screen.dart';
 import '../../../../Widgets/dynamic_boxes_line.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/add_new_job_card_or_edit.dart';
 import '../../../../Widgets/main screen widgets/job_cards_widgets/job_card_buttons.dart';
@@ -662,7 +663,7 @@ Widget tableOfScreensForMainJobCards({
       sortAscending: controller.isAscending.value,
       columns: [
         const DataColumn2(
-          size: ColumnSize.S,
+          size: ColumnSize.M,
           label: SizedBox(),
           // onSort: controller.onSort,
         ),
@@ -830,12 +831,18 @@ DataRow dataRowForTheTable(
     }),
     cells: [
       DataCell(
-        editSection(
-          context,
-          jobData,
-          constraints,
-          jobId,
-          jobData.type == 'SALES' ? false : true,
+        Row(
+          spacing: 5,
+          children: [
+            editSection(
+              context,
+              jobData,
+              constraints,
+              jobId,
+              jobData.type == 'SALES' ? false : true,
+            ),
+            attachmentButton(controller, jobId),
+          ],
         ),
       ), // need to be changed
       DataCell(
@@ -1000,6 +1007,23 @@ Widget editSection(
             : const Icon(Icons.edit_note_rounded, color: Colors.blue),
       );
     },
+  );
+}
+
+IconButton attachmentButton(JobCardController controller, String id) {
+  return IconButton(
+    onPressed: () {
+      Get.dialog(
+        Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          child: AttachmentScreen(
+            screenName: controller.getScreenName(),
+            documentId: id,
+          ),
+        ),
+      );
+    },
+    icon: attachIcon,
   );
 }
 

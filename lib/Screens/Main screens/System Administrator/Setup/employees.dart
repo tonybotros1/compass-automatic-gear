@@ -1,12 +1,14 @@
+import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/employees/employees_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
-import '../../../../Widgets/Auth screens widgets/register widgets/search_bar.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/employees_widgets/employee_dialog.dart';
+import '../../../../Widgets/menu_dialog.dart';
+import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
 class Employees extends StatelessWidget {
@@ -20,46 +22,209 @@ class Employees extends StatelessWidget {
         builder: (context, constraints) {
           return Padding(
             padding: screenPadding,
-            child: Container(
-              width: constraints.maxWidth,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  GetX<EmployeesController>(
-                    init: EmployeesController(),
-                    builder: (controller) {
-                      return searchBar(
-                        onChanged: (_) {
-                          controller.filterEmployees();
-                        },
-                        onPressedForClearSearch: () {
-                          controller.search.value.clear();
-                          controller.filterEmployees();
-                        },
-                        search: controller.search,
-                        constraints: constraints,
-                        context: context,
-                        title: 'Search for employees',
-                        button: newEmployeeButton(
-                          context,
-                          constraints,
-                          controller,
+            child: Column(
+              children: [
+                GetBuilder<EmployeesController>(
+                  init: EmployeesController(),
+                  builder: (controller) {
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: constraints.maxWidth - 28,
                         ),
-                      );
-                    },
-                  ),
-                  Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          spacing: 10,
+                          children: [
+                            Row(
+                              spacing: 10,
+                              children: [
+                                myTextFormFieldWithBorder(
+                                  width: 90,
+                                  labelText: 'Employee name',
+                                  controller: controller.employeeNameFilter,
+                                ),
+
+                                MenuWithValues(
+                                  labelText: 'Gender',
+                                  headerLqabel: 'Genders',
+                                  dialogWidth: constraints.maxWidth / 3,
+                                  width: 170,
+                                  controller: controller.genderFilter,
+                                  displayKeys: const ['name'],
+                                  displaySelectedKeys: const ['name'],
+                                  onOpen: () {
+                                    return controller.getGenders();
+                                  },
+                                  onDelete: () {
+                                    controller.employeeNameFilterId.value = "";
+                                    controller.employeeNameFilter.clear();
+                                  },
+                                  onSelected: (value) {
+                                    controller.employeeNameFilterId.value =
+                                        value['_id'];
+                                    controller.employeeNameFilter.text =
+                                        value['name'];
+                                  },
+                                ),
+                              ],
+                            ),
+
+                            // Row(
+                            //   spacing: 10,
+                            //   crossAxisAlignment: CrossAxisAlignment.end,
+                            //   children: [
+                            //     myTextFormFieldWithBorder(
+                            //       width: 120,
+                            //       controller: controller.fromDate.value,
+                            //       labelText: 'From Date',
+                            //       onFieldSubmitted: (_) async {
+                            //         normalizeDate(
+                            //           controller.fromDate.value.text,
+                            //           controller.fromDate.value,
+                            //         );
+                            //       },
+                            //       onTapOutside: (_) {
+                            //         normalizeDate(
+                            //           controller.fromDate.value.text,
+                            //           controller.fromDate.value,
+                            //         );
+                            //       },
+                            //     ),
+                            //     myTextFormFieldWithBorder(
+                            //       width: 120,
+                            //       controller: controller.toDate.value,
+                            //       labelText: 'To Date',
+                            //       onFieldSubmitted: (_) async {
+                            //         normalizeDate(
+                            //           controller.toDate.value.text,
+                            //           controller.toDate.value,
+                            //         );
+                            //       },
+                            //       onTapOutside: (_) {
+                            //         normalizeDate(
+                            //           controller.toDate.value.text,
+                            //           controller.toDate.value,
+                            //         );
+                            //       },
+                            //     ),
+                            //   ],
+                            // ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                GetBuilder<EmployeesController>(
+                  builder: (controller) {
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: constraints.maxWidth - 28,
+                        ),
+                        child: Row(
+                          spacing: 10,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+
+                          children: [
+                            Row(
+                              spacing: 10,
+                              children: [
+                                newEmployeeButton(
+                                  context,
+                                  constraints,
+                                  controller,
+                                ),
+                              ],
+                            ),
+                            Row(
+                              spacing: 10,
+                              children: [
+                                CustomSlidingSegmentedControl<int>(
+                                  height: 30,
+                                  initialValue:
+                                      controller.initStatusPickersValue.value,
+                                  children: const {
+                                    1: Text('ALL'),
+                                    2: Text('ACTIVE'),
+                                    3: Text('INACTIVE'),
+                                  },
+                                  decoration: BoxDecoration(
+                                    color: CupertinoColors.lightBackgroundGray,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  thumbDecoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withAlpha(1),
+                                        blurRadius: 4.0,
+                                        spreadRadius: 1.0,
+                                        offset: const Offset(0.0, 2.0),
+                                      ),
+                                    ],
+                                  ),
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInToLinear,
+                                  onValueChanged: (v) {
+                                    // controller.onChooseForStatusPicker(v);
+                                  },
+                                ),
+                              ],
+                            ),
+                            Row(
+                              spacing: 10,
+                              children: [
+                                ElevatedButton(
+                                  style: findButtonStyle,
+                                  onPressed: controller.isScreenLoding.isFalse
+                                      ? () async {
+                                          // controller.filterSearch();
+                                        }
+                                      : null,
+                                  child: controller.isScreenLoding.isFalse
+                                      ? Text(
+                                          'Find',
+                                          style: fontStyleForElevatedButtons,
+                                        )
+                                      : loadingProcess,
+                                ),
+                                ElevatedButton(
+                                  style: clearVariablesButtonStyle,
+                                  onPressed: () {
+                                    // controller.clearAllFilters();
+                                    // controller.update();
+                                  },
+                                  child: Text(
+                                    'Clear',
+                                    style: fontStyleForElevatedButtons,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: Container(
+                    width: constraints.maxWidth,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     child: GetX<EmployeesController>(
                       builder: (controller) {
-                        if (controller.isScreenLoding.value) {
-                          return Center(child: loadingProcess);
-                        }
-                        if (controller.allEmployees.isEmpty) {
-                          return const Center(child: Text('No Element'));
-                        }
                         return SizedBox(
                           width: constraints.maxWidth,
                           child: tableOfScreens(
@@ -71,8 +236,8 @@ class Employees extends StatelessWidget {
                       },
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
@@ -121,9 +286,7 @@ Widget tableOfScreens({
       ),
     ],
     source: CardDataSourceForEmployees(
-      cards:
-          controller.filteredEmployees.isEmpty &&
-              controller.search.value.text.isEmpty
+      cards: controller.filteredEmployees.isEmpty
           ? controller.allEmployees
           : controller.filteredEmployees,
       context: context,

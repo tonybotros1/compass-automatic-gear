@@ -1,7 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_controller.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../../consts.dart';
 import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
@@ -23,7 +21,17 @@ Container jobInformation(BuildContext context, EmployeesController controller) {
 
             children: [
               myTextFormFieldWithBorder(
+                labelText: 'Job Employyer',
+                width: 310,
+                controller: controller.jobTitle,
+              ),
+              myTextFormFieldWithBorder(
                 labelText: 'Job Title',
+                width: 310,
+                controller: controller.jobTitle,
+              ),
+              myTextFormFieldWithBorder(
+                labelText: 'Job Location',
                 width: 310,
                 controller: controller.jobTitle,
               ),
@@ -68,11 +76,6 @@ Container jobInformation(BuildContext context, EmployeesController controller) {
                   ),
                 ],
               ),
-              myTextFormFieldWithBorder(
-                labelText: 'Job Description',
-                maxLines: 5,
-                controller: controller.jobDescription,
-              ),
             ],
           ),
         ),
@@ -101,97 +104,6 @@ Container jobInformation(BuildContext context, EmployeesController controller) {
                   controller.employeeStatus.text = value['name'];
                   controller.employeeStatusId.value = value['_id'];
                 },
-              ),
-             
-              Text('Category', style: textFieldLabelStyle),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 300,
-                    child: Row(
-                      children: [
-                        GetX<EmployeesController>(
-                          builder: (controller) {
-                            return CupertinoCheckbox(
-                              checkColor: mainColor,
-                              activeColor: Colors.white,
-                              value: controller.isTimeSheetsSelected.value,
-                              onChanged: (value) {
-                                controller.selectDepartment(
-                                  "Time Sheets",
-                                  value!,
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        Text('Time Sheets', style: textFieldLabelStyle),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      GetX<EmployeesController>(
-                        builder: (controller) {
-                          return CupertinoCheckbox(
-                            checkColor: mainColor,
-                            activeColor: Colors.white,
-                            value: controller.isJobCardsSelected.value,
-                            onChanged: (value) {
-                              controller.selectDepartment("Job Cards", value!);
-                            },
-                          );
-                        },
-                      ),
-                      Text('Job Cards', style: textFieldLabelStyle),
-                    ],
-                  ),
-                ],
-              ),
-
-              Row(
-                children: [
-                  SizedBox(
-                    width: 300,
-                    child: Row(
-                      children: [
-                        GetX<EmployeesController>(
-                          builder: (controller) {
-                            return CupertinoCheckbox(
-                              checkColor: mainColor,
-                              activeColor: Colors.white,
-                              value: controller.isReceivingSelected.value,
-                              onChanged: (value) {
-                                controller.selectDepartment(
-                                  "Receiving",
-                                  value!,
-                                );
-                              },
-                            );
-                          },
-                        ),
-                        Text('Receiving', style: textFieldLabelStyle),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      GetX<EmployeesController>(
-                        builder: (controller) {
-                          return CupertinoCheckbox(
-                            checkColor: mainColor,
-                            activeColor: Colors.white,
-                            value: controller.isIssueingSelected.value,
-                            onChanged: (value) {
-                              controller.selectDepartment("Issueing", value!);
-                            },
-                          );
-                        },
-                      ),
-                      Text('Issueing', style: textFieldLabelStyle),
-                    ],
-                  ),
-                ],
               ),
             ],
           ),

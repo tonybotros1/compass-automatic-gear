@@ -1,11 +1,18 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:datahubai/Models/employees/email_model.dart';
+import 'package:datahubai/Models/employees/nationality_model.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../Models/employees/employees_model.dart';
+import '../../Models/employees/phone_model.dart';
+import '../../Models/entity information/entity_information_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import 'main_screen_contro.dart';
@@ -13,13 +20,16 @@ import 'websocket_controller.dart';
 
 class EmployeesController extends GetxController {
   TextEditingController employeeName = TextEditingController();
-  TextEditingController employeeNumber = TextEditingController();
+  TextEditingController employeeNameFilter = TextEditingController();
+  RxString employeeNameFilterId = RxString('');
+  TextEditingController genderFilter = TextEditingController();
+  // TextEditingController employeeNumber = TextEditingController();
   TextEditingController employeeGender = TextEditingController();
   TextEditingController employeeDateOfBirth = TextEditingController();
+  TextEditingController employeePlaceOfBirth = TextEditingController();
+  TextEditingController employeeCountryOfBirth = TextEditingController();
   TextEditingController employeeNationality = TextEditingController();
   TextEditingController employeeMaritalStatus = TextEditingController();
-  TextEditingController employeeNationalIdOrPassportNumber =
-      TextEditingController();
   TextEditingController employeeEmail = TextEditingController();
   TextEditingController employeePhoneNumber = TextEditingController();
   TextEditingController employeeEmergencyPhoneNumber = TextEditingController();
@@ -28,29 +38,56 @@ class EmployeesController extends GetxController {
   TextEditingController jobTitle = TextEditingController();
   TextEditingController hireDate = TextEditingController();
   TextEditingController endDate = TextEditingController();
-  TextEditingController jobDescription = TextEditingController();
   TextEditingController employeeStatus = TextEditingController();
-
+  RxList<EntityAddress> addressesList = RxList<EntityAddress>([]);
+  RxList<PhoneModel> phonesList = RxList<PhoneModel>([]);
+  RxList<EmailModel> emailsList = RxList<EmailModel>([]);
+  RxList<NationalityModel> nationalityList = RxList<NationalityModel>([]);
+  TextEditingController country = TextEditingController();
+  TextEditingController line = TextEditingController();
+  TextEditingController city = TextEditingController();
+  TextEditingController nationality = TextEditingController();
+  TextEditingController phoneType = TextEditingController();
+  TextEditingController emailType = TextEditingController();
+  TextEditingController phoneNumber = TextEditingController();
+  TextEditingController emailAddress = TextEditingController();
+  RxString nationalityId = RxString('');
+  RxString phoneTypeId = RxString('');
+  RxString emailTypeId = RxString('');
+  TextEditingController nationalityStartDate = TextEditingController();
+  TextEditingController nationalityEndDate = TextEditingController();
+  RxString countryId = RxString('');
+  RxString cityId = RxString('');
   RxString employeeNamtionalityId = RxString('');
   RxString employeeMaritalStatusId = RxString('');
   RxString employeeStatusId = RxString('');
   RxString employeeStatusForBar = RxString('');
   RxString employeeGenderId = RxString('');
+  RxString employeeCountryOfBirthId = RxString('');
   RxString query = RxString('');
-  Rx<TextEditingController> search = TextEditingController().obs;
   RxBool isScreenLoding = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
   RxBool isTimeSheetsSelected = RxBool(false);
-  RxBool isJobCardsSelected = RxBool(false);
   RxBool isReceivingSelected = RxBool(false);
   RxBool isIssueingSelected = RxBool(false);
-  RxList<String> department = RxList<String>([]);
   String backendUrl = backendTestURI;
   RxList<EmployeesModel> allEmployees = RxList<EmployeesModel>([]);
   RxList<EmployeesModel> filteredEmployees = RxList<EmployeesModel>([]);
   WebSocketService ws = Get.find<WebSocketService>();
+  final Uuid _uuid = const Uuid();
+  Uint8List? imageBytes;
+  RxInt initStatusPickersValue = RxInt(1);
+  RxString employeeImage = RxString('');
+
+  List<Widget> contactsTabs = const [
+    Tab(text: 'Address'),
+    Tab(text: 'Nationality'),
+    Tab(text: 'Phones'),
+    Tab(text: 'Emails'),
+    Tab(text: 'Others'),
+  ];
 
   @override
   void onInit() async {
@@ -79,6 +116,22 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getGenders() async {
     return await helper.getAllListValues('GENDER');
+  }
+
+  Future<Map<String, dynamic>> getCountries() async {
+    return await helper.getCountries();
+  }
+
+  Future<Map<String, dynamic>> getPhoneTypes() async {
+    return await helper.getAllListValues('CONTACT_TYPES');
+  }
+
+  Future<Map<String, dynamic>> getTypeOfSocial() async {
+    return await helper.getAllListValues('SOCIAL_MEDIA');
+  }
+
+  Future<Map<String, dynamic>> getCitiesByCountryID(String countryID) async {
+    return await helper.getCitiesValues(countryID);
   }
 
   void connectWebSocket() {
@@ -160,8 +213,7 @@ class EmployeesController extends GetxController {
           "nationality": employeeNamtionalityId.value,
           "date_of_birth": convertDateToIson(employeeDateOfBirth.text),
           "martial_status": employeeMaritalStatusId.value,
-          "national_id_or_passport_number":
-              employeeNationalIdOrPassportNumber.text,
+
           "email": employeeEmail.text,
           "phone": employeePhoneNumber.text,
           "address": employeeAddress.text,
@@ -170,9 +222,7 @@ class EmployeesController extends GetxController {
           "job_title": jobTitle.text,
           "hire_date": convertDateToIson(hireDate.text),
           "end_date": convertDateToIson(endDate.text),
-          "job_description": jobDescription.text,
           "status": employeeStatusId.value,
-          "department": department,
         }),
       );
       if (response.statusCode == 200) {
@@ -212,8 +262,7 @@ class EmployeesController extends GetxController {
           "nationality": employeeNamtionalityId.value,
           "date_of_birth": convertDateToIson(employeeDateOfBirth.text),
           "martial_status": employeeMaritalStatusId.value,
-          "national_id_or_passport_number":
-              employeeNationalIdOrPassportNumber.text,
+
           "email": employeeEmail.text,
           "phone": employeePhoneNumber.text,
           "address": employeeAddress.text,
@@ -222,9 +271,7 @@ class EmployeesController extends GetxController {
           "job_title": jobTitle.text,
           "hire_date": convertDateToIson(hireDate.text),
           "end_date": convertDateToIson(endDate.text),
-          "job_description": jobDescription.text,
           "status": employeeStatusId.value,
-          "department": department,
         }),
       );
       if (response.statusCode == 200) {
@@ -245,7 +292,7 @@ class EmployeesController extends GetxController {
     }
   }
 
-   Future<void> deleteEmployee(String id) async {
+  Future<void> deleteEmployee(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -272,47 +319,14 @@ class EmployeesController extends GetxController {
     }
   }
 
-
-  void selectDepartment(String dep, bool value) {
-    if (dep == "Time Sheets") {
-      isTimeSheetsSelected.value = value;
-      if (value) {
-        department.add("Time Sheets");
-      } else {
-        department.remove("Time Sheets");
-      }
-    } else if (dep == "Job Cards") {
-      isJobCardsSelected.value = value;
-      if (value) {
-        department.add("Job Cards");
-      } else {
-        department.remove("Job Cards");
-      }
-    } else if (dep == "Receiving") {
-      isReceivingSelected.value = value;
-      if (value) {
-        department.add("Receiving");
-      } else {
-        department.remove("Receiving");
-      }
-    } else if (dep == "Issueing") {
-      isIssueingSelected.value = value;
-      if (value) {
-        department.add("Issueing");
-      } else {
-        department.remove("Issueing");
-      }
-    }
-  }
-
   void clearValues() {
     employeeName.clear();
-    employeeNumber.clear();
+    // employeeNumber.clear();
+
     employeeGender.clear();
     employeeDateOfBirth.clear();
     employeeNationality.clear();
     employeeMaritalStatus.clear();
-    employeeNationalIdOrPassportNumber.clear();
     employeeEmail.clear();
     employeePhoneNumber.clear();
     employeeEmergencyPhoneNumber.clear();
@@ -321,15 +335,12 @@ class EmployeesController extends GetxController {
     jobTitle.clear();
     hireDate.clear();
     endDate.clear();
-    jobDescription.clear();
     employeeStatus.clear();
-    department.clear();
     employeeNamtionalityId.value = '';
     employeeMaritalStatusId.value = '';
     employeeStatusId.value = '';
     employeeGenderId.value = '';
     isTimeSheetsSelected.value = false;
-    isJobCardsSelected.value = false;
     isReceivingSelected.value = false;
     isIssueingSelected.value = false;
     employeeStatusForBar.value = '';
@@ -338,13 +349,11 @@ class EmployeesController extends GetxController {
   void loadValues(EmployeesModel data) {
     employeeStatusForBar.value = data.statusType ?? '';
     employeeName.text = data.name ?? '';
-    employeeNumber.text = data.employeeNumber ?? '';
+    // employeeNumber.text = data.employeeNumber ?? '';
     employeeGender.text = data.genderType ?? '';
     employeeDateOfBirth.text = textToDate(data.dateOfBirth);
     employeeNationality.text = data.nationalityName ?? '';
     employeeMaritalStatus.text = data.martialStatusType ?? '';
-    employeeNationalIdOrPassportNumber.text =
-        data.nationalIdOrPassportNumber ?? '';
     employeeEmail.text = data.email ?? '';
     employeePhoneNumber.text = data.phone ?? '';
     employeeEmergencyPhoneNumber.text = data.emergencyContactNumber ?? '';
@@ -353,57 +362,164 @@ class EmployeesController extends GetxController {
     jobTitle.text = data.jobTitle ?? '';
     hireDate.text = textToDate(data.hireDate);
     endDate.text = textToDate(data.endDate);
-    jobDescription.text = data.jobDescription ?? '';
     employeeStatus.text = data.statusType ?? '';
-    department.assignAll(data.department ?? []);
-    if (department.contains("Time Sheets")) {
-      isTimeSheetsSelected.value = true;
-    } else {
-      isTimeSheetsSelected.value = false;
-    }
-    if (department.contains("Job Cards")) {
-      isJobCardsSelected.value = true;
-    } else {
-      isJobCardsSelected.value = false;
-    }
-    if (department.contains("Receiving")) {
-      isReceivingSelected.value = true;
-    } else {
-      isReceivingSelected.value = false;
-    }
-    if (department.contains("Issueing")) {
-      isIssueingSelected.value = true;
-    } else {
-      isIssueingSelected.value = false;
-    }
+
     employeeNamtionalityId.value = data.nationality ?? '';
     employeeMaritalStatusId.value = data.martialStatus ?? '';
     employeeStatusId.value = data.status ?? '';
     employeeGenderId.value = data.gender ?? '';
   }
 
-  // this function is to filter the search results for web
-  void filterEmployees() {
-    query.value = search.value.text.toLowerCase();
-    if (query.value.isEmpty) {
-      filteredEmployees.clear();
-    } else {
-      filteredEmployees.assignAll(
-        allEmployees.where((employee) {
-          return employee.name.toString().toLowerCase().contains(query) ||
-              employee.employeeNumber.toString().toLowerCase().contains(
-                query,
-              ) ||
-              employee.jobTitle.toString().toLowerCase().contains(query) ||
-              employee.statusType.toString().toLowerCase().contains(query) ||
-              textToDate(
-                employee.hireDate,
-              ).toString().toLowerCase().contains(query) ||
-              textToDate(
-                employee.endDate,
-              ).toString().toLowerCase().contains(query);
-        }).toList(),
+  // ======================== address section ========================
+  void addNewAddress() {
+    final String uniqueId = _uuid.v4();
+
+    addressesList.add(
+      EntityAddress(
+        id: uniqueId,
+        line: line.text,
+        country: country.text,
+        countryId: countryId.value,
+        city: city.text,
+        cityId: cityId.value,
+      ),
+    );
+    Get.back();
+  }
+
+  void updateAddress(String id) {
+    int index = addressesList.indexWhere((add) => add.id == id);
+    if (index != -1) {
+      addressesList[index] = EntityAddress(
+        id: addressesList[index].id,
+        line: line.text,
+        country: country.text,
+        countryId: countryId.value,
+        city: city.text,
+        cityId: cityId.value,
       );
+    }
+    addressesList.refresh();
+    Get.back();
+  }
+
+  void deleteAddress(String id) {
+    addressesList.removeWhere((add) => add.id == id);
+  }
+
+  // ======================== nationality section ========================
+  void addNewNationality() {
+    final String uniqueId = _uuid.v4();
+
+    nationalityList.add(
+      NationalityModel(
+        id: uniqueId,
+        nationality: nationality.text,
+        nationalityId: nationalityId.value,
+        startDate: nationalityStartDate.text,
+        endDate: nationalityEndDate.text,
+      ),
+    );
+    Get.back();
+  }
+
+  void updateNationality(String id) {
+    int index = nationalityList.indexWhere((nat) => nat.id == id);
+    if (index != -1) {
+      nationalityList[index] = NationalityModel(
+        id: nationalityList[index].id,
+        nationality: nationality.text,
+        nationalityId: nationalityId.value,
+        startDate: nationalityStartDate.text,
+        endDate: nationalityEndDate.text,
+      );
+    }
+    nationalityList.refresh();
+    Get.back();
+  }
+
+  void deleteNationality(String id) {
+    nationalityList.removeWhere((nat) => nat.id == id);
+  }
+
+  // ======================== phone section ========================
+  void addNewPhone() {
+    final String uniqueId = _uuid.v4();
+
+    phonesList.add(
+      PhoneModel(
+        id: uniqueId,
+        phone: phoneNumber.text,
+        typeId: phoneTypeId.value,
+        type: phoneType.text,
+      ),
+    );
+    Get.back();
+  }
+
+  void updatePhone(String id) {
+    int index = phonesList.indexWhere((nat) => nat.id == id);
+    if (index != -1) {
+      phonesList[index] = PhoneModel(
+        id: phonesList[index].id,
+        phone: phoneNumber.text,
+        typeId: phoneTypeId.value,
+        type: phoneType.text,
+      );
+    }
+    phonesList.refresh();
+    Get.back();
+  }
+
+  void deletePhone(String id) {
+    phonesList.removeWhere((nat) => nat.id == id);
+  }
+
+  // ======================== email section ========================
+  void addNewEmail() {
+    final String uniqueId = _uuid.v4();
+
+    emailsList.add(
+      EmailModel(
+        id: uniqueId,
+        email: emailAddress.text,
+        typeId: emailTypeId.value,
+        type: emailType.text,
+      ),
+    );
+    Get.back();
+  }
+
+  void updateEmail(String id) {
+    int index = emailsList.indexWhere((nat) => nat.id == id);
+    if (index != -1) {
+      emailsList[index] = EmailModel(
+        id: emailsList[index].id,
+        email: emailAddress.text,
+        typeId: emailTypeId.value,
+        type: emailType.text,
+      );
+    }
+    emailsList.refresh();
+    Get.back();
+  }
+
+  void deleteEmail(String id) {
+    emailsList.removeWhere((nat) => nat.id == id);
+  }
+
+  Future<void> pickImage() async {
+    try {
+      // Use file_picker to pick an image file
+      final result = await FilePicker.platform.pickFiles(type: FileType.image);
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        imageBytes = file.bytes;
+        update();
+      }
+    } catch (e) {
+      ///
     }
   }
 }

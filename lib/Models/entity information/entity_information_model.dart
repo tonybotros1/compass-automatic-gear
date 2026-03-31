@@ -157,6 +157,7 @@ class EntityInformationModel {
 }
 
 class EntityAddress {
+  String? id;
   String? line;
   bool? isPrimary;
   String? countryId;
@@ -165,6 +166,7 @@ class EntityAddress {
   String? city;
 
   EntityAddress({
+    this.id,
     this.line,
     this.isPrimary,
     this.countryId,
@@ -174,6 +176,7 @@ class EntityAddress {
   });
 
   EntityAddress.fromJson(Map<String, dynamic> json) {
+    id = json.containsKey('id') ? json['id'] : '';
     line = json.containsKey('line') ? json['line']?.toString() ?? '' : '';
     isPrimary = json.containsKey('isPrimary')
         ? json['isPrimary'] ?? false
@@ -192,6 +195,7 @@ class EntityAddress {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
     data['line'] = line;
     data['isPrimary'] = isPrimary;
     data['country_id'] = countryId;

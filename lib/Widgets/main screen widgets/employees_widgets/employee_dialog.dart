@@ -69,6 +69,7 @@ Future<dynamic> employeeDialog({
                 child: addNewEmployeeOrEdit(
                   controller: controller,
                   canEdit: canEdit,
+                  constraints: constraints,
                 ),
               ),
             ),
