@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
+import '../../../../Widgets/attachments/attachment_screen.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/employees_widgets/employee_dialog.dart';
 import '../../../../Widgets/menu_dialog.dart';
@@ -374,6 +375,7 @@ IconButton editSection(
     onPressed: () async {
       controller.loadValues(data);
       employeeDialog(
+        onPressedForAttachment: null,
         constraints: constraints,
         controller: controller,
         canEdit: true,
@@ -398,6 +400,19 @@ ElevatedButton newEmployeeButton(
       controller.clearValues();
 
       employeeDialog(
+        onPressedForAttachment: () {
+          Get.dialog(
+            Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: AttachmentScreen(
+                code: 'AAA',
+                documentId: '123456789123456789123456',
+              ),
+            ),
+          );
+        },
         constraints: constraints,
         controller: controller,
         canEdit: true,

@@ -26,7 +26,7 @@ Container personalInformation(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               myTextFormFieldWithBorder(
-                labelText: 'Employee Name',
+                labelText: 'Full Name',
                 controller: controller.employeeName,
                 width: 620,
                 readOnly: isReadOnly,
@@ -34,28 +34,6 @@ Container personalInformation(
               Row(
                 spacing: 10,
                 children: [
-                  myTextFormFieldWithBorder(
-                    labelText: 'Date Of Birth',
-                    isDate: true,
-                    controller: controller.employeeDateOfBirth,
-                    width: 200,
-                    readOnly: isReadOnly,
-                    suffixIcon: IconButton(
-                      onPressed: () async {
-                        selectDateContext(
-                          context,
-                          controller.employeeDateOfBirth,
-                        );
-                      },
-                      icon: const Icon(Icons.date_range),
-                    ),
-                    onFieldSubmitted: (_) async {
-                      normalizeDate(
-                        controller.employeeDateOfBirth.text,
-                        controller.employeeDateOfBirth,
-                      );
-                    },
-                  ),
                   MenuWithValues(
                     labelText: 'Country of Birth',
                     headerLqabel: 'Gender',
@@ -82,6 +60,28 @@ Container personalInformation(
                     width: 200,
                     readOnly: isReadOnly,
                   ),
+                  myTextFormFieldWithBorder(
+                    labelText: 'Date Of Birth',
+                    isDate: true,
+                    controller: controller.employeeDateOfBirth,
+                    width: 200,
+                    readOnly: isReadOnly,
+                    suffixIcon: IconButton(
+                      onPressed: () async {
+                        selectDateContext(
+                          context,
+                          controller.employeeDateOfBirth,
+                        );
+                      },
+                      icon: const Icon(Icons.date_range),
+                    ),
+                    onFieldSubmitted: (_) async {
+                      normalizeDate(
+                        controller.employeeDateOfBirth.text,
+                        controller.employeeDateOfBirth,
+                      );
+                    },
+                  ),
                 ],
               ),
               Row(
@@ -107,26 +107,6 @@ Container personalInformation(
                       controller.employeeGenderId.value = value['_id'];
                     },
                   ),
-                  // MenuWithValues(
-                  //   labelText: 'Nationality',
-                  //   headerLqabel: 'Nationality',
-                  //   dialogWidth: 600,
-                  //   width: 200,
-                  //   controller: controller.employeeNationality,
-                  //   displayKeys: const ['name'],
-                  //   displaySelectedKeys: const ['name'],
-                  //   onOpen: () {
-                  //     return controller.getNationalities();
-                  //   },
-                  //   onDelete: () {
-                  //     controller.employeeNationality.clear();
-                  //     controller.employeeNamtionalityId.value = '';
-                  //   },
-                  //   onSelected: (value) {
-                  //     controller.employeeNationality.text = value['name'];
-                  //     controller.employeeNamtionalityId.value = value['_id'];
-                  //   },
-                  // ),
                   MenuWithValues(
                     labelText: 'Martial Status',
                     headerLqabel: 'Martial Status',
@@ -146,6 +126,12 @@ Container personalInformation(
                       controller.employeeMaritalStatus.text = value['name'];
                       controller.employeeMaritalStatusId.value = value['_id'];
                     },
+                  ),
+                  myTextFormFieldWithBorder(
+                    labelText: 'Person Type',
+                    controller: controller.personType,
+                    width: 200,
+                    readOnly: isReadOnly,
                   ),
                 ],
               ),

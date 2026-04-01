@@ -10,16 +10,12 @@ import '../../web_functions.dart';
 import 'attachment_dialog.dart';
 
 class AttachmentScreen extends StatelessWidget {
-  AttachmentScreen({
-    super.key,
-    required this.screenName,
-    required this.documentId,
-  });
+  AttachmentScreen({super.key, required this.code, required this.documentId});
 
-  final String screenName;
+  final String code;
   final String documentId;
   late final AttachmentController controller = Get.put(
-    AttachmentController(screenName: screenName, documentId: documentId),
+    AttachmentController(code: code, documentId: documentId),
     tag: documentId,
   );
 
@@ -34,10 +30,7 @@ class AttachmentScreen extends StatelessWidget {
         // leading: const SizedBox(),
         actions: [
           GetBuilder<AttachmentController>(
-            init: AttachmentController(
-              screenName: screenName,
-              documentId: documentId,
-            ),
+            init: AttachmentController(code: code, documentId: documentId),
             builder: (controller) {
               return newAttachmentButton(context, controller);
             },
@@ -50,10 +43,7 @@ class AttachmentScreen extends StatelessWidget {
         actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
       ),
       body: GetX<AttachmentController>(
-        init: AttachmentController(
-          screenName: screenName,
-          documentId: documentId,
-        ),
+        init: AttachmentController(code: code, documentId: documentId),
         builder: (controller) {
           return PaginatedDataTable2(
             border: TableBorder.symmetric(
@@ -68,17 +58,56 @@ class AttachmentScreen extends StatelessWidget {
             showFirstLastButtons: true,
             horizontalMargin: 5,
             dataRowHeight: 40,
-
             columns: const [
               DataColumn2(
-                size: ColumnSize.L,
+                size: ColumnSize.S,
+                label: SizedBox(),
+                // onSort: controller.onSort,
+              ),
+              DataColumn2(
+                size: ColumnSize.S,
+                label: Text('Code'),
+                // onSort: controller.onSort,
+              ),
+              DataColumn2(
+                size: ColumnSize.M,
+                label: Text('Name'),
+                // onSort: controller.onSort,
+              ),
+              DataColumn2(
+                size: ColumnSize.M,
                 label: Text('Type'),
                 // onSort: controller.onSort,
               ),
               DataColumn2(
-                size: ColumnSize.L,
-
+                size: ColumnSize.S,
                 label: Text('Number'),
+                // onSort: controller.onSort,
+              ),
+              DataColumn2(
+                size: ColumnSize.M,
+                label: Text('Start Date'),
+                // onSort: controller.onSort,
+              ),
+              DataColumn2(
+                size: ColumnSize.M,
+                label: Text('End Date'),
+                // onSort: controller.onSort,
+              ),
+              DataColumn2(
+                size: ColumnSize.L,
+                label: Text('File Name'),
+                // onSort: controller.onSort,
+              ),
+              DataColumn2(
+                size: ColumnSize.L,
+                label: Text('Note'),
+                // onSort: controller.onSort,
+              ),
+
+              DataColumn2(
+                size: ColumnSize.S,
+                label: Text('File'),
                 // onSort: controller.onSort,
               ),
             ],
@@ -96,28 +125,10 @@ class AttachmentScreen extends StatelessWidget {
   }
 }
 
-ClickableHoverText newAttachmentButton(
-  BuildContext context,
-  AttachmentController controller,
-) {
-  return ClickableHoverText(
-    onTap: () {
-      attachmentDialog(
-        controller: controller,
-        canEdit: true,
-        onPressed: () {
-          controller.addAttachments();
-        },
-      );
-    },
-    text: 'New Attachment',
-  );
-}
-
 DataRow dataRowForTheTable(
   AttachmentsModel data,
   BuildContext context,
-  String jobId,
+  String id,
   AttachmentController controller,
   int index,
 ) {
@@ -132,21 +143,135 @@ DataRow dataRowForTheTable(
       return !isEvenRow ? coolColor : Colors.white;
     }),
     cells: [
-      DataCell(textForDataRowInTable(text: data.name ?? '', maxWidth: null)),
+      DataCell(deleteSection(controller, id, context)),
+      DataCell(
+        textForDataRowInTable(
+          text: data.code ?? '',
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.name ?? '',
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.attachmentTypeName ?? '',
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.number ?? '',
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: textToDate(data.startDate),
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: textToDate(data.endDate),
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.fileName ?? '',
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.note ?? '',
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
       DataCell(
         InkWell(
           onTap: () {
-            var openFile = FilePickerService();
-            openFile.openFile(data.file ?? '', data.name ?? '');
+            if (isTheFileImage(data.fileName ?? '')) {
+              openImageViewer([data.fileURL], 1);
+            } else {
+              var openFile = FilePickerService();
+              openFile.openFile(
+                data.fileURL ?? '',
+                "${data.attachmentTypeName ?? ''} - ${data.name ?? ''}",
+              );
+            }
           },
-          child: textForDataRowInTable(
-            text: data.file ?? '',
-            maxWidth: null,
-            isSelectable: false,
+          child: returnFileLogo(
+            width: 30,
+            fileName: data.fileName ?? '',
+            filePath: data.fileURL,
           ),
         ),
       ),
     ],
+  );
+}
+
+ClickableHoverText newAttachmentButton(
+  BuildContext context,
+  AttachmentController controller,
+) {
+  return ClickableHoverText(
+    onTap: () {
+      controller.name.clear();
+      controller.number.clear();
+      controller.type.clear();
+      controller.typeId.value = '';
+      controller.fileName.value = '';
+      controller.fileType.value = '';
+      controller.fileBytes.value = null;
+      controller.startDate.clear();
+      controller.endDate.clear();
+      controller.fileNameWhenSelectFile.clear();
+      controller.note.clear();
+      attachmentDialog(
+        context: context,
+        controller: controller,
+        canEdit: true,
+        onPressed: controller.addingNewAttachment.isFalse
+            ? () {
+                controller.addAttachments();
+              }
+            : null,
+      );
+    },
+    text: 'New Attachment',
+  );
+}
+
+IconButton deleteSection(
+  AttachmentController controller,
+  String id,
+  BuildContext context,
+) {
+  return IconButton(
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The file will be deleted permanently",
+        onPressed: () {
+          controller.deleteattachmenth(id);
+        },
+      );
+    },
+    icon: deleteIcon,
   );
 }
 

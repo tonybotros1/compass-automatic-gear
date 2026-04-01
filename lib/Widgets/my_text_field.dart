@@ -19,6 +19,7 @@ Widget myTextFormFieldWithBorder({
   bool? isDouble,
   bool? isDate,
   double? width,
+  String? initialValue,
   bool? isCapitaLetters,
   FocusNode? focusNode,
   FocusNode? nextFocusNode,
@@ -77,6 +78,7 @@ Widget myTextFormFieldWithBorder({
             }
           },
           child: TextFormField(
+            initialValue: initialValue,
             canRequestFocus: true,
             readOnly: readOnly ?? false,
             onTapOutside: onTapOutside,

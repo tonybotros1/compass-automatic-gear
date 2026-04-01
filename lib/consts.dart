@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:datahubai/helpers.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,8 +17,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://172.168.1.17:8000';
-String webSocketURL = "ws://172.168.1.17:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://192.168.1.18:8000';
+String webSocketURL = "ws://192.168.1.18:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
@@ -1798,4 +1799,70 @@ Future<pw.MemoryImage> networkImageToPdf(String url) async {
   } else {
     throw Exception("Failed to load image from $url");
   }
+}
+
+bool isTheFileImage(String fileName) {
+  final extension = fileName.contains('.')
+      ? fileName.split('.').last.toLowerCase()
+      : '';
+  const imageExtensions = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'};
+  if (imageExtensions.contains(extension)) {
+    return true;
+  }
+  return false;
+}
+
+Widget returnFileLogo({
+  required String fileName,
+  String? filePath,
+  double width = 50,
+}) {
+  final extension = fileName.contains('.')
+      ? fileName.split('.').last.toLowerCase()
+      : '';
+
+  const imageExtensions = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp'};
+
+  if (imageExtensions.contains(extension) &&
+      filePath != null &&
+      filePath.isNotEmpty) {
+    if (filePath.startsWith('http')) {
+      return Image.network(
+        filePath,
+        width: width,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => Image.asset('assets/file.png', width: width),
+      );
+    }
+
+    return Image.file(
+      File(filePath),
+      width: width,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Image.asset('assets/file.png', width: width),
+    );
+  }
+
+  String assetPath;
+  switch (extension) {
+    case 'pdf':
+      assetPath = 'assets/pdf.png';
+      break;
+    case 'doc':
+    case 'docx':
+      assetPath = 'assets/word.png';
+      break;
+    case 'xls':
+    case 'xlsx':
+      assetPath = 'assets/excel.png';
+      break;
+    case 'ppt':
+    case 'pptx':
+      assetPath = 'assets/powerpoint.png';
+      break;
+    default:
+      assetPath = 'assets/file.png';
+  }
+
+  return Image.asset(assetPath, width: width);
 }

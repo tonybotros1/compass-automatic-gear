@@ -1,4 +1,5 @@
 import 'package:datahubai/Controllers/Widgets%20controllers/attachment_controller.dart';
+import 'package:datahubai/Widgets/text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
@@ -8,13 +9,14 @@ Future<dynamic> attachmentDialog({
   required AttachmentController controller,
   required bool canEdit,
   required void Function()? onPressed,
+  required BuildContext context,
 }) {
   return Get.dialog(
     barrierDismissible: false,
     Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
-        height: 410,
+        height: 500,
         width: 600,
         child: Column(
           children: [
@@ -36,25 +38,17 @@ Future<dynamic> attachmentDialog({
                   ),
                   const Spacer(),
                   GetX<AttachmentController>(
-                    builder: (controller) => ElevatedButton(
-                      onPressed: onPressed,
-                      style: new2ButtonStyle,
-                      child: controller.addingNewValue.value == false
-                          ? const Text(
-                              'Save',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            )
-                          : const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            ),
+                    builder: (controller) => ClickableHoverText(
+                      onTap: controller.addingNewAttachment.isFalse
+                          ? onPressed
+                          : null,
+                      text: controller.addingNewAttachment.isFalse
+                          ? 'Save'
+                          : '•••',
                     ),
                   ),
-                  closeButton,
+                  separator(),
+                  closeIcon(),
                 ],
               ),
             ),
@@ -64,6 +58,7 @@ Future<dynamic> attachmentDialog({
                 child: addNewAttachment(
                   controller: controller,
                   canEdit: canEdit,
+                  context: context,
                 ),
               ),
             ),

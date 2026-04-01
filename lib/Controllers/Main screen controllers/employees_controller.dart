@@ -27,6 +27,7 @@ class EmployeesController extends GetxController {
   TextEditingController employeeGender = TextEditingController();
   TextEditingController employeeDateOfBirth = TextEditingController();
   TextEditingController employeePlaceOfBirth = TextEditingController();
+  TextEditingController personType = TextEditingController();
   TextEditingController employeeCountryOfBirth = TextEditingController();
   TextEditingController employeeNationality = TextEditingController();
   TextEditingController employeeMaritalStatus = TextEditingController();
@@ -36,9 +37,14 @@ class EmployeesController extends GetxController {
   TextEditingController employeeEmergencyName = TextEditingController();
   TextEditingController employeeAddress = TextEditingController();
   TextEditingController jobTitle = TextEditingController();
+  TextEditingController jobLocation = TextEditingController();
+  RxString jobLocationId = RxString('');
+  RxString jobTitleId = RxString('');
   TextEditingController hireDate = TextEditingController();
   TextEditingController endDate = TextEditingController();
   TextEditingController employeeStatus = TextEditingController();
+  TextEditingController jobEmployer = TextEditingController();
+  RxString jobEmployerId = RxString('');
   RxList<EntityAddress> addressesList = RxList<EntityAddress>([]);
   RxList<PhoneModel> phonesList = RxList<PhoneModel>([]);
   RxList<EmailModel> emailsList = RxList<EmailModel>([]);
@@ -92,7 +98,7 @@ class EmployeesController extends GetxController {
   @override
   void onInit() async {
     connectWebSocket();
-    getAllEmployees();
+    // getAllEmployees();
     super.onInit();
   }
 
@@ -132,6 +138,18 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getCitiesByCountryID(String countryID) async {
     return await helper.getCitiesValues(countryID);
+  }
+
+  Future<Map<String, dynamic>> getallJobEmployers() async {
+    return await helper.getAllListValues('EMPLOYERS');
+  }
+
+  Future<Map<String, dynamic>> getallJobTitle() async {
+    return await helper.getAllListValues('JOBS');
+  }
+
+  Future<Map<String, dynamic>> getallJobLocations() async {
+    return await helper.getAllListValues('LOCATIONS');
   }
 
   void connectWebSocket() {

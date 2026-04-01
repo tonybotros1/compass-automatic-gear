@@ -13,19 +13,31 @@ import '../../helpers.dart';
 class AttachmentController extends GetxController {
   RxList<AttachmentsModel> attachesList = RxList<AttachmentsModel>([]);
   String backendUrl = backendTestURI;
-  String screenName = '';
+  String code = '';
   String documentId = '';
-  RxBool addingNewValue = RxBool(false);
   TextEditingController name = TextEditingController();
+  TextEditingController type = TextEditingController();
+  RxString typeId = RxString('');
+  TextEditingController number = TextEditingController();
+  TextEditingController startDate = TextEditingController();
+  TextEditingController endDate = TextEditingController();
+  TextEditingController fileNameWhenSelectFile = TextEditingController();
+  TextEditingController note = TextEditingController();
+  TextEditingController attachmentCode = TextEditingController();
   Rx<Uint8List?> fileBytes = Rx<Uint8List?>(null);
   RxString fileType = RxString('');
   RxString fileName = RxString('');
-  AttachmentController({required this.screenName, required this.documentId});
+  AttachmentController({required this.code, required this.documentId});
+  RxBool addingNewAttachment = RxBool(false);
 
   @override
   void onInit() async {
     getAllAttachments();
     super.onInit();
+  }
+
+  Future<Map<String, dynamic>> getAttachmentTypes() async {
+    return await helper.getAllListValues('ATTACHMENT_TYPES');
   }
 
   Future<void> getAllAttachments() async {
@@ -40,10 +52,7 @@ class AttachmentController extends GetxController {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          "screen_name": screenName,
-          "document_id": documentId,
-        }),
+        body: jsonEncode({"code": code, "document_id": documentId}),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -68,15 +77,24 @@ class AttachmentController extends GetxController {
 
   Future<void> addAttachments() async {
     try {
+      addingNewAttachment.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse('$backendUrl/attachment/add_new_attachment');
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll({'Authorization': 'Bearer $accessToken'});
-      request.fields['screen_name'] = screenName;
+      request.fields['code'] = attachmentCode.text;
       request.fields['document_id'] = documentId;
       request.fields['name'] = name.text;
+
+      request.fields['start_date'] = convertDateToIson(
+        startDate.text,
+      ).toString();
+      request.fields['end_date'] = convertDateToIson(endDate.text).toString();
+      request.fields['note'] = note.text;
+      request.fields['number'] = number.text;
+      request.fields['attachment_type'] = typeId.value;
       if (fileBytes.value != null) {
         request.files.add(
           http.MultipartFile.fromBytes(
@@ -93,8 +111,31 @@ class AttachmentController extends GetxController {
         final decoded = jsonDecode(response.body);
         String attURL = decoded['attach_url'];
         String name = decoded['name'];
+        String code = decoded['code'];
+        DateTime startDate = decoded['start_date'];
+        DateTime endDate = decoded['end_date'];
+        String note = decoded['note'];
+        String number = decoded['number'];
+        String attachmentType = decoded['attachment_type_name'];
+        String attachmentTypeId = decoded['attachment_type'];
+        String fileName = decoded['file_name'];
+
         String id = decoded['_id'];
-        attachesList.add(AttachmentsModel(id: id, name: name, file: attURL));
+        attachesList.add(
+          AttachmentsModel(
+            id: id,
+            name: name,
+            fileURL: attURL,
+            code: code,
+            startDate: startDate,
+            endDate: endDate,
+            note: note,
+            number: number,
+            attachmentTypeName: attachmentType,
+            attachmentTypeId: attachmentTypeId,
+            fileName: fileName,
+          ),
+        );
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -105,9 +146,40 @@ class AttachmentController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       } else {}
+      addingNewAttachment.value = false;
       Get.back();
     } catch (e) {
+      addingNewAttachment.value = false;
+
       Get.back();
+    }
+  }
+
+  Future<void> deleteattachmenth(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/attachment/delete_attachment/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        attachesList.removeWhere((att) => att.id == id);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteattachmenth(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      Get.back();
+    } catch (e) {
+      //
     }
   }
 }

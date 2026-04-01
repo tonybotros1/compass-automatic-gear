@@ -4,7 +4,7 @@ import '../../../consts.dart';
 import 'emails/email_section.dart';
 import 'phone/phone_Section.dart';
 import 'address/address_section.dart';
-import 'job_information_section.dart';
+import 'assignment_information_section.dart';
 import 'nationality/nationality_section.dart';
 import 'personal_information_section.dart';
 
@@ -132,9 +132,9 @@ Widget addNewEmployeeOrEdit({
                   Column(
                     children: [
                       labelContainer(
-                        lable: Text('Job Information', style: fontStyle1),
+                        lable: Text('Assignment Information', style: fontStyle1),
                       ),
-                      jobInformation(context, controller),
+                      assignmentInformation(context, controller),
                     ],
                   ),
                 ],

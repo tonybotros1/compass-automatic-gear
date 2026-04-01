@@ -10,6 +10,7 @@ Future<dynamic> employeeDialog({
   required EmployeesController controller,
   required bool canEdit,
   required void Function()? onPressed,
+  required void Function()? onPressedForAttachment,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -57,6 +58,11 @@ Future<dynamic> employeeDialog({
                           ? 'Save'
                           : "•••",
                     ),
+                  ),
+                  separator(),
+                  ClickableHoverText(
+                    onTap: onPressedForAttachment,
+                    text: 'Attachments',
                   ),
                   separator(),
                   closeIcon(),
