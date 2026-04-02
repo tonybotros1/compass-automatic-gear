@@ -2,12 +2,12 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Widgets/text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../Controllers/Widgets controllers/attachment_controller.dart';
 import '../../Models/attachments/attachments_model.dart';
 import '../../consts.dart';
-import '../../web_functions.dart';
+import '../Auth screens widgets/register widgets/search_bar.dart';
 import 'attachment_dialog.dart';
+import 'documents_screen.dart';
 
 class AttachmentScreen extends StatelessWidget {
   AttachmentScreen({super.key, required this.code, required this.documentId});
@@ -42,82 +42,79 @@ class AttachmentScreen extends StatelessWidget {
         ],
         actionsPadding: const EdgeInsets.symmetric(horizontal: 20),
       ),
-      body: GetX<AttachmentController>(
-        init: AttachmentController(code: code, documentId: documentId),
-        builder: (controller) {
-          return PaginatedDataTable2(
-            border: TableBorder.symmetric(
-              inside: BorderSide(color: Colors.grey.shade200, width: 0.5),
-            ),
-            smRatio: 0.67,
-            lmRatio: 3,
-            autoRowsToHeight: true,
-            showCheckboxColumn: false,
-            headingRowHeight: 60,
-            columnSpacing: 5,
-            showFirstLastButtons: true,
-            horizontalMargin: 5,
-            dataRowHeight: 40,
-            columns: const [
-              DataColumn2(
-                size: ColumnSize.S,
-                label: SizedBox(),
-                // onSort: controller.onSort,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Column(
+            children: [
+              GetBuilder<AttachmentController>(
+                init: AttachmentController(code: code, documentId: documentId),
+                builder: (controller) {
+                  return searchBar(
+                    onChanged: (_) {
+                      controller.filterAttachments();
+                    },
+                    onPressedForClearSearch: () {
+                      controller.search.value.clear();
+                      controller.filterAttachments();
+                    },
+                    search: controller.search,
+                    constraints: constraints,
+                    context: context,
+                    title: 'Search for attachments',
+                  );
+                },
               ),
-              DataColumn2(
-                size: ColumnSize.S,
-                label: Text('Code'),
-                // onSort: controller.onSort,
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                label: Text('Name'),
-                // onSort: controller.onSort,
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                label: Text('Type'),
-                // onSort: controller.onSort,
-              ),
-              DataColumn2(
-                size: ColumnSize.S,
-                label: Text('Number'),
-                // onSort: controller.onSort,
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                label: Text('Start Date'),
-                // onSort: controller.onSort,
-              ),
-              DataColumn2(
-                size: ColumnSize.M,
-                label: Text('End Date'),
-                // onSort: controller.onSort,
-              ),
-              DataColumn2(
-                size: ColumnSize.L,
-                label: Text('File Name'),
-                // onSort: controller.onSort,
-              ),
-              DataColumn2(
-                size: ColumnSize.L,
-                label: Text('Note'),
-                // onSort: controller.onSort,
-              ),
+              Expanded(
+                child: GetX<AttachmentController>(
+                  builder: (controller) {
+                    return PaginatedDataTable2(
+                      border: TableBorder.symmetric(
+                        inside: BorderSide(
+                          color: Colors.grey.shade200,
+                          width: 0.5,
+                        ),
+                      ),
+                      smRatio: 0.67,
+                      lmRatio: 3,
+                      autoRowsToHeight: true,
+                      showCheckboxColumn: false,
+                      headingRowHeight: 60,
+                      columnSpacing: 5,
+                      showFirstLastButtons: true,
+                      horizontalMargin: 5,
+                      dataRowHeight: 40,
+                      columns: const [
+                        DataColumn2(size: ColumnSize.S, label: SizedBox()),
+                        DataColumn2(size: ColumnSize.M, label: Text('Type')),
+                        DataColumn2(size: ColumnSize.M, label: Text('Name')),
 
-              DataColumn2(
-                size: ColumnSize.S,
-                label: Text('File'),
-                // onSort: controller.onSort,
+                        DataColumn2(size: ColumnSize.S, label: Text('Number')),
+                        DataColumn2(
+                          size: ColumnSize.M,
+                          label: Text('Start Date'),
+                        ),
+                        DataColumn2(
+                          size: ColumnSize.M,
+                          label: Text('End Date'),
+                        ),
+                        DataColumn2(size: ColumnSize.L, label: Text('Note')),
+
+                        DataColumn2(size: ColumnSize.S, label: Text('Files')),
+                      ],
+                      source: CardDataSource(
+                        cards:
+                            controller.search.value.text.isEmpty &&
+                                controller.filteredAttachesList.isEmpty
+                            ? controller.attachesList
+                            : controller.filteredAttachesList,
+                        context: context,
+                        controller: controller,
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
-            source: CardDataSource(
-              cards: controller.attachesList.isEmpty
-                  ? []
-                  : controller.attachesList,
-              context: context,
-              controller: controller,
-            ),
           );
         },
       ),
@@ -144,9 +141,16 @@ DataRow dataRowForTheTable(
     }),
     cells: [
       DataCell(deleteSection(controller, id, context)),
+      // DataCell(
+      //   textForDataRowInTable(
+      //     text: data.code ?? '',
+      //     maxWidth: null,
+      //     formatDouble: false,
+      //   ),
+      // ),
       DataCell(
         textForDataRowInTable(
-          text: data.code ?? '',
+          text: data.attachmentTypeName ?? '',
           maxWidth: null,
           formatDouble: false,
         ),
@@ -158,13 +162,7 @@ DataRow dataRowForTheTable(
           formatDouble: false,
         ),
       ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.attachmentTypeName ?? '',
-          maxWidth: null,
-          formatDouble: false,
-        ),
-      ),
+
       DataCell(
         textForDataRowInTable(
           text: data.number ?? '',
@@ -186,13 +184,13 @@ DataRow dataRowForTheTable(
           formatDouble: false,
         ),
       ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.fileName ?? '',
-          maxWidth: null,
-          formatDouble: false,
-        ),
-      ),
+      // DataCell(
+      //   textForDataRowInTable(
+      //     text: data.fileName ?? '',
+      //     maxWidth: null,
+      //     formatDouble: false,
+      //   ),
+      // ),
       DataCell(
         textForDataRowInTable(
           text: data.note ?? '',
@@ -202,21 +200,14 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         InkWell(
-          onTap: () {
-            if (isTheFileImage(data.fileName ?? '')) {
-              openImageViewer([data.fileURL], 1);
-            } else {
-              var openFile = FilePickerService();
-              openFile.openFile(
-                data.fileURL ?? '',
-                "${data.attachmentTypeName ?? ''} - ${data.name ?? ''}",
-              );
-            }
-          },
-          child: returnFileLogo(
-            width: 30,
-            fileName: data.fileName ?? '',
-            filePath: data.fileURL,
+          onTap: () {},
+          child: ClickableHoverText(
+            text: 'OPEN',
+            color2: Colors.grey,
+            color1: Colors.blue,
+            onTap: () {
+              documentsScreen(documents: data.attachments ?? []);
+            },
           ),
         ),
       ),
@@ -241,6 +232,7 @@ ClickableHoverText newAttachmentButton(
       controller.endDate.clear();
       controller.fileNameWhenSelectFile.clear();
       controller.note.clear();
+      controller.selectedAttachments.clear();
       attachmentDialog(
         context: context,
         controller: controller,

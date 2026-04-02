@@ -17,7 +17,7 @@ Future<dynamic> attachmentDialog({
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
         height: 500,
-        width: 600,
+        width: 800,
         child: Column(
           children: [
             Container(

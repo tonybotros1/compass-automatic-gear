@@ -44,6 +44,10 @@ class EmployeesController extends GetxController {
   TextEditingController endDate = TextEditingController();
   TextEditingController employeeStatus = TextEditingController();
   TextEditingController jobEmployer = TextEditingController();
+  TextEditingController jobDepartment = TextEditingController();
+  TextEditingController reportingManager = TextEditingController();
+  RxString reportingManagerId = RxString('');
+  RxString jobDepartmentId = RxString('');
   RxString jobEmployerId = RxString('');
   RxList<EntityAddress> addressesList = RxList<EntityAddress>([]);
   RxList<PhoneModel> phonesList = RxList<PhoneModel>([]);
@@ -142,6 +146,9 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getallJobEmployers() async {
     return await helper.getAllListValues('EMPLOYERS');
+  }
+   Future<Map<String, dynamic>> getAllJobDepartments() async {
+    return await helper.getAllListValues('DEPARTMENTS');
   }
 
   Future<Map<String, dynamic>> getallJobTitle() async {

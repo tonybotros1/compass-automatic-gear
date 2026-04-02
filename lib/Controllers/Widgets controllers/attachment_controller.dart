@@ -7,11 +7,13 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Models/attachments/attachments_model.dart';
+import '../../Models/attachments/selected_attachments_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 
 class AttachmentController extends GetxController {
   RxList<AttachmentsModel> attachesList = RxList<AttachmentsModel>([]);
+  RxList<AttachmentsModel> filteredAttachesList = RxList<AttachmentsModel>([]);
   String backendUrl = backendTestURI;
   String code = '';
   String documentId = '';
@@ -23,12 +25,16 @@ class AttachmentController extends GetxController {
   TextEditingController endDate = TextEditingController();
   TextEditingController fileNameWhenSelectFile = TextEditingController();
   TextEditingController note = TextEditingController();
-  TextEditingController attachmentCode = TextEditingController();
+  Rx<TextEditingController> search = TextEditingController().obs;
+  // TextEditingController attachmentCode = TextEditingController();
   Rx<Uint8List?> fileBytes = Rx<Uint8List?>(null);
   RxString fileType = RxString('');
   RxString fileName = RxString('');
+  RxList<SelectedAttachmentsModel> selectedAttachments =
+      RxList<SelectedAttachmentsModel>([]);
   AttachmentController({required this.code, required this.documentId});
   RxBool addingNewAttachment = RxBool(false);
+  RxString query = RxString('');
 
   @override
   void onInit() async {
@@ -60,6 +66,7 @@ class AttachmentController extends GetxController {
         attachesList.assignAll(
           att.map((employee) => AttachmentsModel.fromJson(employee)),
         );
+        filterAttachments();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -84,7 +91,7 @@ class AttachmentController extends GetxController {
       Uri url = Uri.parse('$backendUrl/attachment/add_new_attachment');
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll({'Authorization': 'Bearer $accessToken'});
-      request.fields['code'] = attachmentCode.text;
+      request.fields['code'] = "EMPLOYEES_ATTACHMENT";
       request.fields['document_id'] = documentId;
       request.fields['name'] = name.text;
 
@@ -95,47 +102,25 @@ class AttachmentController extends GetxController {
       request.fields['note'] = note.text;
       request.fields['number'] = number.text;
       request.fields['attachment_type'] = typeId.value;
-      if (fileBytes.value != null) {
+      for (int i = 0; i < selectedAttachments.length; i++) {
         request.files.add(
           http.MultipartFile.fromBytes(
-            'attachment',
-            fileBytes.value!,
-            filename: fileName.value,
+            'attachments',
+            selectedAttachments[i].fileBytes!,
+            filename: selectedAttachments[i].fileName,
           ),
         );
       }
+
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        String attURL = decoded['attach_url'];
-        String name = decoded['name'];
-        String code = decoded['code'];
-        DateTime startDate = decoded['start_date'];
-        DateTime endDate = decoded['end_date'];
-        String note = decoded['note'];
-        String number = decoded['number'];
-        String attachmentType = decoded['attachment_type_name'];
-        String attachmentTypeId = decoded['attachment_type'];
-        String fileName = decoded['file_name'];
-
-        String id = decoded['_id'];
-        attachesList.add(
-          AttachmentsModel(
-            id: id,
-            name: name,
-            fileURL: attURL,
-            code: code,
-            startDate: startDate,
-            endDate: endDate,
-            note: note,
-            number: number,
-            attachmentTypeName: attachmentType,
-            attachmentTypeId: attachmentTypeId,
-            fileName: fileName,
-          ),
+        AttachmentsModel newAttachment = AttachmentsModel.fromJson(
+          decoded['result'],
         );
+        attachesList.add(newAttachment);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -181,5 +166,26 @@ class AttachmentController extends GetxController {
     } catch (e) {
       //
     }
+  }
+
+  void filterAttachments() {
+    query.value = search.value.text.toLowerCase();
+
+    if (query.value.isEmpty) {
+      filteredAttachesList.clear();
+      return;
+    }
+    filteredAttachesList.assignAll(
+      attachesList.where((attach) {
+        return attach.name.toString().toLowerCase().contains(query.value) ||
+            attach.attachmentTypeName.toString().toLowerCase().contains(
+              query.value,
+            ) ||
+            attach.number.toString().toLowerCase().contains(query.value) ||
+            attach.note.toString().toLowerCase().contains(query.value) ||
+            textToDate(attach.startDate).toLowerCase().contains(query.value) ||
+            textToDate(attach.endDate).toLowerCase().contains(query.value);
+      }).toList(),
+    );
   }
 }

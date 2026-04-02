@@ -62,7 +62,7 @@ Future<dynamic> employeeDialog({
                   separator(),
                   ClickableHoverText(
                     onTap: onPressedForAttachment,
-                    text: 'Attachments',
+                    text: 'Document of Record',
                   ),
                   separator(),
                   closeIcon(),

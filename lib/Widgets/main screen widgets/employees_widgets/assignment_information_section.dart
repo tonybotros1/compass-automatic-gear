@@ -64,6 +64,26 @@ Container assignmentInformation(
                 },
               ),
               MenuWithValues(
+                labelText: 'Department',
+                headerLqabel: 'Departments',
+                dialogWidth: 600,
+                width: 310,
+                controller: controller.jobDepartment,
+                displayKeys: const ['name'],
+                displaySelectedKeys: const ['name'],
+                onOpen: () {
+                  return controller.getAllJobDepartments();
+                },
+                onDelete: () {
+                  controller.jobDepartment.clear();
+                  controller.jobDepartmentId.value = '';
+                },
+                onSelected: (value) {
+                  controller.jobDepartment.text = value['name'];
+                  controller.jobDepartmentId.value = value['_id'];
+                },
+              ),
+              MenuWithValues(
                 labelText: 'Job Title',
                 headerLqabel: 'Job Titles',
                 dialogWidth: 600,
@@ -145,10 +165,31 @@ Container assignmentInformation(
                   ),
                 ],
               ),
+              MenuWithValues(
+                labelText: 'Reporting Manager',
+                headerLqabel: 'Reporting Managers',
+                dialogWidth: 600,
+                width: 310,
+                controller: controller.reportingManager,
+                displayKeys: const ['name'],
+                displaySelectedKeys: const ['name'],
+                onOpen: () {
+                  return controller.getAllJobDepartments();
+                },
+                onDelete: () {
+                  controller.reportingManager.clear();
+                  controller.reportingManagerId.value = '';
+                },
+                onSelected: (value) {
+                  controller.reportingManager.text = value['name'];
+                  controller.reportingManagerId.value = value['_id'];
+                },
+              ),
             ],
           ),
         ),
-        const Expanded( // need to edit
+        const Expanded(
+          // need to edit
           child: Column(
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.start,

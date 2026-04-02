@@ -17,8 +17,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://192.168.1.18:8000';
-String webSocketURL = "ws://192.168.1.18:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://172.168.1.17:8000';
+String webSocketURL = "ws://172.168.1.17:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
@@ -1799,6 +1799,13 @@ Future<pw.MemoryImage> networkImageToPdf(String url) async {
   } else {
     throw Exception("Failed to load image from $url");
   }
+}
+
+String returnFileExtension(String fileName) {
+  String extension = fileName.contains('.')
+      ? fileName.split('.').last.toLowerCase()
+      : '';
+  return extension;
 }
 
 bool isTheFileImage(String fileName) {
