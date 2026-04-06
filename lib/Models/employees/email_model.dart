@@ -7,10 +7,10 @@ class EmailModel {
   EmailModel({this.id, this.email, this.type, this.typeId});
 
   EmailModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    email = json['email'];
-    type = json['type'];
-    typeId = json['type_id'];
+    id = json.containsKey('id') ? json['id'] ?? '' : '';
+    email = json.containsKey('email') ? json['email'] ?? '' : '';
+    type =json.containsKey('type_name') ?  json['type_name'] ?? '' : '';
+    typeId =json.containsKey('type') ?  json['type']??'' : '';
   }
 
   Map<String, dynamic> toJson() {

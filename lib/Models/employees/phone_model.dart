@@ -1,24 +1,29 @@
 class PhoneModel {
   String? id;
-  String? phone;
   String? type;
-  String? typeId;
+  String? phone;
+  String? employeeId;
+  String? typeName;
 
-  PhoneModel({this.id, this.phone, this.type, this.typeId});
+  PhoneModel({this.id, this.type, this.phone, this.employeeId, this.typeName});
 
   PhoneModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    phone = json['phone'];
-    type = json['type'];
-    typeId = json['type_id'];
+    id = json.containsKey('_id') ? json['_id'] ?? '' : '';
+    type = json.containsKey('type') ? json['type'] ?? '' : '';
+    phone = json.containsKey('phone') ? json['phone'] ?? '' : '';
+    employeeId = json.containsKey('employee_id')
+        ? json['employee_id'] ?? ''
+        : '';
+    typeName = json.containsKey('type_name') ? json['type_name'] ?? '' : '';
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['phone'] = phone;
+    data['_id'] = id;
     data['type'] = type;
-    data['type_id'] = typeId;
+    data['phone'] = phone;
+    data['employee_id'] = employeeId;
+    data['type_name'] = typeName;
     return data;
   }
 }

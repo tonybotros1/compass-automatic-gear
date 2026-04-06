@@ -17,7 +17,7 @@ Widget phoneSectionFotEmployees(BoxConstraints constraints) {
           children: [
             Padding(
               padding: const EdgeInsets.all(4),
-              child: newAddressButton(controller: controller),
+              child: newPhoneButton(controller: controller),
             ),
             Expanded(
               child: tableOfScreens(
@@ -73,8 +73,8 @@ DataRow dataRowForTheTable(
       DataCell(
         Row(
           children: [
-            removeAddressButton(controller: controller, id: data.id ?? ''),
-            updateAddressButton(
+            removePhoneButton(controller: controller, id: data.id ?? ''),
+            updatephoneButton(
               controller: controller,
               data: data,
               id: data.id ?? '',
@@ -83,7 +83,10 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(
-        textForDataRowInTable(text: data.type.toString(), formatDouble: false),
+        textForDataRowInTable(
+          text: data.typeName.toString(),
+          formatDouble: false,
+        ),
       ),
       DataCell(
         textForDataRowInTable(
@@ -96,9 +99,13 @@ DataRow dataRowForTheTable(
   );
 }
 
-ElevatedButton newAddressButton({required EmployeesController controller}) {
+ElevatedButton newPhoneButton({required EmployeesController controller}) {
   return ElevatedButton(
     onPressed: () {
+      if (controller.currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Please save doc first");
+        return;
+      }
       controller.phoneType.clear();
       controller.phoneTypeId.value = '';
       controller.phoneNumber.clear();
@@ -118,7 +125,7 @@ ElevatedButton newAddressButton({required EmployeesController controller}) {
   );
 }
 
-IconButton removeAddressButton({
+IconButton removePhoneButton({
   required EmployeesController controller,
   required String id,
 }) {
@@ -130,15 +137,15 @@ IconButton removeAddressButton({
   );
 }
 
-IconButton updateAddressButton({
+IconButton updatephoneButton({
   required PhoneModel data,
   required EmployeesController controller,
   required String id,
 }) {
   return IconButton(
     onPressed: () {
-      controller.phoneType.text = data.type ?? '';
-      controller.phoneTypeId.value = data.typeId ?? '';
+      controller.phoneType.text = data.typeName ?? '';
+      controller.phoneTypeId.value = data.type ?? '';
       controller.phoneNumber.text = data.phone ?? '';
       phoneDialog(
         controller: controller,

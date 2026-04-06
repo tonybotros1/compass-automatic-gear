@@ -37,7 +37,17 @@ Future<dynamic> nationalityDialog({
                     style: fontStyleForScreenNameUsedInButtons,
                   ),
                   const Spacer(),
-                  ClickableHoverText(onTap: onPressed, text: 'Ok'),
+                  GetX<EmployeesController>(
+                    builder: (controller) {
+                      return ClickableHoverText(
+                        onTap: onPressed,
+                        text:
+                            controller.addingNewEmployeeNationalityValue.isFalse
+                            ? 'Save'
+                            : '•••',
+                      );
+                    },
+                  ),
                   separator(),
                   closeIcon(),
                 ],

@@ -33,7 +33,12 @@ Future<dynamic> emailDialog({
                 children: [
                   Text('Phone', style: fontStyleForScreenNameUsedInButtons),
                   const Spacer(),
-                  ClickableHoverText(onTap: onPressed, text: 'Ok'),
+                  ClickableHoverText(
+                    onTap: onPressed,
+                    text: controller.addingNewEmployeeEmailValue.isFalse
+                        ? 'Save'
+                        : '•••',
+                  ),
                   separator(),
                   closeIcon(),
                 ],

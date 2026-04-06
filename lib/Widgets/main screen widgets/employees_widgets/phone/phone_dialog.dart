@@ -33,7 +33,16 @@ Future<dynamic> phoneDialog({
                 children: [
                   Text('Phone', style: fontStyleForScreenNameUsedInButtons),
                   const Spacer(),
-                  ClickableHoverText(onTap: onPressed, text: 'Ok'),
+                  GetX<EmployeesController>(
+                    builder: (controller) {
+                      return ClickableHoverText(
+                        onTap: onPressed,
+                        text: controller.addingNewEmployeePhoneValue.isFalse
+                            ? 'Save'
+                            : '•••',
+                      );
+                    },
+                  ),
                   separator(),
                   closeIcon(),
                 ],

@@ -80,6 +80,9 @@ class EmployeesController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxBool addingNewContactAndRelativesValue = RxBool(false);
   RxBool addingNewEmployeeAddressValue = RxBool(false);
+  RxBool addingNewEmployeePhoneValue = RxBool(false);
+  RxBool addingNewEmployeeEmailValue = RxBool(false);
+  RxBool addingNewEmployeeNationalityValue = RxBool(false);
   String backendUrl = backendTestURI;
   RxList<EmployeesModel> allEmployees = RxList<EmployeesModel>([]);
   WebSocketService ws = Get.find<WebSocketService>();
@@ -445,6 +448,9 @@ class EmployeesController extends GetxController {
     reportingManager.text = employee.reportingManagerName ?? '';
     reportingManagerId.value = employee.reportingManager ?? '';
     addressesList.assignAll(employee.addressesList ?? []);
+    nationalityList.assignAll(employee.nationalitiesList ?? []);
+    phonesList.assignAll(employee.phoneList ?? []);
+    emailsList.assignAll(employee.emailList ?? []);
   }
 
   // ======================== address section ========================
@@ -493,6 +499,10 @@ class EmployeesController extends GetxController {
       Get.back();
     } catch (e) {
       addingNewEmployeeAddressValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -543,6 +553,10 @@ class EmployeesController extends GetxController {
       Get.back();
     } catch (e) {
       addingNewEmployeeAddressValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
@@ -573,109 +587,434 @@ class EmployeesController extends GetxController {
         logout();
       } else {}
     } catch (e) {
-      //
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 
   // ======================== nationality section ========================
-  void addNewNationality() {
-    // final String uniqueId = _uuid.v4();
-
-    // nationalityList.add(
-    //   NationalityModel(
-    //     id: uniqueId,
-    //     nationality: nationality.text,
-    //     nationalityId: nationalityId.value,
-    //     startDate: nationalityStartDate.text,
-    //     endDate: nationalityEndDate.text,
-    //   ),
-    // );
-    // Get.back();
-  }
-
-  void updateNationality(String id) {
-    int index = nationalityList.indexWhere((nat) => nat.id == id);
-    if (index != -1) {
-      nationalityList[index] = NationalityModel(
-        id: nationalityList[index].id,
-        nationality: nationality.text,
-        nationalityId: nationalityId.value,
-        startDate: nationalityStartDate.text,
-        endDate: nationalityEndDate.text,
+  Future<void> addNewNationality() async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewEmployeeNationalityValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/add_employee_nationality/${currentEmployeeId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "nationality": nationalityId.value,
+          "start_date": nationalityStartDate.text.isNotEmpty
+              ? convertDateToIson(nationalityStartDate.text)
+              : null,
+          "end_date": nationalityEndDate.text.isNotEmpty
+              ? convertDateToIson(nationalityEndDate.text)
+              : null,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        NationalityModel newNationality = NationalityModel.fromJson(
+          decoded['new_nationality'],
+        );
+        nationalityList.insert(0, newNationality);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewNationality();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewEmployeeNationalityValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeeNationalityValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
       );
     }
-    nationalityList.refresh();
-    Get.back();
   }
 
-  void deleteNationality(String id) {
-    nationalityList.removeWhere((nat) => nat.id == id);
+  Future<void> updateNationality(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewEmployeeNationalityValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/edit_employee_nationality/$id',
+      );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "nationality": nationalityId.value,
+          "start_date": nationalityStartDate.text.isNotEmpty
+              ? convertDateToIson(nationalityStartDate.text)
+              : null,
+          "end_date": nationalityEndDate.text.isNotEmpty
+              ? convertDateToIson(nationalityEndDate.text)
+              : null,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        NationalityModel updatedNationality = NationalityModel.fromJson(
+          decoded['updated_nationality'],
+        );
+        int index = nationalityList.indexWhere((nat) => nat.id == id);
+        if (index != -1) {
+          nationalityList[index] = updatedNationality;
+          nationalityList.refresh();
+        }
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateNationality(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewEmployeeNationalityValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeeNationalityValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> deleteNationality(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/delete_employee_nationality/$id',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        nationalityList.removeWhere((add) => add.id == id);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteNationality(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
   }
 
   // ======================== phone section ========================
-  void addNewPhone() {
-    // final String uniqueId = _uuid.v4();
-
-    // phonesList.add(
-    //   PhoneModel(
-    //     id: uniqueId,
-    //     phone: phoneNumber.text,
-    //     typeId: phoneTypeId.value,
-    //     type: phoneType.text,
-    //   ),
-    // );
-    // Get.back();
-  }
-
-  void updatePhone(String id) {
-    int index = phonesList.indexWhere((nat) => nat.id == id);
-    if (index != -1) {
-      phonesList[index] = PhoneModel(
-        id: phonesList[index].id,
-        phone: phoneNumber.text,
-        typeId: phoneTypeId.value,
-        type: phoneType.text,
+  Future<void> addNewPhone() async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewEmployeePhoneValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/add_employee_phone/${currentEmployeeId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "type": phoneTypeId.value,
+          "phone": phoneNumber.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        PhoneModel newPhone = PhoneModel.fromJson(decoded['new_phone']);
+        phonesList.insert(0, newPhone);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewPhone();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      addingNewEmployeePhoneValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeePhoneValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
       );
     }
-    phonesList.refresh();
-    Get.back();
   }
 
-  void deletePhone(String id) {
-    phonesList.removeWhere((nat) => nat.id == id);
+  Future<void> updatePhone(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewEmployeePhoneValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/employees/edit_employee_phone/$id');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "type": phoneTypeId.value,
+          "phone": phoneNumber.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        PhoneModel updatedPhone = PhoneModel.fromJson(decoded['updated_phone']);
+        int index = phonesList.indexWhere((ph) => ph.id == id);
+        if (index != -1) {
+          phonesList[index] = updatedPhone;
+          phonesList.refresh();
+        }
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updatePhone(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewEmployeePhoneValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeePhoneValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> deletePhone(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/employees/delete_employee_phone/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        phonesList.removeWhere((ph) => ph.id == id);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deletePhone(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
   }
 
   // ======================== email section ========================
-  void addNewEmail() {
-    // final String uniqueId = _uuid.v4();
-
-    // emailsList.add(
-    //   EmailModel(
-    //     id: uniqueId,
-    //     email: emailAddress.text,
-    //     typeId: emailTypeId.value,
-    //     type: emailType.text,
-    //   ),
-    // );
-    // Get.back();
-  }
-
-  void updateEmail(String id) {
-    int index = emailsList.indexWhere((nat) => nat.id == id);
-    if (index != -1) {
-      emailsList[index] = EmailModel(
-        id: emailsList[index].id,
-        email: emailAddress.text,
-        typeId: emailTypeId.value,
-        type: emailType.text,
+  Future<void> addNewEmail() async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewEmployeeEmailValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/add_employee_email/${currentEmployeeId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "type": emailTypeId.value,
+          "email": emailAddress.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        EmailModel newEmail = EmailModel.fromJson(decoded['new_email']);
+        emailsList.insert(0, newEmail);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewEmail();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      addingNewEmployeeEmailValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeeEmailValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
       );
     }
-    emailsList.refresh();
-    Get.back();
   }
 
-  void deleteEmail(String id) {
-    emailsList.removeWhere((nat) => nat.id == id);
+  Future<void> updateEmail(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewEmployeeEmailValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/employees/edit_employee_email/$id');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "type": emailTypeId.value,
+          "phone": emailAddress.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        EmailModel updatedEmail = EmailModel.fromJson(decoded['updated_phone']);
+        int index = emailsList.indexWhere((ph) => ph.id == id);
+        if (index != -1) {
+          emailsList[index] = updatedEmail;
+          emailsList.refresh();
+        }
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateEmail(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      addingNewEmployeeEmailValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeeEmailValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> deleteEmail(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/employees/delete_employee_email/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        emailsList.removeWhere((em) => em.id == id);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteEmail(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
   }
 
   Future<void> pickImage() async {
@@ -721,9 +1060,7 @@ class EmployeesController extends GetxController {
               .map((item) => ContactsAndRelativesModel.fromJson(item))
               .toList(),
         );
-
-      } else if (response.statusCode == 401 &&
-          refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           await getContactAndRelative();
@@ -764,7 +1101,9 @@ class EmployeesController extends GetxController {
           "gender": contactAndRelativeGenderId.value,
           "nationality": contactAndRelativeNationalityId.value,
           "phone_number": contactAndRelativePhoneNumber.text,
-          "date_of_birth": convertDateToIson(contactAndRelativeDateOfBirth.text),
+          "date_of_birth": convertDateToIson(
+            contactAndRelativeDateOfBirth.text,
+          ),
           "email_address": contactAndRelativeEmailAddress.text,
           "note": contactAndRelativeNotes.text,
           "is_emergency": isThisContactAnEmergencyConact.value,

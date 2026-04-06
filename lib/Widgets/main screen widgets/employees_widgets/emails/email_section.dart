@@ -7,9 +7,7 @@ import '../../../../consts.dart';
 import '../../auto_size_box.dart';
 import 'email_dialog.dart';
 
-Widget emailSectionFotEmployees({
-  required BoxConstraints constraints,
-}) {
+Widget emailSectionFotEmployees({required BoxConstraints constraints}) {
   return Container(
     decoration: containerDecor,
     child: GetX<EmployeesController>(
@@ -85,7 +83,7 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(
-        textForDataRowInTable(text: data.type.toString(), formatDouble: false),
+        textForDataRowInTable(text: data.type ?? '', formatDouble: false),
       ),
       DataCell(
         textForDataRowInTable(

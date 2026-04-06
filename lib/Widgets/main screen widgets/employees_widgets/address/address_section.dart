@@ -91,8 +91,10 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: addressData.line.toString(),
+          text: addressData.line ?? '',
           formatDouble: false,
+          maxWidth: null,
+          // maxLines: 1,
         ),
       ),
       DataCell(

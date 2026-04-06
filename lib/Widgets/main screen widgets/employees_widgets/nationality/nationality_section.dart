@@ -106,7 +106,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: addressData.nationality.toString(),
+          text: addressData.nationalityName.toString(),
           formatDouble: false,
         ),
       ),
@@ -134,6 +134,10 @@ ElevatedButton newNationalityButton({
 }) {
   return ElevatedButton(
     onPressed: () {
+      if (controller.currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Please save doc first");
+        return;
+      }
       controller.nationality.clear();
       controller.nationalityStartDate.clear();
       controller.nationalityEndDate.clear();
@@ -174,7 +178,8 @@ IconButton updateNationalityButton({
 }) {
   return IconButton(
     onPressed: () {
-      controller.nationality.text = data.nationality ?? '';
+      controller.nationality.text = data.nationalityName ?? '';
+      controller.nationalityId.value = data.nationality ?? '';
       controller.nationalityStartDate.text = textToDate(data.startDate);
       controller.nationalityEndDate.text = textToDate(data.endDate);
       nationalityDialog(

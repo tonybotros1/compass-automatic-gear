@@ -1078,6 +1078,7 @@ Widget textForDataRowInTable({
   bool isSelectable = true,
   bool formatDouble = true,
   TextStyle? style,
+  int? maxLines
 }) {
   String formattedText = text;
 
@@ -1093,7 +1094,7 @@ Widget textForDataRowInTable({
     child: isSelectable
         ? SelectableText(
             formattedText,
-            // maxLines: 1,
+            maxLines: maxLines,
             style:
                 style ??
                 GoogleFonts.robotoMono(
@@ -1112,7 +1113,7 @@ Widget textForDataRowInTable({
           )
         : Text(
             formattedText,
-            // maxLines: 1,
+            maxLines: maxLines,
             overflow: TextOverflow.ellipsis,
 
             style:
