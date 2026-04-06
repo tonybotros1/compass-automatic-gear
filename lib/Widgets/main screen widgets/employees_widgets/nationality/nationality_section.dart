@@ -10,7 +10,6 @@ import 'nationality_dialog.dart';
 Widget nationalitySectionFotEmployees({
   required BoxConstraints constraints,
   required BuildContext context,
-  required bool canEdit,
 }) {
   return Container(
     decoration: containerDecor,

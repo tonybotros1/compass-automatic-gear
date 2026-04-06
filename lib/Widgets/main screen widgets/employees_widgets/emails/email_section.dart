@@ -9,7 +9,6 @@ import 'email_dialog.dart';
 
 Widget emailSectionFotEmployees({
   required BoxConstraints constraints,
-  required bool canEdit,
 }) {
   return Container(
     decoration: containerDecor,

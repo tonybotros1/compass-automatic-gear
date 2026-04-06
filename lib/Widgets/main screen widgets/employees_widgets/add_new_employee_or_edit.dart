@@ -10,7 +10,6 @@ import 'personal_information_section.dart';
 
 Widget addNewEmployeeOrEdit({
   required EmployeesController controller,
-  required bool canEdit,
   required BoxConstraints constraints,
 }) {
   return LayoutBuilder(
@@ -38,7 +37,7 @@ Widget addNewEmployeeOrEdit({
                                 style: fontStyle1,
                               ),
                             ),
-                            personalInformation(context, controller, canEdit),
+                            personalInformation(context, controller),
                           ],
                         ),
                       ),
@@ -91,20 +90,14 @@ Widget addNewEmployeeOrEdit({
                                     children: [
                                       // TAB 1
                                       addressSectionFotEmployees(
-                                        canEdit: canEdit,
                                         constraints: constraints,
                                       ),
                                       nationalitySectionFotEmployees(
-                                        canEdit: canEdit,
                                         constraints: constraints,
                                         context: context,
                                       ),
-                                      phoneSectionFotEmployees(
-                                        canEdit: canEdit,
-                                        constraints: constraints,
-                                      ),
+                                      phoneSectionFotEmployees(constraints),
                                       emailSectionFotEmployees(
-                                        canEdit: canEdit,
                                         constraints: constraints,
                                       ),
                                       const Text('4'),
@@ -132,7 +125,10 @@ Widget addNewEmployeeOrEdit({
                   Column(
                     children: [
                       labelContainer(
-                        lable: Text('Assignment Information', style: fontStyle1),
+                        lable: Text(
+                          'Assignment Information',
+                          style: fontStyle1,
+                        ),
                       ),
                       assignmentInformation(context, controller),
                     ],

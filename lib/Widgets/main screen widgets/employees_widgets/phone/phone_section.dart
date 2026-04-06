@@ -7,10 +7,7 @@ import '../../../../consts.dart';
 import '../../auto_size_box.dart';
 import 'phone_dialog.dart';
 
-Widget phoneSectionFotEmployees({
-  required BoxConstraints constraints,
-  required bool canEdit,
-}) {
+Widget phoneSectionFotEmployees(BoxConstraints constraints) {
   return Container(
     decoration: containerDecor,
     child: GetX<EmployeesController>(

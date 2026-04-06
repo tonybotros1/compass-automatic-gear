@@ -2,15 +2,12 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
-import '../../../../Models/entity information/entity_information_model.dart';
+import '../../../../Models/employees/address_model.dart';
 import '../../../../consts.dart';
 import '../../auto_size_box.dart';
 import 'address_dialog.dart';
 
-Widget addressSectionFotEmployees({
-  required BoxConstraints constraints,
-  required bool canEdit,
-}) {
+Widget addressSectionFotEmployees({required BoxConstraints constraints}) {
   return Container(
     decoration: containerDecor,
     child: GetX<EmployeesController>(
@@ -71,7 +68,7 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  EntityAddress addressData,
+  EmployeeAddressModel addressData,
   BoxConstraints constraints,
   EmployeesController controller,
 ) {
@@ -100,14 +97,14 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: addressData.country ?? '',
+          text: addressData.countryName ?? '',
           maxWidth: null,
           formatDouble: false,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: addressData.city ?? '',
+          text: addressData.cityName ?? '',
           maxWidth: null,
           formatDouble: false,
         ),
@@ -119,6 +116,10 @@ DataRow dataRowForTheTable(
 ElevatedButton newAddressButton({required EmployeesController controller}) {
   return ElevatedButton(
     onPressed: () {
+      if (controller.currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Please save doc first");
+        return;
+      }
       controller.line.clear();
       controller.country.clear();
       controller.city.clear();
@@ -146,24 +147,31 @@ IconButton removeAddressButton({
 }) {
   return IconButton(
     onPressed: () {
-      controller.deleteAddress(id);
+      alertDialog(
+        context: Get.context!,
+        content: "Are you sure you want to delete this address?",
+        onPressed: () {
+          Get.back();
+          controller.deleteAddress(id);
+        },
+      );
     },
     icon: deleteIcon,
   );
 }
 
 IconButton updateAddressButton({
-  required EntityAddress data,
+  required EmployeeAddressModel data,
   required EmployeesController controller,
   required String id,
 }) {
   return IconButton(
     onPressed: () {
       controller.line.text = data.line ?? '';
-      controller.country.text = data.country ?? '';
-      controller.city.text = data.city ?? '';
-      controller.countryId.value = data.countryId ?? '';
-      controller.cityId.value = data.cityId ?? '';
+      controller.country.text = data.countryName ?? '';
+      controller.city.text = data.cityName ?? '';
+      controller.countryId.value = data.country ?? '';
+      controller.cityId.value = data.city ?? '';
       addressDialog(
         controller: controller,
         canEdit: true,

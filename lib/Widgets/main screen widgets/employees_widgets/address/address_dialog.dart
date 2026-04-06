@@ -33,7 +33,16 @@ Future<dynamic> addressDialog({
                 children: [
                   Text('Address', style: fontStyleForScreenNameUsedInButtons),
                   const Spacer(),
-                  ClickableHoverText(onTap: onPressed, text: 'Ok'),
+                  GetX<EmployeesController>(
+                    builder: (controller) {
+                      return ClickableHoverText(
+                        onTap: onPressed,
+                        text: controller.addingNewEmployeeAddressValue.isFalse
+                            ? 'Save'
+                            : "•••",
+                      );
+                    },
+                  ),
                   separator(),
                   closeIcon(),
                 ],

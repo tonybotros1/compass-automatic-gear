@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
 import '../../../../Widgets/attachments/attachment_screen.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/employees_widgets/contacts_and_relatives_Dialog.dart';
 import '../../../../Widgets/main screen widgets/employees_widgets/employee_dialog.dart';
 import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
@@ -120,7 +121,7 @@ class Employees extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 20),
-                GetBuilder<EmployeesController>(
+                GetX<EmployeesController>(
                   builder: (controller) {
                     return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -262,12 +263,24 @@ Widget tableOfScreens({
     columns: [
       const DataColumn2(label: Text(''), size: ColumnSize.S),
       DataColumn2(
-        label: AutoSizedText(text: 'Name', constraints: constraints),
+        label: AutoSizedText(text: 'Full Name', constraints: constraints),
         size: ColumnSize.M,
       ),
       DataColumn2(
         size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Number'),
+        label: AutoSizedText(constraints: constraints, text: 'Type'),
+      ),
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(constraints: constraints, text: 'Status'),
+      ),
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(constraints: constraints, text: 'Employer'),
+      ),
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(constraints: constraints, text: 'Department'),
       ),
       DataColumn2(
         size: ColumnSize.M,
@@ -275,21 +288,11 @@ Widget tableOfScreens({
       ),
       DataColumn2(
         size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Hire Date'),
-      ),
-      DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'End Date'),
-      ),
-      DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Status'),
+        label: AutoSizedText(constraints: constraints, text: 'Location'),
       ),
     ],
     source: CardDataSourceForEmployees(
-      cards: controller.filteredEmployees.isEmpty
-          ? controller.allEmployees
-          : controller.filteredEmployees,
+      cards: controller.allEmployees.isEmpty ? [] : controller.allEmployees,
       context: context,
       constraints: constraints,
       controller: controller,
@@ -319,27 +322,20 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.name ?? '',
+          text: data.fullName ?? '',
           color: Colors.blueGrey,
           isBold: true,
         ),
       ),
-      DataCell(textForDataRowInTable(text: data.employeeNumber ?? '')),
-      DataCell(textForDataRowInTable(text: data.jobTitle ?? '')),
-      DataCell(textForDataRowInTable(text: textToDate(data.hireDate))),
-      DataCell(textForDataRowInTable(text: textToDate(data.endDate))),
+      DataCell(textForDataRowInTable(text: data.personType ?? '')),
+      DataCell(textForDataRowInTable(text: data.statusName ?? '')),
+      DataCell(textForDataRowInTable(text: data.employerName ?? '')),
+      DataCell(textForDataRowInTable(text: data.departmentName ?? '')),
       DataCell(
-        textForDataRowInTable(
-          isBold: true,
-          text: data.statusType ?? '',
-          color: data.statusType == "Active"
-              ? Colors.green
-              : data.statusType == "Inactive"
-              ? Colors.red
-              : data.statusType == "Probation"
-              ? Colors.teal
-              : Colors.brown,
-        ),
+        textForDataRowInTable(isBold: true, text: data.jobTitleName ?? ''),
+      ),
+      DataCell(
+        textForDataRowInTable(isBold: true, text: data.locationName ?? ''),
       ),
     ],
   );
@@ -373,16 +369,24 @@ IconButton editSection(
 ) {
   return IconButton(
     onPressed: () async {
-      controller.loadValues(data);
+      await controller.loadValues(employeeId);
       employeeDialog(
         onPressedForAttachment: null,
         constraints: constraints,
         controller: controller,
-        canEdit: true,
+        onPressedForContactsAndRelatives: () async {
+          await controller.getContactAndRelative();
+
+          contactsAndRelativesDialog(
+            constraints: constraints,
+            controller: controller,
+            canEdit: true,
+          );
+        },
         onPressed: controller.addingNewValue.value
             ? null
             : () {
-                controller.updateEmployee(employeeId);
+                controller.addNewEmployee();
               },
       );
     },
@@ -397,9 +401,21 @@ ElevatedButton newEmployeeButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      controller.clearValues();
+      controller.clearValues(true);
 
       employeeDialog(
+        onPressedForContactsAndRelatives: () async {
+          if (controller.currentEmployeeId.value.isEmpty) {
+            alertMessage(context: context, content: "Please save doc first");
+            return;
+          }
+          await controller.getContactAndRelative();
+          contactsAndRelativesDialog(
+            constraints: constraints,
+            controller: controller,
+            canEdit: true,
+          );
+        },
         onPressedForAttachment: () {
           Get.dialog(
             Dialog(
@@ -415,7 +431,6 @@ ElevatedButton newEmployeeButton(
         },
         constraints: constraints,
         controller: controller,
-        canEdit: true,
         onPressed: controller.addingNewValue.value
             ? null
             : () async {

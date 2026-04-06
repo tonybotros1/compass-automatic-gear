@@ -8,7 +8,6 @@ import 'image_section.dart';
 Container personalInformation(
   BuildContext context,
   EmployeesController controller,
-  bool isReadOnly,
 ) {
   return Container(
     height: 245,
@@ -29,14 +28,13 @@ Container personalInformation(
                 labelText: 'Full Name',
                 controller: controller.employeeName,
                 width: 620,
-                readOnly: isReadOnly,
               ),
               Row(
                 spacing: 10,
                 children: [
                   MenuWithValues(
                     labelText: 'Country of Birth',
-                    headerLqabel: 'Gender',
+                    headerLqabel: 'Country of Birth',
                     dialogWidth: 600,
                     width: 200,
                     controller: controller.employeeCountryOfBirth,
@@ -58,14 +56,12 @@ Container personalInformation(
                     labelText: 'Place of Birth',
                     controller: controller.employeePlaceOfBirth,
                     width: 200,
-                    readOnly: isReadOnly,
                   ),
                   myTextFormFieldWithBorder(
                     labelText: 'Date Of Birth',
                     isDate: true,
                     controller: controller.employeeDateOfBirth,
                     width: 200,
-                    readOnly: isReadOnly,
                     suffixIcon: IconButton(
                       onPressed: () async {
                         selectDateContext(
@@ -131,7 +127,7 @@ Container personalInformation(
                     labelText: 'Person Type',
                     controller: controller.personType,
                     width: 200,
-                    readOnly: isReadOnly,
+                    readOnly: true
                   ),
                 ],
               ),

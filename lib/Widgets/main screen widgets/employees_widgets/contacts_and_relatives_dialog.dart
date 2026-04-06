@@ -2,15 +2,12 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_cont
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
-import '../../text_button.dart';
-import 'add_new_employee_or_edit.dart';
+import 'contact_and_relatives_screen.dart.dart';
 
-Future<dynamic> employeeDialog({
+Future<dynamic> contactsAndRelativesDialog({
   required BoxConstraints constraints,
   required EmployeesController controller,
-  required void Function()? onPressed,
-  required void Function()? onPressedForAttachment,
-  required void Function()? onPressedForContactsAndRelatives,
+  required bool canEdit,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -33,30 +30,10 @@ Future<dynamic> employeeDialog({
                 spacing: 10,
                 children: [
                   Text(
-                    controller.getScreenName(),
+                    "Contacts & Relatives",
                     style: fontStyleForScreenNameUsedInButtons,
                   ),
-
                   const Spacer(),
-                  GetX<EmployeesController>(
-                    builder: (controller) => ClickableHoverText(
-                      onTap: onPressed,
-                      text: controller.addingNewValue.value == false
-                          ? 'Save'
-                          : "•••",
-                    ),
-                  ),
-                  separator(),
-                  ClickableHoverText(
-                    onTap: onPressedForContactsAndRelatives,
-                    text: 'Contacts and Relatives',
-                  ),
-                  point(),
-                  ClickableHoverText(
-                    onTap: onPressedForAttachment,
-                    text: 'Document of Record',
-                  ),
-                  separator(),
                   closeIcon(),
                 ],
               ),
@@ -64,8 +41,9 @@ Future<dynamic> employeeDialog({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: addNewEmployeeOrEdit(
+                child: contactsAndRelativesScreen(
                   controller: controller,
+                  canEdit: canEdit,
                   constraints: constraints,
                 ),
               ),

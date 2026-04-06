@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
 import '../../text_button.dart';
-import 'add_new_employee_or_edit.dart';
+import 'add_new_contact_and_relavente_or_edit.dart';
 
-Future<dynamic> employeeDialog({
+Future<dynamic> contactsAndRelativesInsertingDialog({
   required BoxConstraints constraints,
   required EmployeesController controller,
+  required bool canEdit,
   required void Function()? onPressed,
-  required void Function()? onPressedForAttachment,
-  required void Function()? onPressedForContactsAndRelatives,
+  required void Function()? onPressedForDocumentAndRecord,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -18,6 +18,8 @@ Future<dynamic> employeeDialog({
       insetPadding: const EdgeInsets.all(8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
+        width: 600,
+        height: 700,
         child: Column(
           children: [
             Container(
@@ -32,28 +34,22 @@ Future<dynamic> employeeDialog({
               child: Row(
                 spacing: 10,
                 children: [
-                  Text(
-                    controller.getScreenName(),
-                    style: fontStyleForScreenNameUsedInButtons,
-                  ),
+                  Text('C & R', style: fontStyleForScreenNameUsedInButtons),
 
                   const Spacer(),
+                  separator(),
+
                   GetX<EmployeesController>(
                     builder: (controller) => ClickableHoverText(
                       onTap: onPressed,
-                      text: controller.addingNewValue.value == false
+                      text: controller.addingNewContactAndRelativesValue.value == false
                           ? 'Save'
                           : "•••",
                     ),
                   ),
-                  separator(),
-                  ClickableHoverText(
-                    onTap: onPressedForContactsAndRelatives,
-                    text: 'Contacts and Relatives',
-                  ),
                   point(),
                   ClickableHoverText(
-                    onTap: onPressedForAttachment,
+                    onTap: onPressed,
                     text: 'Document of Record',
                   ),
                   separator(),
@@ -64,9 +60,9 @@ Future<dynamic> employeeDialog({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: addNewEmployeeOrEdit(
+                child: addNewContactAndRelativeOrEdit(
                   controller: controller,
-                  constraints: constraints,
+                  canEdit: canEdit,
                 ),
               ),
             ),
