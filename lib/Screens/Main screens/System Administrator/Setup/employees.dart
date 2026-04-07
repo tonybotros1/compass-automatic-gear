@@ -44,76 +44,101 @@ class Employees extends StatelessWidget {
                               spacing: 10,
                               children: [
                                 myTextFormFieldWithBorder(
-                                  width: 90,
-                                  labelText: 'Employee name',
+                                  width: 250,
+                                  labelText: 'Name',
                                   controller: controller.employeeNameFilter,
                                 ),
 
                                 MenuWithValues(
-                                  labelText: 'Gender',
-                                  headerLqabel: 'Genders',
-                                  dialogWidth: constraints.maxWidth / 3,
-                                  width: 170,
-                                  controller: controller.genderFilter,
+                                  labelText: 'Employer',
+                                  headerLqabel: 'Employers',
+                                  dialogWidth: 600,
+                                  width: 250,
+                                  controller: controller.employerFilter,
                                   displayKeys: const ['name'],
                                   displaySelectedKeys: const ['name'],
                                   onOpen: () {
-                                    return controller.getGenders();
+                                    return controller.getallJobEmployers();
                                   },
                                   onDelete: () {
-                                    controller.employeeNameFilterId.value = "";
-                                    controller.employeeNameFilter.clear();
+                                    controller.employerIdFilter.value = "";
+                                    controller.employerFilter.clear();
                                   },
                                   onSelected: (value) {
-                                    controller.employeeNameFilterId.value =
+                                    controller.employerIdFilter.value =
                                         value['_id'];
-                                    controller.employeeNameFilter.text =
+                                    controller.employerFilter.text =
+                                        value['name'];
+                                  },
+                                ),
+                                MenuWithValues(
+                                  labelText: 'Department',
+                                  headerLqabel: 'Departments',
+                                  dialogWidth: 600,
+                                  width: 250,
+                                  controller: controller.departmentFilter,
+                                  displayKeys: const ['name'],
+                                  displaySelectedKeys: const ['name'],
+                                  onOpen: () {
+                                    return controller.getAllJobDepartments();
+                                  },
+                                  onDelete: () {
+                                    controller.departmentIdFilter.value = "";
+                                    controller.departmentFilter.clear();
+                                  },
+                                  onSelected: (value) {
+                                    controller.departmentIdFilter.value =
+                                        value['_id'];
+                                    controller.departmentFilter.text =
+                                        value['name'];
+                                  },
+                                ),
+                                MenuWithValues(
+                                  labelText: 'Job Title',
+                                  headerLqabel: 'Jobs Titles',
+                                  dialogWidth: 600,
+                                  width: 250,
+                                  controller: controller.jobTitleFilter,
+                                  displayKeys: const ['name'],
+                                  displaySelectedKeys: const ['name'],
+                                  onOpen: () {
+                                    return controller.getallJobTitle();
+                                  },
+                                  onDelete: () {
+                                    controller.jobTitleIdFilter.value = "";
+                                    controller.jobTitleFilter.clear();
+                                  },
+                                  onSelected: (value) {
+                                    controller.jobTitleIdFilter.value =
+                                        value['_id'];
+                                    controller.jobTitleFilter.text =
+                                        value['name'];
+                                  },
+                                ),
+                                MenuWithValues(
+                                  labelText: 'Location',
+                                  headerLqabel: 'Locations',
+                                  dialogWidth: 600,
+                                  width: 250,
+                                  controller: controller.locationFilter,
+                                  displayKeys: const ['name'],
+                                  displaySelectedKeys: const ['name'],
+                                  onOpen: () {
+                                    return controller.getallJobLocations();
+                                  },
+                                  onDelete: () {
+                                    controller.locationIdFilter.value = "";
+                                    controller.locationFilter.clear();
+                                  },
+                                  onSelected: (value) {
+                                    controller.locationIdFilter.value =
+                                        value['_id'];
+                                    controller.locationFilter.text =
                                         value['name'];
                                   },
                                 ),
                               ],
                             ),
-
-                            // Row(
-                            //   spacing: 10,
-                            //   crossAxisAlignment: CrossAxisAlignment.end,
-                            //   children: [
-                            //     myTextFormFieldWithBorder(
-                            //       width: 120,
-                            //       controller: controller.fromDate.value,
-                            //       labelText: 'From Date',
-                            //       onFieldSubmitted: (_) async {
-                            //         normalizeDate(
-                            //           controller.fromDate.value.text,
-                            //           controller.fromDate.value,
-                            //         );
-                            //       },
-                            //       onTapOutside: (_) {
-                            //         normalizeDate(
-                            //           controller.fromDate.value.text,
-                            //           controller.fromDate.value,
-                            //         );
-                            //       },
-                            //     ),
-                            //     myTextFormFieldWithBorder(
-                            //       width: 120,
-                            //       controller: controller.toDate.value,
-                            //       labelText: 'To Date',
-                            //       onFieldSubmitted: (_) async {
-                            //         normalizeDate(
-                            //           controller.toDate.value.text,
-                            //           controller.toDate.value,
-                            //         );
-                            //       },
-                            //       onTapOutside: (_) {
-                            //         normalizeDate(
-                            //           controller.toDate.value.text,
-                            //           controller.toDate.value,
-                            //         );
-                            //       },
-                            //     ),
-                            //   ],
-                            // ),
                           ],
                         ),
                       ),
@@ -142,6 +167,15 @@ class Employees extends StatelessWidget {
                                   context,
                                   constraints,
                                   controller,
+                                  true,
+                                  'New Employee',
+                                ),
+                                newEmployeeButton(
+                                  context,
+                                  constraints,
+                                  controller,
+                                  false,
+                                  'New Applicant',
                                 ),
                               ],
                             ),
@@ -151,11 +185,12 @@ class Employees extends StatelessWidget {
                                 CustomSlidingSegmentedControl<int>(
                                   height: 30,
                                   initialValue:
-                                      controller.initStatusPickersValue.value,
+                                      controller.initTypePickersValue.value,
                                   children: const {
                                     1: Text('ALL'),
-                                    2: Text('ACTIVE'),
-                                    3: Text('INACTIVE'),
+                                    2: Text('EMPLOYEE'),
+                                    3: Text('APPLICANT'),
+                                    4: Text('EX EMPLOYEE'),
                                   },
                                   decoration: BoxDecoration(
                                     color: CupertinoColors.lightBackgroundGray,
@@ -176,7 +211,7 @@ class Employees extends StatelessWidget {
                                   duration: const Duration(milliseconds: 300),
                                   curve: Curves.easeInToLinear,
                                   onValueChanged: (v) {
-                                    // controller.onChooseForStatusPicker(v);
+                                    controller.onChooseForTypePicker(v);
                                   },
                                 ),
                               ],
@@ -188,7 +223,7 @@ class Employees extends StatelessWidget {
                                   style: findButtonStyle,
                                   onPressed: controller.isScreenLoding.isFalse
                                       ? () async {
-                                          // controller.filterSearch();
+                                          controller.filterSearch();
                                         }
                                       : null,
                                   child: controller.isScreenLoding.isFalse
@@ -371,10 +406,24 @@ IconButton editSection(
     onPressed: () async {
       await controller.loadValues(employeeId);
       employeeDialog(
-        onPressedForAttachment: null,
+        onPressedForAttachment: () {
+          Get.dialog(
+            Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: AttachmentScreen(
+                code: 'EMPLOYEES_ATTACHMENT',
+                documentId: employeeId,
+              ),
+            ),
+          );
+        },
         constraints: constraints,
         controller: controller,
         onPressedForContactsAndRelatives: () async {
+          controller.contactsAndRelativesSearch.value.clear();
+          controller.filteredContactsAndRelativesList.clear();
           await controller.getContactAndRelative();
 
           contactsAndRelativesDialog(
@@ -383,6 +432,7 @@ IconButton editSection(
             canEdit: true,
           );
         },
+
         onPressed: controller.addingNewValue.value
             ? null
             : () {
@@ -398,10 +448,12 @@ ElevatedButton newEmployeeButton(
   BuildContext context,
   BoxConstraints constraints,
   EmployeesController controller,
+  bool isEmployee,
+  String buttonName,
 ) {
   return ElevatedButton(
     onPressed: () {
-      controller.clearValues(true);
+      controller.clearValues(isEmployee);
 
       employeeDialog(
         onPressedForContactsAndRelatives: () async {
@@ -409,7 +461,7 @@ ElevatedButton newEmployeeButton(
             alertMessage(context: context, content: "Please save doc first");
             return;
           }
-          await controller.getContactAndRelative();
+          controller.contactsAndRelativesSearch.value.clear();
           contactsAndRelativesDialog(
             constraints: constraints,
             controller: controller,
@@ -417,6 +469,10 @@ ElevatedButton newEmployeeButton(
           );
         },
         onPressedForAttachment: () {
+          if (controller.currentEmployeeId.isEmpty) {
+            alertMessage(context: context, content: " Please save doc first");
+            return;
+          }
           Get.dialog(
             Dialog(
               shape: RoundedRectangleBorder(
@@ -424,7 +480,7 @@ ElevatedButton newEmployeeButton(
               ),
               child: AttachmentScreen(
                 code: 'EMPLOYEES_ATTACHMENT',
-                documentId: '123456789123456789123456',
+                documentId: controller.currentEmployeeId.value,
               ),
             ),
           );
@@ -438,8 +494,8 @@ ElevatedButton newEmployeeButton(
               },
       );
     },
-    style: newButtonStyle,
-    child: const Text('New Employee'),
+    style: isEmployee == true ? newButtonStyle : newApplicantButtonStyle,
+    child: Text(buttonName),
   );
 }
 

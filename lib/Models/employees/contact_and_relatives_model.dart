@@ -34,56 +34,53 @@ class ContactsAndRelativesModel {
   });
 
   ContactsAndRelativesModel.fromJson(Map<String, dynamic> json) {
-    id = json.containsKey('_id') ? json['_id'] ?? '' : '';
-    fullName = json.containsKey('full_name') ? json['full_name'] ?? '' : '';
-    relationship = json.containsKey('relationship')
-        ? json['relationship'] ?? ''
-        : '';
-    phoneNumber = json.containsKey('phone_number')
-        ? json['phone_number'] ?? ''
-        : '';
-    gender = json.containsKey('gender') ? json['gender'] ?? '' : '';
-    dateOfBirth = json.containsKey('date_of_birth')
-        ? DateTime.tryParse(json['date_of_birth'])
-        : null;
-    nationality = json.containsKey('nationality')
-        ? json['nationality'] ?? ''
-        : '';
-    emailAddress = json.containsKey('email_address')
-        ? json['email_address'] ?? ''
-        : '';
-    note = json.containsKey('note') ? json['note'] ?? "" : ' ';
-    isEmergency = json.containsKey('is_emergency')
-        ? json['is_emergency'] ?? false
+    id = json['_id'] as String?;
+    fullName = json['full_name'] as String?;
+    relationship = json['relationship'] as String?;
+    phoneNumber = json['phone_number'] as String?;
+    gender = json['gender'] as String?;
+
+    /// SAFE Date Parsing
+    final dob = json['date_of_birth'];
+    if (dob != null && dob is String && dob.isNotEmpty) {
+      dateOfBirth = DateTime.tryParse(dob);
+    } else {
+      dateOfBirth = null;
+    }
+
+    nationality = json['nationality'] as String?;
+    emailAddress = json['email_address'] as String?;
+    note = json['note'] as String?;
+
+    /// SAFE BOOL
+    isEmergency = json['is_emergency'] is bool
+        ? json['is_emergency']
         : false;
-    relationshipName = json.containsKey('relationship_name')
-        ? json['relationship_name'] ?? ''
-        : ' ';
-    genderName = json.containsKey('gender_name')
-        ? json['gender_name'] ?? ''
-        : ' ';
-    nationalityName = json.containsKey('nationality_name')
-        ? json['nationality_name'] ?? ''
-        : ' ';
+
+    companyId = json['company_id'] as String?;
+    employeeId = json['employee_id'] as String?;
+    relationshipName = json['relationship_name'] as String?;
+    genderName = json['gender_name'] as String?;
+    nationalityName = json['nationality_name'] as String?;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['_id'] = id;
-    data['full_name'] = fullName;
-    data['relationship'] = relationship;
-    data['phone_number'] = phoneNumber;
-    data['gender'] = gender;
-    data['date_of_birth'] = dateOfBirth;
-    data['nationality'] = nationality;
-    data['email_address'] = emailAddress;
-    data['note'] = note;
-    data['is_emergency'] = isEmergency;
-    data['company_id'] = companyId;
-    data['employee_id'] = employeeId;
-    data['relationship_name'] = relationshipName;
-    data['gender_name'] = genderName;
-    data['nationality_name'] = nationalityName;
-    return data;
+    return {
+      '_id': id,
+      'full_name': fullName,
+      'relationship': relationship,
+      'phone_number': phoneNumber,
+      'gender': gender,
+      'date_of_birth': dateOfBirth?.toIso8601String(),
+      'nationality': nationality,
+      'email_address': emailAddress,
+      'note': note,
+      'is_emergency': isEmergency,
+      'company_id': companyId,
+      'employee_id': employeeId,
+      'relationship_name': relationshipName,
+      'gender_name': genderName,
+      'nationality_name': nationalityName,
+    };
   }
 }

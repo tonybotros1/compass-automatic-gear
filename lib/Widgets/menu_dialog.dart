@@ -34,6 +34,7 @@ class MenuWithValues extends StatefulWidget {
     this.nextFocusNode,
     this.previousFocusNode,
     this.headerKeys,
+    this.validate,
   });
   final TextEditingController controller;
   final double? width;
@@ -62,6 +63,7 @@ class MenuWithValues extends StatefulWidget {
   final String? labelText;
   final void Function()? onDelete;
   final String? headerLqabel;
+  final bool? validate;
 
   @override
   State<MenuWithValues> createState() => _MenuWithValuesState();
@@ -317,6 +319,7 @@ class _MenuWithValuesState extends State<MenuWithValues> {
                     );
                   },
                 ),
+
                 suffixIconConstraints: const BoxConstraints(
                   maxHeight: 30,
                   maxWidth: 70,
@@ -353,6 +356,14 @@ class _MenuWithValuesState extends State<MenuWithValues> {
                   borderSide: BorderSide(color: Colors.red, width: 2.0),
                 ),
               ),
+              validator: widget.validate != false
+                  ? (value) {
+                      if (value!.isEmpty) {
+                        return 'Please Enter ${widget.labelText ?? ''}';
+                      }
+                      return null;
+                    }
+                  : null,
             ),
           ),
         ],

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../Models/employees/contact_and_relatives_model.dart';
 import '../../../consts.dart';
 import '../../Auth screens widgets/register widgets/search_bar.dart';
+import '../../attachments/attachment_screen.dart';
 import 'contact_and_relative_inserting_dialog.dart';
 
 Widget contactsAndRelativesScreen({
@@ -20,16 +21,16 @@ Widget contactsAndRelativesScreen({
             builder: (controller) {
               return searchBar(
                 onChanged: (_) {
-                  // controller.filterAttachments();
+                  controller.filterContactsAndRelatives();
                 },
                 onPressedForClearSearch: () {
-                  // controller.search.value.clear();
-                  // controller.filterAttachments();
+                  controller.contactsAndRelativesSearch.value.clear();
+                  controller.filterContactsAndRelatives();
                 },
-                search: controller.search,
+                search: controller.contactsAndRelativesSearch,
                 constraints: constraints,
                 context: context,
-                title: 'Search for attachments',
+                title: 'Search for contacts',
                 button: newContactAndRelativesButton(
                   context,
                   constraints,
@@ -80,11 +81,18 @@ Widget contactsAndRelativesScreen({
                     ),
                   ],
                   source: CardDataSource(
-                    cards: controller.contactsAndRelativesList.isEmpty
-                        ? []
-                        : controller.contactsAndRelativesList,
+                    cards:
+                        controller.filteredContactsAndRelativesList.isEmpty &&
+                            controller
+                                .contactsAndRelativesSearch
+                                .value
+                                .text
+                                .isEmpty
+                        ? controller.contactsAndRelativesList
+                        : controller.filteredContactsAndRelativesList,
                     controller: controller,
                     context: context,
+                    constraints: constraints,
                   ),
                 );
               },
@@ -102,6 +110,7 @@ DataRow dataRowForTheTable(
   String id,
   EmployeesController controller,
   int index,
+  BoxConstraints constraints,
 ) {
   final isEvenRow = index % 2 == 0;
   return DataRow2(
@@ -112,7 +121,15 @@ DataRow dataRowForTheTable(
       return !isEvenRow ? coolColor : Colors.white;
     }),
     cells: [
-      DataCell(deleteSection(controller, id, context)),
+      DataCell(
+        Row(
+          children: [
+            deleteSection(controller, id, context),
+            editSection(controller, context, constraints, id, data),
+            attachmentSection(id),
+          ],
+        ),
+      ),
 
       DataCell(
         textForDataRowInTable(
@@ -184,13 +201,74 @@ IconButton deleteSection(
     onPressed: () {
       alertDialog(
         context: context,
-        content: "The file will be deleted permanently",
+        content: "The contact will be deleted permanently",
         onPressed: () {
-          // controller.deleteattachmenth(id);
+          Get.back();
+          controller.deleteContactAndRelative(id);
         },
       );
     },
     icon: deleteIcon,
+  );
+}
+
+IconButton attachmentSection(String id) {
+  return IconButton(
+    onPressed: () {
+      Get.dialog(
+        Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          child: AttachmentScreen(
+            code: 'EMPLOYEES_CONTACTS_AND_RELATIVES_ATTACHMENT',
+            documentId: id,
+          ),
+        ),
+      );
+    },
+    icon: attachIcon,
+  );
+}
+
+IconButton editSection(
+  EmployeesController controller,
+  BuildContext context,
+  BoxConstraints constraints,
+  String contactId,
+  ContactsAndRelativesModel data,
+) {
+  return IconButton(
+    onPressed: () {
+      controller.contactAndRelativeFullName.text = data.fullName ?? '';
+      controller.contactAndRelativeRelationship.text =
+          data.relationshipName ?? '';
+      controller.contactAndRelativeRelationshipId.value =
+          data.relationship ?? '';
+      controller.contactAndRelativePhoneNumber.text = data.phoneNumber ?? '';
+      controller.contactAndRelativeGender.text = data.genderName ?? '';
+      controller.contactAndRelativeGenderId.value = data.gender ?? '';
+      controller.contactAndRelativeDateOfBirth.text = textToDate(
+        data.dateOfBirth,
+      );
+      controller.contactAndRelativeNationality.text =
+          data.nationalityName ?? '';
+      controller.contactAndRelativeNationalityId.value = data.nationality ?? '';
+      controller.contactAndRelativeEmailAddress.text = data.emailAddress ?? '';
+      controller.contactAndRelativeNotes.text = data.note ?? '';
+      controller.isThisContactAnEmergencyConact.value =
+          data.isEmergency ?? false;
+      contactsAndRelativesInsertingDialog(
+        onPressedForDocumentAndRecord: () {},
+        constraints: constraints,
+        controller: controller,
+        canEdit: true,
+        onPressed: controller.addingNewContactAndRelativesValue.isTrue
+            ? null
+            : () async {
+                await controller.updateContactAndRelative(contactId);
+              },
+      );
+    },
+    icon: editIcon,
   );
 }
 
@@ -234,11 +312,13 @@ class CardDataSource extends DataTableSource {
   final List<ContactsAndRelativesModel> cards;
   final BuildContext context;
   final EmployeesController controller;
+  final BoxConstraints constraints;
 
   CardDataSource({
     required this.cards,
     required this.context,
     required this.controller,
+    required this.constraints,
   });
 
   @override
@@ -248,7 +328,14 @@ class CardDataSource extends DataTableSource {
     final data = cards[index];
     final cardId = data.id ?? '';
 
-    return dataRowForTheTable(data, context, cardId, controller, index);
+    return dataRowForTheTable(
+      data,
+      context,
+      cardId,
+      controller,
+      index,
+      constraints,
+    );
   }
 
   @override

@@ -239,6 +239,14 @@ ClickableHoverText newAttachmentButton(
         canEdit: true,
         onPressed: controller.addingNewAttachment.isFalse
             ? () {
+                if (!controller.formKey.currentState!.validate()) return;
+                if (controller.selectedAttachments.isEmpty) {
+                  alertMessage(
+                    context: context,
+                    content: 'Please add at least one attachment',
+                  );
+                  return;
+                }
                 controller.addAttachments();
               }
             : null,

@@ -19,8 +19,18 @@ import 'websocket_controller.dart';
 
 class EmployeesController extends GetxController {
   Rx<TextEditingController> search = TextEditingController().obs;
+  Rx<TextEditingController> contactsAndRelativesSearch =
+      TextEditingController().obs;
   TextEditingController employeeName = TextEditingController();
   TextEditingController employeeNameFilter = TextEditingController();
+  TextEditingController employerFilter = TextEditingController();
+  TextEditingController departmentFilter = TextEditingController();
+  TextEditingController jobTitleFilter = TextEditingController();
+  TextEditingController locationFilter = TextEditingController();
+  RxString locationIdFilter = RxString('');
+  RxString jobTitleIdFilter = RxString('');
+  RxString departmentIdFilter = RxString('');
+  RxString employerIdFilter = RxString('');
   RxString employeeNameFilterId = RxString('');
   TextEditingController genderFilter = TextEditingController();
   // TextEditingController employeeNumber = TextEditingController();
@@ -74,6 +84,7 @@ class EmployeesController extends GetxController {
   RxString employeeGenderId = RxString('');
   RxString employeeCountryOfBirthId = RxString('');
   RxString query = RxString('');
+  RxString contactsAndRelativesQuery = RxString('');
   RxBool isScreenLoding = RxBool(false);
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
@@ -88,10 +99,13 @@ class EmployeesController extends GetxController {
   WebSocketService ws = Get.find<WebSocketService>();
   Uint8List? imageBytes;
   RxInt initStatusPickersValue = RxInt(1);
+  RxInt initTypePickersValue = RxInt(1);
   RxString employeeImage = RxString('');
   RxString currentEmployeeId = RxString('');
   // =================== Contacts And Relatives Section ===================
   RxList<ContactsAndRelativesModel> contactsAndRelativesList =
+      RxList<ContactsAndRelativesModel>([]);
+  RxList<ContactsAndRelativesModel> filteredContactsAndRelativesList =
       RxList<ContactsAndRelativesModel>([]);
   TextEditingController contactAndRelativeFullName = TextEditingController();
   TextEditingController contactAndRelativeRelationship =
@@ -107,6 +121,7 @@ class EmployeesController extends GetxController {
       TextEditingController();
   TextEditingController contactAndRelativeNotes = TextEditingController();
   RxBool isThisContactAnEmergencyConact = RxBool(false);
+  TextEditingController typeFilter = TextEditingController();
 
   List<Widget> contactsTabs = const [
     Tab(text: 'Address'),
@@ -119,7 +134,7 @@ class EmployeesController extends GetxController {
   @override
   void onInit() async {
     connectWebSocket();
-    getAllEmployees();
+    // getAllEmployees();
     super.onInit();
   }
 
@@ -181,6 +196,78 @@ class EmployeesController extends GetxController {
     return await helper.getAllListValues('LOCATIONS');
   }
 
+  void onChooseForTypePicker(int i) {
+    switch (i) {
+      case 1:
+        initTypePickersValue.value = 1;
+        typeFilter.clear();
+        filterSearch();
+        break;
+      case 2:
+        initTypePickersValue.value = 2;
+        typeFilter.text = 'EMPLOYEE';
+        filterSearch();
+        break;
+      case 3:
+        initTypePickersValue.value = 3;
+        typeFilter.text = 'APPLICANT';
+        filterSearch();
+        break;
+      case 4:
+        initTypePickersValue.value = 3;
+        typeFilter.text = 'EX EMPLOYEE';
+        filterSearch();
+        break;
+
+      default:
+    }
+  }
+
+  // this function is to get all list values by code for drop down menu
+  Future<Map<String, dynamic>> getAllReporingManagers(
+    String employeeId,
+    String employerId,
+  ) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse('$backendUrl/employees/get_all_reporting_managers');
+      final response = await http.post(
+        url,
+        headers: {
+          "Authorization": "Bearer $accessToken",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "employer_id": employerId,
+          "current_employee_id": employeeId,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> jsonData = decoded["result"];
+        Map<String, dynamic> map = {for (var rep in jsonData) rep['_id']: rep};
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getAllReporingManagers(employeeId, employerId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
   void connectWebSocket() {
     ws.events.listen((message) {
       switch (message["type"]) {
@@ -203,6 +290,72 @@ class EmployeesController extends GetxController {
           break;
       }
     });
+  }
+
+  void filterSearch() async {
+    Map<String, dynamic> body = {};
+    if (employeeNameFilter.text.isNotEmpty) {
+      body["name"] = employeeNameFilter.text;
+    }
+    if (employerIdFilter.value.isNotEmpty) {
+      body["employer"] = employerIdFilter.value;
+    }
+    if (departmentIdFilter.value.isNotEmpty) {
+      body["department"] = departmentIdFilter.value;
+    }
+    if (jobTitleIdFilter.value.isNotEmpty) {
+      body["job_title"] = jobTitleIdFilter.value;
+    }
+    if (locationIdFilter.value.isNotEmpty) {
+      body["location"] = locationIdFilter.value;
+    }
+    if (typeFilter.text.isNotEmpty) {
+      body["type"] = typeFilter.text;
+    }
+    if (body.isNotEmpty) {
+      await searchEngine(body);
+    } else {
+      await searchEngine({"all": true});
+    }
+  }
+
+  Future<void> searchEngine(Map<String, dynamic> body) async {
+    try {
+      isScreenLoding.value = true;
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/employees/search_engine_for_employees');
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List employees = decoded['employees'];
+        allEmployees.assignAll(
+          employees.map((employee) => EmployeesModel.fromJson(employee)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await searchEngine(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      isScreenLoding.value = false;
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
   }
 
   Future<void> getAllEmployees() async {
@@ -398,7 +551,7 @@ class EmployeesController extends GetxController {
     employeeGenderId.value = '';
     employeeMaritalStatus.clear();
     employeeMaritalStatusId.value = '';
-    personType.text = isEmployee ? 'Employee' : 'Applicant';
+    personType.text = isEmployee == true ? 'Employee' : 'Applicant';
     employeeStatus.clear();
     employeeStatusId.value = '';
     jobEmployer.clear();
@@ -422,6 +575,7 @@ class EmployeesController extends GetxController {
   Future<void> loadValues(String selectedEmployeeId) async {
     final data = await getEmployeeDetails(selectedEmployeeId);
     final employee = EmployeesModel.fromJson(data);
+    employeeImage.value = employee.personImageUrl ?? '';
     currentEmployeeId.value = employee.id ?? '';
     employeeName.text = employee.fullName ?? '';
     employeeCountryOfBirth.text = employee.countryOfBirthName ?? '';
@@ -1054,9 +1208,9 @@ class EmployeesController extends GetxController {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        List newContact = decoded['new_contact'];
+        List contacts = decoded['contact'];
         contactsAndRelativesList.assignAll(
-          newContact
+          contacts
               .map((item) => ContactsAndRelativesModel.fromJson(item))
               .toList(),
         );
@@ -1128,6 +1282,140 @@ class EmployeesController extends GetxController {
       Get.back();
     } catch (e) {
       addingNewContactAndRelativesValue.value = false;
+    }
+  }
+
+  Future<void> updateContactAndRelative(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "employee does not exist");
+        return;
+      }
+      addingNewContactAndRelativesValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/update_employee_contact_and_relative/$id',
+      );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "full_name": contactAndRelativeFullName.text,
+          "relationship": contactAndRelativeRelationshipId.value,
+          "gender": contactAndRelativeGenderId.value,
+          "nationality": contactAndRelativeNationalityId.value,
+          "phone_number": contactAndRelativePhoneNumber.text,
+          "date_of_birth": contactAndRelativeDateOfBirth.text.isNotEmpty
+              ? convertDateToIson(contactAndRelativeDateOfBirth.text)
+              : null,
+          "email_address": contactAndRelativeEmailAddress.text,
+          "note": contactAndRelativeNotes.text,
+          "is_emergency": isThisContactAnEmergencyConact.value,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        ContactsAndRelativesModel updatedContact =
+            ContactsAndRelativesModel.fromJson(decoded['updated_contact']);
+        int index = contactsAndRelativesList.indexWhere(
+          (contact) => contact.id == id,
+        );
+        if (index != -1) {
+          contactsAndRelativesList[index] = updatedContact;
+        }
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateContactAndRelative(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      addingNewContactAndRelativesValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewContactAndRelativesValue.value = false;
+    }
+  }
+
+  Future<void> deleteContactAndRelative(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "contact does not exist");
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/delete_employee_contact_and_relative/$id',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        contactsAndRelativesList.removeWhere((contact) => contact.id == id);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteContactAndRelative(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  void filterContactsAndRelatives() {
+    contactsAndRelativesQuery.value = contactsAndRelativesSearch.value.text
+        .toLowerCase();
+    if (contactsAndRelativesQuery.value.isEmpty) {
+      filteredContactsAndRelativesList.clear();
+    } else {
+      filteredContactsAndRelativesList.assignAll(
+        contactsAndRelativesList.where((contact) {
+          return contact.fullName.toString().toLowerCase().contains(
+                contactsAndRelativesQuery,
+              ) ||
+              contact.relationshipName.toString().toLowerCase().contains(
+                contactsAndRelativesQuery,
+              ) ||
+              contact.phoneNumber.toString().toLowerCase().contains(
+                contactsAndRelativesQuery,
+              ) ||
+              contact.genderName.toString().toLowerCase().contains(
+                contactsAndRelativesQuery,
+              ) ||
+              contact.nationalityName.toString().toLowerCase().contains(
+                contactsAndRelativesQuery,
+              ) ||
+              contact.emailAddress.toString().toLowerCase().contains(
+                contactsAndRelativesQuery,
+              ) ||
+              // (contact.isEmergency.toString().toLowerCase() == 'true'
+              //         ? 'emergency'
+              //         : '-')
+              //     .contains(query) ||
+              textToDate(
+                contact.dateOfBirth,
+              ).toString().toLowerCase().contains(contactsAndRelativesQuery);
+        }).toList(),
+      );
     }
   }
 }

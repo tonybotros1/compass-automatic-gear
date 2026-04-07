@@ -28,11 +28,11 @@ class AttachmentsModel {
     name = json.containsKey('name') ? json['name'] ?? "" : "";
 
     code = json.containsKey('code') ? json['code'] ?? "" : "";
-    startDate = json.containsKey('start_date')
-        ? DateTime.tryParse(json['start_date'])
+    startDate = json['start_date'] != null
+        ? DateTime.tryParse(json['start_date'].toString())
         : null;
-    endDate = json.containsKey('end_date')
-        ? DateTime.tryParse(json['end_date'])
+    endDate = json['end_date'] != null
+        ? DateTime.tryParse(json['end_date'].toString())
         : null;
     note = json.containsKey('note') ? json['note'] ?? "" : "";
     number = json.containsKey('number') ? json['number'] ?? "" : "";
@@ -59,9 +59,11 @@ class Attachments {
   Attachments({this.attachUrl, this.attachPublicId, this.fileName});
 
   Attachments.fromJson(Map<String, dynamic> json) {
-    attachUrl = json['attach_url'];
-    attachPublicId = json['attach_public_id'];
-    fileName = json['file_name'];
+    attachUrl = json.containsKey('attach_url') ? json['attach_url'] : '';
+    attachPublicId = json.containsKey('attach_public_id')
+        ? json['attach_public_id']
+        : '';
+    fileName = json.containsKey('file_name') ? json['file_name'] : '';
   }
 
   Map<String, dynamic> toJson() {

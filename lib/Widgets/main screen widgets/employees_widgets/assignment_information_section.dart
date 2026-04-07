@@ -171,10 +171,13 @@ Container assignmentInformation(
                 dialogWidth: 600,
                 width: 310,
                 controller: controller.reportingManager,
-                displayKeys: const ['name'],
-                displaySelectedKeys: const ['name'],
+                displayKeys: const ['full_name'],
+                displaySelectedKeys: const ['full_name'],
                 onOpen: () {
-                  return controller.getAllJobDepartments();
+                  return controller.getAllReporingManagers(
+                    controller.currentEmployeeId.value,
+                    controller.jobEmployerId.value,
+                  );
                 },
                 onDelete: () {
                   controller.reportingManager.clear();

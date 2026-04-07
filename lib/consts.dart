@@ -17,8 +17,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://192.168.1.18:8000';
-String webSocketURL = "ws://192.168.1.18:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://172.168.1.17:8000';
+String webSocketURL = "ws://172.168.1.17:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
@@ -277,6 +277,13 @@ Color colorForNameInCards = const Color(0xFF00695C);
 
 var newButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: Colors.green,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+  minimumSize: const Size(100, 40),
+);
+
+var newApplicantButtonStyle = ElevatedButton.styleFrom(
+  backgroundColor: const Color(0xff547792),
   foregroundColor: Colors.white,
   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
   minimumSize: const Size(100, 40),
@@ -1078,7 +1085,7 @@ Widget textForDataRowInTable({
   bool isSelectable = true,
   bool formatDouble = true,
   TextStyle? style,
-  int? maxLines
+  int? maxLines,
 }) {
   String formattedText = text;
 

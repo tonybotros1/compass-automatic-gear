@@ -35,7 +35,8 @@ class AttachmentController extends GetxController {
   AttachmentController({required this.code, required this.documentId});
   RxBool addingNewAttachment = RxBool(false);
   RxString query = RxString('');
-
+  final formKey = GlobalKey<FormState>();
+  ScrollController scrollController = ScrollController();
   @override
   void onInit() async {
     getAllAttachments();
@@ -78,7 +79,7 @@ class AttachmentController extends GetxController {
         logout();
       } else {}
     } catch (e) {
-      //
+      // print(e);
     }
   }
 
@@ -91,14 +92,19 @@ class AttachmentController extends GetxController {
       Uri url = Uri.parse('$backendUrl/attachment/add_new_attachment');
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll({'Authorization': 'Bearer $accessToken'});
-      request.fields['code'] = "EMPLOYEES_ATTACHMENT";
+      request.fields['code'] = code;
       request.fields['document_id'] = documentId;
       request.fields['name'] = name.text;
 
-      request.fields['start_date'] = convertDateToIson(
-        startDate.text,
-      ).toString();
-      request.fields['end_date'] = convertDateToIson(endDate.text).toString();
+      if (startDate.text.isNotEmpty) {
+        request.fields['start_date'] = convertDateToIson(
+          startDate.text,
+        ).toString();
+      }
+
+      if (endDate.text.isNotEmpty) {
+        request.fields['end_date'] = convertDateToIson(endDate.text).toString();
+      }
       request.fields['note'] = note.text;
       request.fields['number'] = number.text;
       request.fields['attachment_type'] = typeId.value;

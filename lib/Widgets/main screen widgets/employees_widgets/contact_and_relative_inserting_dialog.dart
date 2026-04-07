@@ -42,16 +42,14 @@ Future<dynamic> contactsAndRelativesInsertingDialog({
                   GetX<EmployeesController>(
                     builder: (controller) => ClickableHoverText(
                       onTap: onPressed,
-                      text: controller.addingNewContactAndRelativesValue.value == false
+                      text:
+                          controller.addingNewContactAndRelativesValue.value ==
+                              false
                           ? 'Save'
                           : "•••",
                     ),
                   ),
-                  point(),
-                  ClickableHoverText(
-                    onTap: onPressed,
-                    text: 'Document of Record',
-                  ),
+
                   separator(),
                   closeIcon(),
                 ],
