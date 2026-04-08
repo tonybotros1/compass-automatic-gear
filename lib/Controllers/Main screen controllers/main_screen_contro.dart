@@ -35,7 +35,8 @@ import '../../Screens/Main screens/System Administrator/Setup/cash_management_pa
 import '../../Screens/Main screens/System Administrator/Setup/cash_management_receipts.dart';
 import '../../Screens/Main screens/System Administrator/Setup/converters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/counters.dart';
-import '../../Screens/Main screens/System Administrator/Setup/defination.dart';
+import '../../Screens/Main screens/System Administrator/Setup/legislation.dart';
+import '../../Screens/Main screens/System Administrator/Setup/payroll_elements.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations_vendors.dart';
 import '../../Screens/Main screens/System Administrator/Setup/issue_items.dart';
@@ -317,6 +318,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: BatchPaymentProcess());
       case '/defination':
         return const SizedBox(child: Defination());
+      case '/legislation':
+        return const SizedBox(child: Legislation());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }

@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/employees/address_model.dart';
 import '../../Models/employees/contact_and_relatives_model.dart';
 import '../../Models/employees/employees_model.dart';
+import '../../Models/employees/payroll_elements_model.dart';
 import '../../Models/employees/phone_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
@@ -37,10 +38,12 @@ class EmployeesController extends GetxController {
   TextEditingController employeeGender = TextEditingController();
   TextEditingController employeeDateOfBirth = TextEditingController();
   TextEditingController employeePlaceOfBirth = TextEditingController();
-  TextEditingController personType = TextEditingController();
+  RxString personType = RxString('');
   TextEditingController employeeCountryOfBirth = TextEditingController();
   TextEditingController employeeNationality = TextEditingController();
   TextEditingController employeeMaritalStatus = TextEditingController();
+  TextEditingController employeeLegislation = TextEditingController();
+  RxString employeeLegislationId = RxString('');
   TextEditingController employeeEmail = TextEditingController();
   TextEditingController employeePhoneNumber = TextEditingController();
   TextEditingController employeeEmergencyPhoneNumber = TextEditingController();
@@ -52,7 +55,7 @@ class EmployeesController extends GetxController {
   RxString jobTitleId = RxString('');
   TextEditingController hireDate = TextEditingController();
   TextEditingController endDate = TextEditingController();
-  TextEditingController employeeStatus = TextEditingController();
+  RxString employeeStatus = RxString('');
   TextEditingController jobEmployer = TextEditingController();
   TextEditingController jobDepartment = TextEditingController();
   TextEditingController reportingManager = TextEditingController();
@@ -61,6 +64,8 @@ class EmployeesController extends GetxController {
   RxString jobEmployerId = RxString('');
   RxList<EmployeeAddressModel> addressesList = RxList<EmployeeAddressModel>([]);
   RxList<PhoneModel> phonesList = RxList<PhoneModel>([]);
+  RxList<PayrollElementsModel> payrollElementsList =
+      RxList<PayrollElementsModel>([]);
   RxList<EmailModel> emailsList = RxList<EmailModel>([]);
   RxList<NationalityModel> nationalityList = RxList<NationalityModel>([]);
   TextEditingController country = TextEditingController();
@@ -80,7 +85,6 @@ class EmployeesController extends GetxController {
   RxString cityId = RxString('');
   RxString employeeNamtionalityId = RxString('');
   RxString employeeMaritalStatusId = RxString('');
-  RxString employeeStatusId = RxString('');
   RxString employeeGenderId = RxString('');
   RxString employeeCountryOfBirthId = RxString('');
   RxString query = RxString('');
@@ -150,6 +154,10 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getMaritalStatus() async {
     return await helper.getAllListValues('MARITAL_STATUS');
+  }
+
+  Future<Map<String, dynamic>> getAllLegislations() async {
+    return await helper.getAllLegislations();
   }
 
   Future<Map<String, dynamic>> getEmployeeStatus() async {
@@ -436,8 +444,8 @@ class EmployeesController extends GetxController {
         "date_of_birth": convertDateToIson(employeeDateOfBirth.text).toString(),
         "gender": employeeGenderId.value,
         "martial_status": employeeMaritalStatusId.value,
-        "person_type": personType.text,
-        "status": employeeStatusId.value,
+        "person_type": personType.value,
+        "status": employeeStatus.value,
         "employer": jobEmployerId.value,
         "department": jobDepartmentId.value,
         "job_title": jobTitleId.value,
@@ -551,9 +559,8 @@ class EmployeesController extends GetxController {
     employeeGenderId.value = '';
     employeeMaritalStatus.clear();
     employeeMaritalStatusId.value = '';
-    personType.text = isEmployee == true ? 'Employee' : 'Applicant';
-    employeeStatus.clear();
-    employeeStatusId.value = '';
+    personType.value = isEmployee == true ? 'Employee' : 'Applicant';
+    employeeStatus.value = '';
     jobEmployer.clear();
     jobEmployerId.value = '';
     jobDepartment.clear();
@@ -586,9 +593,8 @@ class EmployeesController extends GetxController {
     employeeGenderId.value = employee.gender ?? '';
     employeeMaritalStatus.text = employee.martialStatusName ?? '';
     employeeMaritalStatusId.value = employee.martialStatus ?? '';
-    personType.text = employee.personType ?? '';
-    employeeStatus.text = employee.statusName ?? '';
-    employeeStatusId.value = employee.status ?? '';
+    personType.value = employee.personType ?? '';
+    employeeStatus.value = employee.status ?? '';
     jobEmployer.text = employee.employerName ?? '';
     jobEmployerId.value = employee.employer ?? '';
     jobDepartment.text = employee.departmentName ?? '';

@@ -9,6 +9,7 @@ Container assignmentInformation(
   EmployeesController controller,
 ) {
   return Container(
+    height: 410,
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     width: double.infinity,
@@ -23,26 +24,6 @@ Container assignmentInformation(
             mainAxisAlignment: MainAxisAlignment.start,
 
             children: [
-              MenuWithValues(
-                labelText: 'Status',
-                headerLqabel: 'Status',
-                dialogWidth: 600,
-                width: 150,
-                controller: controller.employeeStatus,
-                displayKeys: const ['name'],
-                displaySelectedKeys: const ['name'],
-                onOpen: () {
-                  return controller.getEmployeeStatus();
-                },
-                onDelete: () {
-                  controller.employeeStatus.clear();
-                  controller.employeeStatusId.value = '';
-                },
-                onSelected: (value) {
-                  controller.employeeStatus.text = value['name'];
-                  controller.employeeStatusId.value = value['_id'];
-                },
-              ),
               MenuWithValues(
                 labelText: 'Employer',
                 headerLqabel: 'Employers',

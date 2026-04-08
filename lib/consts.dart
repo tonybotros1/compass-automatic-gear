@@ -1211,6 +1211,10 @@ Container statusBox(
           ? Colors.pink.shade800.withAlpha(alpha)
           : status == 'SI'
           ? Colors.blue.shade300.withAlpha(alpha)
+          : status == 'Employee' ||
+                status == 'Applicant' ||
+                status == 'Ex Employee'
+          ? Colors.orange
           : Colors.brown.withAlpha(alpha),
     ),
     // height: hieght,

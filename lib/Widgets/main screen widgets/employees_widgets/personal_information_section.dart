@@ -123,11 +123,25 @@ Container personalInformation(
                       controller.employeeMaritalStatusId.value = value['_id'];
                     },
                   ),
-                  myTextFormFieldWithBorder(
-                    labelText: 'Person Type',
-                    controller: controller.personType,
+                  MenuWithValues(
+                    labelText: 'Legislation',
+                    headerLqabel: 'Legilations',
+                    dialogWidth: 600,
                     width: 200,
-                    readOnly: true
+                    controller: controller.employeeLegislation,
+                    displayKeys: const ['name'],
+                    displaySelectedKeys: const ['name'],
+                    onOpen: () {
+                      return controller.getAllLegislations();
+                    },
+                    onDelete: () {
+                      controller.employeeLegislation.clear();
+                      controller.employeeLegislationId.value = '';
+                    },
+                    onSelected: (value) {
+                      controller.employeeLegislation.text = value['name'];
+                      controller.employeeLegislationId.value = value['_id'];
+                    },
                   ),
                 ],
               ),

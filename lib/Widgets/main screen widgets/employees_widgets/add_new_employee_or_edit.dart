@@ -1,7 +1,9 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../consts.dart';
 import 'emails/email_section.dart';
+import 'payroll_elements/payroll_elements_section.dart';
 import 'phone/phone_Section.dart';
 import 'address/address_section.dart';
 import 'assignment_information_section.dart';
@@ -32,9 +34,49 @@ Widget addNewEmployeeOrEdit({
                         child: Column(
                           children: [
                             labelContainer(
-                              lable: Text(
-                                'Personal Information',
-                                style: fontStyle1,
+                              lable: Row(
+                                spacing: 10,
+                                children: [
+                                  Text(
+                                    'Personal Information',
+                                    style: fontStyle1,
+                                  ),
+                                  const Spacer(),
+                                  GetX<EmployeesController>(
+                                    builder: (controller) {
+                                      if (controller
+                                          .personType
+                                          .value
+                                          .isNotEmpty) {
+                                        return statusBox(
+                                          controller.personType.value,
+                                          hieght: 35,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 5,
+                                          ),
+                                        );
+                                      }
+                                      return const SizedBox();
+                                    },
+                                  ),
+                                  GetX<EmployeesController>(
+                                    builder: (controller) {
+                                      if (controller
+                                          .employeeStatus
+                                          .value
+                                          .isNotEmpty) {
+                                        return statusBox(
+                                          controller.employeeStatus.value,
+                                          hieght: 35,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 5,
+                                          ),
+                                        );
+                                      }
+                                      return const SizedBox();
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
                             personalInformation(context, controller),
@@ -108,29 +150,41 @@ Widget addNewEmployeeOrEdit({
                             ),
                           ),
                         ),
-                        // Column(
-                        //   children: [
-                        //     labelContainer(
-                        //       lable: Text(
-                        //         'Contact Information',
-                        //         style: fontStyle1,
-                        //       ),
-                        //     ),
-                        //     contactInformation(context, controller),
-                        //   ],
-                        // ),
                       ),
                     ],
                   ),
-                  Column(
+                  Row(
+                    spacing: 20,
                     children: [
-                      labelContainer(
-                        lable: Text(
-                          'Assignment Information',
-                          style: fontStyle1,
+                      Expanded(
+                        child: Column(
+                          children: [
+                            labelContainer(
+                              lable: Text(
+                                'Assignment Information',
+                                style: fontStyle1,
+                              ),
+                            ),
+                            assignmentInformation(context, controller),
+                          ],
                         ),
                       ),
-                      assignmentInformation(context, controller),
+                      Expanded(
+                        child: SizedBox(
+                          width: 600,
+                          child: Column(
+                            children: [
+                              labelContainer(
+                                lable: Text(
+                                  'Payroll Elements',
+                                  style: fontStyle1,
+                                ),
+                              ),
+                              payrollElementsSection(constraints, context),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
