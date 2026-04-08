@@ -14,80 +14,88 @@ Widget addNewPayrollElementOrEdit({
       spacing: 10,
       children: [
         MenuWithValues(
-          labelText: 'name',
-          headerLqabel: 'name',
+          labelText: 'Name',
+          headerLqabel: 'Name',
           dialogWidth: 600,
-          controller: controller.country,
+          controller: controller.employeePayrollElementName,
           displayKeys: const ['name'],
           displaySelectedKeys: const ['name'],
           onDelete: () {
-            controller.phoneType.clear();
-            controller.phoneTypeId.value = '';
+            controller.employeePayrollElementName.clear();
+            controller.employeePayrollElementNameId.value = '';
           },
           onSelected: (value) {
-            controller.phoneType.text = value['name'];
-            controller.phoneTypeId.value = value['_id'];
+            controller.employeePayrollElementName.text = value['name'];
+            controller.employeePayrollElementNameId.value = value['_id'];
           },
           onOpen: () {
-            return controller.getPhoneTypes();
+            return controller.getAllPayrollElements();
           },
         ),
         myTextFormFieldWithBorder(
+          width: 200,
           obscureText: false,
-          controller: controller.phoneNumber,
+          controller: controller.employeePayrollElementvalue,
           labelText: 'Value',
+          isDouble: true,
         ),
         myTextFormFieldWithBorder(
           labelText: 'Start Date',
           isDate: true,
-          controller: controller.nationalityStartDate,
+          controller: controller.employeePayrollElementStartDate,
           width: 200,
           suffixIcon: IconButton(
             onPressed: () async {
-              selectDateContext(context, controller.nationalityStartDate);
+              selectDateContext(
+                context,
+                controller.employeePayrollElementStartDate,
+              );
             },
             icon: const Icon(Icons.date_range),
           ),
           onFieldSubmitted: (_) async {
             normalizeDate(
-              controller.nationalityStartDate.text,
-              controller.nationalityStartDate,
+              controller.employeePayrollElementStartDate.text,
+              controller.employeePayrollElementStartDate,
             );
           },
           onTapOutside: (_) {
             normalizeDate(
-              controller.nationalityStartDate.text,
-              controller.nationalityStartDate,
+              controller.employeePayrollElementStartDate.text,
+              controller.employeePayrollElementStartDate,
             );
           },
         ),
         myTextFormFieldWithBorder(
           labelText: 'End Date',
           isDate: true,
-          controller: controller.nationalityEndDate,
+          controller: controller.employeePayrollElementEndDate,
           width: 200,
           suffixIcon: IconButton(
             onPressed: () async {
-              selectDateContext(context, controller.nationalityEndDate);
+              selectDateContext(
+                context,
+                controller.employeePayrollElementEndDate,
+              );
             },
             icon: const Icon(Icons.date_range),
           ),
           onFieldSubmitted: (_) async {
             normalizeDate(
-              controller.nationalityEndDate.text,
-              controller.nationalityEndDate,
+              controller.employeePayrollElementEndDate.text,
+              controller.employeePayrollElementEndDate,
             );
           },
           onTapOutside: (_) {
             normalizeDate(
-              controller.nationalityEndDate.text,
-              controller.nationalityEndDate,
+              controller.employeePayrollElementEndDate.text,
+              controller.employeePayrollElementEndDate,
             );
           },
         ),
         myTextFormFieldWithBorder(
           obscureText: false,
-          controller: controller.phoneNumber,
+          controller: controller.employeePayrollElementNote,
           labelText: 'Note',
         ),
       ],

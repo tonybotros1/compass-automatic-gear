@@ -97,8 +97,8 @@ DataRow dataRowForTheTable(
       DataCell(
         Row(
           children: [
-            removePhoneButton(controller: controller, id: data.id ?? ''),
-            updatephoneButton(
+            removePayrollButton(controller: controller, id: data.id ?? ''),
+            updatePayrollButton(
               controller: controller,
               data: data,
               id: data.id ?? '',
@@ -112,7 +112,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.value ?? '',
+          text: data.value?.toString() ?? '0',
           maxWidth: null,
           formatDouble: false,
         ),
@@ -152,14 +152,17 @@ ElevatedButton newPhoneButton({
         alertMessage(context: Get.context!, content: "Please save doc first");
         return;
       }
-      // controller.phoneType.clear();
-      // controller.phoneTypeId.value = '';
-      // controller.phoneNumber.clear();
+      controller.employeePayrollElementName.clear();
+      controller.employeePayrollElementNameId.value = '';
+      controller.employeePayrollElementEndDate.clear();
+      controller.employeePayrollElementStartDate.clear();
+      controller.employeePayrollElementvalue.clear();
+      controller.employeePayrollElementNote.clear();
       payrollElementsDialog(
         controller: controller,
         canEdit: true,
         onPressed: () {
-          // controller.addNewPhone();
+          controller.addNewEmployeePayroll();
         },
         context: context,
       );
@@ -172,19 +175,19 @@ ElevatedButton newPhoneButton({
   );
 }
 
-IconButton removePhoneButton({
+IconButton removePayrollButton({
   required EmployeesController controller,
   required String id,
 }) {
   return IconButton(
     onPressed: () {
-      // controller.deletePhone(id);
+      controller.deleteEmployeePayroll(id);
     },
     icon: deleteIcon,
   );
 }
 
-IconButton updatephoneButton({
+IconButton updatePayrollButton({
   required EmployeePayrollElementsModel data,
   required EmployeesController controller,
   required String id,
@@ -192,14 +195,20 @@ IconButton updatephoneButton({
 }) {
   return IconButton(
     onPressed: () {
-      // controller.phoneType.text = data.typeName ?? '';
-      // controller.phoneTypeId.value = data.type ?? '';
-      // controller.phoneNumber.text = data.phone ?? '';
+      controller.employeePayrollElementName.text = data.name ?? '';
+      controller.employeePayrollElementNameId.value = data.nameId ?? '';
+      controller.employeePayrollElementvalue.text =
+          data.value?.toString() ?? '0';
+      controller.employeePayrollElementStartDate.text = textToDate(
+        data.startDate,
+      );
+      controller.employeePayrollElementEndDate.text = textToDate(data.endDate);
+      controller.employeePayrollElementNote.text = data.note ?? '';
       payrollElementsDialog(
         controller: controller,
         canEdit: true,
         onPressed: () {
-          // controller.updatePhone(id);
+          controller.updateEmployeePayroll(id);
         },
         context: context,
       );

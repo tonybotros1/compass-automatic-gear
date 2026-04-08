@@ -251,16 +251,13 @@ class Helpers {
     }
   }
 
-  
   // this function is to get all legislations by code for drop down menu
   Future<Map<String, dynamic>> getAllLegislations() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse(
-        '$backendUrl/legislation/get_all_legislations',
-      );
+      var url = Uri.parse('$backendUrl/legislation/get_all_legislations');
       final response = await http.get(
         url,
         headers: {"Authorization": "Bearer $accessToken"},
@@ -276,6 +273,45 @@ class Helpers {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getAllLegislations();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // this function is to get all legislations by code for drop down menu
+  Future<Map<String, dynamic>> getAllPayrollElements() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendUrl/payroll_elements/get_payroll_elements_for_lov',
+      );
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> jsonData = decoded["elements"];
+        Map<String, dynamic> map = {
+          for (var role in jsonData) role['_id']: role,
+        };
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getAllPayrollElements();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }

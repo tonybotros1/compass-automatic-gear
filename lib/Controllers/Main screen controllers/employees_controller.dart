@@ -69,6 +69,13 @@ class EmployeesController extends GetxController {
   RxList<EmailModel> emailsList = RxList<EmailModel>([]);
   RxList<NationalityModel> nationalityList = RxList<NationalityModel>([]);
   TextEditingController country = TextEditingController();
+  TextEditingController employeePayrollElementName = TextEditingController();
+  TextEditingController employeePayrollElementvalue = TextEditingController();
+  TextEditingController employeePayrollElementStartDate =
+      TextEditingController();
+  TextEditingController employeePayrollElementEndDate = TextEditingController();
+  TextEditingController employeePayrollElementNote = TextEditingController();
+  RxString employeePayrollElementNameId = RxString('');
   TextEditingController line = TextEditingController();
   TextEditingController city = TextEditingController();
   TextEditingController nationality = TextEditingController();
@@ -158,6 +165,10 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getAllLegislations() async {
     return await helper.getAllLegislations();
+  }
+
+  Future<Map<String, dynamic>> getAllPayrollElements() async {
+    return await helper.getAllPayrollElements();
   }
 
   Future<Map<String, dynamic>> getEmployeeStatus() async {
@@ -611,6 +622,7 @@ class EmployeesController extends GetxController {
     nationalityList.assignAll(employee.nationalitiesList ?? []);
     phonesList.assignAll(employee.phoneList ?? []);
     emailsList.assignAll(employee.emailList ?? []);
+    payrollElementsList.assignAll(employee.payrollsList ?? []);
   }
 
   // ======================== address section ========================
@@ -1421,6 +1433,155 @@ class EmployeesController extends GetxController {
                 contact.dateOfBirth,
               ).toString().toLowerCase().contains(contactsAndRelativesQuery);
         }).toList(),
+      );
+    }
+  }
+
+  // ======================== Payroll section ========================
+  Future<void> addNewEmployeePayroll() async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewContactAndRelativesValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/add_new_employee_payroll/${currentEmployeeId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "name": employeePayrollElementNameId.value,
+          "value": employeePayrollElementvalue.text.isNotEmpty
+              ? double.tryParse(employeePayrollElementvalue.text)
+              : 0,
+          "start_date": employeePayrollElementStartDate.text.isNotEmpty
+              ? convertDateToIson(employeePayrollElementStartDate.text)
+              : null,
+          "end_date": employeePayrollElementEndDate.text.isNotEmpty
+              ? convertDateToIson(employeePayrollElementEndDate.text)
+              : null,
+          "notes": employeePayrollElementNote.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        EmployeePayrollElementsModel newPayroll =
+            EmployeePayrollElementsModel.fromJson(decoded['new_payroll']);
+        payrollElementsList.insert(0, newPayroll);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewEmployeePayroll();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewContactAndRelativesValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewContactAndRelativesValue.value = false;
+    }
+  }
+
+  Future<void> updateEmployeePayroll(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewContactAndRelativesValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/employees/update_employee_payroll/$id');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "name": employeePayrollElementNameId.value,
+          "value": employeePayrollElementvalue.text.isNotEmpty
+              ? double.tryParse(employeePayrollElementvalue.text)
+              : 0,
+          "start_date": employeePayrollElementStartDate.text.isNotEmpty
+              ? convertDateToIson(employeePayrollElementStartDate.text)
+              : null,
+          "end_date": employeePayrollElementEndDate.text.isNotEmpty
+              ? convertDateToIson(employeePayrollElementEndDate.text)
+              : null,
+          "notes": employeePayrollElementNote.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        EmployeePayrollElementsModel updatedPayroll =
+            EmployeePayrollElementsModel.fromJson(decoded['updated_payroll']);
+            print(updatedPayroll.note);
+        int index = payrollElementsList.indexWhere((i) => i.id == id);
+        print(index);
+        if (index != -1) {
+          payrollElementsList[index] = updatedPayroll;
+          payrollElementsList.refresh();
+        }
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateEmployeePayroll(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewContactAndRelativesValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewContactAndRelativesValue.value = false;
+    }
+  }
+
+  Future<void> deleteEmployeePayroll(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "contact does not exist");
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/employees/delete_employee_payroll/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        payrollElementsList.removeWhere((contact) => contact.id == id);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteEmployeePayroll(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
       );
     }
   }

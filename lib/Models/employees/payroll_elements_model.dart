@@ -1,7 +1,8 @@
 class EmployeePayrollElementsModel {
   String? id;
   String? name;
-  String? value;
+  String? nameId;
+  double? value;
   DateTime? startDate;
   DateTime? endDate;
   String? note;
@@ -17,8 +18,9 @@ class EmployeePayrollElementsModel {
 
   EmployeePayrollElementsModel.fromJson(Map<String, dynamic> json) {
     id = json.containsKey('_id') ? json['_id'] ?? '' : '';
-    name = json.containsKey('name') ? json['name'] ?? '' : '';
-    value = json.containsKey('value') ? json['value'] ?? '' : '';
+    name = json.containsKey('name_value') ? json['name_value'] ?? '' : '';
+    nameId = json.containsKey('name') ? json['name'] ?? '' : '';
+    value = json.containsKey('value') ? json['value'] ?? 0 : 0;
     startDate = json.containsKey('start_date')
         ? json['start_date'] != null
               ? DateTime.tryParse(json['start_date'])
@@ -29,6 +31,6 @@ class EmployeePayrollElementsModel {
               ? DateTime.tryParse(json['end_date'])
               : null
         : null;
-    note = json.containsKey('note') ? json['note'] ?? '' : '';
+    note = json.containsKey('notes') ? json['notes'] ?? '' : '';
   }
 }
