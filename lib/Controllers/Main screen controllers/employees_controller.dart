@@ -64,8 +64,8 @@ class EmployeesController extends GetxController {
   RxString jobEmployerId = RxString('');
   RxList<EmployeeAddressModel> addressesList = RxList<EmployeeAddressModel>([]);
   RxList<PhoneModel> phonesList = RxList<PhoneModel>([]);
-  RxList<PayrollElementsModel> payrollElementsList =
-      RxList<PayrollElementsModel>([]);
+  RxList<EmployeePayrollElementsModel> payrollElementsList =
+      RxList<EmployeePayrollElementsModel>([]);
   RxList<EmailModel> emailsList = RxList<EmailModel>([]);
   RxList<NationalityModel> nationalityList = RxList<NationalityModel>([]);
   TextEditingController country = TextEditingController();

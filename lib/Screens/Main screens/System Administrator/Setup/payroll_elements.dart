@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../Controllers/Main screen controllers/payroll_elements_controller.dart';
+import '../../../../Models/payroll elements/payroll_elements_model.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/defination_widgets/defination_dialog.dart';
+import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
@@ -42,8 +44,40 @@ class Defination extends StatelessWidget {
                               children: [
                                 myTextFormFieldWithBorder(
                                   width: 250,
+                                  labelText: 'Key',
+                                  controller: controller.elementKeyFilter,
+                                ),
+                                myTextFormFieldWithBorder(
+                                  width: 250,
                                   labelText: 'Name',
-                                  // controller: controller.employeeNameFilter,
+                                  controller: controller.elementNameFilter,
+                                ),
+                                MenuWithValues(
+                                  labelText: 'Type',
+                                  headerLqabel: 'Types',
+                                  dialogWidth: 600,
+                                  width: 250,
+                                  controller: controller.elementTypeFilter,
+                                  displayKeys: const ['name'],
+                                  displaySelectedKeys: const ['name'],
+                                  data: controller.elementTypes,
+                                  onDelete: () {
+                                    controller.elementTypeFilter.clear();
+                                  },
+                                  onSelected: (value) {
+                                    controller.elementTypeFilter.value =
+                                        value['name'];
+                                  },
+                                ),
+                                myTextFormFieldWithBorder(
+                                  width: 250,
+                                  labelText: 'Priority',
+                                  controller: controller.elementPriorityFilter,
+                                ),
+                                myTextFormFieldWithBorder(
+                                  width: 250,
+                                  labelText: 'Comments',
+                                  controller: controller.elementCommentFilter,
                                 ),
                               ],
                             ),
@@ -71,7 +105,11 @@ class Defination extends StatelessWidget {
                             Row(
                               spacing: 10,
                               children: [
-                                newButton(context, constraints, controller),
+                                newElementButton(
+                                  context,
+                                  constraints,
+                                  controller,
+                                ),
                               ],
                             ),
                             Row(
@@ -118,7 +156,7 @@ class Defination extends StatelessWidget {
                                   style: findButtonStyle,
                                   onPressed: controller.isScreenLoding.isFalse
                                       ? () async {
-                                          // controller.filterSearch();
+                                          controller.filterSearch();
                                         }
                                       : null,
                                   child: controller.isScreenLoding.isFalse
@@ -131,7 +169,7 @@ class Defination extends StatelessWidget {
                                 ElevatedButton(
                                   style: clearVariablesButtonStyle,
                                   onPressed: () {
-                                    // controller.clearAllFilters();
+                                    controller.clearSearchValues();
                                     // controller.update();
                                   },
                                   child: Text(
@@ -155,7 +193,7 @@ class Defination extends StatelessWidget {
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: GetBuilder<PayrollElementsController>(
+                    child: GetX<PayrollElementsController>(
                       builder: (controller) {
                         return SizedBox(
                           width: constraints.maxWidth,
@@ -188,11 +226,16 @@ Widget tableOfScreens({
     columnSpacing: 5,
     autoRowsToHeight: true,
     renderEmptyRowsInTheEnd: true,
+    lmRatio: 2.5,
     columns: [
       const DataColumn2(label: Text(''), size: ColumnSize.S),
       DataColumn2(
-        label: AutoSizedText(text: 'Full Name', constraints: constraints),
+        label: AutoSizedText(text: 'Key', constraints: constraints),
         size: ColumnSize.M,
+      ),
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(constraints: constraints, text: 'Name'),
       ),
       DataColumn2(
         size: ColumnSize.M,
@@ -200,27 +243,17 @@ Widget tableOfScreens({
       ),
       DataColumn2(
         size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Status'),
+        label: AutoSizedText(constraints: constraints, text: 'Priority'),
       ),
       DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Employer'),
-      ),
-      DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Department'),
-      ),
-      DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Job Title'),
-      ),
-      DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Location'),
+        size: ColumnSize.L,
+        label: AutoSizedText(constraints: constraints, text: 'Comments'),
       ),
     ],
     source: CardDataSourceForEmployees(
-      cards: [],
+      cards: controller.allPayrollElements.isEmpty
+          ? []
+          : controller.allPayrollElements,
       context: context,
       constraints: constraints,
       controller: controller,
@@ -229,7 +262,7 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  dynamic data,
+  PayrollElementsModel data,
   BuildContext context,
   BoxConstraints constraints,
   String employeeId,
@@ -238,46 +271,48 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
-      const DataCell(
+      DataCell(
         Row(
           spacing: 5,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // deleteSection(controller, employeeId, context),
-            // editSection(context, controller, data, constraints, employeeId),
+            deleteSection(controller, employeeId, context),
+            editSection(context, controller, data, constraints, employeeId),
           ],
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.fullName ?? '',
+          text: data.key ?? '',
           color: Colors.blueGrey,
           isBold: true,
+          formatDouble: false,
         ),
       ),
-      DataCell(textForDataRowInTable(text: data.personType ?? '')),
-      DataCell(textForDataRowInTable(text: data.statusName ?? '')),
-      DataCell(textForDataRowInTable(text: data.employerName ?? '')),
-      DataCell(textForDataRowInTable(text: data.departmentName ?? '')),
       DataCell(
-        textForDataRowInTable(isBold: true, text: data.jobTitleName ?? ''),
+        textForDataRowInTable(text: data.name ?? '', formatDouble: false),
       ),
       DataCell(
-        textForDataRowInTable(isBold: true, text: data.locationName ?? ''),
+        textForDataRowInTable(text: data.type ?? '', formatDouble: false),
+      ),
+      DataCell(
+        textForDataRowInTable(text: data.priority ?? '', formatDouble: false),
+      ),
+      DataCell(
+        textForDataRowInTable(text: data.comments ?? '', formatDouble: false),
       ),
     ],
   );
 }
 
-ElevatedButton newButton(
+ElevatedButton newElementButton(
   BuildContext context,
   BoxConstraints constraints,
   PayrollElementsController controller,
 ) {
   return ElevatedButton(
     onPressed: () {
-      // controller.clearValues(isEmployee);
-
+      controller.clearValues();
       definationDialog(
         context: context,
         constraints: constraints,
@@ -285,17 +320,61 @@ ElevatedButton newButton(
         onPressed: controller.addingNewValue.value
             ? null
             : () async {
-                // await controller.addNewEmployee();
+                await controller.addNewPayrollElement();
               },
       );
     },
     style: newButtonStyle,
-    child: const Text('New'),
+    child: const Text('New Element'),
+  );
+}
+
+IconButton deleteSection(
+  PayrollElementsController controller,
+  String employeeId,
+  BuildContext context,
+) {
+  return IconButton(
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The doc will be deleted permanently",
+        onPressed: () {
+          controller.deletePayrollElement(employeeId);
+        },
+      );
+    },
+    icon: deleteIcon,
+  );
+}
+
+IconButton editSection(
+  BuildContext context,
+  PayrollElementsController controller,
+  PayrollElementsModel data,
+  BoxConstraints constraints,
+  String elementID,
+) {
+  return IconButton(
+    onPressed: () async {
+      controller.loadValues(data);
+      definationDialog(
+        context: context,
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () {
+                controller.addNewPayrollElement();
+              },
+      );
+    },
+    icon: editIcon,
   );
 }
 
 class CardDataSourceForEmployees extends DataTableSource {
-  final List cards;
+  final List<PayrollElementsModel> cards;
   final BuildContext context;
   final BoxConstraints constraints;
   final PayrollElementsController controller;

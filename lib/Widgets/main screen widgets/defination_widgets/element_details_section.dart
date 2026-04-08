@@ -30,12 +30,12 @@ Container elementDetails(
                 children: [
                   myTextFormFieldWithBorder(
                     labelText: 'Element Key',
-                    controller: controller.elementName,
+                    controller: controller.elementKey,
                     width: 310,
                   ),
                   myTextFormFieldWithBorder(
                     labelText: 'Element Name',
-                    controller: controller.elementKey,
+                    controller: controller.elementName,
                     width: 620,
                   ),
                   MenuWithValues(
@@ -68,6 +68,7 @@ Container elementDetails(
               child: myTextFormFieldWithBorder(
                 maxLines: 10,
                 labelText: 'Comments',
+                controller: controller.elementComment,
               ),
             ),
           ],
@@ -82,7 +83,7 @@ Container elementDetails(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                spacing: 5,
+                spacing: 10,
                 children: [
                   GetX<PayrollElementsController>(
                     builder: (controller) {
@@ -98,7 +99,7 @@ Container elementDetails(
                 ],
               ),
               Row(
-                spacing: 5,
+                spacing: 10,
                 children: [
                   GetX<PayrollElementsController>(
                     builder: (controller) {
@@ -114,7 +115,7 @@ Container elementDetails(
                 ],
               ),
               Row(
-                spacing: 5,
+                spacing: 10,
                 children: [
                   GetX<PayrollElementsController>(
                     builder: (controller) {
@@ -130,7 +131,7 @@ Container elementDetails(
                 ],
               ),
               Row(
-                spacing: 5,
+                spacing: 10,
                 children: [
                   GetX<PayrollElementsController>(
                     builder: (controller) {

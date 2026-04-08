@@ -1,4 +1,4 @@
-class PayrollElementsModel {
+class EmployeePayrollElementsModel {
   String? id;
   String? name;
   String? value;
@@ -6,7 +6,7 @@ class PayrollElementsModel {
   DateTime? endDate;
   String? note;
 
-  PayrollElementsModel({
+  EmployeePayrollElementsModel({
     this.id,
     this.name,
     this.value,
@@ -15,7 +15,7 @@ class PayrollElementsModel {
     this.note,
   });
 
-  PayrollElementsModel.fromJson(Map<String, dynamic> json) {
+  EmployeePayrollElementsModel.fromJson(Map<String, dynamic> json) {
     id = json.containsKey('_id') ? json['_id'] ?? '' : '';
     name = json.containsKey('name') ? json['name'] ?? '' : '';
     value = json.containsKey('value') ? json['value'] ?? '' : '';

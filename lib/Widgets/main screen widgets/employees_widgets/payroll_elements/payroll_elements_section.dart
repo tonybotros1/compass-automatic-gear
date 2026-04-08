@@ -87,7 +87,7 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  PayrollElementsModel data,
+  EmployeePayrollElementsModel data,
   BoxConstraints constraints,
   EmployeesController controller,
   BuildContext context,
@@ -185,7 +185,7 @@ IconButton removePhoneButton({
 }
 
 IconButton updatephoneButton({
-  required PayrollElementsModel data,
+  required EmployeePayrollElementsModel data,
   required EmployeesController controller,
   required String id,
   required BuildContext context,
