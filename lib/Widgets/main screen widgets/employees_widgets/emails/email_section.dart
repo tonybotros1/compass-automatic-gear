@@ -53,7 +53,7 @@ Widget tableOfScreens({
         ),
         DataColumn2(
           size: ColumnSize.L,
-          label: AutoSizedText(constraints: constraints, text: 'Email'),
+          label: AutoSizedText(constraints: constraints, text: 'Contact Details'),
         ),
       ],
       rows: controller.emailsList.map<DataRow>((invoiceItems) {
@@ -112,7 +112,7 @@ ElevatedButton newEmailButton({required EmployeesController controller}) {
     },
     style: newButtonStyle,
     child: const Text(
-      'New Email',
+      'New Contact',
       style: TextStyle(fontWeight: FontWeight.bold),
     ),
   );

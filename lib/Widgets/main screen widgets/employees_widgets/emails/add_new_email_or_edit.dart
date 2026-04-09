@@ -34,7 +34,7 @@ Widget addNewEmailOrEdit({
         myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.emailAddress,
-          labelText: 'Email',
+          labelText: 'Contact Details',
           validate: true,
         ),
       ],

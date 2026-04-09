@@ -258,18 +258,19 @@ class PayrollElementsController extends GetxController {
     elementName.clear();
     elementType.clear();
     elementPriority.clear();
+    elementComment.clear();
+    currentPayrollElementId.value = '';
     allowOverride.value = false;
     recurring.value = false;
     entryValue.value = false;
     standardLink.value = false;
   }
 
-   void clearSearchValues() {
+  void clearSearchValues() {
     elementKeyFilter.clear();
     elementNameFilter.clear();
     elementTypeFilter.clear();
     elementPriorityFilter.clear();
-   
   }
 
   void loadValues(PayrollElementsModel data) {

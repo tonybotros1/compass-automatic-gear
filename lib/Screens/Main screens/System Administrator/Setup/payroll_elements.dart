@@ -287,19 +287,32 @@ DataRow dataRowForTheTable(
           color: Colors.blueGrey,
           isBold: true,
           formatDouble: false,
+          maxWidth: null,
         ),
       ),
       DataCell(
-        textForDataRowInTable(text: data.name ?? '', formatDouble: false),
+        textForDataRowInTable(
+          text: data.name ?? '',
+          formatDouble: false,
+          maxWidth: null,
+        ),
       ),
       DataCell(
-        textForDataRowInTable(text: data.type ?? '', formatDouble: false),
+        textForDataRowInTable(
+          text: data.type ?? '',
+          formatDouble: false,
+          maxWidth: null,
+        ),
       ),
       DataCell(
         textForDataRowInTable(text: data.priority ?? '', formatDouble: false),
       ),
       DataCell(
-        textForDataRowInTable(text: data.comments ?? '', formatDouble: false),
+        textForDataRowInTable(
+          text: data.comments ?? '',
+          formatDouble: false,
+          maxLines: null,
+        ),
       ),
     ],
   );

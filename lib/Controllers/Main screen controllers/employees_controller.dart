@@ -138,8 +138,7 @@ class EmployeesController extends GetxController {
     Tab(text: 'Address'),
     Tab(text: 'Nationality'),
     Tab(text: 'Phones'),
-    Tab(text: 'Emails'),
-    Tab(text: 'Others'),
+    Tab(text: 'Social Contacts'),
   ];
 
   @override
@@ -1528,9 +1527,7 @@ class EmployeesController extends GetxController {
         final decoded = jsonDecode(response.body);
         EmployeePayrollElementsModel updatedPayroll =
             EmployeePayrollElementsModel.fromJson(decoded['updated_payroll']);
-            print(updatedPayroll.note);
         int index = payrollElementsList.indexWhere((i) => i.id == id);
-        print(index);
         if (index != -1) {
           payrollElementsList[index] = updatedPayroll;
           payrollElementsList.refresh();

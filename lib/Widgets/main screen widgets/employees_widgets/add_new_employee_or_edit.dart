@@ -142,7 +142,6 @@ Widget addNewEmployeeOrEdit({
                                       emailSectionFotEmployees(
                                         constraints: constraints,
                                       ),
-                                      const Text('4'),
                                     ],
                                   ),
                                 ),

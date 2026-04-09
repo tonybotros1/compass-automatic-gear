@@ -31,7 +31,7 @@ Future<dynamic> emailDialog({
               child: Row(
                 spacing: 10,
                 children: [
-                  Text('Phone', style: fontStyleForScreenNameUsedInButtons),
+                  Text('Social', style: fontStyleForScreenNameUsedInButtons),
                   const Spacer(),
                   ClickableHoverText(
                     onTap: onPressed,
