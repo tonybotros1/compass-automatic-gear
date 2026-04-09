@@ -8,7 +8,6 @@ import '../../../../Controllers/Main screen controllers/payroll_elements_control
 import '../../../../Models/payroll elements/payroll_elements_model.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/defination_widgets/defination_dialog.dart';
-import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
 
@@ -52,33 +51,33 @@ class Defination extends StatelessWidget {
                                   labelText: 'Name',
                                   controller: controller.elementNameFilter,
                                 ),
-                                MenuWithValues(
-                                  labelText: 'Type',
-                                  headerLqabel: 'Types',
-                                  dialogWidth: 600,
-                                  width: 250,
-                                  controller: controller.elementTypeFilter,
-                                  displayKeys: const ['name'],
-                                  displaySelectedKeys: const ['name'],
-                                  data: controller.elementTypes,
-                                  onDelete: () {
-                                    controller.elementTypeFilter.clear();
-                                  },
-                                  onSelected: (value) {
-                                    controller.elementTypeFilter.value =
-                                        value['name'];
-                                  },
-                                ),
-                                myTextFormFieldWithBorder(
-                                  width: 250,
-                                  labelText: 'Priority',
-                                  controller: controller.elementPriorityFilter,
-                                ),
-                                myTextFormFieldWithBorder(
-                                  width: 250,
-                                  labelText: 'Comments',
-                                  controller: controller.elementCommentFilter,
-                                ),
+                                // MenuWithValues(
+                                //   labelText: 'Type',
+                                //   headerLqabel: 'Types',
+                                //   dialogWidth: 600,
+                                //   width: 250,
+                                //   controller: controller.elementTypeFilter,
+                                //   displayKeys: const ['name'],
+                                //   displaySelectedKeys: const ['name'],
+                                //   data: controller.elementTypes,
+                                //   onDelete: () {
+                                //     controller.elementTypeFilter.clear();
+                                //   },
+                                //   onSelected: (value) {
+                                //     controller.elementTypeFilter.value =
+                                //         value['name'];
+                                //   },
+                                // ),
+                                // myTextFormFieldWithBorder(
+                                //   width: 250,
+                                //   labelText: 'Priority',
+                                //   controller: controller.elementPriorityFilter,
+                                // ),
+                                // myTextFormFieldWithBorder(
+                                //   width: 250,
+                                //   labelText: 'Comments',
+                                //   controller: controller.elementCommentFilter,
+                                // ),
                               ],
                             ),
                           ],
@@ -121,9 +120,9 @@ class Defination extends StatelessWidget {
                                       controller.initTypePickersValue.value,
                                   children: const {
                                     1: Text('ALL'),
-                                    2: Text(''),
-                                    3: Text(''),
-                                    4: Text(''),
+                                    2: Text('EARNING'),
+                                    3: Text('DEDUCTION'),
+                                    4: Text('INFORMATION'),
                                   },
                                   decoration: BoxDecoration(
                                     color: CupertinoColors.lightBackgroundGray,
@@ -144,7 +143,7 @@ class Defination extends StatelessWidget {
                                   duration: const Duration(milliseconds: 300),
                                   curve: Curves.easeInToLinear,
                                   onValueChanged: (v) {
-                                    // controller.onChooseForTypePicker(v);
+                                    controller.onChooseForTypePicker(v);
                                   },
                                 ),
                               ],

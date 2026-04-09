@@ -81,6 +81,33 @@ class PayrollElementsController extends GetxController {
     return mainScreenController.selectedScreenName.value;
   }
 
+  void onChooseForTypePicker(int i) {
+    switch (i) {
+      case 1:
+        initTypePickersValue.value = 1;
+        elementTypeFilter.clear();
+        filterSearch();
+        break;
+      case 2:
+        initTypePickersValue.value = 2;
+        elementTypeFilter.text = 'Earning';
+        filterSearch();
+        break;
+      case 3:
+        initTypePickersValue.value = 3;
+        elementTypeFilter.text = 'Deduction';
+        filterSearch();
+        break;
+      case 4:
+        initTypePickersValue.value = 3;
+        elementTypeFilter.text = 'Information';
+        filterSearch();
+        break;
+
+      default:
+    }
+  }
+
   Future<void> addNewPayrollElement() async {
     try {
       addingNewValue.value = true;

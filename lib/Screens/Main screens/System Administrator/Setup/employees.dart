@@ -190,7 +190,7 @@ class Employees extends StatelessWidget {
                                     1: Text('ALL'),
                                     2: Text('EMPLOYEE'),
                                     3: Text('APPLICANT'),
-                                    4: Text('EX EMPLOYEE'),
+                                    4: Text('EX-EMPLOYEE'),
                                   },
                                   decoration: BoxDecoration(
                                     color: CupertinoColors.lightBackgroundGray,
@@ -363,7 +363,7 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(textForDataRowInTable(text: data.personType ?? '')),
-      DataCell(textForDataRowInTable(text: data.statusName ?? '')),
+      DataCell(textForDataRowInTable(text: data.status ?? '')),
       DataCell(textForDataRowInTable(text: data.employerName ?? '')),
       DataCell(textForDataRowInTable(text: data.departmentName ?? '')),
       DataCell(
@@ -387,7 +387,7 @@ IconButton deleteSection(
         context: context,
         content: "The technicians will be deleted permanently",
         onPressed: () {
-          controller.deleteEmployee(employeeId);
+          // controller.deleteEmployee(employeeId);
         },
       );
     },

@@ -193,7 +193,6 @@ class EmployeesModel {
   List<EmailModel>? emailList;
   List<EmployeePayrollElementsModel>? payrollsList;
 
-  String? statusName;
   String? genderName;
   String? employerName;
   String? departmentName;
@@ -308,7 +307,6 @@ class EmployeesModel {
     }
 
     /// Names
-    if (json.containsKey('status_name')) model.statusName = json['status_name'];
     if (json.containsKey('gender_name')) model.genderName = json['gender_name'];
     if (json.containsKey('employer_name')) {
       model.employerName = json['employer_name'];
