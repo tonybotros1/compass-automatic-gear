@@ -4,7 +4,6 @@ import '../../../consts.dart';
 import '../../my_text_field.dart';
 
 Container legislationInformation(
-  BuildContext context,
   LegislationController controller,
 ) {
   return Container(

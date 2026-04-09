@@ -15,6 +15,7 @@ class LegislationController extends GetxController {
   RxBool isScreenLoding = RxBool(false);
   RxBool addingNewValue = RxBool(false);
   TextEditingController name = TextEditingController();
+  TextEditingController nameFilter = TextEditingController();
   RxList<LegislationModel> allLegislations = RxList<LegislationModel>([]);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
@@ -39,28 +40,18 @@ class LegislationController extends GetxController {
           allLegislations.add(newDoc);
           break;
 
-        // case "branch_status_updated":
-        //   final branchId = message["data"]['_id'];
-        //   final branchStatus = message["data"]['status'];
-        //   final index = allBranches.indexWhere((m) => m.id == branchId);
-        //   if (index != -1) {
-        //     allBranches[index].status = branchStatus;
-        //     allBranches.refresh();
-        //   }
-        //   break;
+        case "leg_updated":
+          final updated = LegislationModel.fromJson(message["data"]);
+          final index = allLegislations.indexWhere((m) => m.id == updated.id);
+          if (index != -1) {
+            allLegislations[index] = updated;
+          }
+          break;
 
-        // case "branch_updated":
-        //   final updated = BranchesModel.fromJson(message["data"]);
-        //   final index = allBranches.indexWhere((m) => m.id == updated.id);
-        //   if (index != -1) {
-        //     allBranches[index] = updated;
-        //   }
-        //   break;
-
-        // case "branch_deleted":
-        //   final deletedId = message["data"]["_id"];
-        //   allBranches.removeWhere((m) => m.id == deletedId);
-        //   break;
+        case "leg_deleted":
+          final deletedId = message["data"]["_id"];
+          allLegislations.removeWhere((m) => m.id == deletedId);
+          break;
       }
     });
   }
@@ -100,5 +91,129 @@ class LegislationController extends GetxController {
         content: 'Something went wrong please try again',
       );
     }
+  }
+
+  Future<void> updateLegislation(String id) async {
+    try {
+      addingNewValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/legislation/update_legislation/$id');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"name": name.text}),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateLegislation(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> deletedLegislation(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/legislation/delete_legislation/$id',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deletedLegislation(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      Get.back();
+    } catch (e) {
+      //
+    }
+  }
+
+  void filterSearch() async {
+    Map<String, dynamic> body = {};
+    if (nameFilter.text.isNotEmpty) {
+      body["name"] = nameFilter.text;
+    }
+
+    if (body.isNotEmpty) {
+      await searchEngine(body);
+    } else {
+      await searchEngine({"all": true});
+    }
+  }
+
+  Future<void> searchEngine(Map<String, dynamic> body) async {
+    try {
+      isScreenLoding.value = true;
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/legislation/search_engine_for_legislations',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(body),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List docs = decoded['legislations_elements'];
+        allLegislations.assignAll(
+          docs.map((job) => LegislationModel.fromJson(job)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await searchEngine(body);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+
+      isScreenLoding.value = false;
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
+  }
+
+  void clearAllFilters() {
+    nameFilter.clear();
   }
 }

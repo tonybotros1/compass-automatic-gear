@@ -8,7 +8,6 @@ import 'add_new_legilation_or_edit.dart';
 Future<dynamic> legislationDialog({
   required BoxConstraints constraints,
   required LegislationController controller,
-  required BuildContext context,
   required void Function()? onPressed,
 }) {
   return Get.dialog(
@@ -59,7 +58,6 @@ Future<dynamic> legislationDialog({
                 child: addNewLegistlationOrEdit(
                   controller: controller,
                   constraints: constraints,
-                  context: context,
                 ),
               ),
             ),

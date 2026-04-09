@@ -47,7 +47,7 @@ class _LegislationState extends State<Legislation> {
                                 myTextFormFieldWithBorder(
                                   width: 250,
                                   labelText: 'Name',
-                                  // controller: controller.employeeNameFilter,
+                                  controller: controller.nameFilter,
                                 ),
                               ],
                             ),
@@ -72,12 +72,7 @@ class _LegislationState extends State<Legislation> {
                           crossAxisAlignment: CrossAxisAlignment.end,
 
                           children: [
-                            Row(
-                              spacing: 10,
-                              children: [
-                                newButton(context, constraints, controller),
-                              ],
-                            ),
+                            newButton(constraints, controller),
 
                             Row(
                               spacing: 10,
@@ -86,7 +81,7 @@ class _LegislationState extends State<Legislation> {
                                   style: findButtonStyle,
                                   onPressed: controller.isScreenLoding.isFalse
                                       ? () async {
-                                          // controller.filterSearch();
+                                          controller.filterSearch();
                                         }
                                       : null,
                                   child: controller.isScreenLoding.isFalse
@@ -99,7 +94,7 @@ class _LegislationState extends State<Legislation> {
                                 ElevatedButton(
                                   style: clearVariablesButtonStyle,
                                   onPressed: () {
-                                    // controller.clearAllFilters();
+                                    controller.clearAllFilters();
                                     // controller.update();
                                   },
                                   child: Text(
@@ -184,13 +179,13 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
-      const DataCell(
+      DataCell(
         Row(
           spacing: 5,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            // deleteSection(controller, employeeId, context),
-            // editSection(context, controller, data, constraints, employeeId),
+            deleteSection(controller, employeeId, context),
+            editSection(controller, data, constraints, employeeId),
           ],
         ),
       ),
@@ -206,16 +201,14 @@ DataRow dataRowForTheTable(
 }
 
 ElevatedButton newButton(
-  BuildContext context,
   BoxConstraints constraints,
   LegislationController controller,
 ) {
   return ElevatedButton(
     onPressed: () {
-      // controller.clearValues(isEmployee);
+      controller.name.clear();
       controller.name.clear();
       legislationDialog(
-        context: context,
         constraints: constraints,
         controller: controller,
         onPressed: controller.addingNewValue.value
@@ -227,6 +220,48 @@ ElevatedButton newButton(
     },
     style: newButtonStyle,
     child: const Text('New Legislation'),
+  );
+}
+
+IconButton deleteSection(
+  LegislationController controller,
+  String employeeId,
+  BuildContext context,
+) {
+  return IconButton(
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The doc will be deleted permanently",
+        onPressed: () {
+          controller.deletedLegislation(employeeId);
+        },
+      );
+    },
+    icon: deleteIcon,
+  );
+}
+
+IconButton editSection(
+  LegislationController controller,
+  LegislationModel data,
+  BoxConstraints constraints,
+  String elementID,
+) {
+  return IconButton(
+    onPressed: () async {
+      controller.name.text = data.name ?? '';
+      legislationDialog(
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () async {
+                await controller.updateLegislation(elementID);
+              },
+      );
+    },
+    icon: editIcon,
   );
 }
 
