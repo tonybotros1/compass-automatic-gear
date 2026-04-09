@@ -2,6 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_cont
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
+import 'bank_accounts/bank_accounts_section.dart';
 import 'emails/email_section.dart';
 import 'payroll_elements/payroll_elements_section.dart';
 import 'phone/phone_Section.dart';
@@ -141,6 +142,11 @@ Widget addNewEmployeeOrEdit({
                                       phoneSectionFotEmployees(constraints),
                                       emailSectionFotEmployees(
                                         constraints: constraints,
+                                        context: context,
+                                      ),
+                                      bankAccountsSection(
+                                        constraints: constraints,
+                                        context: context,
                                       ),
                                     ],
                                   ),

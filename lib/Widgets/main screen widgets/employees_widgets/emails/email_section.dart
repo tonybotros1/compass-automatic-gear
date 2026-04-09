@@ -7,7 +7,10 @@ import '../../../../consts.dart';
 import '../../auto_size_box.dart';
 import 'email_dialog.dart';
 
-Widget emailSectionFotEmployees({required BoxConstraints constraints}) {
+Widget emailSectionFotEmployees({
+  required BoxConstraints constraints,
+  required BuildContext context,
+}) {
   return Container(
     decoration: containerDecor,
     child: GetX<EmployeesController>(
@@ -23,6 +26,7 @@ Widget emailSectionFotEmployees({required BoxConstraints constraints}) {
               child: tableOfScreens(
                 constraints: constraints,
                 controller: controller,
+                context: context,
               ),
             ),
           ],
@@ -35,6 +39,7 @@ Widget emailSectionFotEmployees({required BoxConstraints constraints}) {
 Widget tableOfScreens({
   required BoxConstraints constraints,
   required EmployeesController controller,
+  required BuildContext context,
 }) {
   return SizedBox(
     // width: constraints.maxWidth - 17,
@@ -53,11 +58,19 @@ Widget tableOfScreens({
         ),
         DataColumn2(
           size: ColumnSize.L,
-          label: AutoSizedText(constraints: constraints, text: 'Contact Details'),
+          label: AutoSizedText(
+            constraints: constraints,
+            text: 'Contact Details',
+          ),
         ),
       ],
       rows: controller.emailsList.map<DataRow>((invoiceItems) {
-        return dataRowForTheTable(invoiceItems, constraints, controller);
+        return dataRowForTheTable(
+          invoiceItems,
+          constraints,
+          controller,
+          context,
+        );
       }).toList(),
     ),
   );
@@ -67,13 +80,18 @@ DataRow dataRowForTheTable(
   EmailModel data,
   BoxConstraints constraints,
   EmployeesController controller,
+  BuildContext context,
 ) {
   return DataRow(
     cells: [
       DataCell(
         Row(
           children: [
-            removeEmailButton(controller: controller, id: data.id ?? ''),
+            removeEmailButton(
+              controller: controller,
+              id: data.id ?? '',
+              context: context,
+            ),
             updateEmailButton(
               controller: controller,
               data: data,
@@ -111,20 +129,24 @@ ElevatedButton newEmailButton({required EmployeesController controller}) {
       );
     },
     style: newButtonStyle,
-    child: const Text(
-      'New Contact',
-      style: TextStyle(fontWeight: FontWeight.bold),
-    ),
+    child: const Text('New', style: TextStyle(fontWeight: FontWeight.bold)),
   );
 }
 
 IconButton removeEmailButton({
   required EmployeesController controller,
   required String id,
+  required BuildContext context,
 }) {
   return IconButton(
     onPressed: () {
-      controller.deleteEmail(id);
+      alertDialog(
+        context: context,
+        content: "Are you sure you want to delete this document?",
+        onPressed: () {
+          controller.deleteEmail(id);
+        },
+      );
     },
     icon: deleteIcon,
   );

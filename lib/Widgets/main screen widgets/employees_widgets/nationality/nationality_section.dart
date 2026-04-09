@@ -94,6 +94,7 @@ DataRow dataRowForTheTable(
             removeNationalityButton(
               controller: controller,
               id: addressData.id ?? '',
+              context: context,
             ),
             updateNationalityButton(
               controller: controller,
@@ -151,20 +152,24 @@ ElevatedButton newNationalityButton({
       );
     },
     style: newButtonStyle,
-    child: const Text(
-      'New Nationality',
-      style: TextStyle(fontWeight: FontWeight.bold),
-    ),
+    child: const Text('New', style: TextStyle(fontWeight: FontWeight.bold)),
   );
 }
 
 IconButton removeNationalityButton({
   required EmployeesController controller,
   required String id,
+  required BuildContext context,
 }) {
   return IconButton(
     onPressed: () {
-      controller.deleteNationality(id);
+      alertDialog(
+        context: context,
+        content: "Are you sure you want to delete this document?",
+        onPressed: () {
+          controller.deleteNationality(id);
+        },
+      );
     },
     icon: deleteIcon,
   );

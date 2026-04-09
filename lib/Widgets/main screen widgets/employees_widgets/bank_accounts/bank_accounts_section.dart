@@ -1,19 +1,18 @@
 import 'package:data_table_2/data_table_2.dart';
-import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../Models/employees/payroll_elements_model.dart';
+import '../../../../Controllers/Main screen controllers/employees_controller.dart';
+import '../../../../Models/employees/employee_account_banks_model.dart';
 import '../../../../consts.dart';
 import '../../auto_size_box.dart';
-import 'payroll_elements_dialog.dart';
+import 'bank_accounts_dialog.dart';
 
-Widget payrollElementsSection(
-  BoxConstraints constraints,
-  BuildContext context,
-) {
+Widget bankAccountsSection({
+  required BoxConstraints constraints,
+  required BuildContext context,
+}) {
   return Container(
     decoration: containerDecor,
-    height: 410,
     child: GetX<EmployeesController>(
       builder: (controller) {
         return Column(
@@ -21,7 +20,7 @@ Widget payrollElementsSection(
           children: [
             Padding(
               padding: const EdgeInsets.all(4),
-              child: newPhoneButton(controller: controller, context: context),
+              child: newBankAccountButton(controller: controller),
             ),
             Expanded(
               child: tableOfScreens(
@@ -43,7 +42,6 @@ Widget tableOfScreens({
   required BuildContext context,
 }) {
   return SizedBox(
-    // width: constraints.maxWidth - 17,
     child: DataTable2(
       columnSpacing: 5,
       horizontalMargin: horizontalMarginForTable,
@@ -59,22 +57,18 @@ Widget tableOfScreens({
         ),
         DataColumn2(
           size: ColumnSize.M,
-          label: AutoSizedText(constraints: constraints, text: 'Value'),
-        ),
-        DataColumn2(
-          size: ColumnSize.M,
-          label: AutoSizedText(constraints: constraints, text: 'Start Date'),
-        ),
-        DataColumn2(
-          size: ColumnSize.M,
-          label: AutoSizedText(constraints: constraints, text: 'End Date'),
+          label: AutoSizedText(constraints: constraints, text: 'Acc. Number'),
         ),
         DataColumn2(
           size: ColumnSize.L,
-          label: AutoSizedText(constraints: constraints, text: 'Note'),
+          label: AutoSizedText(constraints: constraints, text: 'IBAN'),
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'SWIFT CODE'),
         ),
       ],
-      rows: controller.payrollElementsList.map<DataRow>((invoiceItems) {
+      rows: controller.bankAccountsList.map<DataRow>((invoiceItems) {
         return dataRowForTheTable(
           invoiceItems,
           constraints,
@@ -87,7 +81,7 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  EmployeePayrollElementsModel data,
+  EmployeeAccountBanksModel data,
   BoxConstraints constraints,
   EmployeesController controller,
   BuildContext context,
@@ -97,47 +91,39 @@ DataRow dataRowForTheTable(
       DataCell(
         Row(
           children: [
-            removePayrollButton(
+            removeBankAccountButton(
               controller: controller,
               id: data.id ?? '',
               context: context,
             ),
-            updatePayrollButton(
+            updateBankAccountButton(
               controller: controller,
               data: data,
               id: data.id ?? '',
-              context: context,
             ),
           ],
         ),
       ),
       DataCell(
-        textForDataRowInTable(text: data.name.toString(), formatDouble: false),
+        textForDataRowInTable(text: data.bankName ?? '', formatDouble: false),
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.value?.toString() ?? '0',
+          text: data.accountNumber ?? '',
           maxWidth: null,
           formatDouble: false,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: textToDate(data.startDate),
+          text: data.iban ?? '',
           maxWidth: null,
           formatDouble: false,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: textToDate(data.endDate),
-          maxWidth: null,
-          formatDouble: false,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.note ?? '',
+          text: data.swiftCode ?? '',
           maxWidth: null,
           formatDouble: false,
         ),
@@ -146,29 +132,20 @@ DataRow dataRowForTheTable(
   );
 }
 
-ElevatedButton newPhoneButton({
-  required EmployeesController controller,
-  required BuildContext context,
-}) {
+ElevatedButton newBankAccountButton({required EmployeesController controller}) {
   return ElevatedButton(
     onPressed: () {
-      if (controller.currentEmployeeId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: "Please save doc first");
-        return;
-      }
-      controller.employeePayrollElementName.clear();
-      controller.employeePayrollElementNameId.value = '';
-      controller.employeePayrollElementEndDate.clear();
-      controller.employeePayrollElementStartDate.clear();
-      controller.employeePayrollElementvalue.clear();
-      controller.employeePayrollElementNote.clear();
-      payrollElementsDialog(
+      controller.employeeBankName.clear();
+      controller.employeeBankNameId.value = '';
+      controller.employeeAccountNumber.clear();
+      controller.employeeIBAN.clear();
+      controller.employeeSWIFTCode.clear();
+      bankAccountsDialog(
         controller: controller,
         canEdit: true,
         onPressed: () {
-          controller.addNewEmployeePayroll();
+          controller.addNewEmployeeBankAccount();
         },
-        context: context,
       );
     },
     style: newButtonStyle,
@@ -176,7 +153,7 @@ ElevatedButton newPhoneButton({
   );
 }
 
-IconButton removePayrollButton({
+IconButton removeBankAccountButton({
   required EmployeesController controller,
   required String id,
   required BuildContext context,
@@ -187,7 +164,8 @@ IconButton removePayrollButton({
         context: context,
         content: "Are you sure you want to delete this document?",
         onPressed: () {
-          controller.deleteEmployeePayroll(id);
+          Get.back();
+          controller.deleteBankAccount(id);
         },
       );
     },
@@ -195,30 +173,24 @@ IconButton removePayrollButton({
   );
 }
 
-IconButton updatePayrollButton({
-  required EmployeePayrollElementsModel data,
+IconButton updateBankAccountButton({
+  required EmployeeAccountBanksModel data,
   required EmployeesController controller,
   required String id,
-  required BuildContext context,
 }) {
   return IconButton(
     onPressed: () {
-      controller.employeePayrollElementName.text = data.name ?? '';
-      controller.employeePayrollElementNameId.value = data.nameId ?? '';
-      controller.employeePayrollElementvalue.text =
-          data.value?.toString() ?? '0';
-      controller.employeePayrollElementStartDate.text = textToDate(
-        data.startDate,
-      );
-      controller.employeePayrollElementEndDate.text = textToDate(data.endDate);
-      controller.employeePayrollElementNote.text = data.note ?? '';
-      payrollElementsDialog(
+      controller.employeeBankName.text = data.bankName ?? '';
+      controller.employeeBankNameId.value = data.bankNameId ?? '';
+      controller.employeeAccountNumber.text = data.accountNumber ?? '';
+      controller.employeeIBAN.text = data.iban ?? '';
+      controller.employeeSWIFTCode.text = data.swiftCode ?? '';
+      bankAccountsDialog(
         controller: controller,
         canEdit: true,
         onPressed: () {
-          controller.updateEmployeePayroll(id);
+          controller.updateEmployeeBankAccount(id);
         },
-        context: context,
       );
     },
     icon: editIcon,

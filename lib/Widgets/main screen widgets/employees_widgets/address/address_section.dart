@@ -137,7 +137,7 @@ ElevatedButton newAddressButton({required EmployeesController controller}) {
     },
     style: newButtonStyle,
     child: const Text(
-      'New Address',
+      'New',
       style: TextStyle(fontWeight: FontWeight.bold),
     ),
   );

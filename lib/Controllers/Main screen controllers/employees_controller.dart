@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/employees/address_model.dart';
 import '../../Models/employees/contact_and_relatives_model.dart';
+import '../../Models/employees/employee_account_banks_model.dart';
 import '../../Models/employees/employees_model.dart';
 import '../../Models/employees/payroll_elements_model.dart';
 import '../../Models/employees/phone_model.dart';
@@ -67,6 +68,8 @@ class EmployeesController extends GetxController {
   RxList<EmployeePayrollElementsModel> payrollElementsList =
       RxList<EmployeePayrollElementsModel>([]);
   RxList<EmailModel> emailsList = RxList<EmailModel>([]);
+  RxList<EmployeeAccountBanksModel> bankAccountsList =
+      RxList<EmployeeAccountBanksModel>([]);
   RxList<NationalityModel> nationalityList = RxList<NationalityModel>([]);
   TextEditingController country = TextEditingController();
   TextEditingController employeePayrollElementName = TextEditingController();
@@ -83,6 +86,11 @@ class EmployeesController extends GetxController {
   TextEditingController emailType = TextEditingController();
   TextEditingController phoneNumber = TextEditingController();
   TextEditingController emailAddress = TextEditingController();
+  TextEditingController employeeBankName = TextEditingController();
+  RxString employeeBankNameId = RxString('');
+  TextEditingController employeeAccountNumber = TextEditingController();
+  TextEditingController employeeIBAN = TextEditingController();
+  TextEditingController employeeSWIFTCode = TextEditingController();
   RxString nationalityId = RxString('');
   RxString phoneTypeId = RxString('');
   RxString emailTypeId = RxString('');
@@ -104,6 +112,7 @@ class EmployeesController extends GetxController {
   RxBool addingNewEmployeeAddressValue = RxBool(false);
   RxBool addingNewEmployeePhoneValue = RxBool(false);
   RxBool addingNewEmployeeEmailValue = RxBool(false);
+  RxBool addingNewEmployeeBankAccount = RxBool(false);
   RxBool addingNewEmployeeNationalityValue = RxBool(false);
   String backendUrl = backendTestURI;
   RxList<EmployeesModel> allEmployees = RxList<EmployeesModel>([]);
@@ -139,6 +148,7 @@ class EmployeesController extends GetxController {
     Tab(text: 'Nationality'),
     Tab(text: 'Phones'),
     Tab(text: 'Social Contacts'),
+    Tab(text: 'Bank Accounts'),
   ];
 
   @override
@@ -188,6 +198,10 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getPhoneTypes() async {
     return await helper.getAllListValues('CONTACT_TYPES');
+  }
+
+  Future<Map<String, dynamic>> getAkkBanksNames() async {
+    return await helper.getAllListValues('BANKS');
   }
 
   Future<Map<String, dynamic>> getTypeOfSocial() async {
@@ -622,6 +636,7 @@ class EmployeesController extends GetxController {
     phonesList.assignAll(employee.phoneList ?? []);
     emailsList.assignAll(employee.emailList ?? []);
     payrollElementsList.assignAll(employee.payrollsList ?? []);
+    bankAccountsList.assignAll(employee.bankAccountsList ?? []);
   }
 
   // ======================== address section ========================
@@ -1200,6 +1215,150 @@ class EmployeesController extends GetxController {
       }
     } catch (e) {
       ///
+    }
+  }
+
+  // ============================ bank accounts section =============================
+  Future<void> addNewEmployeeBankAccount() async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewEmployeeBankAccount.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/add_employee_bank_account/${currentEmployeeId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "bank_name": employeeBankNameId.value,
+          "account_number": employeeAccountNumber.text,
+          "iban": employeeIBAN.text,
+          "swift_code": employeeSWIFTCode.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        EmployeeAccountBanksModel newBankAccount =
+            EmployeeAccountBanksModel.fromJson(decoded['new_bank_account']);
+        bankAccountsList.insert(0, newBankAccount);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewEmployeeBankAccount();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+      addingNewEmployeeBankAccount.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeeBankAccount.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> updateEmployeeBankAccount(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewEmployeeBankAccount.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/edit_employee_bank_account/$id',
+      );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "bank_name": employeeBankNameId.value,
+          "account_number": employeeAccountNumber.text,
+          "iban": employeeIBAN.text,
+          "swift_code": employeeSWIFTCode.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        EmployeeAccountBanksModel updatedBankAccount =
+            EmployeeAccountBanksModel.fromJson(decoded['updated_bank_account']);
+        int index = bankAccountsList.indexWhere((i) => i.id == id);
+        if (index != -1) {
+          bankAccountsList[index] = updatedBankAccount;
+        }
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateEmployeeBankAccount(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewEmployeeBankAccount.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeeBankAccount.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> deleteBankAccount(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/delete_employee_bank_account/$id',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        bankAccountsList.removeWhere((em) => em.id == id);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteBankAccount(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 

@@ -119,7 +119,7 @@ ElevatedButton newPhoneButton({required EmployeesController controller}) {
     },
     style: newButtonStyle,
     child: const Text(
-      'New Phone',
+      'New',
       style: TextStyle(fontWeight: FontWeight.bold),
     ),
   );
