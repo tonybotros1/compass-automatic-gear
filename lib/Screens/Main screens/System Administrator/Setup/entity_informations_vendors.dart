@@ -169,7 +169,6 @@ class EntityInformationsVendors extends StatelessWidget {
                     GetX<EntityInformationsVendorController>(
                       builder: (controller) {
                         return Container(
-                          // padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey),
                             borderRadius: const BorderRadius.only(
@@ -182,9 +181,6 @@ class EntityInformationsVendors extends StatelessWidget {
                           child: SizedBox(
                             width: constraints.maxWidth,
                             height: constraints.maxHeight * 0.8,
-
-                            // constraints.maxHeight -
-                            // (constraints.maxHeight / 7),
                             child: tableOfScreens(
                               constraints: constraints,
                               context: context,
