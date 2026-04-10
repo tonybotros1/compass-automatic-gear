@@ -19,6 +19,16 @@ class LegislationController extends GetxController {
   RxList<LegislationModel> allLegislations = RxList<LegislationModel>([]);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
+  final List<String> weekDays = const [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+  RxList<String> selectedDays = RxList([]);
 
   @override
   void onInit() async {
@@ -69,7 +79,7 @@ class LegislationController extends GetxController {
           'Authorization': 'Bearer $accessToken',
           "Content-Type": "application/json",
         },
-        body: jsonEncode({"name": name.text}),
+        body: jsonEncode({"name": name.text, "weekend": selectedDays}),
       );
       if (response.statusCode == 200) {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
@@ -106,7 +116,7 @@ class LegislationController extends GetxController {
           'Authorization': 'Bearer $accessToken',
           "Content-Type": "application/json",
         },
-        body: jsonEncode({"name": name.text}),
+        body: jsonEncode({"name": name.text, "weekend": selectedDays}),
       );
       if (response.statusCode == 200) {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
@@ -135,9 +145,7 @@ class LegislationController extends GetxController {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse(
-        '$backendUrl/legislation/delete_legislation/$id',
-      );
+      Uri url = Uri.parse('$backendUrl/legislation/delete_legislation/$id');
       final response = await http.delete(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},

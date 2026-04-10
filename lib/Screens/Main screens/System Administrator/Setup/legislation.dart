@@ -207,7 +207,7 @@ ElevatedButton newButton(
   return ElevatedButton(
     onPressed: () {
       controller.name.clear();
-      controller.name.clear();
+      controller.selectedDays.clear();
       legislationDialog(
         constraints: constraints,
         controller: controller,
@@ -251,6 +251,7 @@ IconButton editSection(
   return IconButton(
     onPressed: () async {
       controller.name.text = data.name ?? '';
+      controller.selectedDays.assignAll(data.weekend ?? []);
       legislationDialog(
         constraints: constraints,
         controller: controller,
