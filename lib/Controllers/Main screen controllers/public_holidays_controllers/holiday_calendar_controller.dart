@@ -15,6 +15,7 @@ class HolidayCalendarController extends GetxController {
   final RxMap<String, HolidayEntry> holidays = <String, HolidayEntry>{}.obs;
   final Map<int, List<List<DateTime?>>> _monthGridCache =
       <int, List<List<DateTime?>>>{};
+  late final TextEditingController yearController;
 
   static const List<String> monthLabels = <String>[
     'January',
@@ -53,7 +54,14 @@ class HolidayCalendarController extends GetxController {
 
   @override
   void onInit() async {
+    yearController = TextEditingController(text: selectedYear.value.toString());
     getAllHolidays();
+    super.onInit();
+  }
+
+  @override
+  onClose() async {
+    yearController.dispose();
     super.onInit();
   }
 
@@ -113,13 +121,25 @@ class HolidayCalendarController extends GetxController {
     selectedYear.value = year;
   }
 
-  void saveHoliday({required DateTime date, required String name}) {
+  void saveHoliday({required DateTime date, required String name}) async {
     final DateTime normalizedDate = _normalize(date);
+    String? id = '';
+
+    if (holidays.containsKey(dateKey(normalizedDate))) {
+      HolidayEntry? updatedHoliday = holidays[dateKey(normalizedDate)];
+      id = updatedHoliday?.id;
+      if (id != null) {
+        updateHoliday(id: id, date: date, name: name);
+      }
+    } else {
+      HolidayEntry? addedHoliday = await addNewHoliday(date: date, name: name);
+      id = addedHoliday?.id;
+    }
     holidays[dateKey(normalizedDate)] = HolidayEntry(
       date: normalizedDate,
       name: name,
+      id: id,
     );
-    addNewHoliday(date: date, name: name);
   }
 
   void removeHoliday(DateTime date) {
@@ -197,7 +217,7 @@ class HolidayCalendarController extends GetxController {
     }
   }
 
-  Future<void> addNewHoliday({
+  Future<HolidayEntry?> addNewHoliday({
     required DateTime date,
     required String name,
   }) async {
@@ -218,6 +238,11 @@ class HolidayCalendarController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        HolidayEntry addedHoliday = HolidayEntry.fromJson(
+          decoded['added_holiday'],
+        );
+        return addedHoliday;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -227,7 +252,45 @@ class HolidayCalendarController extends GetxController {
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> updateHoliday({
+    required String id,
+    required DateTime date,
+    required String name,
+  }) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/public_holidays/update_holiday/$id');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "name": name,
+          "date": convertDateToIson(textToDate(date)),
+        }),
+      );
+      if (response.statusCode == 200) {
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateHoliday(id: id, date: date, name: name);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
       Get.back();
     } catch (e) {
       //
