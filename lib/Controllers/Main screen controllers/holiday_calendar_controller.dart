@@ -5,9 +5,9 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../Models/public_holidays_models/holiday_entry.dart';
-import '../../../consts.dart';
-import '../../../helpers.dart';
+import '../../Models/public_holidays_models/holiday_entry.dart';
+import '../../consts.dart';
+import '../../helpers.dart';
 
 class HolidayCalendarController extends GetxController {
   String backendUrl = backendTestURI;

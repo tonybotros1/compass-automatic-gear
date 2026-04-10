@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../Controllers/Main screen controllers/public_holidays_controllers/holiday_calendar_controller.dart';
+import '../../../../Controllers/Main screen controllers/holiday_calendar_controller.dart';
 import '../../../../Models/public_holidays_models/holiday_entry.dart';
 import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/main screen widgets/public_holidays_widgets/calendar_theme.dart';
