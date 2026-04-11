@@ -182,6 +182,8 @@ class EmployeesModel {
   DateTime? hireDate;
   DateTime? endDate;
   String? reportingManager;
+  String? legislation;
+  String? legislationName;
   DateTime? createdAt;
   DateTime? updatedAt;
   String? peopleCounter;
@@ -229,6 +231,9 @@ class EmployeesModel {
       model.martialStatus = json['martial_status'];
     }
     if (json.containsKey('person_type')) model.personType = json['person_type'];
+    if (json.containsKey('legislation')) {
+      model.legislation = json['legislation'];
+    }
     if (json.containsKey('status')) model.status = json['status'];
     if (json.containsKey('employer')) model.employer = json['employer'];
     if (json.containsKey('department')) model.department = json['department'];
@@ -318,6 +323,9 @@ class EmployeesModel {
 
     /// Names
     if (json.containsKey('gender_name')) model.genderName = json['gender_name'];
+    if (json.containsKey('legislation_name')) {
+      model.legislationName = json['legislation_name'];
+    }
     if (json.containsKey('employer_name')) {
       model.employerName = json['employer_name'];
     }

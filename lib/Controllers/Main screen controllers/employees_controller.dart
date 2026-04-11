@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/employees/address_model.dart';
 import '../../Models/employees/contact_and_relatives_model.dart';
 import '../../Models/employees/employee_account_banks_model.dart';
+import '../../Models/employees/employee_leaves_model.dart';
 import '../../Models/employees/employees_model.dart';
 import '../../Models/employees/payroll_elements_model.dart';
 import '../../Models/employees/phone_model.dart';
@@ -23,6 +24,7 @@ class EmployeesController extends GetxController {
   Rx<TextEditingController> search = TextEditingController().obs;
   Rx<TextEditingController> contactsAndRelativesSearch =
       TextEditingController().obs;
+  Rx<TextEditingController> leavesSearch = TextEditingController().obs;
   TextEditingController employeeName = TextEditingController();
   TextEditingController employeeNameFilter = TextEditingController();
   TextEditingController employerFilter = TextEditingController();
@@ -109,7 +111,9 @@ class EmployeesController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
   RxBool addingNewContactAndRelativesValue = RxBool(false);
+  RxBool addingNewLeaveValue = RxBool(false);
   RxBool addingNewEmployeeAddressValue = RxBool(false);
+  RxBool addingNewEmployeeLeaveValue = RxBool(false);
   RxBool addingNewEmployeePhoneValue = RxBool(false);
   RxBool addingNewEmployeeEmailValue = RxBool(false);
   RxBool addingNewEmployeeBankAccount = RxBool(false);
@@ -128,6 +132,10 @@ class EmployeesController extends GetxController {
   RxList<ContactsAndRelativesModel> filteredContactsAndRelativesList =
       RxList<ContactsAndRelativesModel>([]);
   TextEditingController contactAndRelativeFullName = TextEditingController();
+  RxList<EmployeeLeavesModel> leavesList = RxList<EmployeeLeavesModel>([]);
+  RxList<EmployeeLeavesModel> filteredLeavesList = RxList<EmployeeLeavesModel>(
+    [],
+  );
   TextEditingController contactAndRelativeRelationship =
       TextEditingController();
   RxString contactAndRelativeRelationshipId = RxString('');
@@ -142,6 +150,18 @@ class EmployeesController extends GetxController {
   TextEditingController contactAndRelativeNotes = TextEditingController();
   RxBool isThisContactAnEmergencyConact = RxBool(false);
   TextEditingController typeFilter = TextEditingController();
+
+  // =================== Leaves Section ===================
+  TextEditingController employeeLeaveType = TextEditingController();
+  RxString employeeLeaveTypeId = RxString('');
+  RxString employeeLeaveTypeTypeToCheckForHowToCalculateTheHolidays = RxString(
+    '',
+  );
+  RxString employeeLeaveStatus = RxString('');
+  TextEditingController employeeLeaveStartTime = TextEditingController();
+  TextEditingController employeeLeaveEndTime = TextEditingController();
+  TextEditingController employeeLeaveNumberOfDays = TextEditingController();
+  TextEditingController employeeLeaveNote = TextEditingController();
 
   List<Widget> contactsTabs = const [
     Tab(text: 'Address'),
@@ -196,6 +216,17 @@ class EmployeesController extends GetxController {
     return await helper.getCountries();
   }
 
+  Future<Map<String, dynamic>> getEmployeeWorkingDays(
+    String employeeId,
+    Map body,
+  ) async {
+    return await helper.getEmployeeWorkingDays(employeeId, body);
+  }
+
+  Future<Map<String, dynamic>> getAllLeaveTypes() async {
+    return await helper.getAllLeaveTypes();
+  }
+
   Future<Map<String, dynamic>> getPhoneTypes() async {
     return await helper.getAllListValues('CONTACT_TYPES');
   }
@@ -226,6 +257,10 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getallJobLocations() async {
     return await helper.getAllListValues('LOCATIONS');
+  }
+
+  Future getCurrentEmployeeLeaveStatus(String id) async {
+    return await helper.getEmployeeLeaveStatus(id);
   }
 
   void onChooseForTypePicker(int i) {
@@ -467,6 +502,7 @@ class EmployeesController extends GetxController {
         "place_of_birth": employeePlaceOfBirth.text,
         "date_of_birth": convertDateToIson(employeeDateOfBirth.text).toString(),
         "gender": employeeGenderId.value,
+        "legislation": employeeLegislationId.value,
         "martial_status": employeeMaritalStatusId.value,
         "person_type": personType.value,
         "status": employeeStatus.value,
@@ -574,6 +610,10 @@ class EmployeesController extends GetxController {
   }
 
   void clearValues(bool isEmployee) {
+    currentEmployeeId.value = '';
+    payrollElementsList.clear();
+    employeeImage.value = '';
+    bankAccountsList.clear();
     employeeName.clear();
     employeeCountryOfBirth.clear();
     employeeCountryOfBirthId.value = '';
@@ -587,6 +627,8 @@ class EmployeesController extends GetxController {
     employeeStatus.value = '';
     jobEmployer.clear();
     jobEmployerId.value = '';
+    employeeLegislationId.value = '';
+    employeeLegislation.clear();
     jobDepartment.clear();
     jobDepartmentId.value = '';
     jobTitle.clear();
@@ -609,6 +651,8 @@ class EmployeesController extends GetxController {
     employeeImage.value = employee.personImageUrl ?? '';
     currentEmployeeId.value = employee.id ?? '';
     employeeName.text = employee.fullName ?? '';
+    employeeLegislationId.value = employee.legislation ?? '';
+    employeeLegislation.text = employee.legislationName ?? '';
     employeeCountryOfBirth.text = employee.countryOfBirthName ?? '';
     employeeCountryOfBirthId.value = employee.countryOfBirth ?? '';
     employeePlaceOfBirth.text = employee.placeOfBirth ?? '';
@@ -637,6 +681,225 @@ class EmployeesController extends GetxController {
     emailsList.assignAll(employee.emailList ?? []);
     payrollElementsList.assignAll(employee.payrollsList ?? []);
     bankAccountsList.assignAll(employee.bankAccountsList ?? []);
+  }
+
+  // ======================== leaves section ========================
+
+  Future<void> getAllEmployeeLeave() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/get_all_employee_leaves/${currentEmployeeId.value}',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List leaves = decoded['all_leaves'];
+
+        leavesList.assignAll(
+          leaves.map((l) => EmployeeLeavesModel.fromJson(l)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllEmployeeLeave();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> addNewEmployeeLeave() async {
+    try {
+      addingNewEmployeeLeaveValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/add_new_employee_leave/${currentEmployeeId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "leave_type": employeeLeaveTypeId.value,
+          "start_date": employeeLeaveStartTime.text.isNotEmpty
+              ? convertDateToIson(employeeLeaveStartTime.text)
+              : null,
+          "end_date": employeeLeaveEndTime.text.isNotEmpty
+              ? convertDateToIson(employeeLeaveEndTime.text)
+              : null,
+          "number_of_days": employeeLeaveNumberOfDays.text.isNotEmpty
+              ? int.tryParse(employeeLeaveNumberOfDays.text)
+              : 0,
+          "note": employeeLeaveNote.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        EmployeeLeavesModel newLeave = EmployeeLeavesModel.fromJson(
+          decoded['new_leave'],
+        );
+        leavesList.insert(0, newLeave);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewEmployeeLeave();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewEmployeeLeaveValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeeLeaveValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> updateEmployeeLeave(String id) async {
+    try {
+      String leaveStatus = await getCurrentEmployeeLeaveStatus(id);
+      if ((leaveStatus != 'New')) {
+        alertMessage(
+          context: Get.context!,
+          content: 'Only new jobs can be edit',
+        );
+        return;
+      }
+      addingNewEmployeeLeaveValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/employees/update_employee_leave/$id');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "leave_type": employeeLeaveTypeId.value,
+          "start_date": employeeLeaveStartTime.text.isNotEmpty
+              ? convertDateToIson(employeeLeaveStartTime.text)
+              : null,
+          "status": employeeLeaveStatus.value,
+          "end_date": employeeLeaveEndTime.text.isNotEmpty
+              ? convertDateToIson(employeeLeaveEndTime.text)
+              : null,
+          "number_of_days": employeeLeaveNumberOfDays.text.isNotEmpty
+              ? int.tryParse(employeeLeaveNumberOfDays.text)
+              : 0,
+          "note": employeeLeaveNote.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        EmployeeLeavesModel updatedLeave = EmployeeLeavesModel.fromJson(
+          decoded['update_leave'],
+        );
+        int index = leavesList.indexWhere((i) => i.id == id);
+        if (index != -1) {
+          leavesList[index] = updatedLeave;
+        }
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateEmployeeLeave(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewEmployeeLeaveValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeeLeaveValue.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<void> deleteEmployeeLeave(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendUrl/employees/delete_employee_leave/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        leavesList.removeWhere((add) => add.id == id);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteEmployeeLeave(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {}
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  void filterEmployeeLeaves() {
+    String query = leavesSearch.value.text.toLowerCase();
+    if (query.isEmpty) {
+      filteredLeavesList.clear();
+    } else {
+      filteredLeavesList.assignAll(
+        leavesList.where((contact) {
+          return contact.leaveTypeName.toString().toLowerCase().contains(
+                query,
+              ) ||
+              contact.status.toString().toLowerCase().contains(query) ||
+              textToDate(
+                contact.startDate,
+              ).toString().toLowerCase().contains(query) ||
+              textToDate(
+                contact.endDate,
+              ).toString().toLowerCase().contains(query) ||
+              contact.numberOdDays.toString().toLowerCase().contains(
+                query,
+              ) ||
+              contact.note.toString().toLowerCase().contains(
+                query,
+              );
+        }).toList(),
+      );
+    }
   }
 
   // ======================== address section ========================
@@ -680,7 +943,7 @@ class EmployeesController extends GetxController {
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
+      }
       addingNewEmployeeAddressValue.value = false;
       Get.back();
     } catch (e) {

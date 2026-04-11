@@ -1885,3 +1885,45 @@ Widget returnFileLogo({
 
   return Image.asset(assetPath, width: width);
 }
+
+int calculateDaysBetweenTwoDates(dynamic startDate, dynamic endDate) {
+  DateTime parseDate(dynamic value) {
+    if (value is DateTime) return DateTime(value.year, value.month, value.day);
+
+    if (value is String) {
+      try {
+        // Case 1: ISO format (2026-04-11)
+        if (value.contains('-') && value.split('-')[0].length == 4) {
+          final d = DateTime.parse(value);
+          return DateTime(d.year, d.month, d.day);
+        }
+
+        // Case 2: DD-MM-YYYY (11-04-2026)
+        if (value.contains('-')) {
+          final parts = value.split('-');
+          if (parts.length == 3) {
+            final day = int.parse(parts[0]);
+            final month = int.parse(parts[1]);
+            final year = int.parse(parts[2]);
+            return DateTime(year, month, day);
+          }
+        }
+
+        throw Exception();
+      } catch (e) {
+        throw Exception("Invalid date string format: $value");
+      }
+    }
+
+    throw Exception("Date must be String or DateTime");
+  }
+
+  final start = parseDate(startDate);
+  final end = parseDate(endDate);
+
+  if (start.isAfter(end)) {
+    throw Exception("startDate cannot be after endDate");
+  }
+
+  return end.difference(start).inDays + 1;
+}

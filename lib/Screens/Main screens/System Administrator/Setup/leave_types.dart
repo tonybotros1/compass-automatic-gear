@@ -302,6 +302,9 @@ IconButton editSection(
       controller.type.text = data.type ?? '';
       controller.basedElement.text = data.basedElement ?? '';
       controller.basedElementId.value = data.basedElementId ?? '';
+      controller.isCalendarDaysSelected.value = data.type == "Calendar Days"
+          ? true
+          : false;
       leaveTypesDialog(
         constraints: constraints,
         controller: controller,

@@ -9,6 +9,7 @@ import '../../../../Widgets/attachments/attachment_screen.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
 import '../../../../Widgets/main screen widgets/employees_widgets/contacts_and_relatives_Dialog.dart';
 import '../../../../Widgets/main screen widgets/employees_widgets/employee_dialog.dart';
+import '../../../../Widgets/main screen widgets/employees_widgets/leaves/leaves_dialog.dart';
 import '../../../../Widgets/menu_dialog.dart';
 import '../../../../Widgets/my_text_field.dart';
 import '../../../../consts.dart';
@@ -406,6 +407,12 @@ IconButton editSection(
     onPressed: () async {
       await controller.loadValues(employeeId);
       employeeDialog(
+        onPressedForLeaves: ()async {
+          controller.leavesSearch.value.clear();
+          controller.filteredLeavesList.clear();
+         await controller.getAllEmployeeLeave();
+          leavesDialog(constraints: constraints, controller: controller);
+        },
         onPressedForAttachment: () {
           Get.dialog(
             Dialog(
@@ -456,6 +463,15 @@ ElevatedButton newEmployeeButton(
       controller.clearValues(isEmployee);
 
       employeeDialog(
+        onPressedForLeaves: () {
+          if (controller.currentEmployeeId.value.isEmpty) {
+            alertMessage(context: context, content: "Please save doc first");
+            return;
+          }
+          controller.leavesSearch.value.clear();
+          controller.getAllEmployeeLeave();
+          leavesDialog(constraints: constraints, controller: controller);
+        },
         onPressedForContactsAndRelatives: () async {
           if (controller.currentEmployeeId.value.isEmpty) {
             alertMessage(context: context, content: "Please save doc first");

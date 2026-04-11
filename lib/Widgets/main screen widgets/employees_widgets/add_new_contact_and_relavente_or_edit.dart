@@ -78,7 +78,7 @@ Widget addNewContactAndRelativeOrEdit({
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
-                labelText: 'Date Of Bitrh',
+                labelText: 'Date Of Birth',
                 controller: controller.contactAndRelativeDateOfBirth,
                 isDate: true,
                 suffixIcon: IconButton(
