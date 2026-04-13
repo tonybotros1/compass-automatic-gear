@@ -4,15 +4,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../../Controllers/Main screen controllers/payroll_elements_controller.dart';
-import '../../../../Models/payroll elements/payroll_elements_model.dart';
+import '../../../../Controllers/Main screen controllers/payroll_controller.dart';
+import '../../../../Models/payroll/payroll_model.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/defination_widgets/defination_dialog.dart';
-import '../../../../Widgets/my_text_field.dart';
+import '../../../../Widgets/main screen widgets/payroll_widgets/payroll_dialog.dart';
 import '../../../../consts.dart';
 
-class Defination extends StatelessWidget {
-  const Defination({super.key});
+class Payroll extends StatelessWidget {
+  const Payroll({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +23,8 @@ class Defination extends StatelessWidget {
             padding: screenPadding,
             child: Column(
               children: [
-                GetBuilder<PayrollElementsController>(
-                  init: PayrollElementsController(),
+                GetBuilder<PayrollController>(
+                  init: PayrollController(),
                   builder: (controller) {
                     return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -33,7 +32,7 @@ class Defination extends StatelessWidget {
                         constraints: BoxConstraints(
                           minWidth: constraints.maxWidth - 28,
                         ),
-                        child: Row(
+                        child: const Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           spacing: 10,
@@ -41,42 +40,37 @@ class Defination extends StatelessWidget {
                             Row(
                               spacing: 10,
                               children: [
-                                myTextFormFieldWithBorder(
-                                  width: 250,
-                                  labelText: 'Key',
-                                  controller: controller.elementKeyFilter,
-                                ),
-                                myTextFormFieldWithBorder(
-                                  width: 250,
-                                  labelText: 'Name',
-                                  controller: controller.elementNameFilter,
-                                ),
-                                // MenuWithValues(
-                                //   labelText: 'Type',
-                                //   headerLqabel: 'Types',
-                                //   dialogWidth: 600,
+                                // myTextFormFieldWithBorder(
                                 //   width: 250,
-                                //   controller: controller.elementTypeFilter,
+                                //   labelText: 'Name',
+                                //   controller: controller.nameFilter,
+                                // ),
+                                // myTextFormFieldWithBorder(
+                                //   width: 250,
+                                //   labelText: 'Code',
+                                //   controller: controller.codeFilter,
+                                // ),
+                                // MenuWithValues(
+                                //   labelText: 'Based Element',
+                                //   headerLqabel: 'Based Elements',
+                                //   dialogWidth: 600,
+                                //   width: 300,
+                                //   controller: controller.basedElementFilter,
                                 //   displayKeys: const ['name'],
                                 //   displaySelectedKeys: const ['name'],
-                                //   data: controller.elementTypes,
+                                //   onOpen: () {
+                                //     return controller.getAllPayrollElements();
+                                //   },
                                 //   onDelete: () {
-                                //     controller.elementTypeFilter.clear();
+                                //     controller.basedElementFilterId.value = "";
+                                //     controller.basedElementFilter.clear();
                                 //   },
                                 //   onSelected: (value) {
-                                //     controller.elementTypeFilter.value =
+                                //     controller.basedElementFilterId.value =
+                                //         value['_id'];
+                                //     controller.basedElementFilter.text =
                                 //         value['name'];
                                 //   },
-                                // ),
-                                // myTextFormFieldWithBorder(
-                                //   width: 250,
-                                //   labelText: 'Priority',
-                                //   controller: controller.elementPriorityFilter,
-                                // ),
-                                // myTextFormFieldWithBorder(
-                                //   width: 250,
-                                //   labelText: 'Comments',
-                                //   controller: controller.elementCommentFilter,
                                 // ),
                               ],
                             ),
@@ -87,7 +81,7 @@ class Defination extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 20),
-                GetX<PayrollElementsController>(
+                GetX<PayrollController>(
                   builder: (controller) {
                     return SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -101,52 +95,37 @@ class Defination extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
 
                           children: [
-                            Row(
-                              spacing: 10,
-                              children: [
-                                newElementButton(
-                                  context,
-                                  constraints,
-                                  controller,
-                                ),
-                              ],
-                            ),
-                            Row(
-                              spacing: 10,
-                              children: [
-                                CustomSlidingSegmentedControl<int>(
-                                  height: 30,
-                                  initialValue:
-                                      controller.initTypePickersValue.value,
-                                  children: const {
-                                    1: Text('ALL'),
-                                    2: Text('EARNING'),
-                                    3: Text('DEDUCTION'),
-                                    4: Text('INFORMATION'),
-                                  },
-                                  decoration: BoxDecoration(
-                                    color: CupertinoColors.lightBackgroundGray,
-                                    borderRadius: BorderRadius.circular(8),
+                            newPayrollButton(context, constraints, controller),
+                            CustomSlidingSegmentedControl<int>(
+                              height: 30,
+                              initialValue:
+                                  controller.initTypePickersValue.value,
+                              children: const {
+                                1: Text('ALL'),
+                                2: Text('CALENDAR DAYS'),
+                                3: Text('WORKING DAYS'),
+                              },
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.lightBackgroundGray,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              thumbDecoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withAlpha(1),
+                                    blurRadius: 4.0,
+                                    spreadRadius: 1.0,
+                                    offset: const Offset(0.0, 2.0),
                                   ),
-                                  thumbDecoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(6),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withAlpha(1),
-                                        blurRadius: 4.0,
-                                        spreadRadius: 1.0,
-                                        offset: const Offset(0.0, 2.0),
-                                      ),
-                                    ],
-                                  ),
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInToLinear,
-                                  onValueChanged: (v) {
-                                    controller.onChooseForTypePicker(v);
-                                  },
-                                ),
-                              ],
+                                ],
+                              ),
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInToLinear,
+                              onValueChanged: (v) {
+                                // controller.onChooseForTypePicker(v);
+                              },
                             ),
                             Row(
                               spacing: 10,
@@ -155,7 +134,7 @@ class Defination extends StatelessWidget {
                                   style: findButtonStyle,
                                   onPressed: controller.isScreenLoding.isFalse
                                       ? () async {
-                                          controller.filterSearch();
+                                          // controller.filterSearch();
                                         }
                                       : null,
                                   child: controller.isScreenLoding.isFalse
@@ -168,8 +147,7 @@ class Defination extends StatelessWidget {
                                 ElevatedButton(
                                   style: clearVariablesButtonStyle,
                                   onPressed: () {
-                                    controller.clearSearchValues();
-                                    // controller.update();
+                                    // controller.clearAllFilters();
                                   },
                                   child: Text(
                                     'Clear',
@@ -192,7 +170,7 @@ class Defination extends StatelessWidget {
                       border: Border.all(color: Colors.grey),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: GetX<PayrollElementsController>(
+                    child: GetX<PayrollController>(
                       builder: (controller) {
                         return SizedBox(
                           width: constraints.maxWidth,
@@ -218,41 +196,45 @@ class Defination extends StatelessWidget {
 Widget tableOfScreens({
   required BoxConstraints constraints,
   required BuildContext context,
-  required PayrollElementsController controller,
+  required PayrollController controller,
 }) {
   return PaginatedDataTable2(
     horizontalMargin: horizontalMarginForTable,
     columnSpacing: 5,
     autoRowsToHeight: true,
     renderEmptyRowsInTheEnd: true,
-    lmRatio: 2.5,
     columns: [
       const DataColumn2(label: Text(''), size: ColumnSize.S),
       DataColumn2(
-        label: AutoSizedText(text: 'Key', constraints: constraints),
+        label: AutoSizedText(text: 'Name', constraints: constraints),
+        size: ColumnSize.M,
+      ),
+      DataColumn2(
+        label: AutoSizedText(text: 'Status', constraints: constraints),
         size: ColumnSize.M,
       ),
       DataColumn2(
         size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Name'),
+        label: AutoSizedText(constraints: constraints, text: 'Period Type'),
       ),
       DataColumn2(
         size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Type'),
+        label: AutoSizedText(
+          constraints: constraints,
+          text: 'First Period Start Date',
+        ),
       ),
       DataColumn2(
         size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Priority'),
+        label: AutoSizedText(constraints: constraints, text: 'Number of Years'),
       ),
       DataColumn2(
-        size: ColumnSize.L,
-        label: AutoSizedText(constraints: constraints, text: 'Comments'),
+        size: ColumnSize.M,
+        label: AutoSizedText(constraints: constraints, text: 'AP Invoice Type'),
       ),
     ],
     source: CardDataSourceForEmployees(
-      cards: controller.allPayrollElements.isEmpty
-          ? []
-          : controller.allPayrollElements,
+      cards: controller.allPayrolls.isEmpty ? [] : controller.allPayrolls,
       context: context,
       constraints: constraints,
       controller: controller,
@@ -261,11 +243,11 @@ Widget tableOfScreens({
 }
 
 DataRow dataRowForTheTable(
-  PayrollElementsModel data,
+  PayrollModel data,
   BuildContext context,
   BoxConstraints constraints,
   String employeeId,
-  PayrollElementsController controller,
+  PayrollController controller,
   int index,
 ) {
   return DataRow(
@@ -282,34 +264,31 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.key ?? '',
+          text: data.name ?? '',
           color: Colors.blueGrey,
           isBold: true,
-          formatDouble: false,
+          maxWidth: null,
+        ),
+      ),
+      DataCell(statusBox(data.status ?? '')),
+      DataCell(
+        textForDataRowInTable(text: data.periodType ?? '', maxWidth: null),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: textToDate(data.firstPeriodStartDate),
           maxWidth: null,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.name ?? '',
-          formatDouble: false,
+          text: data.numberOfYears.toString(),
           maxWidth: null,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.type ?? '',
-          formatDouble: false,
-          maxWidth: null,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(text: data.priority ?? '', formatDouble: false),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.comments ?? '',
-          formatDouble: false,
+          text: data.apInvoiceTypeName ?? '',
           maxWidth: null,
         ),
       ),
@@ -317,42 +296,18 @@ DataRow dataRowForTheTable(
   );
 }
 
-ElevatedButton newElementButton(
-  BuildContext context,
-  BoxConstraints constraints,
-  PayrollElementsController controller,
-) {
-  return ElevatedButton(
-    onPressed: () {
-      controller.clearValues();
-      definationDialog(
-        context: context,
-        constraints: constraints,
-        controller: controller,
-        onPressed: controller.addingNewValue.value
-            ? null
-            : () async {
-                await controller.addNewPayrollElement();
-              },
-      );
-    },
-    style: newButtonStyle,
-    child: const Text('New Element'),
-  );
-}
-
 IconButton deleteSection(
-  PayrollElementsController controller,
-  String employeeId,
+  PayrollController controller,
+  String id,
   BuildContext context,
 ) {
   return IconButton(
     onPressed: () {
       alertDialog(
         context: context,
-        content: "The doc will be deleted permanently",
+        content: "The type will be deleted permanently",
         onPressed: () {
-          controller.deletePayrollElement(employeeId);
+          // controller.deleteLeaveType(id);
         },
       );
     },
@@ -362,34 +317,68 @@ IconButton deleteSection(
 
 IconButton editSection(
   BuildContext context,
-  PayrollElementsController controller,
-  PayrollElementsModel data,
+  PayrollController controller,
+  PayrollModel data,
   BoxConstraints constraints,
-  String elementID,
+  String id,
 ) {
   return IconButton(
     onPressed: () async {
-      controller.loadValues(data);
-      definationDialog(
+      // controller.name.text = data.name ?? '';
+      // controller.code.text = data.code ?? '';
+      // controller.type.text = data.type ?? '';
+      // controller.basedElement.text = data.basedElement ?? '';
+      // controller.basedElementId.value = data.basedElementId ?? '';
+      // controller.isCalendarDaysSelected.value = data.type == "Calendar Days"
+      //     ? true
+      //     : false;
+      // leaveTypesDialog(
+      //   constraints: constraints,
+      //   controller: controller,
+      //   onPressed: controller.addingNewValue.value
+      //       ? null
+      //       : () {
+      //           controller.editLeaveType(id);
+      //         },
+      // );
+    },
+    icon: editIcon,
+  );
+}
+
+ElevatedButton newPayrollButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  PayrollController controller,
+) {
+  return ElevatedButton(
+    onPressed: () {
+      // controller.name.clear();
+      // controller.code.clear();
+      // controller.type.clear();
+      // controller.basedElement.clear();
+      // controller.basedElementId.value = '';
+      payrollDialog(
         context: context,
         constraints: constraints,
         controller: controller,
         onPressed: controller.addingNewValue.value
             ? null
             : () {
-                controller.addNewPayrollElement();
+                controller.addNewPayroll();
               },
       );
     },
-    icon: editIcon,
+    style: newButtonStyle,
+    child: const Text("New Payroll"),
   );
 }
 
 class CardDataSourceForEmployees extends DataTableSource {
-  final List<PayrollElementsModel> cards;
+  final List<PayrollModel> cards;
   final BuildContext context;
   final BoxConstraints constraints;
-  final PayrollElementsController controller;
+  final PayrollController controller;
 
   CardDataSourceForEmployees({
     required this.cards,

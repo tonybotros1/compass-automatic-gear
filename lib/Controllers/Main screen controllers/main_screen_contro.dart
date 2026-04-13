@@ -37,6 +37,7 @@ import '../../Screens/Main screens/System Administrator/Setup/converters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/counters.dart';
 import '../../Screens/Main screens/System Administrator/Setup/leave_types.dart';
 import '../../Screens/Main screens/System Administrator/Setup/legislation.dart';
+import '../../Screens/Main screens/System Administrator/Setup/payroll.dart';
 import '../../Screens/Main screens/System Administrator/Setup/payroll_elements.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations.dart';
 import '../../Screens/Main screens/System Administrator/Setup/entity_informations_vendors.dart';
@@ -326,6 +327,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: PublicHolidays());
       case '/leaveTypes':
         return const SizedBox(child: LeaveTypes());
+      case '/payroll':
+        return const SizedBox(child: Payroll());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }
