@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../consts.dart';
 import '../../../Controllers/Main screen controllers/payroll_controller.dart';
-import '../../../Models/payroll/period_Details_model.dart';
+import '../../../Models/payroll/period_details_model.dart';
 import '../auto_size_box.dart';
+import 'period_dialog.dart';
 
 Widget periodDetailsSection({
   required BoxConstraints constraints,
@@ -33,8 +34,9 @@ Widget tableOfScreens({
     columnSpacing: 5,
     horizontalMargin: horizontalMarginForTable,
     showBottomBorder: true,
-    lmRatio: 2,
+    lmRatio: 3,
     columns: [
+      const DataColumn2(label: SizedBox(), size: ColumnSize.S),
       DataColumn2(
         label: AutoSizedText(constraints: constraints, text: 'Period'),
         size: ColumnSize.L,
@@ -46,6 +48,10 @@ Widget tableOfScreens({
       DataColumn2(
         size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'End Date'),
+      ),
+      DataColumn2(
+        size: ColumnSize.S,
+        label: AutoSizedText(constraints: constraints, text: 'Status'),
       ),
     ],
     rows: controller.allPeriodDetails.map<DataRow>((invoiceItems) {
@@ -62,6 +68,14 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
+      DataCell(
+        Row(
+          children: [
+            deleteSection(controller, data.id ?? '', context),
+            editSection(controller, data, data.id ?? ''),
+          ],
+        ),
+      ),
       DataCell(
         textForDataRowInTable(
           text: data.period ?? '',
@@ -86,6 +100,51 @@ DataRow dataRowForTheTable(
           color: Colors.red,
         ),
       ),
+      DataCell(statusBox(data.status ?? '')),
     ],
+  );
+}
+
+IconButton editSection(
+  PayrollController controller,
+  PeriodDetailsModel data,
+  String id,
+) {
+  return IconButton(
+    onPressed: () async {
+      controller.periodName.text = data.period ?? '';
+      controller.periodStartDate.text = textToDate(data.startDate);
+      controller.periodEndDate.text = textToDate(data.endDate);
+      controller.isActiveSelected.value = data.status == 'Active'
+          ? true
+          : false;
+      periodDialog(
+        controller: controller,
+        onPressed: () {
+          controller.updatePayrollPeriod(id);
+        },
+        context: Get.context!,
+      );
+    },
+    icon: editIcon,
+  );
+}
+
+IconButton deleteSection(
+  PayrollController controller,
+  String id,
+  BuildContext context,
+) {
+  return IconButton(
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: "The document will be deleted permanently",
+        onPressed: () {
+          controller.deletePayrollPeriod(id);
+        },
+      );
+    },
+    icon: deleteIcon,
   );
 }

@@ -1,6 +1,4 @@
-import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
 import 'package:data_table_2/data_table_2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -96,37 +94,7 @@ class Payroll extends StatelessWidget {
 
                           children: [
                             newPayrollButton(context, constraints, controller),
-                            CustomSlidingSegmentedControl<int>(
-                              height: 30,
-                              initialValue:
-                                  controller.initTypePickersValue.value,
-                              children: const {
-                                1: Text('ALL'),
-                                2: Text('CALENDAR DAYS'),
-                                3: Text('WORKING DAYS'),
-                              },
-                              decoration: BoxDecoration(
-                                color: CupertinoColors.lightBackgroundGray,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              thumbDecoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withAlpha(1),
-                                    blurRadius: 4.0,
-                                    spreadRadius: 1.0,
-                                    offset: const Offset(0.0, 2.0),
-                                  ),
-                                ],
-                              ),
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInToLinear,
-                              onValueChanged: (v) {
-                                // controller.onChooseForTypePicker(v);
-                              },
-                            ),
+
                             Row(
                               spacing: 10,
                               children: [
@@ -207,30 +175,12 @@ Widget tableOfScreens({
       const DataColumn2(label: Text(''), size: ColumnSize.S),
       DataColumn2(
         label: AutoSizedText(text: 'Name', constraints: constraints),
-        size: ColumnSize.M,
+        size: ColumnSize.S,
       ),
+
       DataColumn2(
-        label: AutoSizedText(text: 'Status', constraints: constraints),
-        size: ColumnSize.M,
-      ),
-      DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Period Type'),
-      ),
-      DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(
-          constraints: constraints,
-          text: 'First Period Start Date',
-        ),
-      ),
-      DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Number of Years'),
-      ),
-      DataColumn2(
-        size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'AP Invoice Type'),
+        size: ColumnSize.L,
+        label: AutoSizedText(constraints: constraints, text: 'Notes'),
       ),
     ],
     source: CardDataSourceForEmployees(
@@ -252,16 +202,7 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow(
     cells: [
-      DataCell(
-        Row(
-          spacing: 5,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            deleteSection(controller, employeeId, context),
-            editSection(context, controller, data, constraints, employeeId),
-          ],
-        ),
-      ),
+      DataCell(editSection(controller, data, constraints, employeeId)),
       DataCell(
         textForDataRowInTable(
           text: data.name ?? '',
@@ -270,53 +211,12 @@ DataRow dataRowForTheTable(
           maxWidth: null,
         ),
       ),
-      DataCell(statusBox(data.status ?? '')),
-      DataCell(
-        textForDataRowInTable(text: data.periodType ?? '', maxWidth: null),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: textToDate(data.firstPeriodStartDate),
-          maxWidth: null,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.numberOfYears.toString(),
-          maxWidth: null,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.apInvoiceTypeName ?? '',
-          maxWidth: null,
-        ),
-      ),
+      DataCell(textForDataRowInTable(text: data.notes ?? '', maxWidth: null)),
     ],
   );
 }
 
-IconButton deleteSection(
-  PayrollController controller,
-  String id,
-  BuildContext context,
-) {
-  return IconButton(
-    onPressed: () {
-      alertDialog(
-        context: context,
-        content: "The type will be deleted permanently",
-        onPressed: () {
-          // controller.deleteLeaveType(id);
-        },
-      );
-    },
-    icon: deleteIcon,
-  );
-}
-
 IconButton editSection(
-  BuildContext context,
   PayrollController controller,
   PayrollModel data,
   BoxConstraints constraints,
@@ -324,23 +224,27 @@ IconButton editSection(
 ) {
   return IconButton(
     onPressed: () async {
-      // controller.name.text = data.name ?? '';
-      // controller.code.text = data.code ?? '';
-      // controller.type.text = data.type ?? '';
-      // controller.basedElement.text = data.basedElement ?? '';
-      // controller.basedElementId.value = data.basedElementId ?? '';
-      // controller.isCalendarDaysSelected.value = data.type == "Calendar Days"
-      //     ? true
-      //     : false;
-      // leaveTypesDialog(
-      //   constraints: constraints,
-      //   controller: controller,
-      //   onPressed: controller.addingNewValue.value
-      //       ? null
-      //       : () {
-      //           controller.editLeaveType(id);
-      //         },
-      // );
+      controller.currentPayrollId.value = id;
+      await controller.getCurrentPayrollDetails(id);
+      payrollDialog(
+        onPressedForDelete: () {
+          alertDialog(
+            context: Get.context!,
+            content: "Are you sure you want to delete this payroll?",
+            onPressed: () {
+              controller.deletePayroll(id);
+            },
+          );
+        },
+        context: Get.context!,
+        constraints: constraints,
+        controller: controller,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () {
+                controller.addNewPayroll();
+              },
+      );
     },
     icon: editIcon,
   );
@@ -353,12 +257,12 @@ ElevatedButton newPayrollButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      // controller.name.clear();
-      // controller.code.clear();
-      // controller.type.clear();
-      // controller.basedElement.clear();
-      // controller.basedElementId.value = '';
+      controller.name.clear();
+      controller.notes.clear();
+      controller.allPeriodDetails.clear();
+      controller.currentPayrollId.value = '';
       payrollDialog(
+        onPressedForDelete: null,
         context: context,
         constraints: constraints,
         controller: controller,

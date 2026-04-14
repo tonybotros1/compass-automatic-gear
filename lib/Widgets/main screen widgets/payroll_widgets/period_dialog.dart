@@ -3,13 +3,11 @@ import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/payroll_controller.dart';
 import '../../../consts.dart';
 import '../../text_button.dart';
-import 'add_new_payroll_or_edit.dart';
+import 'add_new_period_or_edit.dart';
 
-Future<dynamic> payrollDialog({
-  required BoxConstraints constraints,
+Future<dynamic> periodDialog({
   required PayrollController controller,
   required void Function()? onPressed,
-  required void Function()? onPressedForDelete,
   required BuildContext context,
 }) {
   return Get.dialog(
@@ -18,6 +16,8 @@ Future<dynamic> payrollDialog({
       insetPadding: const EdgeInsets.all(8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
+        height: 350,
+        width: 400,
         child: Column(
           children: [
             Container(
@@ -32,34 +32,17 @@ Future<dynamic> payrollDialog({
               child: Row(
                 spacing: 10,
                 children: [
-                  Text(
-                    controller.getScreenName(),
-                    style: fontStyleForScreenNameUsedInButtons,
-                  ),
+                  Text("Periods", style: fontStyleForScreenNameUsedInButtons),
 
                   const Spacer(),
-                  separator(),
-
                   GetX<PayrollController>(
                     builder: (controller) => ClickableHoverText(
                       onTap: onPressed,
-                      text: controller.addingNewValue.value == false
+                      text: controller.addingNewPeriodValue.value == false
                           ? 'Save'
                           : "•••",
                     ),
                   ),
-                  onPressedForDelete != null
-                      ? Row(
-                          spacing: 10,
-                          children: [
-                            point(),
-                            ClickableHoverText(
-                              onTap: onPressedForDelete,
-                              text: 'Delete',
-                            ),
-                          ],
-                        )
-                      : const SizedBox(),
 
                   separator(),
                   closeIcon(),
@@ -69,9 +52,8 @@ Future<dynamic> payrollDialog({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: addNewPayrollOrEdit(
+                child: addNewPeriodOrEdit(
                   controller: controller,
-                  constraints: constraints,
                   context: context,
                 ),
               ),

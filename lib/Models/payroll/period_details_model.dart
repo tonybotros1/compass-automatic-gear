@@ -3,7 +3,7 @@ class PeriodDetailsModel {
   final String? period;
   final DateTime? startDate;
   final DateTime? endDate;
-  final bool? status;
+  final String? status;
 
   PeriodDetailsModel({
     this.id,
@@ -16,7 +16,7 @@ class PeriodDetailsModel {
   factory PeriodDetailsModel.fromJson(Map<String, dynamic> json) {
     return PeriodDetailsModel(
       id: json.containsKey('_id') ? json['_id'] ?? '' : '',
-      period: json.containsKey('period') ? json['period'] ?? '' : '',
+      period: json.containsKey('period_name') ? json['period_name'] ?? '' : '',
 
       startDate: json.containsKey('start_date')
           ? json['start_date'] != null
@@ -29,7 +29,7 @@ class PeriodDetailsModel {
                 : null
           : null,
 
-      status: json.containsKey('status') ? json['status'] ?? false : false,
+      status: json.containsKey('status') ? json['status'] ?? "" : "",
     );
   }
 }
