@@ -21,112 +21,29 @@ class Payroll extends StatelessWidget {
             padding: screenPadding,
             child: Column(
               children: [
-                GetBuilder<PayrollController>(
+                GetX<PayrollController>(
                   init: PayrollController(),
                   builder: (controller) {
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minWidth: constraints.maxWidth - 28,
-                        ),
-                        child: const Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          spacing: 10,
-                          children: [
-                            Row(
-                              spacing: 10,
-                              children: [
-                                // myTextFormFieldWithBorder(
-                                //   width: 250,
-                                //   labelText: 'Name',
-                                //   controller: controller.nameFilter,
-                                // ),
-                                // myTextFormFieldWithBorder(
-                                //   width: 250,
-                                //   labelText: 'Code',
-                                //   controller: controller.codeFilter,
-                                // ),
-                                // MenuWithValues(
-                                //   labelText: 'Based Element',
-                                //   headerLqabel: 'Based Elements',
-                                //   dialogWidth: 600,
-                                //   width: 300,
-                                //   controller: controller.basedElementFilter,
-                                //   displayKeys: const ['name'],
-                                //   displaySelectedKeys: const ['name'],
-                                //   onOpen: () {
-                                //     return controller.getAllPayrollElements();
-                                //   },
-                                //   onDelete: () {
-                                //     controller.basedElementFilterId.value = "";
-                                //     controller.basedElementFilter.clear();
-                                //   },
-                                //   onSelected: (value) {
-                                //     controller.basedElementFilterId.value =
-                                //         value['_id'];
-                                //     controller.basedElementFilter.text =
-                                //         value['name'];
-                                //   },
-                                // ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-                GetX<PayrollController>(
-                  builder: (controller) {
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minWidth: constraints.maxWidth - 28,
-                        ),
-                        child: Row(
-                          spacing: 10,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                    return Row(
+                      spacing: 10,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
 
-                          children: [
-                            newPayrollButton(context, constraints, controller),
+                      children: [
+                        newPayrollButton(context, constraints, controller),
 
-                            Row(
-                              spacing: 10,
-                              children: [
-                                ElevatedButton(
-                                  style: findButtonStyle,
-                                  onPressed: controller.isScreenLoding.isFalse
-                                      ? () async {
-                                          // controller.filterSearch();
-                                        }
-                                      : null,
-                                  child: controller.isScreenLoding.isFalse
-                                      ? Text(
-                                          'Find',
-                                          style: fontStyleForElevatedButtons,
-                                        )
-                                      : loadingProcess,
-                                ),
-                                ElevatedButton(
-                                  style: clearVariablesButtonStyle,
-                                  onPressed: () {
-                                    // controller.clearAllFilters();
-                                  },
-                                  child: Text(
-                                    'Clear',
-                                    style: fontStyleForElevatedButtons,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                        ElevatedButton(
+                          style: findButtonStyle,
+                          onPressed: controller.isScreenLoding.isFalse
+                              ? () async {
+                                  controller.getAllPayrolls();
+                                }
+                              : null,
+                          child: controller.isScreenLoding.isFalse
+                              ? Text('Find', style: fontStyleForElevatedButtons)
+                              : loadingProcess,
                         ),
-                      ),
+                      ],
                     );
                   },
                 ),
@@ -177,6 +94,10 @@ Widget tableOfScreens({
         label: AutoSizedText(text: 'Name', constraints: constraints),
         size: ColumnSize.S,
       ),
+      DataColumn2(
+        size: ColumnSize.M,
+        label: AutoSizedText(constraints: constraints, text: 'Notes'),
+      ),
 
       DataColumn2(
         size: ColumnSize.L,
@@ -207,6 +128,13 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           text: data.name ?? '',
           color: Colors.blueGrey,
+          isBold: true,
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.paymentType ?? '',
           isBold: true,
           maxWidth: null,
         ),
@@ -259,8 +187,10 @@ ElevatedButton newPayrollButton(
     onPressed: () {
       controller.name.clear();
       controller.notes.clear();
+      controller.paymentType.clear();
       controller.allPeriodDetails.clear();
       controller.currentPayrollId.value = '';
+      controller.paymentTypeId.value = '';
       payrollDialog(
         onPressedForDelete: null,
         context: context,

@@ -15,6 +15,8 @@ class PayrollController extends GetxController {
   // header
   TextEditingController name = TextEditingController();
   TextEditingController notes = TextEditingController();
+  TextEditingController paymentType = TextEditingController();
+  RxString paymentTypeId = RxString('');
 
   // details
   TextEditingController periodName = TextEditingController();
@@ -50,6 +52,10 @@ class PayrollController extends GetxController {
 
   void selecetActiveInactive(String type, bool value) {
     isActiveSelected.value = value;
+  }
+
+  Future<Map<String, dynamic>> getPaymentTypes() async {
+    return await helper.getAllAPPaymentTypes();
   }
 
   Future<void> getAllPayrolls() async {
@@ -107,6 +113,8 @@ class PayrollController extends GetxController {
         );
         name.text = payroll.name ?? '';
         notes.text = payroll.notes ?? '';
+        paymentType.text = payroll.paymentType ?? '';
+        paymentTypeId.value = payroll.paymentTypeId ?? '';
         allPeriodDetails.assignAll(payroll.allParollDetails ?? []);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -120,7 +128,7 @@ class PayrollController extends GetxController {
         logout();
       }
     } catch (e) {
-      print(e);
+      // print(e);
     }
   }
 
@@ -138,7 +146,11 @@ class PayrollController extends GetxController {
             'Authorization': 'Bearer $accessToken',
             "Content-Type": "application/json",
           },
-          body: jsonEncode({"name": name.text, "notes": notes.text}),
+          body: jsonEncode({
+            "name": name.text,
+            "notes": notes.text,
+            "payment_type": paymentTypeId.value,
+          }),
         );
         if (response.statusCode == 200) {
           final decoded = jsonDecode(response.body);
@@ -167,7 +179,11 @@ class PayrollController extends GetxController {
             'Authorization': 'Bearer $accessToken',
             "Content-Type": "application/json",
           },
-          body: jsonEncode({"name": name.text, "notes": notes.text}),
+          body: jsonEncode({
+            "name": name.text,
+            "notes": notes.text,
+            "payment_type": paymentTypeId.value,
+          }),
         );
         if (response.statusCode == 200) {
           final decoded = jsonDecode(response.body);

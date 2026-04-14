@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../Controllers/Main screen controllers/payroll_controller.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 
 Container parollDetails(PayrollController controller) {
@@ -28,6 +29,26 @@ Container parollDetails(PayrollController controller) {
                     labelText: 'Name',
                     controller: controller.name,
                     width: 600,
+                  ),
+                  MenuWithValues(
+                    labelText: 'Payment Type',
+                    headerLqabel: 'payment Types',
+                    dialogWidth: 600,
+                    width: 600,
+                    controller: controller.paymentType,
+                    displayKeys: const ['type'],
+                    displaySelectedKeys: const ['type'],
+                    onOpen: () {
+                      return controller.getPaymentTypes();
+                    },
+                    onDelete: () {
+                      controller.paymentTypeId.value = "";
+                      controller.paymentType.clear();
+                    },
+                    onSelected: (value) {
+                      controller.paymentTypeId.value = value['_id'];
+                      controller.paymentType.text = value['type'];
+                    },
                   ),
                 ],
               ),
