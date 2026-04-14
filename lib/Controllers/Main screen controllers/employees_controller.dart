@@ -62,6 +62,8 @@ class EmployeesController extends GetxController {
   TextEditingController jobEmployer = TextEditingController();
   TextEditingController jobDepartment = TextEditingController();
   TextEditingController reportingManager = TextEditingController();
+  TextEditingController payroll = TextEditingController();
+  RxString payrollId = RxString('');
   RxString reportingManagerId = RxString('');
   RxString jobDepartmentId = RxString('');
   RxString jobEmployerId = RxString('');
@@ -257,6 +259,10 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getallJobLocations() async {
     return await helper.getAllListValues('LOCATIONS');
+  }
+
+  Future<Map<String, dynamic>> getAllPayrolls() async {
+    return await helper.getPayrolls();
   }
 
   Future getCurrentEmployeeLeaveStatus(String id) async {
@@ -506,12 +512,17 @@ class EmployeesController extends GetxController {
         "martial_status": employeeMaritalStatusId.value,
         "person_type": personType.value,
         "status": employeeStatus.value,
+        "payroll": payrollId.value,
         "employer": jobEmployerId.value,
         "department": jobDepartmentId.value,
         "job_title": jobTitleId.value,
         "location": jobLocationId.value,
-        "hire_date": convertDateToIson(hireDate.text).toString(),
-        "end_date": convertDateToIson(endDate.text).toString(),
+        "hire_date": hireDate.text.isNotEmpty
+            ? convertDateToIson(hireDate.text).toString()
+            : "",
+        "end_date": endDate.text.isNotEmpty
+            ? convertDateToIson(endDate.text).toString()
+            : "",
         "reporting_manager": reportingManagerId.value,
       };
       if (currentEmployeeId.value.isEmpty) {
@@ -610,6 +621,8 @@ class EmployeesController extends GetxController {
   }
 
   void clearValues(bool isEmployee) {
+    payroll.clear();
+    payrollId.value = '';
     currentEmployeeId.value = '';
     payrollElementsList.clear();
     employeeImage.value = '';
@@ -648,6 +661,8 @@ class EmployeesController extends GetxController {
   Future<void> loadValues(String selectedEmployeeId) async {
     final data = await getEmployeeDetails(selectedEmployeeId);
     final employee = EmployeesModel.fromJson(data);
+    payroll.text = employee.payrollName ?? '';
+    payrollId.value = employee.payroll ?? '';
     employeeImage.value = employee.personImageUrl ?? '';
     currentEmployeeId.value = employee.id ?? '';
     employeeName.text = employee.fullName ?? '';
@@ -891,12 +906,8 @@ class EmployeesController extends GetxController {
               textToDate(
                 contact.endDate,
               ).toString().toLowerCase().contains(query) ||
-              contact.numberOdDays.toString().toLowerCase().contains(
-                query,
-              ) ||
-              contact.note.toString().toLowerCase().contains(
-                query,
-              );
+              contact.numberOdDays.toString().toLowerCase().contains(query) ||
+              contact.note.toString().toLowerCase().contains(query);
         }).toList(),
       );
     }

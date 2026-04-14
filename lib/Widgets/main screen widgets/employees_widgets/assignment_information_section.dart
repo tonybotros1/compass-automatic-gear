@@ -165,20 +165,41 @@ Container assignmentInformation(
                   controller.reportingManagerId.value = '';
                 },
                 onSelected: (value) {
-                  controller.reportingManager.text = value['name'];
+                  controller.reportingManager.text = value['full_name'];
                   controller.reportingManagerId.value = value['_id'];
                 },
               ),
             ],
           ),
         ),
-        const Expanded(
+        Expanded(
           // need to edit
           child: Column(
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [],
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              MenuWithValues(
+                labelText: 'Payroll',
+                headerLqabel: 'Payrolls',
+                dialogWidth: 600,
+                width: 310,
+                controller: controller.payroll,
+                displayKeys: const ['name'],
+                displaySelectedKeys: const ['name'],
+                onOpen: () {
+                  return controller.getAllPayrolls();
+                },
+                onDelete: () {
+                  controller.payroll.clear();
+                  controller.payrollId.value = '';
+                },
+                onSelected: (value) {
+                  controller.payroll.text = value['name'];
+                  controller.payrollId.value = value['_id'];
+                },
+              ),
+            ],
           ),
         ),
       ],
