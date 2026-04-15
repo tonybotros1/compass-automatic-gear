@@ -9,18 +9,20 @@ class PayrollElementsModel {
   final bool? recurring;
   final bool? entryValue;
   final bool? standardLink;
+  final String? functionName;
 
   PayrollElementsModel({
-     this.id,
-     this.name,
-     this.key,
-     this.priority,
-     this.type,
-     this.comments,
-     this.allowOverride,
-     this.entryValue,
-     this.standardLink,
-     this.recurring,
+    this.id,
+    this.name,
+    this.key,
+    this.priority,
+    this.type,
+    this.comments,
+    this.allowOverride,
+    this.entryValue,
+    this.standardLink,
+    this.recurring,
+    this.functionName,
   });
 
   factory PayrollElementsModel.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,7 @@ class PayrollElementsModel {
       standardLink: json.containsKey('is_standard_link')
           ? json['is_standard_link'] ?? false
           : false,
+      functionName: json.containsKey('function') ? json['function'] ?? '' : '',
     );
   }
 }

@@ -38,21 +38,42 @@ Container elementDetails(
                     controller: controller.elementName,
                     width: 620,
                   ),
-                  MenuWithValues(
-                    labelText: 'Element Type',
-                    headerLqabel: 'Element Type',
-                    dialogWidth: 600,
-                    width: 200,
-                    controller: controller.elementType,
-                    displayKeys: const ['name'],
-                    displaySelectedKeys: const ['name'],
-                    data: controller.elementTypes,
-                    onDelete: () {
-                      controller.elementType.clear();
-                    },
-                    onSelected: (value) {
-                      controller.elementType.text = value['name'];
-                    },
+                  Row(
+                    spacing: 10,
+                    children: [
+                      MenuWithValues(
+                        labelText: 'Element Type',
+                        headerLqabel: 'Element Type',
+                        dialogWidth: 600,
+                        width: 200,
+                        controller: controller.elementType,
+                        displayKeys: const ['name'],
+                        displaySelectedKeys: const ['name'],
+                        data: controller.elementTypes,
+                        onDelete: () {
+                          controller.elementType.clear();
+                        },
+                        onSelected: (value) {
+                          controller.elementType.text = value['name'];
+                        },
+                      ),
+                      MenuWithValues(
+                        labelText: 'Function',
+                        headerLqabel: 'Functions',
+                        dialogWidth: 600,
+                        width: 410,
+                        controller: controller.functionName,
+                        displayKeys: const ['name'],
+                        displaySelectedKeys: const ['name'],
+                        data: controller.functions,
+                        onDelete: () {
+                          controller.functionName.clear();
+                        },
+                        onSelected: (value) {
+                          controller.functionName.text = value['name'];
+                        },
+                      ),
+                    ],
                   ),
                   myTextFormFieldWithBorder(
                     labelText: 'Priority',

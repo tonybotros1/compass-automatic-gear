@@ -15,6 +15,7 @@ class PayrollElementsController extends GetxController {
   TextEditingController elementName = TextEditingController();
   TextEditingController elementNameFilter = TextEditingController();
   TextEditingController elementType = TextEditingController();
+  TextEditingController functionName = TextEditingController();
   TextEditingController elementTypeFilter = TextEditingController();
   TextEditingController elementPriority = TextEditingController();
   TextEditingController elementPriorityFilter = TextEditingController();
@@ -37,6 +38,12 @@ class PayrollElementsController extends GetxController {
     '1': {'name': 'Earning'},
     '2': {'name': 'Deduction'},
     '3': {'name': 'Information'},
+  });
+
+  RxMap functions = RxMap({
+    '1': {'name': 'PY_INPUT_VALUE_FF'},
+    // '2': {'name': 'Deduction'},
+    // '3': {'name': 'Information'},
   });
 
   @override
@@ -120,6 +127,7 @@ class PayrollElementsController extends GetxController {
         "type": elementType.text,
         "priority": elementPriority.text,
         "comments": elementComment.text,
+        "function": functionName.text,
         "is_allow_override": allowOverride.value,
         "is_recurring": recurring.value,
         "is_entry_value": entryValue.value,
@@ -291,6 +299,7 @@ class PayrollElementsController extends GetxController {
     recurring.value = false;
     entryValue.value = false;
     standardLink.value = false;
+    functionName.clear();
   }
 
   void clearSearchValues() {
@@ -302,6 +311,7 @@ class PayrollElementsController extends GetxController {
 
   void loadValues(PayrollElementsModel data) {
     currentPayrollElementId.value = data.id ?? '';
+    functionName.text = data.functionName ?? '';
     elementKey.text = data.key ?? '';
     elementName.text = data.name ?? '';
     elementPriority.text = data.priority ?? '';
