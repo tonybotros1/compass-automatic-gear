@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../Models/payroll elements/based_elements_model.dart';
 import '../../Models/payroll elements/payroll_elements_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
@@ -34,6 +35,17 @@ class PayrollElementsController extends GetxController {
   RxString currentPayrollElementId = RxString('');
   RxInt initTypePickersValue = RxInt(1);
 
+  // based elements section
+  RxBool addingNewBasedElementValue = RxBool(false);
+  RxList<BasedElementsModel> basedElementsList = RxList<BasedElementsModel>([]);
+  TextEditingController basedElementName = TextEditingController();
+  TextEditingController basedElementType = TextEditingController();
+
+  RxMap allBasedElementTypes = RxMap({
+    '1': {'name': 'Add'},
+    '2': {'name': 'Subtract'},
+  });
+
   RxMap elementTypes = RxMap({
     '1': {'name': 'Earning'},
     '2': {'name': 'Deduction'},
@@ -45,6 +57,8 @@ class PayrollElementsController extends GetxController {
     // '2': {'name': 'Deduction'},
     // '3': {'name': 'Information'},
   });
+
+  List<Widget> contactsTabs = const [Tab(text: 'Based Elements')];
 
   @override
   void onInit() async {
@@ -285,6 +299,127 @@ class PayrollElementsController extends GetxController {
       isScreenLoding.value = false;
     } catch (e) {
       isScreenLoding.value = false;
+    }
+  }
+
+  Future<void> addNewBasedElements() async {
+    try {
+      addingNewBasedElementValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/payroll_elements/add_new_based_element/${currentPayrollElementId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "name": basedElementName.text,
+          "type": basedElementType.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        String addedID = decoded["added_based_element_id"];
+        basedElementsList.add(
+          BasedElementsModel(
+            elementName: basedElementName.text,
+            type: basedElementType.text,
+            id: addedID,
+          ),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewBasedElements();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewBasedElementValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewBasedElementValue.value = false;
+    }
+  }
+
+  Future<void> updateBasedElements(String id) async {
+    try {
+      addingNewBasedElementValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/payroll_elements/update_based_element/$id',
+      );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "name": basedElementName.text,
+          "type": basedElementType.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        BasedElementsModel updatedElement = BasedElementsModel(
+          elementName: basedElementName.text,
+          type: basedElementType.text,
+          id: id,
+        );
+        int index = basedElementsList.indexWhere((i) => i.id == id);
+        basedElementsList[index] = updatedElement;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewBasedElements();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewBasedElementValue.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewBasedElementValue.value = false;
+    }
+  }
+
+  Future<void> deleteBasedElement(String id) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/payroll_elements/delete_based_element/$id',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        basedElementsList.removeWhere((i) => i.id == id);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteBasedElement(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      //
     }
   }
 

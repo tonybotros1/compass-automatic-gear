@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:datahubai/Models/payroll%20runs/payroll_runs_details_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -22,6 +23,11 @@ class PayrollRunsController extends GetxController {
   RxString periodNameId = RxString('');
   RxString employeeId = RxString('');
   RxString elementId = RxString('');
+  RxList<PayrollRunsEmployeeModel> payrollRunsEmployeeList =
+      RxList<PayrollRunsEmployeeModel>();
+
+  RxList<PayrollRunsEmployeeElementsModel> payrollRunsEmployeeElementsList =
+      RxList<PayrollRunsEmployeeElementsModel>();
 
   Future<Map<String, dynamic>> getAllPayrlls() async {
     return await helper.getPayrolls();
@@ -113,13 +119,81 @@ class PayrollRunsController extends GetxController {
     }
   }
 
+  Future<void> getAllPayrollRuns() async {
+    try {
+      isScreenLoding.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse('$backendTestURI/payroll_runs/get_all_payroll_runs');
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List branches = decoded['payroll_runs'];
+        allPayrollRuns.assignAll(
+          branches.map((run) => PayrollRunsModel.fromJson(run)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllPayrollRuns();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      isScreenLoding.value = false;
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
+  }
+
+  Future<void> getPayrollRunsDetails(String id) async {
+    try {
+      isScreenLoding.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendTestURI/payroll_runs/get_payroll_runs_details/$id',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        PayrollRunDetailsModel details = PayrollRunDetailsModel.fromJson(
+          decoded['payroll_runs_details'],
+        );
+        payrollRunsEmployeeList.assignAll(details.employeesDetails ?? []);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getAllPayrollRuns();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      isScreenLoding.value = false;
+    } catch (e) {
+      isScreenLoding.value = false;
+    }
+  }
+
   Future<void> payrollRun() async {
     try {
       addingNewValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendTestURI/payroll_runs/run_payroll');
+      Uri url = Uri.parse('$backendTestURI/payroll_runs/payroll_run');
       final response = await http.post(
         url,
         headers: {
@@ -150,42 +224,4 @@ class PayrollRunsController extends GetxController {
       addingNewValue.value = false;
     }
   }
-
-  // Future<Map<String, dynamic>> getAllElementsForSelectedEmployee() async {
-  //   try {
-  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //     var accessToken = '${prefs.getString('accessToken')}';
-  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-  //     var url = Uri.parse(
-  //       '$backendTestURI/payroll_runs/get_elements_for_selected_employee/${employeeId.value}',
-  //     );
-  //     final response = await http.get(
-  //       url,
-  //       headers: {'Authorization': 'Bearer $accessToken'},
-  //     );
-  //     if (response.statusCode == 200) {
-  //       final decode = jsonDecode(response.body);
-  //       List<dynamic> jsonData = decode['all_elements'];
-  //       Map<String, dynamic> map = {
-  //         for (var model in jsonData) model['_id']: model,
-  //       };
-  //       return map;
-  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
-  //       final refreshed = await helper.refreshAccessToken(refreshToken);
-  //       if (refreshed == RefreshResult.success) {
-  //         return await getAllElementsForSelectedEmployee();
-  //       } else if (refreshed == RefreshResult.invalidToken) {
-  //         logout();
-  //       }
-  //       return {};
-  //     } else if (response.statusCode == 401) {
-  //       logout();
-  //       return {};
-  //     } else {
-  //       return {};
-  //     }
-  //   } catch (e) {
-  //     return {};
-  //   }
-  // }
 }

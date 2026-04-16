@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/payroll_runs_controller.dart';
 import '../../../../Models/payroll runs/payroll_runs_model.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
+import '../../../../Widgets/main screen widgets/payroll_runs_widgets/payroll_runs_details_dialog.dart';
 import '../../../../Widgets/main screen widgets/payroll_runs_widgets/payroll_runs_dialog.dart';
 import '../../../../consts.dart';
 
@@ -36,7 +37,7 @@ class PayrollRuns extends StatelessWidget {
                           style: findButtonStyle,
                           onPressed: controller.isScreenLoding.isFalse
                               ? () async {
-                                  // controller.getAllPayrolls();
+                                  controller.getAllPayrollRuns();
                                 }
                               : null,
                           child: controller.isScreenLoding.isFalse
@@ -88,10 +89,12 @@ Widget tableOfScreens({
     columnSpacing: 5,
     autoRowsToHeight: true,
     renderEmptyRowsInTheEnd: true,
+    lmRatio: 3,
     columns: [
+      const DataColumn2(label: SizedBox(), size: ColumnSize.S),
       DataColumn2(
         label: AutoSizedText(text: 'Run Number', constraints: constraints),
-        size: ColumnSize.M,
+        size: ColumnSize.S,
       ),
       DataColumn2(
         size: ColumnSize.M,
@@ -113,7 +116,7 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Payment Number'),
       ),
     ],
-    source: CardDataSourceForEmployees(
+    source: CardDataSourceForPayrollRuns(
       cards: controller.allPayrollRuns.isEmpty ? [] : controller.allPayrollRuns,
       context: context,
       constraints: constraints,
@@ -126,16 +129,17 @@ DataRow dataRowForTheTable(
   PayrollRunsModel data,
   BuildContext context,
   BoxConstraints constraints,
-  String employeeId,
+  String runId,
   PayrollRunsController controller,
   int index,
 ) {
   return DataRow(
     cells: [
+      DataCell(editSection(controller, constraints, runId)),
       DataCell(
         textForDataRowInTable(
           text: data.runNumber ?? '',
-          color: Colors.blueGrey,
+          color: Colors.orange,
           isBold: true,
           maxWidth: null,
         ),
@@ -145,6 +149,7 @@ DataRow dataRowForTheTable(
           text: data.payrollName ?? '',
           isBold: true,
           maxWidth: null,
+          color: mainColor,
         ),
       ),
       DataCell(
@@ -196,13 +201,31 @@ ElevatedButton newPayrollButton(
   );
 }
 
-class CardDataSourceForEmployees extends DataTableSource {
+IconButton editSection(
+  PayrollRunsController controller,
+  BoxConstraints constraints,
+  String runId,
+) {
+  return IconButton(
+    onPressed: () async {
+      await controller.getPayrollRunsDetails(runId);
+      payrollRunsDetails(
+        constraints: constraints,
+        controller: controller,
+        context: Get.context!,
+      );
+    },
+    icon: editIcon,
+  );
+}
+
+class CardDataSourceForPayrollRuns extends DataTableSource {
   final List<PayrollRunsModel> cards;
   final BuildContext context;
   final BoxConstraints constraints;
   final PayrollRunsController controller;
 
-  CardDataSourceForEmployees({
+  CardDataSourceForPayrollRuns({
     required this.cards,
     required this.context,
     required this.constraints,
