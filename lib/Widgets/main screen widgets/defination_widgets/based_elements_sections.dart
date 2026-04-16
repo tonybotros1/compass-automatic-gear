@@ -84,6 +84,7 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           text: data.elementName.toString(),
           formatDouble: false,
+          maxWidth: null,
         ),
       ),
       DataCell(

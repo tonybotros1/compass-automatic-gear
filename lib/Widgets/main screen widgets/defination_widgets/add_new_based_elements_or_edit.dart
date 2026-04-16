@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../Controllers/Main screen controllers/payroll_elements_controller.dart';
 import '../../menu_dialog.dart';
-import '../../my_text_field.dart';
 
 Widget addNewBasedElementsOrEdit({
   required PayrollElementsController controller,
@@ -12,12 +11,26 @@ Widget addNewBasedElementsOrEdit({
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 10,
       children: [
-        myTextFormFieldWithBorder(
-          obscureText: false,
+        MenuWithValues(
+          labelText: 'Element Type',
+          headerLqabel: 'Types',
+          dialogWidth: 600,
           controller: controller.basedElementName,
-          labelText: 'Element Name',
-          validate: true,
+          displayKeys: const ['name'],
+          displaySelectedKeys: const ['name'],
+          onDelete: () {
+            controller.basedElementName.clear();
+            controller.basedElementNameId.value = '';
+          },
+          onSelected: (value) {
+            controller.basedElementName.text = value['name'];
+            controller.basedElementNameId.value = value['_id'];
+          },
+          onOpen: () {
+            return controller.getAllPayrollElements();
+          },
         ),
+
         MenuWithValues(
           labelText: 'Type',
           headerLqabel: 'Types',

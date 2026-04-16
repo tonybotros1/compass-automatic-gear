@@ -167,6 +167,22 @@ Container elementDetails(
                   Text('Standard Link', style: coolTextStyle),
                 ],
               ),
+              Row(
+                spacing: 10,
+                children: [
+                  GetX<PayrollElementsController>(
+                    builder: (controller) {
+                      return CupertinoCheckbox(
+                        value: controller.indirect.value,
+                        onChanged: (val) {
+                          controller.indirect.value = val ?? false;
+                        },
+                      );
+                    },
+                  ),
+                  Text('Indirect', style: coolTextStyle),
+                ],
+              ),
             ],
           ),
         ),

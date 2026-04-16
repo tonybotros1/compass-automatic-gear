@@ -28,6 +28,7 @@ class PayrollElementsController extends GetxController {
   RxBool recurring = RxBool(false);
   RxBool entryValue = RxBool(false);
   RxBool standardLink = RxBool(false);
+  RxBool indirect = RxBool(false);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
   RxList<PayrollElementsModel> allPayrollElements =
@@ -39,6 +40,7 @@ class PayrollElementsController extends GetxController {
   RxBool addingNewBasedElementValue = RxBool(false);
   RxList<BasedElementsModel> basedElementsList = RxList<BasedElementsModel>([]);
   TextEditingController basedElementName = TextEditingController();
+  RxString basedElementNameId = RxString('');
   TextEditingController basedElementType = TextEditingController();
 
   RxMap allBasedElementTypes = RxMap({
@@ -64,6 +66,10 @@ class PayrollElementsController extends GetxController {
   void onInit() async {
     connectWebSocket();
     super.onInit();
+  }
+
+  Future<Map<String, dynamic>> getAllPayrollElements() async {
+    return await helper.getAllPayrollElementsForPayrollElements();
   }
 
   void connectWebSocket() {
@@ -146,6 +152,7 @@ class PayrollElementsController extends GetxController {
         "is_recurring": recurring.value,
         "is_entry_value": entryValue.value,
         "is_standard_link": standardLink.value,
+        "is_indirect": indirect.value,
       };
       if (currentPayrollElementId.value.isEmpty) {
         Uri addingurl = Uri.parse(
@@ -318,7 +325,7 @@ class PayrollElementsController extends GetxController {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
-          "name": basedElementName.text,
+          "name": basedElementNameId.value,
           "type": basedElementType.text,
         }),
       );
@@ -365,7 +372,7 @@ class PayrollElementsController extends GetxController {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
-          "name": basedElementName.text,
+          "name": basedElementNameId.value,
           "type": basedElementType.text,
         }),
       );
@@ -429,6 +436,7 @@ class PayrollElementsController extends GetxController {
     elementType.clear();
     elementPriority.clear();
     elementComment.clear();
+    indirect.value = false;
     currentPayrollElementId.value = '';
     allowOverride.value = false;
     recurring.value = false;
@@ -456,5 +464,6 @@ class PayrollElementsController extends GetxController {
     recurring.value = data.recurring ?? false;
     entryValue.value = data.entryValue ?? false;
     standardLink.value = data.standardLink ?? false;
+    indirect.value = data.indirect ?? false;
   }
 }

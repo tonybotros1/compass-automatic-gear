@@ -411,6 +411,44 @@ class Helpers {
     }
   }
 
+  Future<Map<String, dynamic>> getAllPayrollElementsForPayrollElements() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      var url = Uri.parse(
+        '$backendUrl/payroll_elements/get_payroll_elements_for_lov_for_payroll_elements',
+      );
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> jsonData = decoded["elements"];
+        Map<String, dynamic> map = {
+          for (var role in jsonData) role['_id']: role,
+        };
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getAllPayrollElements();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
   // this function is to get all list values by code for drop down menu
   Future<Map<String, dynamic>> getAllEmployeesByDepartment(
     String department,

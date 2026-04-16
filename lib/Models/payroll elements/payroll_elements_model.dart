@@ -9,6 +9,7 @@ class PayrollElementsModel {
   final bool? recurring;
   final bool? entryValue;
   final bool? standardLink;
+  final bool? indirect;
   final String? functionName;
 
   PayrollElementsModel({
@@ -23,6 +24,7 @@ class PayrollElementsModel {
     this.standardLink,
     this.recurring,
     this.functionName,
+    this.indirect,
   });
 
   factory PayrollElementsModel.fromJson(Map<String, dynamic> json) {
@@ -46,6 +48,9 @@ class PayrollElementsModel {
           ? json['is_standard_link'] ?? false
           : false,
       functionName: json.containsKey('function') ? json['function'] ?? '' : '',
+      indirect: json.containsKey('is_indirect')
+          ? json['is_indirect'] ?? false
+          : false,
     );
   }
 }
