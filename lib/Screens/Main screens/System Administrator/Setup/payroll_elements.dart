@@ -369,9 +369,9 @@ IconButton editSection(
 ) {
   return IconButton(
     onPressed: () async {
-      controller.loadValues(data);
+      await controller.loadValues(elementID);
       definationDialog(
-        context: context,
+        context: Get.context!,
         constraints: constraints,
         controller: controller,
         onPressed: controller.addingNewValue.value

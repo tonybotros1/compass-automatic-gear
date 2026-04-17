@@ -82,7 +82,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.elementName.toString(),
+          text: data.elementNameValue.toString(),
           formatDouble: false,
           maxWidth: null,
         ),
@@ -109,6 +109,7 @@ ElevatedButton newElementButton({
       }
       controller.basedElementName.clear();
       controller.basedElementType.clear();
+      controller.basedElementNameId.value = '';
       basedAlementsDialog(
         controller: controller,
         canEdit: true,
@@ -148,7 +149,8 @@ IconButton updateElementButton({
 }) {
   return IconButton(
     onPressed: () {
-      controller.basedElementName.text = data.elementName ?? '';
+      controller.basedElementName.text = data.elementNameValue ?? '';
+      controller.basedElementNameId.value = data.elementName ?? '';
       controller.basedElementType.text = data.type ?? '';
       basedAlementsDialog(
         controller: controller,

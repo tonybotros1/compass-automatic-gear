@@ -135,6 +135,42 @@ class PayrollElementsController extends GetxController {
     }
   }
 
+  Future<PayrollElementsModel> getPayrollElementDetails(
+    String payrollElementId,
+  ) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/payroll_elements/get_payroll_element_details/$payrollElementId',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        PayrollElementsModel details = PayrollElementsModel.fromJson(
+          decoded['details'],
+        );
+        return details;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getPayrollElementDetails(payrollElementId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      return PayrollElementsModel();
+    } catch (e) {
+      return PayrollElementsModel();
+    }
+  }
+
   Future<void> addNewPayrollElement() async {
     try {
       addingNewValue.value = true;
@@ -334,7 +370,8 @@ class PayrollElementsController extends GetxController {
         String addedID = decoded["added_based_element_id"];
         basedElementsList.add(
           BasedElementsModel(
-            elementName: basedElementName.text,
+            elementNameValue: basedElementName.text,
+            elementName: basedElementNameId.value,
             type: basedElementType.text,
             id: addedID,
           ),
@@ -378,7 +415,8 @@ class PayrollElementsController extends GetxController {
       );
       if (response.statusCode == 200) {
         BasedElementsModel updatedElement = BasedElementsModel(
-          elementName: basedElementName.text,
+          elementNameValue: basedElementName.text,
+          elementName: basedElementNameId.value,
           type: basedElementType.text,
           id: id,
         );
@@ -452,18 +490,22 @@ class PayrollElementsController extends GetxController {
     elementPriorityFilter.clear();
   }
 
-  void loadValues(PayrollElementsModel data) {
-    currentPayrollElementId.value = data.id ?? '';
-    functionName.text = data.functionName ?? '';
-    elementKey.text = data.key ?? '';
-    elementName.text = data.name ?? '';
-    elementPriority.text = data.priority ?? '';
-    elementComment.text = data.comments ?? '';
-    elementType.text = data.type ?? '';
-    allowOverride.value = data.allowOverride ?? false;
-    recurring.value = data.recurring ?? false;
-    entryValue.value = data.entryValue ?? false;
-    standardLink.value = data.standardLink ?? false;
-    indirect.value = data.indirect ?? false;
+  Future<void> loadValues(String payrollElementId) async {
+    PayrollElementsModel details = await getPayrollElementDetails(
+      payrollElementId,
+    );
+    currentPayrollElementId.value = details.id ?? '';
+    functionName.text = details.function ?? '';
+    elementKey.text = details.key ?? '';
+    elementName.text = details.name ?? '';
+    elementPriority.text = details.priority ?? '';
+    elementComment.text = details.comments ?? '';
+    elementType.text = details.type ?? '';
+    allowOverride.value = details.isAllowOverride ?? false;
+    recurring.value = details.isRecurring ?? false;
+    entryValue.value = details.isEntryValue ?? false;
+    standardLink.value = details.isStandardLink ?? false;
+    indirect.value = details.isIndirect ?? false;
+    basedElementsList.assignAll(details.elementDetails ?? []);
   }
 }
