@@ -184,6 +184,15 @@ ElevatedButton newPayrollButton(
 ) {
   return ElevatedButton(
     onPressed: () {
+      controller.payrollName.clear();
+      controller.periodName.clear();
+      controller.payrollNameId.value = '';
+      controller.periodNameId.value = '';
+      controller.employeeName.clear();
+      controller.employeeId.value = '';
+      controller.elementName.clear();
+      controller.elementId.value = '';
+
       payrollRunsDialog(
         onPressedForDelete: null,
         context: context,
@@ -208,7 +217,9 @@ IconButton editSection(
 ) {
   return IconButton(
     onPressed: () async {
+      controller.payrollRunsEmployeeElementsList.clear();
       await controller.getPayrollRunsDetails(runId);
+
       payrollRunsDetails(
         constraints: constraints,
         controller: controller,

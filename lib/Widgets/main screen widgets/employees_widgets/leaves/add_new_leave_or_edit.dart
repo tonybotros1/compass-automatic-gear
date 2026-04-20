@@ -1,4 +1,5 @@
 import 'package:datahubai/Widgets/my_text_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
@@ -75,6 +76,12 @@ Widget addNewLeaveOrEdit({
               controller.employeeLeaveStartTime,
             );
           },
+          onTapOutside: (_) {
+            normalizeDate(
+              controller.employeeLeaveStartTime.text,
+              controller.employeeLeaveStartTime,
+            );
+          },
         ),
         myTextFormFieldWithBorder(
           labelText: 'End Date',
@@ -104,37 +111,7 @@ Widget addNewLeaveOrEdit({
                 Get.context!,
                 controller.employeeLeaveEndTime,
               ).then((_) async {
-                if (controller
-                        .employeeLeaveTypeTypeToCheckForHowToCalculateTheHolidays
-                        .value
-                        .toLowerCase() ==
-                    'calendar days') {
-                  controller.employeeLeaveNumberOfDays.text =
-                      calculateDaysBetweenTwoDates(
-                        controller.employeeLeaveStartTime.text,
-                        controller.employeeLeaveEndTime.text,
-                      ).toString();
-                } else {
-                  Map workingDays = await controller.getEmployeeWorkingDays(
-                    controller.currentEmployeeId.value,
-                    {
-                      "start_date": convertDateToIson(
-                        controller.employeeLeaveStartTime.text,
-                      ),
-                      "end_date": convertDateToIson(
-                        controller.employeeLeaveEndTime.text,
-                      ),
-                    },
-                  );
-                  controller.employeeLeaveNumberOfDays.text =
-                      workingDays.containsKey('working_days')
-                      ? workingDays['working_days'].toString()
-                      : '';
-                }
-
-                if (controller.employeeLeaveNumberOfDays.text.isEmpty) {
-                  controller.employeeLeaveEndTime.clear();
-                }
+                await controller.onSelectLeaveEndDate();
               });
             },
             icon: const Icon(Icons.date_range),
@@ -144,13 +121,63 @@ Widget addNewLeaveOrEdit({
               controller.employeeLeaveEndTime.text,
               controller.employeeLeaveEndTime,
             );
+            await controller.onSelectLeaveEndDate();
+          },
+          onTapOutside: (_) async {
+            normalizeDate(
+              controller.employeeLeaveEndTime.text,
+              controller.employeeLeaveEndTime,
+            );
+            await controller.onSelectLeaveEndDate();
           },
         ),
-        myTextFormFieldWithBorder(
-          labelText: 'Number of Days',
-          controller: controller.employeeLeaveNumberOfDays,
-          width: 200,
-          isEnabled: false,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            myTextFormFieldWithBorder(
+              labelText: 'Number of Days',
+              controller: controller.employeeLeaveNumberOfDays,
+              width: 200,
+              isEnabled: false,
+            ),
+            Container(
+              height: 35,
+              width: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.grey),
+                color: Colors.white,
+              ),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: GetX<EmployeesController>(
+                      builder: (controller) {
+                        return CupertinoCheckbox(
+                          value: controller.employeeLeavePayInAdvance.value,
+                          onChanged: (value) {
+                            controller.employeeLeavePayInAdvance.value = value!;
+                          },
+                          fillColor: WidgetStateProperty.resolveWith<Color?>((
+                            Set<WidgetState> states,
+                          ) {
+                            if (!states.contains(WidgetState.selected)) {
+                              return Colors.grey.shade300;
+                            }
+                            return Colors.red;
+                          }),
+                        );
+                      },
+                    ),
+                  ),
+
+                  Text('Pay in Advance ?', style: textFieldFontStyle),
+                ],
+              ),
+            ),
+          ],
         ),
 
         myTextFormFieldWithBorder(

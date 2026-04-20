@@ -25,6 +25,7 @@ class EmployeesController extends GetxController {
   Rx<TextEditingController> contactsAndRelativesSearch =
       TextEditingController().obs;
   Rx<TextEditingController> leavesSearch = TextEditingController().obs;
+  final leavesSearchQuery = ''.obs;
   TextEditingController employeeName = TextEditingController();
   TextEditingController employeeNameFilter = TextEditingController();
   TextEditingController employerFilter = TextEditingController();
@@ -164,6 +165,7 @@ class EmployeesController extends GetxController {
   TextEditingController employeeLeaveEndTime = TextEditingController();
   TextEditingController employeeLeaveNumberOfDays = TextEditingController();
   TextEditingController employeeLeaveNote = TextEditingController();
+  RxBool employeeLeavePayInAdvance = RxBool(false);
 
   List<Widget> contactsTabs = const [
     Tab(text: 'Address'),
@@ -363,6 +365,22 @@ class EmployeesController extends GetxController {
           break;
       }
     });
+  }
+
+  Future<void> onSelectLeaveEndDate() async {
+    Map workingDays = await getEmployeeWorkingDays(currentEmployeeId.value, {
+      "start_date": convertDateToIson(employeeLeaveStartTime.text),
+      "end_date": convertDateToIson(employeeLeaveEndTime.text),
+      "leave_type":
+          employeeLeaveTypeTypeToCheckForHowToCalculateTheHolidays.value,
+    });
+    employeeLeaveNumberOfDays.text = workingDays.containsKey('working_days')
+        ? workingDays['working_days'].toString()
+        : '';
+
+    if (employeeLeaveNumberOfDays.text.isEmpty) {
+      employeeLeaveEndTime.clear();
+    }
   }
 
   void filterSearch() async {
@@ -764,6 +782,7 @@ class EmployeesController extends GetxController {
               ? int.tryParse(employeeLeaveNumberOfDays.text)
               : 0,
           "note": employeeLeaveNote.text,
+          "pay_in_advance": employeeLeavePayInAdvance.value,
         }),
       );
       if (response.statusCode == 200) {
@@ -827,6 +846,7 @@ class EmployeesController extends GetxController {
               ? int.tryParse(employeeLeaveNumberOfDays.text)
               : 0,
           "note": employeeLeaveNote.text,
+          "pay_in_advance": employeeLeavePayInAdvance.value,
         }),
       );
       if (response.statusCode == 200) {
@@ -889,25 +909,21 @@ class EmployeesController extends GetxController {
     }
   }
 
-  void filterEmployeeLeaves() {
-    String query = leavesSearch.value.text.toLowerCase();
+  void filterEmployeeLeaves([String? value]) {
+    final query = (value ?? leavesSearch.value.text).trim().toLowerCase();
+    leavesSearchQuery.value = query;
     if (query.isEmpty) {
       filteredLeavesList.clear();
+      return;
     } else {
       filteredLeavesList.assignAll(
-        leavesList.where((contact) {
-          return contact.leaveTypeName.toString().toLowerCase().contains(
-                query,
-              ) ||
-              contact.status.toString().toLowerCase().contains(query) ||
-              textToDate(
-                contact.startDate,
-              ).toString().toLowerCase().contains(query) ||
-              textToDate(
-                contact.endDate,
-              ).toString().toLowerCase().contains(query) ||
-              contact.numberOdDays.toString().toLowerCase().contains(query) ||
-              contact.note.toString().toLowerCase().contains(query);
+        leavesList.where((leave) {
+          return (leave.leaveTypeName ?? '').toLowerCase().contains(query) ||
+              (leave.status ?? '').toLowerCase().contains(query) ||
+              textToDate(leave.startDate).toLowerCase().contains(query) ||
+              textToDate(leave.endDate).toLowerCase().contains(query) ||
+              (leave.numberOdDays?.toString() ?? '').contains(query) ||
+              (leave.note ?? '').toLowerCase().contains(query);
         }).toList(),
       );
     }

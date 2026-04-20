@@ -71,24 +71,30 @@ Widget jobCardSection(
                   ),
                   child: Row(
                     children: [
-                      GetX<JobCardController>(
-                        builder: (controller) {
-                          return CupertinoCheckbox(
-                            value: controller.isReturned.value,
-                            onChanged: (value) {
-                              controller.isReturned.value = value!;
-                              controller.isJobModified.value = true;
-                            },
-                            fillColor: WidgetStateProperty.resolveWith<Color?>((
-                              Set<WidgetState> states,
-                            ) {
-                              if (!states.contains(WidgetState.selected)) {
-                                return Colors.grey.shade300;
-                              }
-                              return Colors.red;
-                            }),
-                          );
-                        },
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: GetX<JobCardController>(
+                          builder: (controller) {
+                            return CupertinoCheckbox(
+                              value: controller.isReturned.value,
+                              onChanged: (value) {
+                                controller.isReturned.value = value!;
+                                controller.isJobModified.value = true;
+                              },
+                              fillColor:
+                                  WidgetStateProperty.resolveWith<Color?>((
+                                    Set<WidgetState> states,
+                                  ) {
+                                    if (!states.contains(
+                                      WidgetState.selected,
+                                    )) {
+                                      return Colors.grey.shade300;
+                                    }
+                                    return Colors.red;
+                                  }),
+                            );
+                          },
+                        ),
                       ),
 
                       Text('Returned ?', style: textFieldFontStyle),

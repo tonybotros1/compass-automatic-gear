@@ -336,7 +336,7 @@ class Helpers {
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       var url = Uri.parse(
-        '$backendUrl/employees/get_number_of_days_for_working_days/$employeeId',
+        '$backendUrl/employees/get_number_of_days/$employeeId',
       );
       final response = await http.post(
         url,
@@ -411,7 +411,9 @@ class Helpers {
     }
   }
 
-  Future<Map<String, dynamic>> getAllPayrollElementsForPayrollElements() async {
+  Future<Map<String, dynamic>> getAllPayrollElementsForPayrollElements(
+    String elementID,
+  ) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -419,9 +421,13 @@ class Helpers {
       var url = Uri.parse(
         '$backendUrl/payroll_elements/get_payroll_elements_for_lov_for_payroll_elements',
       );
-      final response = await http.get(
+      final response = await http.post(
         url,
-        headers: {"Authorization": "Bearer $accessToken"},
+        headers: {
+          "Authorization": "Bearer $accessToken",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"element_id": elementID}),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);

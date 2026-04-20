@@ -56,7 +56,7 @@ class PayrollElementsController extends GetxController {
 
   RxMap functions = RxMap({
     '1': {'name': 'PY_INPUT_VALUE_FF'},
-    // '2': {'name': 'Deduction'},
+    '2': {'name': 'PY_ANNUAL_LEAVE_FF'},
     // '3': {'name': 'Information'},
   });
 
@@ -68,8 +68,8 @@ class PayrollElementsController extends GetxController {
     super.onInit();
   }
 
-  Future<Map<String, dynamic>> getAllPayrollElements() async {
-    return await helper.getAllPayrollElementsForPayrollElements();
+  Future<Map<String, dynamic>> getAllPayrollElements(String elementId) async {
+    return await helper.getAllPayrollElementsForPayrollElements(elementId);
   }
 
   void connectWebSocket() {

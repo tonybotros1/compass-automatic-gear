@@ -19,12 +19,12 @@ Widget leavesScreen({
           GetBuilder<EmployeesController>(
             builder: (controller) {
               return searchBar(
-                onChanged: (_) {
-                  controller.filterEmployeeLeaves();
+                onChanged: (value) {
+                  controller.filterEmployeeLeaves(value);
                 },
                 onPressedForClearSearch: () {
                   controller.leavesSearch.value.clear();
-                  controller.filterEmployeeLeaves();
+                  controller.filterEmployeeLeaves('');
                 },
                 search: controller.leavesSearch,
                 constraints: constraints,
@@ -37,7 +37,15 @@ Widget leavesScreen({
           Expanded(
             child: GetX<EmployeesController>(
               builder: (controller) {
+                final query = controller.leavesSearchQuery.value;
+                final cards =
+                    (query.isEmpty
+                            ? controller.leavesList
+                            : controller.filteredLeavesList)
+                        .toList();
+
                 return PaginatedDataTable2(
+                  key: ValueKey('$query-${cards.length}'),
                   border: TableBorder.symmetric(
                     inside: BorderSide(color: Colors.grey.shade200, width: 0.5),
                   ),
@@ -63,11 +71,7 @@ Widget leavesScreen({
                     DataColumn2(size: ColumnSize.L, label: Text('Note')),
                   ],
                   source: CardDataSource(
-                    cards:
-                        controller.filteredLeavesList.isEmpty &&
-                            controller.leavesSearch.value.text.isEmpty
-                        ? controller.leavesList
-                        : controller.filteredLeavesList,
+                    cards: cards,
                     controller: controller,
                     context: context,
                     constraints: constraints,
@@ -192,6 +196,7 @@ IconButton editSection(
       controller.employeeLeaveEndTime.text = textToDate(data.endDate);
       controller.employeeLeaveNumberOfDays.text = data.numberOdDays.toString();
       controller.employeeLeaveNote.text = data.note ?? '';
+      controller.employeeLeavePayInAdvance.value = data.payInAdvance ?? false;
 
       leavesInsertingDialog(
         onPressedForPost: () async {
@@ -258,6 +263,7 @@ ElevatedButton newLeaveButton(
       controller.employeeLeaveEndTime.clear();
       controller.employeeLeaveNumberOfDays.clear();
       controller.employeeLeaveNote.clear();
+      controller.employeeLeavePayInAdvance.value = false;
 
       leavesInsertingDialog(
         onPressedForCancel: null,

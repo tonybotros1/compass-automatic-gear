@@ -7,6 +7,7 @@ class EmployeeLeavesModel {
   DateTime? endDate;
   int? numberOdDays;
   String? note;
+  bool? payInAdvance;
 
   EmployeeLeavesModel({
     this.id,
@@ -17,6 +18,7 @@ class EmployeeLeavesModel {
     this.numberOdDays,
     this.startDate,
     this.status,
+    this.payInAdvance,
   });
 
   EmployeeLeavesModel.fromJson(Map<String, dynamic> json) {
@@ -40,5 +42,8 @@ class EmployeeLeavesModel {
         ? json['number_of_days'] ?? 0
         : 0;
     note = json.containsKey('note') ? json['note'] ?? '' : '';
+    payInAdvance = json.containsKey('pay_in_advance')
+        ? json['pay_in_advance'] ?? false
+        : false;
   }
 }

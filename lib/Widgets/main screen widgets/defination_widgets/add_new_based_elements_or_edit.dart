@@ -27,7 +27,9 @@ Widget addNewBasedElementsOrEdit({
             controller.basedElementNameId.value = value['_id'];
           },
           onOpen: () {
-            return controller.getAllPayrollElements();
+            return controller.getAllPayrollElements(
+              controller.currentPayrollElementId.value,
+            );
           },
         ),
 
