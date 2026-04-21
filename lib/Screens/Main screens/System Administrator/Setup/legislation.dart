@@ -208,6 +208,9 @@ ElevatedButton newButton(
     onPressed: () {
       controller.name.clear();
       controller.selectedDays.clear();
+      controller.numberOfPaidDays.clear();
+      controller.numberOfHalfPaidDays.clear();
+      controller.numberOfUnPaidDays.clear();
       legislationDialog(
         constraints: constraints,
         controller: controller,
@@ -251,6 +254,10 @@ IconButton editSection(
   return IconButton(
     onPressed: () async {
       controller.name.text = data.name ?? '';
+      controller.numberOfPaidDays.text = data.numberOfPaidDays.toString();
+      controller.numberOfHalfPaidDays.text = data.numberOfHalfPaidDays
+          .toString();
+      controller.numberOfUnPaidDays.text = data.numberOfUnpaidDays.toString();
       controller.selectedDays.assignAll(data.weekend ?? []);
       legislationDialog(
         constraints: constraints,

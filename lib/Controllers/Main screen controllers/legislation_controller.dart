@@ -19,6 +19,11 @@ class LegislationController extends GetxController {
   RxList<LegislationModel> allLegislations = RxList<LegislationModel>([]);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
+
+  // sick leave:
+  TextEditingController numberOfPaidDays = TextEditingController();
+  TextEditingController numberOfHalfPaidDays = TextEditingController();
+  TextEditingController numberOfUnPaidDays = TextEditingController();
   final List<String> weekDays = const [
     'Monday',
     'Tuesday',
@@ -79,7 +84,19 @@ class LegislationController extends GetxController {
           'Authorization': 'Bearer $accessToken',
           "Content-Type": "application/json",
         },
-        body: jsonEncode({"name": name.text, "weekend": selectedDays}),
+        body: jsonEncode({
+          "name": name.text,
+          "weekend": selectedDays,
+          "number_of_paid_days": numberOfPaidDays.text.isNotEmpty
+              ? numberOfPaidDays.text
+              : "0",
+          "number_of_half_paid_days": numberOfHalfPaidDays.text.isNotEmpty
+              ? numberOfPaidDays.text
+              : "0",
+          "number_of_unpaid_days": numberOfUnPaidDays.text.isNotEmpty
+              ? numberOfPaidDays.text
+              : "0",
+        }),
       );
       if (response.statusCode == 200) {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
@@ -116,7 +133,19 @@ class LegislationController extends GetxController {
           'Authorization': 'Bearer $accessToken',
           "Content-Type": "application/json",
         },
-        body: jsonEncode({"name": name.text, "weekend": selectedDays}),
+        body: jsonEncode({
+          "name": name.text,
+          "weekend": selectedDays,
+          "number_of_paid_days": numberOfPaidDays.text.isNotEmpty
+              ? numberOfPaidDays.text.trim()
+              : "0",
+          "number_of_half_paid_days": numberOfHalfPaidDays.text.isNotEmpty
+              ? numberOfHalfPaidDays.text.trim()
+              : "0",
+          "number_of_unpaid_days": numberOfUnPaidDays.text.isNotEmpty
+              ? numberOfUnPaidDays.text.trim()
+              : "0",
+        }),
       );
       if (response.statusCode == 200) {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
