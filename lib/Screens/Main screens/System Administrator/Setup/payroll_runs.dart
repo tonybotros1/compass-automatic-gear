@@ -221,6 +221,16 @@ IconButton editSection(
       await controller.getPayrollRunsDetails(runId);
 
       payrollRunsDetails(
+        onTapForRollback: () {
+          alertDialog(
+            context: Get.context!,
+            content: "Are you sure?",
+            onPressed: () async {
+              await controller.payrollRollback(runId);
+              Get.close(2);
+            },
+          );
+        },
         constraints: constraints,
         controller: controller,
         context: Get.context!,

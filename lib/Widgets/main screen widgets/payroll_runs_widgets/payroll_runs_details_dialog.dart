@@ -1,3 +1,4 @@
+import 'package:datahubai/Widgets/text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/payroll_runs_controller.dart';
@@ -8,6 +9,7 @@ Future<dynamic> payrollRunsDetails({
   required BoxConstraints constraints,
   required PayrollRunsController controller,
   required BuildContext context,
+  void Function()? onTapForRollback,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -34,10 +36,16 @@ Future<dynamic> payrollRunsDetails({
                 ),
 
                 const Spacer(),
-
+                GetX<PayrollRunsController>(
+                  builder: (controller) {
+                    return ClickableHoverText(
+                      text: controller.rollingBack.isFalse ? 'Rollback' : "•••",
+                      onTap: onTapForRollback,
+                    );
+                  },
+                ),
                 separator(),
                 closeIcon(),
-                separator(),
               ],
             ),
           ),

@@ -57,7 +57,7 @@ class PayrollElementsController extends GetxController {
   RxMap functions = RxMap({
     '1': {'name': 'PY_INPUT_VALUE_FF'},
     '2': {'name': 'PY_ANNUAL_LEAVE_FF'},
-    // '3': {'name': 'Information'},
+    '3': {'name': 'PY_UNPAID_LEAVE_FF'},
   });
 
   List<Widget> contactsTabs = const [Tab(text: 'Based Elements')];

@@ -15,6 +15,7 @@ class PayrollRunsController extends GetxController {
   RxBool isScreenLoding = RxBool(false);
   RxList<PayrollRunsModel> allPayrollRuns = RxList<PayrollRunsModel>([]);
   RxBool addingNewValue = RxBool(false);
+  RxBool rollingBack = RxBool(false);
   TextEditingController payrollName = TextEditingController();
   TextEditingController periodName = TextEditingController();
   TextEditingController employeeName = TextEditingController();
@@ -208,6 +209,11 @@ class PayrollRunsController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        PayrollRunsModel addedRun = PayrollRunsModel.fromJson(
+          decoded['added_run'],
+        );
+        allPayrollRuns.insert(0, addedRun);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -222,6 +228,41 @@ class PayrollRunsController extends GetxController {
       addingNewValue.value = false;
     } catch (e) {
       addingNewValue.value = false;
+    }
+  }
+
+  Future<void> payrollRollback(String runId) async {
+    try {
+      rollingBack.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendTestURI/payroll_runs/rollback_payroll_run/$runId',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        allPayrollRuns.removeWhere((i) => i.id == runId);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await payrollRun();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      rollingBack.value = false;
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: "Coud not rollback please try again later",
+      );
+      rollingBack.value = false;
     }
   }
 }

@@ -371,8 +371,8 @@ class EmployeesController extends GetxController {
     Map workingDays = await getEmployeeWorkingDays(currentEmployeeId.value, {
       "start_date": convertDateToIson(employeeLeaveStartTime.text),
       "end_date": convertDateToIson(employeeLeaveEndTime.text),
-      "leave_type":
-          employeeLeaveTypeTypeToCheckForHowToCalculateTheHolidays.value,
+      "leave_type": employeeLeaveTypeId.value,
+      // employeeLeaveTypeTypeToCheckForHowToCalculateTheHolidays.value,
     });
     employeeLeaveNumberOfDays.text = workingDays.containsKey('working_days')
         ? workingDays['working_days'].toString()
