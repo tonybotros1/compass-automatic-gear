@@ -29,8 +29,11 @@ class PayrollController extends GetxController {
   String backendUrl = backendTestURI;
   RxBool addingNewValue = RxBool(false);
   RxBool addingNewPeriodValue = RxBool(false);
+  RxBool generatingMonthlyPeriods = RxBool(false);
   RxString currentPayrollId = RxString('');
   RxBool isActiveSelected = RxBool(true);
+
+  TextEditingController yearStartDate = TextEditingController();
 
   RxMap periodTypes = RxMap({
     '1': {'name': 'Monthly'},
@@ -384,6 +387,48 @@ class PayrollController extends GetxController {
       Get.back();
     } catch (e) {
       //
+    }
+  }
+
+  Future<void> generateMonthlyPeriods() async {
+    try {
+      generatingMonthlyPeriods.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/payroll/generate_monthly_periods/${currentPayrollId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "year_start_date": convertDateToIson(yearStartDate.text),
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List addedPeriods = decoded['periods'];
+        allPeriodDetails.assignAll(
+          addedPeriods.map((p) => PeriodDetailsModel.fromJson(p)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await generateMonthlyPeriods();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      generatingMonthlyPeriods.value = false;
+      Get.back();
+    } catch (e) {
+      generatingMonthlyPeriods.value = false;
     }
   }
 }

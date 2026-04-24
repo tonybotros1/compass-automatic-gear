@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/payroll_controller.dart';
 import '../../../consts.dart';
 import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
+import 'monthly_periods_dialog.dart';
 
 Container parollDetails(PayrollController controller) {
   return Container(
@@ -49,6 +51,26 @@ Container parollDetails(PayrollController controller) {
                       controller.paymentTypeId.value = value['_id'];
                       controller.paymentType.text = value['type'];
                     },
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    style: lastChangesButtonStyle,
+                    onPressed: () {
+                      if (controller.currentPayrollId.value.isEmpty) {
+                        alertMessage(
+                          context: Get.context!,
+                          content: "Please save doc first",
+                        );
+                        return;
+                      }
+                      monthlyPeriodsDialog(
+                        controller: controller,
+                        onPressed: () async {
+                          await controller.generateMonthlyPeriods();
+                        },
+                      );
+                    },
+                    child: const Text('GENERATE MONTHLY PERIODS'),
                   ),
                 ],
               ),
