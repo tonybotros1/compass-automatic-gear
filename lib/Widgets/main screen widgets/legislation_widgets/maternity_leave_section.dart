@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../Controllers/Main screen controllers/legislation_controller.dart';
 import '../../../consts.dart';
 
-Container sickLeaveSection(LegislationController controller) {
+Container maternityLeaveSection(LegislationController controller) {
   return Container(
     height: 230,
     padding: const EdgeInsets.all(20),
@@ -15,19 +15,7 @@ Container sickLeaveSection(LegislationController controller) {
       children: [
         myTextFormFieldWithBorder(
           labelText: 'Paid Days No.',
-          controller: controller.numberOfPaidDays,
-          isnumber: true,
-          width: 150,
-        ),
-        myTextFormFieldWithBorder(
-          labelText: 'Half Paid Days No.',
-          controller: controller.numberOfHalfPaidDays,
-          isnumber: true,
-          width: 150,
-        ),
-        myTextFormFieldWithBorder(
-          labelText: 'Unpaid Days No.',
-          controller: controller.numberOfUnPaidDays,
+          controller: controller.meternityNumberOfPaidDays,
           isnumber: true,
           width: 150,
         ),

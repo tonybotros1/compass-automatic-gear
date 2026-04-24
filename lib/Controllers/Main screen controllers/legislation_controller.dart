@@ -24,6 +24,13 @@ class LegislationController extends GetxController {
   TextEditingController numberOfPaidDays = TextEditingController();
   TextEditingController numberOfHalfPaidDays = TextEditingController();
   TextEditingController numberOfUnPaidDays = TextEditingController();
+
+  // maternity leave:
+  TextEditingController meternityNumberOfPaidDays = TextEditingController();
+
+  // compassionate leave:
+  TextEditingController compassionateLeaveNumberOfPaidDays =
+      TextEditingController();
   final List<String> weekDays = const [
     'Monday',
     'Tuesday',
@@ -87,14 +94,24 @@ class LegislationController extends GetxController {
         body: jsonEncode({
           "name": name.text,
           "weekend": selectedDays,
-          "number_of_paid_days": numberOfPaidDays.text.isNotEmpty
+          "number_of_paid_days_for_sick_leave": numberOfPaidDays.text.isNotEmpty
               ? numberOfPaidDays.text
               : "0",
-          "number_of_half_paid_days": numberOfHalfPaidDays.text.isNotEmpty
-              ? numberOfPaidDays.text
+          "number_of_half_paid_days_for_sick_leave":
+              numberOfHalfPaidDays.text.isNotEmpty
+              ? numberOfHalfPaidDays.text
               : "0",
-          "number_of_unpaid_days": numberOfUnPaidDays.text.isNotEmpty
-              ? numberOfPaidDays.text
+          "number_of_unpaid_days_for_sick_leave":
+              numberOfUnPaidDays.text.isNotEmpty
+              ? numberOfUnPaidDays.text
+              : "0",
+          "number_of_paid_days_for_maternity_leave":
+              meternityNumberOfPaidDays.text.isNotEmpty
+              ? meternityNumberOfPaidDays.text
+              : "0",
+          "number_of_paid_days_for_compassionate_leave":
+              compassionateLeaveNumberOfPaidDays.text.isNotEmpty
+              ? compassionateLeaveNumberOfPaidDays.text
               : "0",
         }),
       );
@@ -136,14 +153,24 @@ class LegislationController extends GetxController {
         body: jsonEncode({
           "name": name.text,
           "weekend": selectedDays,
-          "number_of_paid_days": numberOfPaidDays.text.isNotEmpty
+          "number_of_paid_days_for_sick_leave": numberOfPaidDays.text.isNotEmpty
               ? numberOfPaidDays.text.trim()
               : "0",
-          "number_of_half_paid_days": numberOfHalfPaidDays.text.isNotEmpty
+          "number_of_half_paid_days_for_sick_leave":
+              numberOfHalfPaidDays.text.isNotEmpty
               ? numberOfHalfPaidDays.text.trim()
               : "0",
-          "number_of_unpaid_days": numberOfUnPaidDays.text.isNotEmpty
+          "number_of_unpaid_days_for_sick_leave":
+              numberOfUnPaidDays.text.isNotEmpty
               ? numberOfUnPaidDays.text.trim()
+              : "0",
+          "number_of_paid_days_for_maternity_leave":
+              meternityNumberOfPaidDays.text.isNotEmpty
+              ? meternityNumberOfPaidDays.text
+              : "0",
+          "number_of_paid_days_for_compassionate_leave":
+              compassionateLeaveNumberOfPaidDays.text.isNotEmpty
+              ? compassionateLeaveNumberOfPaidDays.text
               : "0",
         }),
       );
@@ -230,6 +257,7 @@ class LegislationController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List docs = decoded['legislations_elements'];
+        print(docs);
         allLegislations.assignAll(
           docs.map((job) => LegislationModel.fromJson(job)),
         );
