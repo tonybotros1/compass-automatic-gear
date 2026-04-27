@@ -240,6 +240,9 @@ class CarTradingDashboardController extends GetxController {
   final selectedRowIndex = (-1).obs;
   RxString itemsPageName = RxString('');
 
+  RxInt initValueForDatePicker = RxInt(1);
+  RxInt initValueForStatusPicker = RxInt(1);
+
   void selectRow(int index) {
     selectedRowIndex.value = index;
     update();
@@ -249,11 +252,7 @@ class CarTradingDashboardController extends GetxController {
   void onInit() async {
     connectWebSocket();
     await getCompanyDetails();
-    getCashOnHandOrBankBalance();
-    getCapitalsOROutstandingSummary('capitals');
-    getCapitalsOROutstandingSummary('outstanding');
-    filterGeneralExpensesSearch();
-    filterSearch();
+    allSearches();
     focusNodeForitems1.addListener(() {
       if (!focusNodeForitems1.hasFocus) {
         normalizeDate(itemDate.value.text, itemDate.value);
@@ -268,38 +267,48 @@ class CarTradingDashboardController extends GetxController {
     super.dispose();
   }
 
+  void allSearches() {
+    filterSearch();
+    filterGeneralExpensesSearch();
+    getCashOnHandOrBankBalance();
+    getCapitalsOROutstandingSummary('capitals');
+    getCapitalsOROutstandingSummary('outstanding');
+  }
+
   void onChooseForDatePicker(int i) {
     switch (i) {
       case 1:
+        initValueForDatePicker.value = 1;
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
         fromDate.value.clear();
         toDate.value.clear();
-        filterSearch();
+        allSearches();
         break;
       case 2:
+        initValueForDatePicker.value = 2;
         setTodayRange(fromDate.value, toDate.value);
         isTodaySelected.value = true;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = false;
-        filterSearch();
+        allSearches();
         break;
       case 3:
+        initValueForDatePicker.value = 3;
         setThisMonthRange(fromDate.value, toDate.value);
         isTodaySelected.value = false;
         isThisMonthSelected.value = true;
         isThisYearSelected.value = false;
-        filterSearch();
-
+        allSearches();
         break;
       case 4:
+        initValueForDatePicker.value = 4;
         setThisYearRange(fromDate.value, toDate.value);
         isTodaySelected.value = false;
         isThisMonthSelected.value = false;
         isThisYearSelected.value = true;
-        filterSearch();
-
+        allSearches();
         break;
       default:
     }
@@ -327,24 +336,27 @@ class CarTradingDashboardController extends GetxController {
   void onChooseForStatusPicker(int i) {
     switch (i) {
       case 1:
+        initValueForStatusPicker.value = 1;
         isNewStatusSelected.value = false;
         isSoldStatusSelected.value = false;
-        filterSearch();
+        allSearches();
         break;
       case 2:
+        initValueForStatusPicker.value = 2;
         if (isNewStatusSelected.isFalse) {
           isNewStatusSelected.value = true;
           isSoldStatusSelected.value = false;
-          filterSearch();
+          allSearches();
         } else {
           isNewStatusSelected.value = false;
         }
         break;
       case 3:
+        initValueForStatusPicker.value = 3;
         if (isSoldStatusSelected.isFalse) {
           isSoldStatusSelected.value = true;
           isNewStatusSelected.value = false;
-          filterSearch();
+          allSearches();
         } else {
           isSoldStatusSelected.value = false;
         }
@@ -2637,6 +2649,10 @@ class CarTradingDashboardController extends GetxController {
   }
 
   void clearFilters() {
+    initValueForDatePicker.value = 1;
+    initValueForStatusPicker.value = 1;
+    carSoldByFilter.value.clear();
+    carBoughtByFilter.value.clear();
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;

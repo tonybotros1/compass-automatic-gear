@@ -1,5 +1,4 @@
 import 'package:custom_sliding_segmented_control/custom_sliding_segmented_control.dart';
-import 'package:datahubai/Widgets/drop_down_menu3.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,6 +7,7 @@ import '../../Widgets/Dashboard Widgets/car trading widgets/last_changes_dialog.
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_accounts_details.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_summary_details.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_car_trading.dart';
+import '../../Widgets/menu_dialog.dart';
 import '../../Widgets/my_text_field.dart';
 import '../../consts.dart';
 
@@ -58,33 +58,17 @@ class CarTradingDashboard extends StatelessWidget {
                                       Row(
                                         spacing: 10,
                                         children: [
-                                          CustomDropdown(
+                                          MenuWithValues(
+                                            labelText: 'Car Brand',
+                                            headerLqabel: 'Brands',
+                                            dialogWidth: 600,
                                             width: 170,
-                                            showedSelectedName: 'name',
-                                            textcontroller: controller
-                                                .carBrandFilter
-                                                .value
-                                                .text,
-                                            hintText: 'Car Brand',
-                                            onChanged: (key, value) {
-                                              controller.carModelFilter.value
-                                                  .clear();
-                                              controller.getModelsByCarBrand(
-                                                key,
-                                              );
-                                              controller
-                                                      .carBrandFilter
-                                                      .value
-                                                      .text =
-                                                  value['name'];
-                                              controller
-                                                      .carBrandFilterId
-                                                      .value =
-                                                  key;
-                                              controller
-                                                      .carModelFilterId
-                                                      .value =
-                                                  '';
+                                            controller:
+                                                controller.carBrandFilter.value,
+                                            displayKeys: const ['name'],
+                                            displaySelectedKeys: const ['name'],
+                                            onOpen: () {
+                                              return controller.getCarBrands();
                                             },
                                             onDelete: () {
                                               controller.allModels.clear();
@@ -101,29 +85,43 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .value =
                                                   '';
                                             },
-                                            onOpen: () {
-                                              return controller.getCarBrands();
-                                            },
-                                          ),
-                                          CustomDropdown(
-                                            width: 170,
-                                            showedSelectedName: 'name',
-                                            textcontroller: controller
-                                                .carModelFilter
-                                                .value
-                                                .text,
-                                            hintText: 'Car Model',
-
-                                            onChanged: (key, value) {
+                                            onSelected: (value) {
+                                              controller.carModelFilter.value
+                                                  .clear();
+                                              controller.getModelsByCarBrand(
+                                                value['_id'],
+                                              );
                                               controller
-                                                      .carModelFilter
+                                                      .carBrandFilter
                                                       .value
                                                       .text =
                                                   value['name'];
                                               controller
+                                                      .carBrandFilterId
+                                                      .value =
+                                                  value['_id'];
+                                              controller
                                                       .carModelFilterId
                                                       .value =
-                                                  key;
+                                                  '';
+                                            },
+                                          ),
+                                          MenuWithValues(
+                                            labelText: 'Car Model',
+                                            headerLqabel: 'Models',
+                                            dialogWidth: 600,
+                                            width: 170,
+                                            controller:
+                                                controller.carModelFilter.value,
+                                            displayKeys: const ['name'],
+                                            displaySelectedKeys: const ['name'],
+                                            onOpen: () {
+                                              return controller
+                                                  .getModelsByCarBrand(
+                                                    controller
+                                                        .carBrandFilterId
+                                                        .value,
+                                                  );
                                             },
                                             onDelete: () {
                                               controller.carModelFilter.value
@@ -133,92 +131,31 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .value =
                                                   '';
                                             },
-                                            onOpen: () {
-                                              return controller
-                                                  .getModelsByCarBrand(
-                                                    controller
-                                                        .carBrandFilterId
-                                                        .value,
-                                                  );
-                                            },
-                                          ),
-                                          // CustomDropdown(
-                                          //   width: 180,
-                                          //   hintText: 'Specification',
-                                          //   showedSelectedName: 'name',
-                                          //   textcontroller: controller
-                                          //       .carSpecificationFilter
-                                          //       .value
-                                          //       .text,
-                                          //   onChanged: (key, value) {
-                                          //     controller
-                                          //             .carSpecificationFilter
-                                          //             .value
-                                          //             .text =
-                                          //         value["name"];
-                                          //     controller
-                                          //             .carSpecificationFilterId
-                                          //             .value =
-                                          //         key;
-                                          //   },
-                                          //   onDelete: () {
-                                          //     controller.carSpecificationFilter.value
-                                          //         .clear();
-                                          //     controller
-                                          //             .carSpecificationFilterId
-                                          //             .value =
-                                          //         '';
-                                          //   },
-                                          //   onOpen: () {
-                                          //     return controller
-                                          //         .getCarSpecefications();
-                                          //   },
-                                          // ),
-                                          // CustomDropdown(
-                                          //   width: 180,
-                                          //   hintText: 'Engine Size',
-                                          //   showedSelectedName: 'name',
-                                          //   textcontroller: controller
-                                          //       .carEngineSizeFilter
-                                          //       .value
-                                          //       .text,
-                                          //   onChanged: (key, value) {
-                                          //     controller
-                                          //             .carEngineSizeFilter
-                                          //             .value
-                                          //             .text =
-                                          //         value['name'];
-                                          //     controller.carEngineSizeFilterId.value =
-                                          //         key;
-                                          //   },
-                                          //   onDelete: () {
-                                          //     controller.carEngineSizeFilter.value
-                                          //         .clear();
-                                          //     controller.carEngineSizeFilterId.value =
-                                          //         '';
-                                          //   },
-                                          //   onOpen: () {
-                                          //     return controller.getEngineTypes();
-                                          //   },
-                                          // ),
-                                          CustomDropdown(
-                                            width: 200,
-                                            hintText: 'Bought From',
-                                            textcontroller: controller
-                                                .carBoughtFromFilter
-                                                .value
-                                                .text,
-                                            showedSelectedName: 'name',
-                                            onChanged: (key, value) {
+                                            onSelected: (value) {
                                               controller
-                                                      .carBoughtFromFilter
+                                                      .carModelFilter
                                                       .value
                                                       .text =
                                                   value['name'];
                                               controller
-                                                      .carBoughtFromFilterId
+                                                      .carModelFilterId
                                                       .value =
-                                                  key;
+                                                  value['_id'];
+                                            },
+                                          ),
+                                          MenuWithValues(
+                                            labelText: 'Bought From',
+                                            headerLqabel: 'Bought from',
+                                            dialogWidth: 600,
+                                            width: 200,
+                                            controller: controller
+                                                .carBoughtFromFilter
+                                                .value,
+                                            displayKeys: const ['name'],
+                                            displaySelectedKeys: const ['name'],
+                                            onOpen: () {
+                                              return controller
+                                                  .getBuyersAndSellers();
                                             },
                                             onDelete: () {
                                               controller
@@ -230,63 +167,31 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .value =
                                                   '';
                                             },
-                                            onOpen: () {
-                                              return controller
-                                                  .getBuyersAndSellers();
-                                            },
-                                          ),
-                                          // CustomDropdown(
-                                          //   width: 200,
-                                          //   hintText: 'Sold To',
-
-                                          //   textcontroller: controller
-                                          //       .carSoldToFilter
-                                          //       .value
-                                          //       .text,
-                                          //   showedSelectedName: 'name',
-                                          //   onChanged: (key, value) {
-                                          //     controller
-                                          //             .carSoldToFilter
-                                          //             .value
-                                          //             .text =
-                                          //         value['name'];
-                                          //     controller
-                                          //             .carSoldToFilterId
-                                          //             .value =
-                                          //         key;
-                                          //   },
-                                          //   onDelete: () {
-                                          //     controller.carSoldToFilter.value
-                                          //         .clear();
-                                          //     controller
-                                          //             .carSoldToFilterId
-                                          //             .value =
-                                          //         '';
-                                          //   },
-                                          //   onOpen: () {
-                                          //     return controller
-                                          //         .getBuyersAndSellers();
-                                          //   },
-                                          // ),
-                                          CustomDropdown(
-                                            width: 200,
-                                            hintText: 'Bought By',
-
-                                            textcontroller: controller
-                                                .carBoughtByFilter
-                                                .value
-                                                .text,
-                                            showedSelectedName: 'name',
-                                            onChanged: (key, value) {
+                                            onSelected: (value) {
                                               controller
-                                                      .carBoughtByFilter
+                                                      .carBoughtFromFilter
                                                       .value
                                                       .text =
                                                   value['name'];
                                               controller
-                                                      .carBoughtByFilterId
+                                                      .carBoughtFromFilterId
                                                       .value =
-                                                  key;
+                                                  value['_id'];
+                                            },
+                                          ),
+                                          MenuWithValues(
+                                            labelText: 'Bought By',
+                                            headerLqabel: 'Bought By',
+                                            dialogWidth: 600,
+                                            width: 200,
+                                            controller: controller
+                                                .carBoughtByFilter
+                                                .value,
+                                            displayKeys: const ['name'],
+                                            displaySelectedKeys: const ['name'],
+                                            onOpen: () {
+                                              return controller
+                                                  .getBuyersAndSellersBy();
                                             },
                                             onDelete: () {
                                               controller.carBoughtByFilter.value
@@ -296,30 +201,32 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .value =
                                                   '';
                                             },
-                                            onOpen: () {
-                                              return controller
-                                                  .getBuyersAndSellersBy();
-                                            },
-                                          ),
-                                          CustomDropdown(
-                                            width: 200,
-                                            hintText: 'Sold By',
-
-                                            textcontroller: controller
-                                                .carSoldByFilter
-                                                .value
-                                                .text,
-                                            showedSelectedName: 'name',
-                                            onChanged: (key, value) {
+                                            onSelected: (value) {
                                               controller
-                                                      .carSoldByFilter
+                                                      .carBoughtByFilter
                                                       .value
                                                       .text =
                                                   value['name'];
                                               controller
-                                                      .carSoldByFilterId
+                                                      .carBoughtByFilterId
                                                       .value =
-                                                  key;
+                                                  value['_id'];
+                                            },
+                                          ),
+
+                                          MenuWithValues(
+                                            labelText: 'Sold By',
+                                            headerLqabel: 'Sold By',
+                                            dialogWidth: 600,
+                                            width: 200,
+                                            controller: controller
+                                                .carSoldByFilter
+                                                .value,
+                                            displayKeys: const ['name'],
+                                            displaySelectedKeys: const ['name'],
+                                            onOpen: () {
+                                              return controller
+                                                  .getBuyersAndSellersBy();
                                             },
                                             onDelete: () {
                                               controller.carSoldByFilter.value
@@ -329,9 +236,16 @@ class CarTradingDashboard extends StatelessWidget {
                                                       .value =
                                                   '';
                                             },
-                                            onOpen: () {
-                                              return controller
-                                                  .getBuyersAndSellersBy();
+                                            onSelected: (value) {
+                                              controller
+                                                      .carSoldByFilter
+                                                      .value
+                                                      .text =
+                                                  value['name'];
+                                              controller
+                                                      .carSoldByFilterId
+                                                      .value =
+                                                  value['_id'];
                                             },
                                           ),
                                         ],
@@ -453,7 +367,9 @@ class CarTradingDashboard extends StatelessWidget {
                                         children: [
                                           CustomSlidingSegmentedControl<int>(
                                             height: 30,
-                                            initialValue: 1,
+                                            initialValue: controller
+                                                .initValueForDatePicker
+                                                .value,
                                             children: const {
                                               1: Text('ALL'),
                                               2: Text('TODAY'),
@@ -500,7 +416,9 @@ class CarTradingDashboard extends StatelessWidget {
                                           CustomSlidingSegmentedControl<int>(
                                             height: 30,
 
-                                            initialValue: 1,
+                                            initialValue: controller
+                                                .initValueForStatusPicker
+                                                .value,
                                             children: const {
                                               1: Text('ALL'),
                                               2: Text('NEW'),
@@ -549,21 +467,7 @@ class CarTradingDashboard extends StatelessWidget {
                                             onPressed:
                                                 controller.searching.isFalse
                                                 ? () {
-                                                    controller.filterSearch();
-                                                    controller
-                                                        .filterGeneralExpensesSearch();
-                                                    controller
-                                                        .getCashOnHandOrBankBalance();
-                                                    controller
-                                                        .getCashOnHandOrBankBalance();
-                                                    controller
-                                                        .getCapitalsOROutstandingSummary(
-                                                          'capitals',
-                                                        );
-                                                    controller
-                                                        .getCapitalsOROutstandingSummary(
-                                                          'outstanding',
-                                                        );
+                                                    controller.allSearches();
                                                   }
                                                 : null,
                                             child: controller.searching.isFalse
