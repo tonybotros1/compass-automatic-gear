@@ -30,8 +30,13 @@ class PayrollRunDetailsModel {
       runNumber: _toStr(json['run_number']),
       description: _toStr(json['description']),
       paymentNumber: _toStr(json['payment_number']),
-      employeesDetails: (json['employees_details'] as List<dynamic>?)
-              ?.map((e) => PayrollRunsEmployeeModel.fromJson(e as Map<String, dynamic>))
+      employeesDetails:
+          (json['employees_details'] as List<dynamic>?)
+              ?.map(
+                (e) => PayrollRunsEmployeeModel.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
               .toList() ??
           [],
       id: _toStr(json['_id']),
@@ -43,6 +48,8 @@ class PayrollRunDetailsModel {
 
 class PayrollRunsEmployeeModel {
   List<PayrollRunsEmployeeElementsModel>? runEmployeeDetails;
+  List<PayrollRunsEmployeeElementsModel>? runEmployeeInformation;
+
   String? employeeName;
   double? totalPayments;
   double? totalDeductions;
@@ -56,12 +63,23 @@ class PayrollRunsEmployeeModel {
     this.totalDeductions,
     this.netSalary,
     this.id,
+    this.runEmployeeInformation,
   });
 
   factory PayrollRunsEmployeeModel.fromJson(Map<String, dynamic> json) {
     return PayrollRunsEmployeeModel(
-      runEmployeeDetails: (json['run_employee_details'] as List<dynamic>?)
-              ?.map((e) => PayrollRunsEmployeeElementsModel.fromJson(e as Map<String, dynamic>))
+      runEmployeeDetails:
+          (json['run_employee_details'] as List<dynamic>?)
+              ?.map(
+                (e) => PayrollRunsEmployeeElementsModel.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
+              .toList() ??
+          [],
+      runEmployeeInformation:
+          (json['run_employee_information'] as List<dynamic>?)
+              ?.map((e) => PayrollRunsEmployeeElementsModel.fromJson(e))
               .toList() ??
           [],
       employeeName: _toStr(json['employee_name']),
@@ -80,6 +98,8 @@ class PayrollRunsEmployeeElementsModel {
   String? id;
   double? payment;
   double? deduction;
+  double? number;
+  double? information;
 
   PayrollRunsEmployeeElementsModel({
     this.value,
@@ -88,6 +108,8 @@ class PayrollRunsEmployeeElementsModel {
     this.id,
     this.payment,
     this.deduction,
+    this.number,
+    this.information,
   });
 
   factory PayrollRunsEmployeeElementsModel.fromJson(Map<String, dynamic> json) {
@@ -98,6 +120,8 @@ class PayrollRunsEmployeeElementsModel {
       id: _toStr(json['_id']),
       payment: _toDouble(json['payment']),
       deduction: _toDouble(json['deduction']),
+      number: _toDouble(json['number']),
+      information: _toDouble(json['information']),
     );
   }
 }

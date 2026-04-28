@@ -218,6 +218,7 @@ IconButton editSection(
   return IconButton(
     onPressed: () async {
       controller.payrollRunsEmployeeElementsList.clear();
+      controller.payrollRunsEmployeeElementsInformationList.clear();
       await controller.getPayrollRunsDetails(runId);
 
       payrollRunsDetails(

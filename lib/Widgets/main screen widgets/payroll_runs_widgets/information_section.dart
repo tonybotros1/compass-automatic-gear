@@ -6,7 +6,7 @@ import '../../../Controllers/Main screen controllers/payroll_runs_controller.dar
 import '../../../Models/payroll runs/payroll_runs_details_model.dart';
 import '../auto_size_box.dart';
 
-Widget employeeTableSection({required BoxConstraints constraints}) {
+Widget informationTableSection({required BoxConstraints constraints}) {
   return Container(
     decoration: BoxDecoration(border: Border.all(color: Colors.blueGrey)),
     child: GetX<PayrollRunsController>(
@@ -28,75 +28,56 @@ Widget tableOfScreens({
     lmRatio: 2,
     columns: [
       DataColumn2(
-        label: AutoSizedText(constraints: constraints, text: 'Employee Name'),
+        label: AutoSizedText(constraints: constraints, text: 'Element Name'),
         size: ColumnSize.L,
       ),
       DataColumn2(
         numeric: true,
         size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Payment'),
+        label: AutoSizedText(constraints: constraints, text: 'Number'),
       ),
       DataColumn2(
         numeric: true,
         size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Deduction'),
-      ),
-      DataColumn2(
-        numeric: true,
-        size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Net'),
+        label: AutoSizedText(constraints: constraints, text: 'Value'),
       ),
     ],
-    rows: controller.payrollRunsEmployeeList.map<DataRow>((invoiceItems) {
+    rows: controller.payrollRunsEmployeeElementsInformationList.map<DataRow>((
+      invoiceItems,
+    ) {
       return dataRowForTheTable(invoiceItems, constraints, controller);
     }).toList(),
   );
 }
 
 DataRow dataRowForTheTable(
-  PayrollRunsEmployeeModel data,
+  PayrollRunsEmployeeElementsModel data,
   BoxConstraints constraints,
   PayrollRunsController controller,
 ) {
-  return DataRow2(
-    onTap: () {
-      controller.payrollRunsEmployeeElementsList.assignAll(
-        data.runEmployeeDetails ?? [],
-      );
-      controller.payrollRunsEmployeeElementsInformationList.assignAll(
-        data.runEmployeeInformation ?? [],
-      );
-    },
+  return DataRow(
     cells: [
       DataCell(
         textForDataRowInTable(
-          text: data.employeeName ?? '',
+          text: data.elementName ?? '',
           formatDouble: false,
           maxWidth: null,
         ),
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.totalPayments.toString(),
-          maxWidth: null,
-          formatDouble: true,
-          color: Colors.green,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.totalDeductions.toString(),
-          maxWidth: null,
-          formatDouble: true,
-          color: Colors.red,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.netSalary.toString(),
+          text: data.number.toString(),
           maxWidth: null,
           formatDouble: true,
           color: Colors.blue,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.information.toString(),
+          maxWidth: null,
+          formatDouble: true,
+          color: Colors.green,
         ),
       ),
     ],

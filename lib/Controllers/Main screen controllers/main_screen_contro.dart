@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/balances.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/company_variables.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/car_brands.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/companies.dart';
@@ -332,6 +333,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: Payroll());
       case '/payrollRuns':
         return const SizedBox(child: PayrollRuns());
+      case '/balances':
+        return const SizedBox(child: Balances());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }

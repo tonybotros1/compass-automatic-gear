@@ -29,6 +29,8 @@ class PayrollRunsController extends GetxController {
 
   RxList<PayrollRunsEmployeeElementsModel> payrollRunsEmployeeElementsList =
       RxList<PayrollRunsEmployeeElementsModel>();
+  RxList<PayrollRunsEmployeeElementsModel> payrollRunsEmployeeElementsInformationList =
+      RxList<PayrollRunsEmployeeElementsModel>();
 
   Future<Map<String, dynamic>> getAllPayrlls() async {
     return await helper.getPayrolls();

@@ -257,7 +257,6 @@ class LegislationController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List docs = decoded['legislations_elements'];
-        print(docs);
         allLegislations.assignAll(
           docs.map((job) => LegislationModel.fromJson(job)),
         );

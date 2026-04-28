@@ -199,6 +199,24 @@ Container assignmentInformation(
                   controller.payrollId.value = value['_id'];
                 },
               ),
+              myTextFormFieldWithBorder(
+                labelText: 'Sick Leave Balance',
+                isDouble: true,
+                width: 310,
+                readOnly: true,
+              ),
+              myTextFormFieldWithBorder(
+                labelText: 'Annual Leave Balance',
+                isDouble: true,
+                width: 310,
+                readOnly: true,
+              ),
+              myTextFormFieldWithBorder(
+                labelText: 'Unpaid Leave Balance',
+                isDouble: true,
+                width: 310,
+                readOnly: true,
+              ),
             ],
           ),
         ),

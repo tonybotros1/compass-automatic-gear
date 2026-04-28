@@ -1,5 +1,4 @@
 import 'package:datahubai/Widgets/my_text_field.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
@@ -141,42 +140,42 @@ Widget addNewLeaveOrEdit({
               width: 200,
               isEnabled: false,
             ),
-            Container(
-              height: 35,
-              width: 200,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.grey),
-                color: Colors.white,
-              ),
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: GetX<EmployeesController>(
-                      builder: (controller) {
-                        return CupertinoCheckbox(
-                          value: controller.employeeLeavePayInAdvance.value,
-                          onChanged: (value) {
-                            controller.employeeLeavePayInAdvance.value = value!;
-                          },
-                          fillColor: WidgetStateProperty.resolveWith<Color?>((
-                            Set<WidgetState> states,
-                          ) {
-                            if (!states.contains(WidgetState.selected)) {
-                              return Colors.grey.shade300;
-                            }
-                            return Colors.red;
-                          }),
-                        );
-                      },
-                    ),
-                  ),
+            // Container(
+            //   height: 35,
+            //   width: 200,
+            //   decoration: BoxDecoration(
+            //     borderRadius: BorderRadius.circular(4),
+            //     border: Border.all(color: Colors.grey),
+            //     color: Colors.white,
+            //   ),
+            //   child: Row(
+            //     children: [
+            //       Padding(
+            //         padding: const EdgeInsets.symmetric(horizontal: 8),
+            //         child: GetX<EmployeesController>(
+            //           builder: (controller) {
+            //             return CupertinoCheckbox(
+            //               value: controller.employeeLeavePayInAdvance.value,
+            //               onChanged: (value) {
+            //                 controller.employeeLeavePayInAdvance.value = value!;
+            //               },
+            //               fillColor: WidgetStateProperty.resolveWith<Color?>((
+            //                 Set<WidgetState> states,
+            //               ) {
+            //                 if (!states.contains(WidgetState.selected)) {
+            //                   return Colors.grey.shade300;
+            //                 }
+            //                 return Colors.red;
+            //               }),
+            //             );
+            //           },
+            //         ),
+            //       ),
 
-                  Text('Pay in Advance ?', style: textFieldFontStyle),
-                ],
-              ),
-            ),
+            //       Text('Pay in Advance ?', style: textFieldFontStyle),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
 
