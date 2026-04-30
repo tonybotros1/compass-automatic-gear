@@ -27,6 +27,12 @@ Widget addNewPayrollElementOrEdit({
           onSelected: (value) {
             controller.employeePayrollElementName.text = value['name'];
             controller.employeePayrollElementNameId.value = value['_id'];
+            if (value['key'].toString().toLowerCase().contains("overtime")) {
+              setThisMonthRange(
+                fromDate: controller.employeePayrollElementStartDate,
+                toDate: controller.employeePayrollElementEndDate,
+              );
+            }
           },
           onOpen: () {
             return controller.getAllPayrollElements();

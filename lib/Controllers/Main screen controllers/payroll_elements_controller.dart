@@ -62,6 +62,9 @@ class PayrollElementsController extends GetxController {
     '5': {'name': 'PY_MATERNITY_LEAVE_FF'},
     '6': {'name': 'PY_COMPASSIONATE_LEAVE_FF'},
     '7': {'name': 'PY_ANNUAL_LEAVE_ENTITLEMENT_FF'},
+    '8': {'name': 'PY_PATERNITY_LEAVE_FF'},
+    '9': {'name': 'PY_OVERTIME_NORMAL_FF'},
+    '10': {'name': 'PY_OVERTIME_HOLIDAYS_FF'},
   });
 
   List<Widget> contactsTabs = const [Tab(text: 'Based Elements')];
@@ -208,6 +211,8 @@ class PayrollElementsController extends GetxController {
           body: jsonEncode(data),
         );
         if (response.statusCode == 200) {
+          final decoded = jsonDecode(response.body);
+          currentPayrollElementId.value = decoded['added_element_id'];
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {

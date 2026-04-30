@@ -5,7 +5,10 @@ class LegislationModel {
   final int? numberOfUnpaidDaysForSickLEave;
   final int? numberOfHalfPaidDaysForSickLEave;
   final int? numberOfHalfPaidDaysForMaternityLEave;
+  final int? numberOfHalfPaidDaysForPaternityLEave;
   final int? numberOfHalfPaidDaysForCompassionateLEave;
+  final double? numberOfWorkingHoursForOvertimeNormal;
+  final double? numberOfWorkingHoursForOvertimeHolidays;
   final List<String>? weekend;
 
   LegislationModel({
@@ -17,6 +20,9 @@ class LegislationModel {
     this.numberOfUnpaidDaysForSickLEave,
     this.numberOfHalfPaidDaysForCompassionateLEave,
     this.numberOfHalfPaidDaysForMaternityLEave,
+    this.numberOfHalfPaidDaysForPaternityLEave,
+    this.numberOfWorkingHoursForOvertimeNormal,
+    this.numberOfWorkingHoursForOvertimeHolidays,
   });
 
   factory LegislationModel.fromJson(Map<String, dynamic> json) {
@@ -42,9 +48,21 @@ class LegislationModel {
           json.containsKey('number_of_paid_days_for_maternity_leave')
           ? json['number_of_paid_days_for_maternity_leave'] ?? 0
           : 0,
+      numberOfHalfPaidDaysForPaternityLEave:
+          json.containsKey('number_of_paid_days_for_paternity_leave')
+          ? json['number_of_paid_days_for_paternity_leave'] ?? 0
+          : 0,
       numberOfHalfPaidDaysForCompassionateLEave:
           json.containsKey('number_of_paid_days_for_compassionate_leave')
           ? json['number_of_paid_days_for_compassionate_leave'] ?? 0
+          : 0,
+      numberOfWorkingHoursForOvertimeNormal:
+          json.containsKey('number_of_working_hours_for_overtime_normal')
+          ? json['number_of_working_hours_for_overtime_normal'] ?? 0
+          : 0,
+        numberOfWorkingHoursForOvertimeHolidays:
+          json.containsKey('number_of_working_hours_for_overtime_holidays')
+          ? json['number_of_working_hours_for_overtime_holidays'] ?? 0
           : 0,
     );
   }

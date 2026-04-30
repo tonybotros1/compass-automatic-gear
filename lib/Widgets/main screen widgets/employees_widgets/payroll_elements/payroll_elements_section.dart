@@ -21,7 +21,7 @@ Widget payrollElementsSection(
           children: [
             Padding(
               padding: const EdgeInsets.all(4),
-              child: newPhoneButton(controller: controller, context: context),
+              child: newElementButton(controller: controller, context: context),
             ),
             Expanded(
               child: tableOfScreens(
@@ -146,7 +146,7 @@ DataRow dataRowForTheTable(
   );
 }
 
-ElevatedButton newPhoneButton({
+ElevatedButton newElementButton({
   required EmployeesController controller,
   required BuildContext context,
 }) {

@@ -17,7 +17,7 @@ Future<dynamic> legislationDialog({
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
         width: constraints.maxWidth * 0.75,
-        height: constraints.maxHeight * 0.75,
+        height: constraints.maxHeight,
         child: Column(
           children: [
             Container(

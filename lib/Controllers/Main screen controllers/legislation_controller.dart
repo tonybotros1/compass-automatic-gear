@@ -25,12 +25,20 @@ class LegislationController extends GetxController {
   TextEditingController numberOfHalfPaidDays = TextEditingController();
   TextEditingController numberOfUnPaidDays = TextEditingController();
 
-  // maternity leave:
+  // maternity / paternity leave:
   TextEditingController meternityNumberOfPaidDays = TextEditingController();
+  TextEditingController paternityNumberOfPaidDays = TextEditingController();
 
   // compassionate leave:
   TextEditingController compassionateLeaveNumberOfPaidDays =
       TextEditingController();
+
+  // overtime:
+  TextEditingController numberOfWorkingHoursForOvertimeNormal =
+      TextEditingController();
+  TextEditingController numberOfWorkingHoursForOvertimeHolidays =
+      TextEditingController();
+
   final List<String> weekDays = const [
     'Monday',
     'Tuesday',
@@ -113,6 +121,18 @@ class LegislationController extends GetxController {
               compassionateLeaveNumberOfPaidDays.text.isNotEmpty
               ? compassionateLeaveNumberOfPaidDays.text
               : "0",
+          "number_of_paid_days_for_paternity_leave":
+              paternityNumberOfPaidDays.text.isNotEmpty
+              ? paternityNumberOfPaidDays.text
+              : "0",
+          "number_of_working_hours_for_overtime_normal":
+              numberOfWorkingHoursForOvertimeNormal.text.isNotEmpty
+              ? numberOfWorkingHoursForOvertimeNormal.text
+              : "0",
+          "number_of_working_hours_for_overtime_holidays":
+              numberOfWorkingHoursForOvertimeHolidays.text.isNotEmpty
+              ? numberOfWorkingHoursForOvertimeHolidays.text
+              : "0",
         }),
       );
       if (response.statusCode == 200) {
@@ -171,6 +191,18 @@ class LegislationController extends GetxController {
           "number_of_paid_days_for_compassionate_leave":
               compassionateLeaveNumberOfPaidDays.text.isNotEmpty
               ? compassionateLeaveNumberOfPaidDays.text
+              : "0",
+          "number_of_paid_days_for_paternity_leave":
+              paternityNumberOfPaidDays.text.isNotEmpty
+              ? paternityNumberOfPaidDays.text
+              : "0",
+          "number_of_working_hours_for_overtime_normal":
+              numberOfWorkingHoursForOvertimeNormal.text.isNotEmpty
+              ? numberOfWorkingHoursForOvertimeNormal.text
+              : "0",
+          "number_of_working_hours_for_overtime_holidays":
+              numberOfWorkingHoursForOvertimeHolidays.text.isNotEmpty
+              ? numberOfWorkingHoursForOvertimeHolidays.text
               : "0",
         }),
       );
@@ -279,5 +311,40 @@ class LegislationController extends GetxController {
 
   void clearAllFilters() {
     nameFilter.clear();
+  }
+
+  void loadValues(LegislationModel data) {
+    name.text = data.name ?? '';
+    numberOfPaidDays.text = data.numberOfPaidDaysForSickLEave.toString();
+    numberOfHalfPaidDays.text = data.numberOfHalfPaidDaysForSickLEave
+        .toString();
+    numberOfUnPaidDays.text = data.numberOfUnpaidDaysForSickLEave.toString();
+    meternityNumberOfPaidDays.text = data.numberOfHalfPaidDaysForMaternityLEave
+        .toString();
+    paternityNumberOfPaidDays.text = data.numberOfHalfPaidDaysForPaternityLEave
+        .toString();
+    compassionateLeaveNumberOfPaidDays.text = data
+        .numberOfHalfPaidDaysForCompassionateLEave
+        .toString();
+    numberOfWorkingHoursForOvertimeNormal.text = data
+        .numberOfWorkingHoursForOvertimeNormal
+        .toString();
+    numberOfWorkingHoursForOvertimeHolidays.text = data
+        .numberOfWorkingHoursForOvertimeHolidays
+        .toString();
+    selectedDays.assignAll(data.weekend ?? []);
+  }
+
+  void clearValues() {
+    name.clear();
+    selectedDays.clear();
+    numberOfPaidDays.clear();
+    numberOfHalfPaidDays.clear();
+    numberOfUnPaidDays.clear();
+    meternityNumberOfPaidDays.clear();
+    compassionateLeaveNumberOfPaidDays.clear();
+    paternityNumberOfPaidDays.clear();
+    numberOfWorkingHoursForOvertimeHolidays.clear();
+    numberOfWorkingHoursForOvertimeNormal.clear();
   }
 }

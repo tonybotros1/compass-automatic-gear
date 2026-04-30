@@ -206,13 +206,6 @@ ElevatedButton newButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      controller.name.clear();
-      controller.selectedDays.clear();
-      controller.numberOfPaidDays.clear();
-      controller.numberOfHalfPaidDays.clear();
-      controller.numberOfUnPaidDays.clear();
-      controller.meternityNumberOfPaidDays.clear();
-      controller.compassionateLeaveNumberOfPaidDays.clear();
       legislationDialog(
         constraints: constraints,
         controller: controller,
@@ -255,21 +248,7 @@ IconButton editSection(
 ) {
   return IconButton(
     onPressed: () async {
-      controller.name.text = data.name ?? '';
-      controller.numberOfPaidDays.text = data.numberOfPaidDaysForSickLEave
-          .toString();
-      controller.numberOfHalfPaidDays.text = data
-          .numberOfHalfPaidDaysForSickLEave
-          .toString();
-      controller.numberOfUnPaidDays.text = data.numberOfUnpaidDaysForSickLEave
-          .toString();
-      controller.meternityNumberOfPaidDays.text = data
-          .numberOfHalfPaidDaysForMaternityLEave
-          .toString();
-      controller.compassionateLeaveNumberOfPaidDays.text = data
-          .numberOfHalfPaidDaysForCompassionateLEave
-          .toString();
-      controller.selectedDays.assignAll(data.weekend ?? []);
+      controller.loadValues(data);
       legislationDialog(
         constraints: constraints,
         controller: controller,
