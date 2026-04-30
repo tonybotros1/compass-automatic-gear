@@ -26,11 +26,23 @@ class PayrollRunsController extends GetxController {
   RxString elementId = RxString('');
   RxList<PayrollRunsEmployeeModel> payrollRunsEmployeeList =
       RxList<PayrollRunsEmployeeModel>();
+  RxList<PayrollRunsEmployeeModel> filteredPayrollRunsEmployeeList =
+      RxList<PayrollRunsEmployeeModel>();
 
   RxList<PayrollRunsEmployeeElementsModel> payrollRunsEmployeeElementsList =
       RxList<PayrollRunsEmployeeElementsModel>();
-  RxList<PayrollRunsEmployeeElementsModel> payrollRunsEmployeeElementsInformationList =
+  RxList<PayrollRunsEmployeeElementsModel>
+  filteredPayrollRunsEmployeeElementsList =
       RxList<PayrollRunsEmployeeElementsModel>();
+  RxList<PayrollRunsEmployeeElementsModel>
+  payrollRunsEmployeeElementsInformationList =
+      RxList<PayrollRunsEmployeeElementsModel>();
+
+  RxString emploeeQuery = RxString('');
+  Rx<TextEditingController> employeeSearch = TextEditingController().obs;
+
+  RxString elementQuery = RxString('');
+  Rx<TextEditingController> elementSearch = TextEditingController().obs;
 
   Future<Map<String, dynamic>> getAllPayrlls() async {
     return await helper.getPayrolls();
@@ -265,6 +277,36 @@ class PayrollRunsController extends GetxController {
         content: "Coud not rollback please try again later",
       );
       rollingBack.value = false;
+    }
+  }
+
+  void filterPayrollEmployees() {
+    emploeeQuery.value = employeeSearch.value.text.toLowerCase();
+    if (emploeeQuery.value.isEmpty) {
+      filteredPayrollRunsEmployeeList.clear();
+    } else {
+      filteredPayrollRunsEmployeeList.assignAll(
+        payrollRunsEmployeeList.where((employee) {
+          return employee.employeeName.toString().toLowerCase().contains(
+            emploeeQuery,
+          );
+        }).toList(),
+      );
+    }
+  }
+
+  void filterPayrollEmployeesElements() {
+    elementQuery.value = elementSearch.value.text.toLowerCase();
+    if (elementQuery.value.isEmpty) {
+      filteredPayrollRunsEmployeeElementsList.clear();
+    } else {
+      filteredPayrollRunsEmployeeElementsList.assignAll(
+        payrollRunsEmployeeElementsList.where((employee) {
+          return employee.elementName.toString().toLowerCase().contains(
+            elementQuery,
+          );
+        }).toList(),
+      );
     }
   }
 }

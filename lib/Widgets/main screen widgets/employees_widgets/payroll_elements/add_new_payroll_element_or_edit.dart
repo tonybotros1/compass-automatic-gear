@@ -27,7 +27,7 @@ Widget addNewPayrollElementOrEdit({
           onSelected: (value) {
             controller.employeePayrollElementName.text = value['name'];
             controller.employeePayrollElementNameId.value = value['_id'];
-            if (value['key'].toString().toLowerCase().contains("overtime")) {
+            if (value['is_recurring'] == false) {
               setThisMonthRange(
                 fromDate: controller.employeePayrollElementStartDate,
                 toDate: controller.employeePayrollElementEndDate,

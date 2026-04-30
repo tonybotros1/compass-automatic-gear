@@ -55,6 +55,7 @@ Future<dynamic> payrollRunsDetails({
               child: payrollRunsDetailsScreen(
                 controller: controller,
                 constraints: constraints,
+                context: context,
               ),
             ),
           ),

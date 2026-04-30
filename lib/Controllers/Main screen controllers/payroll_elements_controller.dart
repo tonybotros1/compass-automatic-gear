@@ -65,6 +65,7 @@ class PayrollElementsController extends GetxController {
     '8': {'name': 'PY_PATERNITY_LEAVE_FF'},
     '9': {'name': 'PY_OVERTIME_NORMAL_FF'},
     '10': {'name': 'PY_OVERTIME_HOLIDAYS_FF'},
+    '11': {'name': 'PY_NONRECURRING_FF'}
   });
 
   List<Widget> contactsTabs = const [Tab(text: 'Based Elements')];

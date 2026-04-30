@@ -4,16 +4,40 @@ import 'package:get/get.dart';
 import '../../../../consts.dart';
 import '../../../Controllers/Main screen controllers/payroll_runs_controller.dart';
 import '../../../Models/payroll runs/payroll_runs_details_model.dart';
+import '../../Auth screens widgets/register widgets/search_bar.dart';
 import '../auto_size_box.dart';
 
-Widget elementsTableSection({required BoxConstraints constraints}) {
+Widget elementsTableSection({
+  required BoxConstraints constraints,
+  required BuildContext context,
+}) {
   return Container(
     decoration: BoxDecoration(border: Border.all(color: Colors.blueGrey)),
     child: GetX<PayrollRunsController>(
       builder: (controller) {
-        return tableOfScreens(
-          constraints: constraints,
-          controller: controller,
+        return Column(
+          children: [
+            searchBar(
+              onChanged: (_) {
+                controller.filterPayrollEmployeesElements();
+              },
+              onPressedForClearSearch: () {
+                controller.elementSearch.value.clear();
+                controller.filterPayrollEmployeesElements();
+              },
+              search: controller.elementSearch,
+              constraints: constraints,
+              width: 300,
+              context: context,
+              title: 'Search for element',
+            ),
+            Expanded(
+              child: tableOfScreens(
+                constraints: constraints,
+                controller: controller,
+              ),
+            ),
+          ],
         );
       },
     ),
@@ -45,11 +69,17 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Deduction'),
       ),
     ],
-    rows: controller.payrollRunsEmployeeElementsList.map<DataRow>((
-      invoiceItems,
-    ) {
-      return dataRowForTheTable(invoiceItems, constraints, controller);
-    }).toList(),
+    rows:
+        controller.filteredPayrollRunsEmployeeElementsList.isEmpty &&
+            controller.employeeSearch.value.text.isEmpty
+        ? controller.payrollRunsEmployeeElementsList.map<DataRow>((doc) {
+            return dataRowForTheTable(doc, constraints, controller);
+          }).toList()
+        : controller.filteredPayrollRunsEmployeeElementsList.map<DataRow>((
+            doc,
+          ) {
+            return dataRowForTheTable(doc, constraints, controller);
+          }).toList(),
   );
 }
 
@@ -64,7 +94,7 @@ DataRow dataRowForTheTable(
         textForDataRowInTable(
           text: data.elementName ?? '',
           formatDouble: false,
-          maxWidth: null
+          maxWidth: null,
         ),
       ),
       DataCell(
