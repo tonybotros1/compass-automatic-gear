@@ -35,6 +35,7 @@ class MenuWithValues extends StatefulWidget {
     this.previousFocusNode,
     this.headerKeys,
     this.validate,
+    this.hideClearButton,
   });
   final TextEditingController controller;
   final double? width;
@@ -64,6 +65,7 @@ class MenuWithValues extends StatefulWidget {
   final void Function()? onDelete;
   final String? headerLqabel;
   final bool? validate;
+  final bool? hideClearButton;
 
   @override
   State<MenuWithValues> createState() => _MenuWithValuesState();
@@ -77,7 +79,6 @@ class _MenuWithValuesState extends State<MenuWithValues> {
     super.initState();
     // Use the passed focusNode if available, otherwise create one
     _effectiveFocusNode = widget.focusNode ?? FocusNode();
-    _effectiveFocusNode.addListener(_handleFocusChange);
   }
 
   @override
@@ -86,77 +87,6 @@ class _MenuWithValuesState extends State<MenuWithValues> {
     if (widget.focusNode == null) _effectiveFocusNode.dispose();
     super.dispose();
   }
-
-  void _handleFocusChange() {
-    // If focus is lost, run validation
-    // if (!_effectiveFocusNode.hasFocus) {
-    //   _validateValue();
-    // }
-  }
-
-  // 1. Update your cache variable in the State class to hold the Item objects
-  // Map<String, dynamic>? _validItemsMap;
-
-  // Future<void> _validateValue() async {
-  //   final text = widget.controller.text.trim();
-  //   if (text.isEmpty) return;
-
-  //   // 2. Fetch and Cache the data as a Map if not already done
-  //   if (_validItemsMap == null) {
-  //     final rawData = widget.onOpen == null
-  //         ? widget.data
-  //         : await widget.onOpen!();
-  //     if (rawData == null) return;
-
-  //     List<dynamic> items = rawData is Map
-  //         ? rawData.values.toList()
-  //         : (rawData as List);
-
-  //     _validItemsMap = {}; // Initialize empty map
-
-  //     for (var item in items) {
-  //       final Map<String, dynamic> itemMap = item is Map
-  //           ? Map<String, dynamic>.from(item)
-  //           : {'value': item};
-
-  //       // Create the same display string used in the UI
-  //       final displayValue = widget.displaySelectedKeys
-  //           .map((k) => itemMap[k]?.toString() ?? '')
-  //           .where((v) => v.trim().isNotEmpty)
-  //           .join(' - ');
-
-  //       // Map the String -> Original Item Object
-  //       _validItemsMap![displayValue] = item;
-  //     }
-  //   }
-
-  //   // 3. Check for a match
-  //   if (_validItemsMap!.containsKey(text)) {
-  //     // MATCH FOUND: Call onSelected with the actual data object
-  //     final selectedItem = _validItemsMap![text];
-  //     widget.onSelected?.call(selectedItem);
-  //     widget.onFieldSubmitted?.call(text);
-  //   } else {
-  //     // NO MATCH: Clear and delete
-
-  //     // showResponsiveDialog(
-  //     //   context,
-  //     //   widget.dialogWidth,
-  //     //   widget.controller,
-  //     //   widget.dialogHeight,
-  //     //   data: widget.data,
-  //     //   initialSearch: widget.controller.text,
-  //     //   flexList: widget.flexList,
-  //     //   onOpen: widget.onOpen,
-  //     //   displayKeys: widget.displayKeys,
-  //     //   displaySelectedKeys: widget.displaySelectedKeys,
-  //     //   onSelected: widget.onSelected,
-  //     //   headerLqabel: widget.headerLqabel,
-  //     // );
-  //     // widget.controller.clear();
-  //     // widget.onDelete?.call();
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -303,7 +233,7 @@ class _MenuWithValuesState extends State<MenuWithValues> {
                                 //   // );
                                 // },
                               ),
-                              if (hasText)
+                              if (hasText && widget.hideClearButton != true)
                                 MiniIcon(
                                   icon: Icons.close,
                                   color: Colors.red,

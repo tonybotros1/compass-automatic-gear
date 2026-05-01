@@ -72,6 +72,8 @@ class EmployeesController extends GetxController {
   RxList<PhoneModel> phonesList = RxList<PhoneModel>([]);
   RxList<EmployeePayrollElementsModel> payrollElementsList =
       RxList<EmployeePayrollElementsModel>([]);
+  RxList<EmployeePayrollElementsModel> filteredPayrollElementsList =
+      RxList<EmployeePayrollElementsModel>([]);
   RxList<EmailModel> emailsList = RxList<EmailModel>([]);
   RxList<EmployeeAccountBanksModel> bankAccountsList =
       RxList<EmployeeAccountBanksModel>([]);
@@ -166,6 +168,8 @@ class EmployeesController extends GetxController {
   TextEditingController employeeLeaveNumberOfDays = TextEditingController();
   TextEditingController employeeLeaveNote = TextEditingController();
   RxBool employeeLeavePayInAdvance = RxBool(false);
+  var buttonLoadingStates = <String, bool>{}.obs;
+  TextEditingController periodFilter = TextEditingController();
 
   List<Widget> contactsTabs = const [
     Tab(text: 'Address'),
@@ -175,6 +179,11 @@ class EmployeesController extends GetxController {
     Tab(text: 'Bank Accounts'),
   ];
 
+  List<Widget> assignmentsTabs = const [
+    Tab(text: 'Assignment Information'),
+    Tab(text: 'Payroll Elements'),
+    Tab(text: 'Non-recurring Elements'),
+  ];
   @override
   void onInit() async {
     connectWebSocket();
@@ -219,6 +228,10 @@ class EmployeesController extends GetxController {
   Future<Map<String, dynamic>> getCountries() async {
     return await helper.getCountries();
   }
+
+  // Future<Map<String, dynamic>> getPayrollPeriods() async {
+  //   return await helper.getPayrollPeriods(payrollId.value);
+  // }
 
   Future<Map<String, dynamic>> getEmployeeWorkingDays(
     String employeeId,
@@ -296,6 +309,38 @@ class EmployeesController extends GetxController {
 
       default:
     }
+  }
+
+  // function to manage loading button
+  void setButtonLoading(String id, bool isLoading) {
+    buttonLoadingStates[id] = isLoading;
+    buttonLoadingStates.refresh(); // Notify listeners
+  }
+
+  List<Map<String, String>> generatePeriodsFromString(String? dateString) {
+    DateTime startDate;
+    if (dateString == null || dateString.trim().isEmpty) {
+      startDate = DateTime.now();
+    } else {
+      try {
+        startDate = DateTime.parse(dateString);
+      } catch (e) {
+        startDate = DateTime.now();
+      }
+    }
+    final now = DateTime.now();
+    List<Map<String, String>> periods = [];
+    DateTime current = DateTime(startDate.year, startDate.month);
+    DateTime end = DateTime(now.year, now.month);
+    while (!current.isAfter(end)) {
+      periods.add({
+        "period_name":
+            "${current.year}-${current.month.toString().padLeft(2, '0')}",
+      });
+      current = DateTime(current.year, current.month + 1);
+    }
+    periodFilter.text = periods.last['period_name'] ?? '';
+    return periods.reversed.toList();
   }
 
   // this function is to get all list values by code for drop down menu
@@ -2029,6 +2074,47 @@ class EmployeesController extends GetxController {
         context: Get.context!,
         content: 'Something went wrong please try again',
       );
+    }
+  }
+
+  Future<void> filterEmployeePayrollElementsByPeriod(String period) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/filter_employee_payrolls_on_period_date/${currentEmployeeId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"period": period}),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List payrolls = decoded['payrolls_elements'] ?? [];
+        payrollElementsList.assignAll(
+          payrolls.map((pay) => EmployeePayrollElementsModel.fromJson(pay)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewEmployeePayroll();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      //
     }
   }
 }

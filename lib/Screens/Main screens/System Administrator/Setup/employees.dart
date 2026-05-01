@@ -396,58 +396,71 @@ IconButton deleteSection(
   );
 }
 
-IconButton editSection(
+Widget editSection(
   BuildContext context,
   EmployeesController controller,
   EmployeesModel data,
   BoxConstraints constraints,
   String employeeId,
 ) {
-  return IconButton(
-    onPressed: () async {
-      await controller.loadValues(employeeId);
-      employeeDialog(
-        onPressedForLeaves: ()async {
-          controller.leavesSearch.value.clear();
-          controller.filteredLeavesList.clear();
-         await controller.getAllEmployeeLeave();
-          leavesDialog(constraints: constraints, controller: controller);
-        },
-        onPressedForAttachment: () {
-          Get.dialog(
-            Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: AttachmentScreen(
-                code: 'EMPLOYEES_ATTACHMENT',
-                documentId: employeeId,
-              ),
-            ),
-          );
-        },
-        constraints: constraints,
-        controller: controller,
-        onPressedForContactsAndRelatives: () async {
-          controller.contactsAndRelativesSearch.value.clear();
-          controller.filteredContactsAndRelativesList.clear();
-          await controller.getContactAndRelative();
-
-          contactsAndRelativesDialog(
-            constraints: constraints,
-            controller: controller,
-            canEdit: true,
-          );
-        },
-
-        onPressed: controller.addingNewValue.value
+  return GetX<EmployeesController>(
+    builder: (controller) {
+      final isLoading = controller.buttonLoadingStates[data.id] ?? false;
+      return IconButton(
+        onPressed: isLoading
             ? null
-            : () {
-                controller.addNewEmployee();
+            : () async {
+                controller.setButtonLoading(data.id ?? '', true);
+                await controller.loadValues(employeeId);
+                controller.setButtonLoading(data.id ?? '', false);
+
+                employeeDialog(
+                  onPressedForLeaves: () async {
+                    controller.leavesSearch.value.clear();
+                    controller.filteredLeavesList.clear();
+                    await controller.getAllEmployeeLeave();
+                    leavesDialog(
+                      constraints: constraints,
+                      controller: controller,
+                    );
+                  },
+                  onPressedForAttachment: () {
+                    Get.dialog(
+                      Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: AttachmentScreen(
+                          code: 'EMPLOYEES_ATTACHMENT',
+                          documentId: employeeId,
+                        ),
+                      ),
+                    );
+                  },
+                  constraints: constraints,
+                  controller: controller,
+                  onPressedForContactsAndRelatives: () async {
+                    controller.contactsAndRelativesSearch.value.clear();
+                    controller.filteredContactsAndRelativesList.clear();
+                    await controller.getContactAndRelative();
+
+                    contactsAndRelativesDialog(
+                      constraints: constraints,
+                      controller: controller,
+                      canEdit: true,
+                    );
+                  },
+
+                  onPressed: controller.addingNewValue.value
+                      ? null
+                      : () {
+                          controller.addNewEmployee();
+                        },
+                );
               },
+        icon: isLoading == false ? editIcon : loadingProcess,
       );
     },
-    icon: editIcon,
   );
 }
 

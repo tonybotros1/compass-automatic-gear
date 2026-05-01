@@ -231,7 +231,6 @@ class BalancesController extends GetxController {
     if (balanceTypeFilter.text.isNotEmpty) {
       body["type"] = balanceTypeFilter.text;
     }
-    print(body);
 
     if (body.isNotEmpty) {
       await searchEngine(body);

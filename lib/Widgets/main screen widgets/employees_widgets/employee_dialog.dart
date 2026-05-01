@@ -2,6 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_cont
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
+import '../../menu_dialog.dart';
 import '../../text_button.dart';
 import 'add_new_employee_or_edit.dart';
 
@@ -37,7 +38,22 @@ Future<dynamic> employeeDialog({
                     controller.getScreenName(),
                     style: fontStyleForScreenNameUsedInButtons,
                   ),
-
+                  MenuWithValues(
+                    hideClearButton: true,
+                    dialogWidth: 600,
+                    width: 150,
+                    controller: controller.periodFilter,
+                    displayKeys: const ['period_name'],
+                    displaySelectedKeys: const ['period_name'],
+                    data: controller.generatePeriodsFromString(
+                      convertDateToIson(controller.hireDate.text).toString(),
+                    ),
+                    onSelected: (value) async {
+                      await controller.filterEmployeePayrollElementsByPeriod(
+                        value['period_name'],
+                      );
+                    },
+                  ),
                   const Spacer(),
                   GetX<EmployeesController>(
                     builder: (controller) => ClickableHoverText(
