@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../Controllers/Main screen controllers/legislation_controller.dart';
 import '../../../consts.dart';
 import 'compassionate_leave_section.dart';
+import 'gratuitt_accrual_section.dart';
 import 'legilation_information.dart';
 import 'maternity_leave_section.dart';
 import 'overtime_holidays_section.dart';
 import 'overtime_normal_section.dart';
 import 'paternity_leave_section.dart';
 import 'sick_leave_section.dart';
+import 'social_security_section.dart';
 
 Widget addNewLegistlationOrEdit({
   required LegislationController controller,
@@ -85,6 +87,33 @@ Widget addNewLegistlationOrEdit({
                     lable: Text('Overtime Holidays', style: fontStyle1),
                   ),
                   overtimeHolidaysSection(controller),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 10,
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  labelContainer(
+                    lable: Text('Social Security', style: fontStyle1),
+                  ),
+                  socialSecuritySection(controller),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  labelContainer(
+                    lable: Text('Gratuity', style: fontStyle1),
+                  ),
+                  gratuityAccrualSection(controller),
                 ],
               ),
             ),

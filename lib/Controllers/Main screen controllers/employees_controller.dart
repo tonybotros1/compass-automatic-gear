@@ -1259,12 +1259,53 @@ class EmployeesController extends GetxController {
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
+      }
     } catch (e) {
       alertMessage(
         context: Get.context!,
         content: 'Something went wrong please try again',
       );
+    }
+  }
+
+  Future<void> filterEmployeeNationalityElementsByPeriod(String period) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/filter_employee_nationalities_on_period_date/${currentEmployeeId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"period": period}),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List nationalities = decoded['nationality_elements'] ?? [];
+        nationalityList.assignAll(
+          nationalities.map((nat) => NationalityModel.fromJson(nat)),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await filterEmployeeNationalityElementsByPeriod(period);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      //
     }
   }
 
@@ -1394,7 +1435,7 @@ class EmployeesController extends GetxController {
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
+      }
     } catch (e) {
       alertMessage(
         context: Get.context!,
@@ -1529,7 +1570,7 @@ class EmployeesController extends GetxController {
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
+      }
     } catch (e) {
       alertMessage(
         context: Get.context!,
@@ -2106,7 +2147,7 @@ class EmployeesController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewEmployeePayroll();
+          await filterEmployeePayrollElementsByPeriod(period);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }

@@ -144,6 +144,7 @@ IconButton removeEmailButton({
         context: context,
         content: "Are you sure you want to delete this document?",
         onPressed: () {
+          Get.back();
           controller.deleteEmail(id);
         },
       );

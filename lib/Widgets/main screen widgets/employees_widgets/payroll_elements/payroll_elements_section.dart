@@ -116,7 +116,7 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.value?.toString() ?? '0',
+          text: data.value == 0 ? '' : data.value.toString(),
           maxWidth: null,
           formatDouble: false,
         ),
@@ -187,6 +187,7 @@ IconButton removePayrollButton({
         context: context,
         content: "Are you sure you want to delete this document?",
         onPressed: () {
+          Get.back();
           controller.deleteEmployeePayroll(id);
         },
       );

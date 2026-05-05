@@ -131,6 +131,7 @@ IconButton removePhoneButton({
 }) {
   return IconButton(
     onPressed: () {
+      Get.back();
       controller.deletePhone(id);
     },
     icon: deleteIcon,

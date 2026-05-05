@@ -39,6 +39,15 @@ class LegislationController extends GetxController {
   TextEditingController numberOfWorkingHoursForOvertimeHolidays =
       TextEditingController();
 
+  // social security
+  TextEditingController socialSecurityEmployee = TextEditingController();
+  TextEditingController socialSecurityEmployer = TextEditingController();
+  TextEditingController socialSecurityCeiling = TextEditingController();
+
+  // gratiuty accrual
+  TextEditingController gratuityFirst5Years = TextEditingController();
+  TextEditingController gratuityAfter5Years = TextEditingController();
+
   final List<String> weekDays = const [
     'Monday',
     'Tuesday',
@@ -133,6 +142,23 @@ class LegislationController extends GetxController {
               numberOfWorkingHoursForOvertimeHolidays.text.isNotEmpty
               ? numberOfWorkingHoursForOvertimeHolidays.text
               : "0",
+          "social_security_employee_percentage":
+              socialSecurityEmployee.text.isNotEmpty
+              ? socialSecurityEmployee.text
+              : "0",
+          "social_security_employer_percentage":
+              socialSecurityEmployer.text.isNotEmpty
+              ? socialSecurityEmployer.text
+              : "0",
+          "social_security_ceiling": socialSecurityCeiling.text.isNotEmpty
+              ? socialSecurityCeiling.text
+              : "0",
+          "gratuity_first_5_years": gratuityFirst5Years.text.isNotEmpty
+              ? gratuityFirst5Years.text
+              : "0",
+          "gratuity_after_5_years": gratuityAfter5Years.text.isNotEmpty
+              ? gratuityAfter5Years.text
+              : "0",
         }),
       );
       if (response.statusCode == 200) {
@@ -203,6 +229,23 @@ class LegislationController extends GetxController {
           "number_of_working_hours_for_overtime_holidays":
               numberOfWorkingHoursForOvertimeHolidays.text.isNotEmpty
               ? numberOfWorkingHoursForOvertimeHolidays.text
+              : "0",
+          "social_security_employee_percentage":
+              socialSecurityEmployee.text.isNotEmpty
+              ? socialSecurityEmployee.text
+              : "0",
+          "social_security_employer_percentage":
+              socialSecurityEmployer.text.isNotEmpty
+              ? socialSecurityEmployer.text
+              : "0",
+          "social_security_ceiling": socialSecurityCeiling.text.isNotEmpty
+              ? socialSecurityCeiling.text
+              : "0",
+          "gratuity_first_5_years": gratuityFirst5Years.text.isNotEmpty
+              ? gratuityFirst5Years.text
+              : "0",
+          "gratuity_after_5_years": gratuityAfter5Years.text.isNotEmpty
+              ? gratuityAfter5Years.text
               : "0",
         }),
       );
@@ -332,6 +375,11 @@ class LegislationController extends GetxController {
     numberOfWorkingHoursForOvertimeHolidays.text = data
         .numberOfWorkingHoursForOvertimeHolidays
         .toString();
+    socialSecurityEmployee.text = data.socialSecurityEmployee.toString();
+    socialSecurityEmployer.text = data.socialSecurityEmployer.toString();
+    socialSecurityCeiling.text = data.socialSecurityCeiling.toString();
+    gratuityFirst5Years.text = data.gratuityFirst5Years.toString();
+    gratuityAfter5Years.text = data.gratuityAfter5Years.toString();
     selectedDays.assignAll(data.weekend ?? []);
   }
 
@@ -346,5 +394,10 @@ class LegislationController extends GetxController {
     paternityNumberOfPaidDays.clear();
     numberOfWorkingHoursForOvertimeHolidays.clear();
     numberOfWorkingHoursForOvertimeNormal.clear();
+    socialSecurityEmployee.clear();
+    socialSecurityEmployer.clear();
+    socialSecurityCeiling.clear();
+    gratuityAfter5Years.clear();
+    gratuityFirst5Years.clear();
   }
 }
