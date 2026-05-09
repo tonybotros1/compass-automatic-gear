@@ -51,7 +51,8 @@ Future<dynamic> leavesInsertingDialog({
                   GetX<EmployeesController>(
                     builder: (controller) => ClickableHoverText(
                       onTap: onPressed,
-                      text: controller.addingNewLeaveValue.value == false
+                      text:
+                          controller.addingNewEmployeeLeaveValue.value == false
                           ? 'Save'
                           : "•••",
                     ),

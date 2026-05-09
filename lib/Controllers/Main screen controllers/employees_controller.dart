@@ -123,6 +123,7 @@ class EmployeesController extends GetxController {
   RxBool addingNewEmployeeEmailValue = RxBool(false);
   RxBool addingNewEmployeeBankAccount = RxBool(false);
   RxBool addingNewEmployeeNationalityValue = RxBool(false);
+  RxBool addingNewEmployeePayrollValue = RxBool(false);
   String backendUrl = backendTestURI;
   RxList<EmployeesModel> allEmployees = RxList<EmployeesModel>([]);
   WebSocketService ws = Get.find<WebSocketService>();
@@ -302,7 +303,7 @@ class EmployeesController extends GetxController {
         filterSearch();
         break;
       case 4:
-        initTypePickersValue.value = 3;
+        initTypePickersValue.value = 4;
         typeFilter.text = 'EX EMPLOYEE';
         filterSearch();
         break;
@@ -428,7 +429,7 @@ class EmployeesController extends GetxController {
     }
   }
 
-  void filterSearch() async {
+  Future<void> filterSearch() async {
     Map<String, dynamic> body = {};
     if (employeeNameFilter.text.isNotEmpty) {
       body["name"] = employeeNameFilter.text;
@@ -453,6 +454,22 @@ class EmployeesController extends GetxController {
     } else {
       await searchEngine({"all": true});
     }
+  }
+
+  void clearAllFilters() {
+    employeeNameFilter.clear();
+    employerFilter.clear();
+    departmentFilter.clear();
+    jobTitleFilter.clear();
+    locationFilter.clear();
+    employerIdFilter.value = '';
+    departmentIdFilter.value = '';
+    jobTitleIdFilter.value = '';
+    locationIdFilter.value = '';
+    employeeNameFilterId.value = '';
+    typeFilter.clear();
+    initTypePickersValue.value = 1;
+    isScreenLoding.value = false;
   }
 
   Future<void> searchEngine(Map<String, dynamic> body) async {
@@ -546,7 +563,7 @@ class EmployeesController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllEmployees();
+          return await getEmployeeDetails(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -569,7 +586,9 @@ class EmployeesController extends GetxController {
         "full_name": employeeName.text,
         "country_of_birth": employeeCountryOfBirthId.value,
         "place_of_birth": employeePlaceOfBirth.text,
-        "date_of_birth": convertDateToIson(employeeDateOfBirth.text).toString(),
+        "date_of_birth": employeeDateOfBirth.text.isNotEmpty
+            ? convertDateToIson(employeeDateOfBirth.text) ?? ""
+            : "",
         "gender": employeeGenderId.value,
         "legislation": employeeLegislationId.value,
         "martial_status": employeeMaritalStatusId.value,
@@ -581,10 +600,10 @@ class EmployeesController extends GetxController {
         "job_title": jobTitleId.value,
         "location": jobLocationId.value,
         "hire_date": hireDate.text.isNotEmpty
-            ? convertDateToIson(hireDate.text).toString()
+            ? convertDateToIson(hireDate.text) ?? ""
             : "",
         "end_date": endDate.text.isNotEmpty
-            ? convertDateToIson(endDate.text).toString()
+            ? convertDateToIson(endDate.text) ?? ""
             : "",
         "reporting_manager": reportingManagerId.value,
       };
@@ -667,6 +686,7 @@ class EmployeesController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
+        allEmployees.removeWhere((employee) => employee.id == id);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -719,6 +739,18 @@ class EmployeesController extends GetxController {
     nationalityList.clear();
     phonesList.clear();
     emailsList.clear();
+    contactsAndRelativesList.clear();
+    filteredContactsAndRelativesList.clear();
+    contactsAndRelativesSearch.value.clear();
+    contactsAndRelativesQuery.value = '';
+    leavesList.clear();
+    filteredLeavesList.clear();
+    leavesSearch.value.clear();
+    leavesSearchQuery.value = '';
+    filteredPayrollElementsList.clear();
+    periodFilter.clear();
+    imageBytes = null;
+    update();
   }
 
   Future<void> loadValues(String selectedEmployeeId) async {
@@ -1513,12 +1545,12 @@ class EmployeesController extends GetxController {
         },
         body: jsonEncode({
           "type": emailTypeId.value,
-          "phone": emailAddress.text,
+          "email": emailAddress.text,
         }),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        EmailModel updatedEmail = EmailModel.fromJson(decoded['updated_phone']);
+        EmailModel updatedEmail = EmailModel.fromJson(decoded['updated_email']);
         int index = emailsList.indexWhere((ph) => ph.id == id);
         if (index != -1) {
           emailsList[index] = updatedEmail;
@@ -1776,7 +1808,6 @@ class EmployeesController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       } else {}
-      Get.back();
     } catch (e) {
       // print(e);
     }
@@ -1978,7 +2009,7 @@ class EmployeesController extends GetxController {
         alertMessage(context: Get.context!, content: "Save doc first please");
         return;
       }
-      addingNewContactAndRelativesValue.value = true;
+      addingNewEmployeePayrollValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -2020,10 +2051,10 @@ class EmployeesController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       }
-      addingNewContactAndRelativesValue.value = false;
+      addingNewEmployeePayrollValue.value = false;
       Get.back();
     } catch (e) {
-      addingNewContactAndRelativesValue.value = false;
+      addingNewEmployeePayrollValue.value = false;
     }
   }
 
@@ -2033,7 +2064,7 @@ class EmployeesController extends GetxController {
         alertMessage(context: Get.context!, content: "Save doc first please");
         return;
       }
-      addingNewContactAndRelativesValue.value = true;
+      addingNewEmployeePayrollValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -2077,10 +2108,10 @@ class EmployeesController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       }
-      addingNewContactAndRelativesValue.value = false;
+      addingNewEmployeePayrollValue.value = false;
       Get.back();
     } catch (e) {
-      addingNewContactAndRelativesValue.value = false;
+      addingNewEmployeePayrollValue.value = false;
     }
   }
 

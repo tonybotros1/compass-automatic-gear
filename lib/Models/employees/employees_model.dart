@@ -154,7 +154,7 @@ class EmployeesModel {
           .map((e) => EmployeePayrollElementsModel.fromJson(e))
           .toList();
     } else {
-      model.emailList = [];
+      model.payrollsList = [];
     }
     if (json.containsKey('bank_accounts_list') &&
         json['bank_accounts_list'] != null) {
@@ -162,7 +162,7 @@ class EmployeesModel {
           .map((e) => EmployeeAccountBanksModel.fromJson(e))
           .toList();
     } else {
-      model.emailList = [];
+      model.bankAccountsList = [];
     }
 
     /// Names

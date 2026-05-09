@@ -38,7 +38,7 @@ Future<dynamic> payrollElementsDialog({
                     builder: (controller) {
                       return ClickableHoverText(
                         onTap: onPressed,
-                        text: controller.addingNewEmployeePhoneValue.isFalse
+                        text: controller.addingNewEmployeePayrollValue.isFalse
                             ? 'Save'
                             : '•••',
                       );

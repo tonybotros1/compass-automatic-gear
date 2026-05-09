@@ -16,7 +16,7 @@ Widget addNewPhoneOrEdit({
           labelText: 'Type',
           headerLqabel: 'Types',
           dialogWidth: 600,
-          controller: controller.country,
+          controller: controller.phoneType,
           displayKeys: const ['name'],
           displaySelectedKeys: const ['name'],
           onDelete: () {

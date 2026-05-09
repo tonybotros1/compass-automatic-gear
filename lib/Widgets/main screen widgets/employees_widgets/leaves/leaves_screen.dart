@@ -238,7 +238,7 @@ IconButton editSection(
         constraints: constraints,
         controller: controller,
         canEdit: true,
-        onPressed: controller.addingNewLeaveValue.isTrue
+        onPressed: controller.addingNewEmployeeLeaveValue.isTrue
             ? null
             : () async {
                 await controller.updateEmployeeLeave(leaveId);
@@ -271,7 +271,7 @@ ElevatedButton newLeaveButton(
         constraints: constraints,
         controller: controller,
         canEdit: true,
-        onPressed: controller.addingNewContactAndRelativesValue.isTrue
+        onPressed: controller.addingNewEmployeeLeaveValue.isTrue
             ? null
             : () async {
                 await controller.addNewEmployeeLeave();

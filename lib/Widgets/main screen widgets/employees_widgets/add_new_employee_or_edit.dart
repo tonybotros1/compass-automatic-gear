@@ -5,7 +5,7 @@ import '../../../consts.dart';
 import 'bank_accounts/bank_accounts_section.dart';
 import 'emails/email_section.dart';
 import 'payroll_elements/payroll_elements_section.dart';
-import 'phone/phone_Section.dart';
+import 'phone/phone_section.dart';
 import 'address/address_section.dart';
 import 'assignment_information_section.dart';
 import 'nationality/nationality_section.dart';

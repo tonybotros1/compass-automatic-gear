@@ -165,9 +165,11 @@ ElevatedButton newElementButton({
       payrollElementsDialog(
         controller: controller,
         canEdit: true,
-        onPressed: () {
-          controller.addNewEmployeePayroll();
-        },
+        onPressed: controller.addingNewEmployeePayrollValue.isTrue
+            ? null
+            : () {
+                controller.addNewEmployeePayroll();
+              },
         context: context,
       );
     },
@@ -216,9 +218,11 @@ IconButton updatePayrollButton({
       payrollElementsDialog(
         controller: controller,
         canEdit: true,
-        onPressed: () {
-          controller.updateEmployeePayroll(id);
-        },
+        onPressed: controller.addingNewEmployeePayrollValue.isTrue
+            ? null
+            : () {
+                controller.updateEmployeePayroll(id);
+              },
         context: context,
       );
     },

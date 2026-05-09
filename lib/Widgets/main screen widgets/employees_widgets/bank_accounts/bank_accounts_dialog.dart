@@ -40,7 +40,7 @@ Future<dynamic> bankAccountsDialog({
                     builder: (controller) {
                       return ClickableHoverText(
                         onTap: onPressed,
-                        text: controller.addingNewEmployeeAddressValue.isFalse
+                        text: controller.addingNewEmployeeBankAccount.isFalse
                             ? 'Save'
                             : "•••",
                       );

@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
 import '../../../../Widgets/attachments/attachment_screen.dart';
 import '../../../../Widgets/main screen widgets/auto_size_box.dart';
-import '../../../../Widgets/main screen widgets/employees_widgets/contacts_and_relatives_Dialog.dart';
+import '../../../../Widgets/main screen widgets/employees_widgets/contacts_and_relatives_dialog.dart';
 import '../../../../Widgets/main screen widgets/employees_widgets/employee_dialog.dart';
 import '../../../../Widgets/main screen widgets/employees_widgets/leaves/leaves_dialog.dart';
 import '../../../../Widgets/menu_dialog.dart';
@@ -236,9 +236,9 @@ class Employees extends StatelessWidget {
                                 ),
                                 ElevatedButton(
                                   style: clearVariablesButtonStyle,
-                                  onPressed: () {
-                                    // controller.clearAllFilters();
-                                    // controller.update();
+                                  onPressed: () async {
+                                    controller.clearAllFilters();
+                                    await controller.filterSearch();
                                   },
                                   child: Text(
                                     'Clear',
@@ -386,7 +386,7 @@ IconButton deleteSection(
     onPressed: () {
       alertDialog(
         context: context,
-        content: "The technicians will be deleted permanently",
+        content: "This employee will be deleted permanently",
         onPressed: () {
           // controller.deleteEmployee(employeeId);
         },
@@ -476,13 +476,14 @@ ElevatedButton newEmployeeButton(
       controller.clearValues(isEmployee);
 
       employeeDialog(
-        onPressedForLeaves: () {
+        onPressedForLeaves: () async {
           if (controller.currentEmployeeId.value.isEmpty) {
             alertMessage(context: context, content: "Please save doc first");
             return;
           }
           controller.leavesSearch.value.clear();
-          controller.getAllEmployeeLeave();
+          controller.filteredLeavesList.clear();
+          await controller.getAllEmployeeLeave();
           leavesDialog(constraints: constraints, controller: controller);
         },
         onPressedForContactsAndRelatives: () async {
@@ -491,6 +492,8 @@ ElevatedButton newEmployeeButton(
             return;
           }
           controller.contactsAndRelativesSearch.value.clear();
+          controller.filteredContactsAndRelativesList.clear();
+          await controller.getContactAndRelative();
           contactsAndRelativesDialog(
             constraints: constraints,
             controller: controller,
