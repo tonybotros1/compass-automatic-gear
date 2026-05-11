@@ -68,9 +68,9 @@ class LeaveTypes extends StatelessWidget {
                                   },
                                   onSelected: (value) {
                                     controller.basedElementFilterId.value =
-                                        value['_id'];
+                                        value['_id']?.toString() ?? '';
                                     controller.basedElementFilter.text =
-                                        value['name'];
+                                        value['name']?.toString() ?? '';
                                   },
                                 ),
                               ],
@@ -98,6 +98,9 @@ class LeaveTypes extends StatelessWidget {
                           children: [
                             newEmployeeButton(context, constraints, controller),
                             CustomSlidingSegmentedControl<int>(
+                              key: ValueKey(
+                                controller.initTypePickersValue.value,
+                              ),
                               height: 30,
                               initialValue:
                                   controller.initTypePickersValue.value,
@@ -279,8 +282,15 @@ IconButton deleteSection(
       alertDialog(
         context: context,
         content: "The type will be deleted permanently",
-        onPressed: () {
-          controller.deleteLeaveType(id);
+        onPressed: () async {
+          final deleted = await controller.deleteLeaveType(id);
+          Get.back();
+          if (!deleted) {
+            alertMessage(
+              context: Get.context!,
+              content: 'Could not delete leave type',
+            );
+          }
         },
       );
     },
@@ -297,6 +307,7 @@ IconButton editSection(
 ) {
   return IconButton(
     onPressed: () async {
+      controller.clearValues();
       controller.name.text = data.name ?? '';
       controller.code.text = data.code ?? '';
       controller.type.text = data.type ?? '';
@@ -326,11 +337,7 @@ ElevatedButton newEmployeeButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      controller.name.clear();
-      controller.code.clear();
-      controller.type.clear();
-      controller.basedElement.clear();
-      controller.basedElementId.value = '';
+      controller.clearValues();
       leaveTypesDialog(
         constraints: constraints,
         controller: controller,

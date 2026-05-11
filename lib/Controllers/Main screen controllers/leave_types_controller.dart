@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'main_screen_contro.dart';
 import 'websocket_controller.dart';
 
 class LeaveTypesController extends GetxController {
+  final GlobalKey<FormState> leaveTypeFormKey = GlobalKey<FormState>();
   TextEditingController name = TextEditingController();
   TextEditingController nameFilter = TextEditingController();
   TextEditingController code = TextEditingController();
@@ -29,11 +31,27 @@ class LeaveTypesController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxList<LeaveTypesModel> allLeaveTypes = RxList<LeaveTypesModel>([]);
   WebSocketService ws = Get.find<WebSocketService>();
+  StreamSubscription? _leaveTypeEventsSubscription;
 
   @override
   void onInit() {
     connectWebSocket();
+    filterSearch();
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    _leaveTypeEventsSubscription?.cancel();
+    name.dispose();
+    nameFilter.dispose();
+    code.dispose();
+    codeFilter.dispose();
+    type.dispose();
+    typeFilter.dispose();
+    basedElement.dispose();
+    basedElementFilter.dispose();
+    super.onClose();
   }
 
   Future<Map<String, dynamic>> getAllPayrollElements() async {
@@ -47,27 +65,92 @@ class LeaveTypesController extends GetxController {
   }
 
   void connectWebSocket() {
-    ws.events.listen((message) {
-      switch (message["type"]) {
-        case "leave_type_added":
-          final newCounter = LeaveTypesModel.fromJson(message["data"]);
-          allLeaveTypes.insert(0, newCounter);
-          break;
+    _leaveTypeEventsSubscription?.cancel();
+    _leaveTypeEventsSubscription = ws.events.listen((message) {
+      try {
+        switch (message["type"]) {
+          case "leave_type_added":
+            final newLeaveType = LeaveTypesModel.fromJson(message["data"]);
+            _upsertLeaveType(newLeaveType);
+            break;
 
-        case "leave_type_updated":
-          final updated = LeaveTypesModel.fromJson(message["data"]);
-          final index = allLeaveTypes.indexWhere((m) => m.id == updated.id);
-          if (index != -1) {
-            allLeaveTypes[index] = updated;
-          }
-          break;
+          case "leave_type_updated":
+            final updated = LeaveTypesModel.fromJson(message["data"]);
+            _upsertLeaveType(updated);
+            break;
 
-        case "leave_type_deleted":
-          final deletedId = message["data"]["_id"];
-          allLeaveTypes.removeWhere((m) => m.id == deletedId);
-          break;
+          case "leave_type_deleted":
+            final deletedId = message["data"]["_id"];
+            allLeaveTypes.removeWhere((m) => m.id == deletedId);
+            break;
+        }
+      } catch (e) {
+        //
       }
     });
+  }
+
+  void _upsertLeaveType(LeaveTypesModel leaveType) {
+    final id = leaveType.id;
+    if (id == null || id.isEmpty) return;
+    final index = allLeaveTypes.indexWhere((m) => m.id == id);
+    if (index == -1) {
+      allLeaveTypes.insert(0, leaveType);
+    } else {
+      allLeaveTypes[index] = leaveType;
+    }
+  }
+
+  Map<String, dynamic> _jsonObject(String body) {
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+    } catch (e) {
+      //
+    }
+    return {};
+  }
+
+  LeaveTypesModel _currentLeaveType({String? id}) {
+    return LeaveTypesModel(
+      id: id,
+      name: name.text,
+      code: code.text,
+      type: isCalendarDaysSelected.isTrue ? 'Calendar Days' : 'Working Days',
+      basedElement: basedElement.text,
+      basedElementId: basedElementId.value,
+    );
+  }
+
+  bool _validateLeaveType() {
+    if (!(leaveTypeFormKey.currentState?.validate() ?? false)) return false;
+    if (name.text.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please enter leave name');
+      return false;
+    }
+    if (code.text.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please enter leave code');
+      return false;
+    }
+    if (basedElementId.value.trim().isEmpty) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Please select based element',
+      );
+      return false;
+    }
+    return true;
+  }
+
+  void clearValues() {
+    leaveTypeFormKey.currentState?.reset();
+    name.clear();
+    code.clear();
+    type.clear();
+    basedElement.clear();
+    basedElementId.value = '';
+    isCalendarDaysSelected.value = false;
   }
 
   void selectCalenderOrWorkingDays(String type, bool value) {
@@ -98,6 +181,8 @@ class LeaveTypesController extends GetxController {
 
   Future<void> addNewLeaveType() async {
     try {
+      if (!_validateLeaveType()) return;
+
       addingNewValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -119,7 +204,17 @@ class LeaveTypesController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
+        final decoded = _jsonObject(response.body);
+        final addedId =
+            decoded['added_leave_type_id']?.toString() ??
+            decoded['added_type_id']?.toString() ??
+            decoded['_id']?.toString();
+        if (addedId != null && addedId.isNotEmpty) {
+          _upsertLeaveType(_currentLeaveType(id: addedId));
+        }
+        await filterSearch();
         addingNewValue.value = false;
+        Get.back();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -134,7 +229,6 @@ class LeaveTypesController extends GetxController {
         addingNewValue.value = false;
       }
       addingNewValue.value = false;
-      Get.back();
     } catch (e) {
       addingNewValue.value = false;
     }
@@ -142,6 +236,9 @@ class LeaveTypesController extends GetxController {
 
   Future<void> editLeaveType(String id) async {
     try {
+      if (id.isEmpty) return;
+      if (!_validateLeaveType()) return;
+
       addingNewValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -163,6 +260,10 @@ class LeaveTypesController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
+        _upsertLeaveType(_currentLeaveType(id: id));
+        await filterSearch();
+        addingNewValue.value = false;
+        Get.back();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -174,15 +275,15 @@ class LeaveTypesController extends GetxController {
         logout();
       } else {}
       addingNewValue.value = false;
-      Get.back();
     } catch (e) {
       addingNewValue.value = false;
-      Get.back();
     }
   }
 
-  Future<void> deleteLeaveType(String typeId) async {
+  Future<bool> deleteLeaveType(String typeId) async {
     try {
+      if (typeId.isEmpty) return false;
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -192,23 +293,25 @@ class LeaveTypesController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
+        allLeaveTypes.removeWhere((m) => m.id == typeId);
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deleteLeaveType(typeId);
+          return await deleteLeaveType(typeId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
       }
-      Get.back();
+      return false;
     } catch (e) {
-      //
+      return false;
     }
   }
 
-  void filterSearch() async {
+  Future<void> filterSearch() async {
     Map<String, dynamic> body = {};
     if (nameFilter.text.isNotEmpty) {
       body["name"] = nameFilter.text;
@@ -224,9 +327,9 @@ class LeaveTypesController extends GetxController {
     }
 
     if (body.isNotEmpty) {
-      await searchEngine(body);
+      return await searchEngine(body);
     } else {
-      await searchEngine({"all": true});
+      return await searchEngine({"all": true});
     }
   }
 
@@ -249,10 +352,12 @@ class LeaveTypesController extends GetxController {
         body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        List docs = decoded['leave_types'];
+        final decoded = _jsonObject(response.body);
+        List docs = decoded['leave_types'] ?? [];
         allLeaveTypes.assignAll(
-          docs.map((doc) => LeaveTypesModel.fromJson(doc)),
+          docs.whereType<Map<String, dynamic>>().map(
+            (doc) => LeaveTypesModel.fromJson(doc),
+          ),
         );
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -277,5 +382,7 @@ class LeaveTypesController extends GetxController {
     typeFilter.clear();
     basedElementFilter.clear();
     basedElementFilterId.value = '';
+    initTypePickersValue.value = 1;
+    filterSearch();
   }
 }

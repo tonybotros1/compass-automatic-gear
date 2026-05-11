@@ -17,15 +17,15 @@ class LeaveTypesModel {
 
   factory LeaveTypesModel.fromJson(Map<String, dynamic> json) {
     return LeaveTypesModel(
-      id: json['_id'] ?? '',
-      name: json.containsKey('name') ? json['name'] ?? '' : '',
-      code: json.containsKey('code') ? json['code'] ?? '' : '',
-      type: json.containsKey('type') ? json['type'] ?? '' : '',
+      id: json['_id']?.toString() ?? '',
+      name: json.containsKey('name') ? json['name']?.toString() ?? '' : '',
+      code: json.containsKey('code') ? json['code']?.toString() ?? '' : '',
+      type: json.containsKey('type') ? json['type']?.toString() ?? '' : '',
       basedElement: json.containsKey('based_element_name')
-          ? json['based_element_name'] ?? ''
+          ? json['based_element_name']?.toString() ?? ''
           : '',
       basedElementId: json.containsKey('based_element')
-          ? json['based_element'] ?? ''
+          ? json['based_element']?.toString() ?? ''
           : '',
     );
   }
