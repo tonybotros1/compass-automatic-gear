@@ -35,62 +35,63 @@ class LegislationModel {
     this.gratuityFirst5Years,
   });
 
+  static int _toInt(dynamic value) {
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ??
+        double.tryParse(value?.toString() ?? '')?.toInt() ??
+        0;
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static List<String> _toStringList(dynamic value) {
+    if (value is List) {
+      return value.map((day) => day.toString()).toList();
+    }
+    return [];
+  }
+
   factory LegislationModel.fromJson(Map<String, dynamic> json) {
     return LegislationModel(
-      id: json['_id'] ?? '',
-      name: json['name'] ?? '',
-      weekend: json.containsKey('weekend')
-          ? json['weekend'].cast<String>() ?? []
-          : [],
-      numberOfPaidDaysForSickLEave:
-          json.containsKey('number_of_paid_days_for_sick_leave')
-          ? json['number_of_paid_days_for_sick_leave'] ?? 0
-          : 0,
-      numberOfHalfPaidDaysForSickLEave:
-          json.containsKey('number_of_half_paid_days_for_sick_leave')
-          ? json['number_of_half_paid_days_for_sick_leave'] ?? 0
-          : 0,
-      numberOfUnpaidDaysForSickLEave:
-          json.containsKey('number_of_unpaid_days_for_sick_leave')
-          ? json['number_of_unpaid_days_for_sick_leave'] ?? 0
-          : 0,
-      numberOfHalfPaidDaysForMaternityLEave:
-          json.containsKey('number_of_paid_days_for_maternity_leave')
-          ? json['number_of_paid_days_for_maternity_leave'] ?? 0
-          : 0,
-      numberOfHalfPaidDaysForPaternityLEave:
-          json.containsKey('number_of_paid_days_for_paternity_leave')
-          ? json['number_of_paid_days_for_paternity_leave'] ?? 0
-          : 0,
-      numberOfHalfPaidDaysForCompassionateLEave:
-          json.containsKey('number_of_paid_days_for_compassionate_leave')
-          ? json['number_of_paid_days_for_compassionate_leave'] ?? 0
-          : 0,
-      numberOfWorkingHoursForOvertimeNormal:
-          json.containsKey('number_of_working_hours_for_overtime_normal')
-          ? json['number_of_working_hours_for_overtime_normal'] ?? 0
-          : 0,
-      numberOfWorkingHoursForOvertimeHolidays:
-          json.containsKey('number_of_working_hours_for_overtime_holidays')
-          ? json['number_of_working_hours_for_overtime_holidays'] ?? 0
-          : 0,
-      socialSecurityEmployee:
-          json.containsKey('social_security_employee_percentage')
-          ? json['social_security_employee_percentage'] ?? 0
-          : 0,
-      socialSecurityEmployer:
-          json.containsKey('social_security_employer_percentage')
-          ? json['social_security_employer_percentage'] ?? 0
-          : 0,
-      socialSecurityCeiling: json.containsKey('social_security_ceiling')
-          ? json['social_security_ceiling'] ?? 0
-          : 0,
-      gratuityFirst5Years: json.containsKey('gratuity_first_5_years')
-          ? json['gratuity_first_5_years'] ?? 0
-          : 0,
-      gratuityAfter5Years: json.containsKey('gratuity_after_5_years')
-          ? json['gratuity_after_5_years'] ?? 0
-          : 0,
+      id: json['_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      weekend: _toStringList(json['weekend']),
+      numberOfPaidDaysForSickLEave: _toInt(
+        json['number_of_paid_days_for_sick_leave'],
+      ),
+      numberOfHalfPaidDaysForSickLEave: _toInt(
+        json['number_of_half_paid_days_for_sick_leave'],
+      ),
+      numberOfUnpaidDaysForSickLEave: _toInt(
+        json['number_of_unpaid_days_for_sick_leave'],
+      ),
+      numberOfHalfPaidDaysForMaternityLEave: _toInt(
+        json['number_of_paid_days_for_maternity_leave'],
+      ),
+      numberOfHalfPaidDaysForPaternityLEave: _toInt(
+        json['number_of_paid_days_for_paternity_leave'],
+      ),
+      numberOfHalfPaidDaysForCompassionateLEave: _toInt(
+        json['number_of_paid_days_for_compassionate_leave'],
+      ),
+      numberOfWorkingHoursForOvertimeNormal: _toDouble(
+        json['number_of_working_hours_for_overtime_normal'],
+      ),
+      numberOfWorkingHoursForOvertimeHolidays: _toDouble(
+        json['number_of_working_hours_for_overtime_holidays'],
+      ),
+      socialSecurityEmployee: _toDouble(
+        json['social_security_employee_percentage'],
+      ),
+      socialSecurityEmployer: _toDouble(
+        json['social_security_employer_percentage'],
+      ),
+      socialSecurityCeiling: _toDouble(json['social_security_ceiling']),
+      gratuityFirst5Years: _toInt(json['gratuity_first_5_years']),
+      gratuityAfter5Years: _toInt(json['gratuity_after_5_years']),
     );
   }
 }

@@ -17,6 +17,7 @@ Container maternityLeaveSection(LegislationController controller) {
           labelText: 'Paid Days No.',
           controller: controller.meternityNumberOfPaidDays,
           isnumber: true,
+          validate: false,
           width: 150,
         ),
       ],

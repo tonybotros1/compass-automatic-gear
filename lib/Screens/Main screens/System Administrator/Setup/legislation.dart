@@ -206,6 +206,7 @@ ElevatedButton newButton(
 ) {
   return ElevatedButton(
     onPressed: () {
+      controller.clearValues();
       legislationDialog(
         constraints: constraints,
         controller: controller,
@@ -231,8 +232,18 @@ IconButton deleteSection(
       alertDialog(
         context: context,
         content: "The doc will be deleted permanently",
-        onPressed: () {
-          controller.deletedLegislation(employeeId);
+        onPressed: () async {
+          final deleted = await controller.deletedLegislation(employeeId);
+          Get.back();
+          if (!deleted) {
+            final currentContext = Get.context;
+            if (currentContext != null && currentContext.mounted) {
+              alertMessage(
+                context: currentContext,
+                content: 'Could not delete legislation. Please try again.',
+              );
+            }
+          }
         },
       );
     },

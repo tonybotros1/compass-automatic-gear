@@ -17,6 +17,7 @@ Container overtimeNormalSection(LegislationController controller) {
           labelText: 'Working Hours',
           controller: controller.numberOfWorkingHoursForOvertimeNormal,
           isnumber: true,
+          validate: false,
           width: 150,
         ),
       ],

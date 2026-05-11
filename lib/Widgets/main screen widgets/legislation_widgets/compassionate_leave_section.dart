@@ -17,6 +17,7 @@ Container compassionateLeaveSection(LegislationController controller) {
           labelText: 'Paid Days No.',
           controller: controller.compassionateLeaveNumberOfPaidDays,
           isnumber: true,
+          validate: false,
           width: 150,
         ),
       ],
