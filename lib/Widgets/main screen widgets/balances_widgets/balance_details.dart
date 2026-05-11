@@ -55,6 +55,7 @@ Container balanceDetails(BuildContext context, BalancesController controller) {
                 maxLines: 5,
                 labelText: 'Description',
                 controller: controller.balanceDescription,
+                validate: false,
               ),
             ),
           ],

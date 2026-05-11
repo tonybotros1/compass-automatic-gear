@@ -23,6 +23,16 @@ class BalancesModel {
     // this.elementDetails,
   });
 
+  static bool _toBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final normalized = value.trim().toLowerCase();
+      return normalized == 'true' || normalized == '1' || normalized == 'yes';
+    }
+    return false;
+  }
+
   factory BalancesModel.fromJson(Map<String, dynamic> json) {
     return BalancesModel(
       id: json.containsKey('_id') ? json['_id']?.toString() : null,
@@ -32,13 +42,13 @@ class BalancesModel {
       name: json.containsKey('name') ? json['name']?.toString() : null,
       type: json.containsKey('type') ? json['type']?.toString() : null,
       showInAssignment: json.containsKey('show_on_assignment')
-          ? json['show_on_assignment']
+          ? _toBool(json['show_on_assignment'])
           : false,
       showInPayroll: json.containsKey('show_on_payroll')
-          ? json['show_on_payroll']
+          ? _toBool(json['show_on_payroll'])
           : false,
       showInLeave: json.containsKey('show_on_leave')
-          ? json['show_on_leave']
+          ? _toBool(json['show_on_leave'])
           : false,
 
       elementDetails:

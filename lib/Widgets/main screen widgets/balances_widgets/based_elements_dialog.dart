@@ -39,7 +39,9 @@ Future<dynamic> basedAlementsDialog({
                   GetX<BalancesController>(
                     builder: (controller) {
                       return ClickableHoverText(
-                        onTap: onPressed,
+                        onTap: controller.addingNewBasedElementValue.isFalse
+                            ? onPressed
+                            : null,
                         text: controller.addingNewBasedElementValue.isFalse
                             ? 'Save'
                             : '•••',

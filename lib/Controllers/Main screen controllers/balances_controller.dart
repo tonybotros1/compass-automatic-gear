@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -13,6 +14,8 @@ import 'main_screen_contro.dart';
 import 'websocket_controller.dart';
 
 class BalancesController extends GetxController {
+  final GlobalKey<FormState> balanceFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> basedElementFormKey = GlobalKey<FormState>();
   TextEditingController balanceNameFilter = TextEditingController();
   TextEditingController balanceTypeFilter = TextEditingController();
   TextEditingController balanceName = TextEditingController();
@@ -43,6 +46,7 @@ class BalancesController extends GetxController {
     '1': {'name': 'Add'},
     '2': {'name': 'Subtract'},
   });
+  StreamSubscription? _balanceEventsSubscription;
 
   @override
   void onInit() async {
@@ -51,20 +55,18 @@ class BalancesController extends GetxController {
   }
 
   void connectWebSocket() {
-    ws.events.listen((message) {
+    _balanceEventsSubscription?.cancel();
+    _balanceEventsSubscription = ws.events.listen((message) {
       try {
         switch (message["type"]) {
           case "hr_balance_added":
             final newDoc = BalancesModel.fromJson(message["data"]);
-            allBalances.add(newDoc);
+            _upsertBalance(newDoc);
             break;
 
           case "hr_balance_updated":
             final updated = BalancesModel.fromJson(message["data"]);
-            final index = allBalances.indexWhere((m) => m.id == updated.id);
-            if (index != -1) {
-              allBalances[index] = updated;
-            }
+            _upsertBalance(updated);
             break;
 
           case "hr_balance_deleted":
@@ -76,6 +78,89 @@ class BalancesController extends GetxController {
         // print(e);
       }
     });
+  }
+
+  @override
+  void onClose() {
+    _balanceEventsSubscription?.cancel();
+    balanceNameFilter.dispose();
+    balanceTypeFilter.dispose();
+    balanceName.dispose();
+    balanceType.dispose();
+    balanceDescription.dispose();
+    basedElementName.dispose();
+    basedElementType.dispose();
+    super.onClose();
+  }
+
+  void _upsertBalance(BalancesModel balance) {
+    final id = balance.id;
+    if (id == null || id.isEmpty) return;
+    final index = allBalances.indexWhere((item) => item.id == id);
+    if (index == -1) {
+      allBalances.add(balance);
+    } else {
+      allBalances[index] = balance;
+    }
+  }
+
+  BalancesModel _currentBalanceFromFields() {
+    return BalancesModel(
+      id: currentBalanceId.value,
+      name: balanceName.text,
+      type: balanceType.text,
+      description: balanceDescription.text,
+      showInAssignment: showOnAssignment.value,
+      showInPayroll: showOnPayroll.value,
+      showInLeave: showOnLeave.value,
+      elementDetails: basedElementsList.toList(),
+    );
+  }
+
+  bool _validateBalance() {
+    if (!(balanceFormKey.currentState?.validate() ?? false)) return false;
+    if (balanceName.text.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please enter balance name');
+      return false;
+    }
+    if (balanceType.text.trim().isEmpty) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Please select balance type',
+      );
+      return false;
+    }
+    return true;
+  }
+
+  bool _validateBasedElement({String? editingId}) {
+    if (currentBalanceId.value.isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please save balance first');
+      return false;
+    }
+    if (!(basedElementFormKey.currentState?.validate() ?? false)) return false;
+    if (basedElementNameId.value.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please select element');
+      return false;
+    }
+    if (basedElementType.text.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please select type');
+      return false;
+    }
+
+    final duplicate = basedElementsList.any(
+      (element) =>
+          element.elementName == basedElementNameId.value &&
+          (editingId == null || element.id != editingId),
+    );
+    if (duplicate) {
+      alertMessage(
+        context: Get.context!,
+        content: 'This based element is already added',
+      );
+      return false;
+    }
+    return true;
   }
 
   Future<Map<String, dynamic>> getAllPayrollElements(String elementId) async {
@@ -107,7 +192,7 @@ class BalancesController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getBalanceDetails(payrollElementId);
+          return await getBalanceDetails(payrollElementId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -122,11 +207,13 @@ class BalancesController extends GetxController {
 
   Future<void> addNewBalance() async {
     try {
+      if (!_validateBalance()) return;
+
       addingNewValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Map data = {
+      Map<String, dynamic> data = {
         "name": balanceName.text,
         "type": balanceType.text,
         "description": balanceDescription.text,
@@ -147,7 +234,9 @@ class BalancesController extends GetxController {
         );
         if (response.statusCode == 200) {
           final decoded = jsonDecode(response.body);
-          currentBalanceId.value = decoded['added_balance_id'];
+          currentBalanceId.value =
+              decoded['added_balance_id']?.toString() ?? '';
+          _upsertBalance(_currentBalanceFromFields());
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -172,6 +261,7 @@ class BalancesController extends GetxController {
           body: jsonEncode(data),
         );
         if (response.statusCode == 200) {
+          _upsertBalance(_currentBalanceFromFields());
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -205,6 +295,7 @@ class BalancesController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
+        allBalances.removeWhere((balance) => balance.id == id);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -278,6 +369,8 @@ class BalancesController extends GetxController {
 
   Future<void> addNewBasedElements() async {
     try {
+      if (!_validateBasedElement()) return;
+
       addingNewBasedElementValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -298,7 +391,7 @@ class BalancesController extends GetxController {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        String addedID = decoded["added_based_element_id"];
+        String addedID = decoded["added_based_element_id"]?.toString() ?? '';
         basedElementsList.add(
           BasedElementsModel(
             elementNameValue: basedElementName.text,
@@ -307,6 +400,7 @@ class BalancesController extends GetxController {
             id: addedID,
           ),
         );
+        _upsertBalance(_currentBalanceFromFields());
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -326,6 +420,12 @@ class BalancesController extends GetxController {
 
   Future<void> updateBasedElements(String id) async {
     try {
+      if (id.isEmpty) {
+        alertMessage(context: Get.context!, content: 'Invalid based element');
+        return;
+      }
+      if (!_validateBasedElement(editingId: id)) return;
+
       addingNewBasedElementValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -350,7 +450,10 @@ class BalancesController extends GetxController {
           id: id,
         );
         int index = basedElementsList.indexWhere((i) => i.id == id);
-        basedElementsList[index] = updatedElement;
+        if (index != -1) {
+          basedElementsList[index] = updatedElement;
+          _upsertBalance(_currentBalanceFromFields());
+        }
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -370,6 +473,8 @@ class BalancesController extends GetxController {
 
   Future<void> deleteBasedElement(String id) async {
     try {
+      if (id.isEmpty) return;
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -380,6 +485,7 @@ class BalancesController extends GetxController {
       );
       if (response.statusCode == 200) {
         basedElementsList.removeWhere((i) => i.id == id);
+        _upsertBalance(_currentBalanceFromFields());
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {

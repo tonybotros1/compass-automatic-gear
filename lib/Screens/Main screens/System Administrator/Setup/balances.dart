@@ -114,7 +114,8 @@ class Balances extends StatelessWidget {
                                 ElevatedButton(
                                   style: clearVariablesButtonStyle,
                                   onPressed: () {
-                                    // controller.clearSearchValues();
+                                    controller.clearSearchValues();
+                                    // controller.filterSearch();
                                   },
                                   child: Text(
                                     'Clear',
@@ -236,7 +237,11 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(
-        textForDataRowInTable(text: '', formatDouble: false, maxWidth: null),
+        textForDataRowInTable(
+          text: showInText(data),
+          formatDouble: false,
+          maxWidth: null,
+        ),
       ),
       DataCell(
         textForDataRowInTable(
@@ -247,6 +252,15 @@ DataRow dataRowForTheTable(
       ),
     ],
   );
+}
+
+String showInText(BalancesModel data) {
+  final values = <String>[
+    if (data.showInAssignment == true) 'Assignment',
+    if (data.showInPayroll == true) 'Payroll',
+    if (data.showInLeave == true) 'Leave',
+  ];
+  return values.join(', ');
 }
 
 ElevatedButton newElementButton(
