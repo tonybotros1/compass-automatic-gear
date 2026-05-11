@@ -40,22 +40,32 @@ class JobCardInvoiceItemsModel {
     this.added,
     this.deleted,
     this.isModified,
-    this.jobId
+    this.jobId,
   });
+
+  double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0.0;
+  }
+
+  int _toInt(dynamic value) {
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
 
   JobCardInvoiceItemsModel.fromJson(Map<String, dynamic> json) {
     id = json.containsKey('_id') ? json['_id'] ?? '' : '';
     companyId = json.containsKey('company_id') ? json['company_id'] ?? '' : '';
     name = json.containsKey('name_text') ? json['name_text'] ?? '' : '';
     nameId = json.containsKey('name') ? json['name'] ?? '' : '';
-    price = json.containsKey('price') ? json['price'] ?? 0 : 0;
-    amount = json.containsKey('amount') ? json['amount'] ?? 0 : 0;
-    discount = json.containsKey('discount') ? json['discount'] ?? 0 : 0;
-    vat = json.containsKey('vat') ? json['vat'] ?? 0 : 0;
-    net = json.containsKey('net') ? json['net'] ?? 0 : 0;
-    total = json.containsKey('total') ? json['total'] ?? 0 : 0;
-    lineNumber = json.containsKey('line_number') ? json['line_number'] ?? 0 : 0;
-    quantity = json.containsKey('quantity') ? json['quantity'] ?? 0 : 0;
+    price = _toDouble(json['price']);
+    amount = _toDouble(json['amount']);
+    discount = _toDouble(json['discount']);
+    vat = _toDouble(json['vat']);
+    net = _toDouble(json['net']);
+    total = _toDouble(json['total']);
+    lineNumber = _toInt(json['line_number']);
+    quantity = _toDouble(json['quantity']);
     description = json.containsKey('description')
         ? json['description'] ?? ''
         : '';
@@ -87,7 +97,6 @@ class JobCardInvoiceItemsModel {
     data['job_card_id'] = jobId;
     return data;
   }
-
 
   Map<String, dynamic> toJsonForQuotation() {
     final Map<String, dynamic> data = <String, dynamic>{};

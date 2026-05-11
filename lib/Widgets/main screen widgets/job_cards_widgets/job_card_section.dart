@@ -330,7 +330,8 @@ Widget jobCardSection(
                     if (controller.jobWarrentyDays.value.text.isEmpty) {
                       controller.jobWarrentyEndDate.value.clear();
                     } else {
-                      if (int.parse(value) < 3000) {
+                      final days = int.tryParse(value);
+                      if (days != null && days < 3000) {
                         controller
                             .changejobWarrentyEndDateDependingOnWarrentyDays();
                       }

@@ -835,7 +835,7 @@ DataRow dataRowForTheTable(
           jobData,
           constraints,
           jobId,
-          jobData.type == 'SALES' ? false : true,
+          jobData.type == 'SALE' ? false : true,
         ),
       ), // need to be changed
       DataCell(
@@ -846,7 +846,7 @@ DataRow dataRowForTheTable(
             : const SizedBox(),
       ),
       DataCell(
-        jobData.type == 'SALES'
+        jobData.type == 'SALE'
             ? statusBox('SI', width: 35)
             : statusBox('JC', width: 35),
       ),

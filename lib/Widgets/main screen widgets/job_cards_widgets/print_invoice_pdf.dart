@@ -196,15 +196,17 @@ pw.Widget buildInvoiceTable(List<JobCardInvoiceItemsModel> items) {
 }
 
 List<pw.TableRow> _buildEmptyRows(int count) {
+  final rowCount = count > 8
+      ? 8
+      : count < 0
+      ? 0
+      : count;
+
   return List.generate(
-    count > 8
-        ? 8
-        : count < 0
-        ? 0
-        : count,
+    rowCount,
     (_) => pw.TableRow(
       children: List.generate(
-        count,
+        7,
         (_) =>
             pw.Padding(padding: const pw.EdgeInsets.all(8), child: pw.Text('')),
       ),

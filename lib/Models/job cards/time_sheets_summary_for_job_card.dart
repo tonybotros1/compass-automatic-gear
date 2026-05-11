@@ -15,6 +15,11 @@ class TimeSheetsSummaryForJobCard {
     this.timeInHours,
   });
 
+  double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0.0;
+  }
+
   TimeSheetsSummaryForJobCard.fromJson(Map<String, dynamic> json) {
     startDate = json.containsKey('start_date')
         ? json['start_date'] != null
@@ -35,8 +40,6 @@ class TimeSheetsSummaryForJobCard {
     employeeName = json.containsKey('employee_name')
         ? json['employee_name'] ?? ''
         : '';
-    timeInHours = json.containsKey('time_in_hours')
-        ? json['time_in_hours'] ?? ''
-        : '';
+    timeInHours = _toDouble(json['time_in_hours']);
   }
 }

@@ -273,6 +273,87 @@ class JobCardController extends GetxController {
 
   @override
   void onClose() {
+    for (final controller in [
+      jobCardCounter.value,
+      jobCardDate.value,
+      invoiceDate.value,
+      approvalDate.value,
+      startDate.value,
+      finishDate.value,
+      deliveryDate.value,
+      jobWarrentyDays.value,
+      jobWarrentyKM.value,
+      jobWarrentyEndDate.value,
+      jobCancelationDate.value,
+      reference1.value,
+      reference2.value,
+      deliveryTime.value,
+      minTestKms.value,
+      invoiceCounter.value,
+      lpoCounter.value,
+      jobNotes,
+      deliveryNotes,
+      plateNumber,
+      plateCode,
+      carBrand,
+      carModel,
+      country,
+      city,
+      year,
+      vin,
+      transmissionType,
+      color,
+      engineType,
+      customerName,
+      customerEntityName,
+      customerEntityEmail,
+      customerEntityPhoneNumber,
+      customerCreditNumber,
+      customerOutstanding,
+      customerSaleMan,
+      customerBranch,
+      customerCurrency,
+      customerCurrencyRate,
+      mileageIn.value,
+      fuelAmount.value,
+      mileageOut.value,
+      inOutDiff.value,
+      internalNote.value,
+      invoiceItemName,
+      lineNumber,
+      description,
+      quantity,
+      price,
+      amount,
+      discount,
+      total,
+      vat,
+      net,
+      jobNumberFilter.value,
+      invoiceNumberFilter.value,
+      carBrandIdFilterName.value,
+      carModelIdFilterName.value,
+      customerNameIdFilterName.value,
+      branchFilterName.value,
+      plateNumberFilter.value,
+      vinFilter.value,
+      lpoFilter.value,
+      fromDate.value,
+      toDate.value,
+      statusFilter.value,
+      typeFilter.value,
+      lableFilter.value,
+      textEditingController,
+    ]) {
+      controller.dispose();
+    }
+    scrollController.dispose();
+    scrollControllerFotTable1.dispose();
+    scrollControllerFotTable2.dispose();
+    scrollControllerForNotes.dispose();
+    scrollerForCarDetails.dispose();
+    scrollerForCustomer.dispose();
+    scrollerForjobSection.dispose();
     focusNodeForCardDetails1.dispose();
     focusNodeForCardDetails2.dispose();
     focusNodeForCardDetails3.dispose();
@@ -523,6 +604,25 @@ class JobCardController extends GetxController {
   // =====================  print functions   =====================
   // ===================== 1. print invoice   =====================
 
+  Map<String, dynamic> _primaryCustomerAddress(Map customerInformation) {
+    final addressInfos = customerInformation['entity_address'];
+    if (addressInfos is! List) return {};
+
+    for (final info in addressInfos) {
+      if (info is Map && info['isPrimary'] == true) {
+        return Map<String, dynamic>.from(info);
+      }
+    }
+
+    for (final info in addressInfos) {
+      if (info is Map) {
+        return Map<String, dynamic>.from(info);
+      }
+    }
+
+    return {};
+  }
+
   Future<Uint8List> generateInvoicedPdf(
     bool withHeader,
     bool isProformaInvoice,
@@ -552,12 +652,7 @@ class JobCardController extends GetxController {
       customerInformation = await helper.getEntityInformationForPrinting(
         customerId.value,
       );
-      List addressinfos = customerInformation.containsKey('entity_address')
-          ? customerInformation['entity_address']
-          : [];
-      customerAddressInformation = addressinfos.firstWhere(
-        (info) => info['isPrimary'] == true,
-      );
+      customerAddressInformation = _primaryCustomerAddress(customerInformation);
     }
     List totals = calculateTotals();
     double net = totals[2] ?? 0;
@@ -736,12 +831,7 @@ class JobCardController extends GetxController {
       customerInformation = await helper.getEntityInformationForPrinting(
         customerId.value,
       );
-      List addressinfos = customerInformation.containsKey('entity_address')
-          ? customerInformation['entity_address']
-          : [];
-      customerAddressInformation = addressinfos.firstWhere(
-        (info) => info['isPrimary'] == true,
-      );
+      customerAddressInformation = _primaryCustomerAddress(customerInformation);
     }
     List totals = calculateTotals();
 
@@ -1122,6 +1212,7 @@ class JobCardController extends GetxController {
   Future<void> getJobItemsSummaryTable(String jobId) async {
     try {
       loadingJobItemsSummaryTable.value = true;
+      itemsSummaryTableList.clear();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -1164,6 +1255,7 @@ class JobCardController extends GetxController {
   Future<void> getTimeSheetsSummaryForJobCard(String jobId) async {
     try {
       loadingTimeSheetsSummary.value = true;
+      timeSheetsSummaryTable.clear();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -1311,6 +1403,8 @@ class JobCardController extends GetxController {
             context: Get.context!,
             content: 'Please enter valid job date',
           );
+          addingNewValue.value = false;
+          return;
         }
       } else {
         newData['job_date'] = null;
@@ -1325,6 +1419,8 @@ class JobCardController extends GetxController {
             context: Get.context!,
             content: 'Please enter valid invoice date',
           );
+          addingNewValue.value = false;
+          return;
         }
       } else {
         newData['invoice_date'] = null;
@@ -1665,6 +1761,7 @@ class JobCardController extends GetxController {
     int index = allInvoiceItems.indexWhere(
       (item) => (item.id == itemId || item.uid == itemId),
     );
+    if (index == -1) return;
     allInvoiceItems[index].deleted = true;
     allInvoiceItems.refresh();
     isJobInvoicesModified.value = true;
@@ -1700,7 +1797,7 @@ class JobCardController extends GetxController {
     Get.back();
   }
 
-  Future copyJob(String id) async {
+  Future<JobCardModel?> copyJob(String id) async {
     try {
       Map jobStatus = await getCurrentJobCardStatus(id);
       final status1 = jobStatus['job_status_1'];
@@ -1709,7 +1806,7 @@ class JobCardController extends GetxController {
           context: Get.context!,
           content: 'Only Posted / Cancelled Jobs Can be Copied',
         );
-        return;
+        return null;
       }
       Get.back();
 
@@ -1748,12 +1845,14 @@ class JobCardController extends GetxController {
       }
 
       loadingCopyJob.value = false;
+      return null;
     } catch (e) {
       loadingCopyJob.value = false;
       alertMessage(
         context: Get.context!,
         content: 'Something went wrong please try again',
       );
+      return null;
     }
   }
 
@@ -1903,7 +2002,7 @@ class JobCardController extends GetxController {
         alertMessage(
           title: 'Done',
           context: Get.context!,
-          content: 'Only Posted Jobs Allowed',
+          content: 'Quotation created successfully',
         );
         final decoded = jsonDecode(response.body);
         quotationCounter.value = decoded['quotation_number'];
@@ -2059,10 +2158,17 @@ class JobCardController extends GetxController {
 
   // ===============================================================================================================
   void changejobWarrentyEndDateDependingOnWarrentyDays() {
-    DateTime date = format.parse(deliveryDate.value.text);
-    DateTime newDate = date.add(
-      Duration(days: int.parse(jobWarrentyDays.value.text)),
-    );
+    final days = int.tryParse(jobWarrentyDays.value.text);
+    if (days == null || deliveryDate.value.text.trim().isEmpty) return;
+
+    late final DateTime date;
+    try {
+      date = format.parseStrict(deliveryDate.value.text);
+    } catch (_) {
+      return;
+    }
+
+    DateTime newDate = date.add(Duration(days: days));
     jobWarrentyEndDate.value.text = format.format(newDate);
   }
 
@@ -2186,7 +2292,7 @@ class JobCardController extends GetxController {
     if (quantity.text.isEmpty) quantity.text = '0';
     if (discount.text.isEmpty) discount.text = '0';
     if (vat.text.isEmpty) vat.text = '0';
-    final currwnQquanity = int.tryParse(quantity.text) ?? 0;
+    final currwnQquanity = double.tryParse(quantity.text) ?? 0.0;
     final currentPrice = double.tryParse(price.text) ?? 0.0;
     final currentDiscount = double.tryParse(discount.text) ?? 0.0;
     amount.text = (currwnQquanity * currentPrice).toStringAsFixed(2);
@@ -2200,16 +2306,19 @@ class JobCardController extends GetxController {
 
   void updateAmount() {
     if (net.text.isEmpty) net.text = '0';
-    if (net.text != '0') {
-      total.text =
-          (double.tryParse(net.text)! / (1 + currentCountryVAT.value / 100))
-              .toStringAsFixed(2);
-      amount.text =
-          (double.tryParse(total.text)! + double.tryParse(discount.text)!)
-              .toStringAsFixed(2);
-      price.text =
-          (double.tryParse(amount.text)! / double.tryParse(quantity.text)!)
-              .toStringAsFixed(2);
+    final currentNet = double.tryParse(net.text) ?? 0.0;
+    final currentDiscount = double.tryParse(discount.text) ?? 0.0;
+    final currentQuantity = double.tryParse(quantity.text) ?? 0.0;
+    if (currentNet != 0) {
+      total.text = (currentNet / (1 + currentCountryVAT.value / 100))
+          .toStringAsFixed(2);
+      amount.text = (double.tryParse(total.text)! + currentDiscount)
+          .toStringAsFixed(2);
+      price.text = currentQuantity == 0
+          ? '0.00'
+          : (double.tryParse(amount.text)! / currentQuantity).toStringAsFixed(
+              2,
+            );
       vat.text =
           ((double.tryParse(total.text))! * (currentCountryVAT.value) / 100)
               .toStringAsFixed(2);
@@ -2521,7 +2630,7 @@ class JobCardController extends GetxController {
   }
 
   Future<void> loadValues(JobCardModel data) async {
-    data.type == 'SALES' ? isSales.value = true : isSales.value = false;
+    data.type == 'SALE' ? isSales.value = true : isSales.value = false;
     quotationId.value = data.quotationId ?? '';
     jobCardAdded.value = true;
     isReturned.value = data.label == 'Returned' ? true : false;
@@ -2784,13 +2893,15 @@ class JobCardController extends GetxController {
   }
 
   void inOutDiffCalculating() {
-    inOutDiff.value.text =
-        (int.parse(mileageOut.value.text) - int.parse(mileageIn.value.text))
-            .toString();
+    final mileageOutValue = int.tryParse(mileageOut.value.text) ?? 0;
+    final mileageInValue = int.tryParse(mileageIn.value.text) ?? 0;
+    inOutDiff.value.text = (mileageOutValue - mileageInValue).toString();
   }
 
   void onSelectForCustomers(String id, Map selectedCustomer) async {
-    List phoneDetails = selectedCustomer['entity_phone'];
+    List phoneDetails = selectedCustomer['entity_phone'] is List
+        ? selectedCustomer['entity_phone']
+        : [];
     Map phone = phoneDetails.firstWhere(
       (value) => value['isPrimary'] == true,
       orElse: () => {'phone': ''},
@@ -2827,18 +2938,21 @@ class JobCardController extends GetxController {
     lableFilter.value.clear();
     lpoFilter.value.clear();
     statusFilter.value.clear();
+    typeFilter.value.clear();
     isAllSelected.value = false;
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;
     jobNumberFilter.value.clear();
     invoiceNumberFilter.value.clear();
-    carBrandIdFilterName.value = TextEditingController();
-    carBrandIdFilter = RxString('');
-    carModelIdFilter = RxString('');
-    customerNameIdFilter = RxString('');
+    carBrandIdFilterName.value.clear();
+    carBrandIdFilter.value = '';
+    carModelIdFilter.value = '';
+    customerNameIdFilter.value = '';
+    branchNameIdFilter.value = '';
     carModelIdFilterName.value.clear();
     customerNameIdFilterName.value.clear();
+    branchFilterName.value.clear();
     plateNumberFilter.value.clear();
     vinFilter.value.clear();
     fromDate.value.clear();

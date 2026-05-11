@@ -8,7 +8,7 @@ pw.Widget infoRow({
   required String title,
   required String value,
   bool? isNumber = false,
-  pw.Font? font
+  pw.Font? font,
 }) {
   return pw.Padding(
     padding: const pw.EdgeInsets.only(bottom: 4),
@@ -129,7 +129,7 @@ $deliveryNote
                         ),
                         numberInfoRow(
                           title: 'VAT:',
-                          value: formatNum(totals[3], priceFormat),
+                          value: formatNum(totals[1], priceFormat),
                         ),
                         numberInfoRow(
                           title: 'Total:',

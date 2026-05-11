@@ -223,14 +223,18 @@ GetBuilder<JobCardController> copyJobButton(
       return ClickableHoverText(
         onTap: controller.loadingCopyJob.isFalse
             ? () async {
-                JobCardModel newData = await controller.copyJob(jobId);
+                final JobCardModel? newData = await controller.copyJob(jobId);
+                if (newData == null) {
+                  controller.loadingCopyJob.value = false;
+                  return;
+                }
                 await controller.loadValues(newData);
                 controller.loadingCopyJob.value = false;
                 editJobCardDialog(
                   controller,
                   newData,
                   newData.id ?? '',
-                  newData.type == 'JOB' ? false : true,
+                  newData.type == 'JOB'
                 ); // need to be changed
               }
             : null,
