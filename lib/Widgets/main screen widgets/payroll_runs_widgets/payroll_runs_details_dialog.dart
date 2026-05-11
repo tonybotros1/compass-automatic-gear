@@ -40,7 +40,9 @@ Future<dynamic> payrollRunsDetails({
                   builder: (controller) {
                     return ClickableHoverText(
                       text: controller.rollingBack.isFalse ? 'Rollback' : "•••",
-                      onTap: onTapForRollback,
+                      onTap: controller.rollingBack.isFalse
+                          ? onTapForRollback
+                          : null,
                     );
                   },
                 ),

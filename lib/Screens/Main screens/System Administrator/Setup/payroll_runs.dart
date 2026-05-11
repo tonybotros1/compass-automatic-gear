@@ -184,14 +184,7 @@ ElevatedButton newPayrollButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      controller.payrollName.clear();
-      controller.periodName.clear();
-      controller.payrollNameId.value = '';
-      controller.periodNameId.value = '';
-      controller.employeeName.clear();
-      controller.employeeId.value = '';
-      controller.elementName.clear();
-      controller.elementId.value = '';
+      controller.clearPayrollRunValues();
 
       payrollRunsDialog(
         onPressedForDelete: null,
@@ -217,9 +210,9 @@ IconButton editSection(
 ) {
   return IconButton(
     onPressed: () async {
-      controller.payrollRunsEmployeeElementsList.clear();
-      controller.payrollRunsEmployeeElementsInformationList.clear();
-      await controller.getPayrollRunsDetails(runId);
+      controller.clearPayrollRunDetails();
+      final loaded = await controller.getPayrollRunsDetails(runId);
+      if (!loaded) return;
 
       payrollRunsDetails(
         onTapForRollback: () {
@@ -227,8 +220,12 @@ IconButton editSection(
             context: Get.context!,
             content: "Are you sure?",
             onPressed: () async {
-              await controller.payrollRollback(runId);
-              Get.close(2);
+              final rolledBack = await controller.payrollRollback(runId);
+              if (rolledBack) {
+                Get.close(2);
+              } else {
+                Get.back();
+              }
             },
           );
         },

@@ -12,6 +12,7 @@ import '../../helpers.dart';
 import 'main_screen_contro.dart';
 
 class PayrollRunsController extends GetxController {
+  final GlobalKey<FormState> payrollRunFormKey = GlobalKey<FormState>();
   RxBool isScreenLoding = RxBool(false);
   RxList<PayrollRunsModel> allPayrollRuns = RxList<PayrollRunsModel>([]);
   RxBool addingNewValue = RxBool(false);
@@ -44,6 +45,78 @@ class PayrollRunsController extends GetxController {
   RxString elementQuery = RxString('');
   Rx<TextEditingController> elementSearch = TextEditingController().obs;
 
+  @override
+  void onClose() {
+    payrollName.dispose();
+    periodName.dispose();
+    employeeName.dispose();
+    elementName.dispose();
+    employeeSearch.value.dispose();
+    elementSearch.value.dispose();
+    super.onClose();
+  }
+
+  bool _validatePayrollRun() {
+    if (!(payrollRunFormKey.currentState?.validate() ?? false)) return false;
+    if (payrollNameId.value.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please select payroll');
+      return false;
+    }
+    if (periodNameId.value.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please select period');
+      return false;
+    }
+    return true;
+  }
+
+  void clearPayrollRunValues() {
+    payrollRunFormKey.currentState?.reset();
+    payrollName.clear();
+    periodName.clear();
+    employeeName.clear();
+    elementName.clear();
+    payrollNameId.value = '';
+    periodNameId.value = '';
+    employeeId.value = '';
+    elementId.value = '';
+  }
+
+  void clearPayrollDependentValues() {
+    periodName.clear();
+    employeeName.clear();
+    periodNameId.value = '';
+    employeeId.value = '';
+  }
+
+  void clearElementSelection() {
+    elementName.clear();
+    elementId.value = '';
+  }
+
+  void clearPayrollRunDetails() {
+    employeeSearch.value.clear();
+    elementSearch.value.clear();
+    emploeeQuery.value = '';
+    elementQuery.value = '';
+    payrollRunsEmployeeList.clear();
+    filteredPayrollRunsEmployeeList.clear();
+    payrollRunsEmployeeElementsList.clear();
+    filteredPayrollRunsEmployeeElementsList.clear();
+    payrollRunsEmployeeElementsInformationList.clear();
+  }
+
+  void selectPayrollRunEmployee(PayrollRunsEmployeeModel employee) {
+    elementSearch.value.clear();
+    elementQuery.value = '';
+    filteredPayrollRunsEmployeeElementsList.clear();
+    payrollRunsEmployeeElementsList.assignAll(
+      employee.runEmployeeDetails ?? [],
+    );
+    payrollRunsEmployeeElementsInformationList.assignAll(
+      employee.runEmployeeInformation ?? [],
+    );
+  }
+
   Future<Map<String, dynamic>> getAllPayrlls() async {
     return await helper.getPayrolls();
   }
@@ -53,6 +126,7 @@ class PayrollRunsController extends GetxController {
   }
 
   Future<Map<String, dynamic>> getPayrollPeriods() async {
+    if (payrollNameId.value.isEmpty) return {};
     return await helper.getPayrollPeriods(payrollNameId.value);
   }
 
@@ -102,6 +176,8 @@ class PayrollRunsController extends GetxController {
 
   Future<Map<String, dynamic>> getAllEmployeesForSelectedPayroll() async {
     try {
+      if (payrollNameId.value.isEmpty) return {};
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -171,8 +247,10 @@ class PayrollRunsController extends GetxController {
     }
   }
 
-  Future<void> getPayrollRunsDetails(String id) async {
+  Future<bool> getPayrollRunsDetails(String id) async {
     try {
+      if (id.isEmpty) return false;
+
       isScreenLoding.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -190,10 +268,12 @@ class PayrollRunsController extends GetxController {
           decoded['payroll_runs_details'],
         );
         payrollRunsEmployeeList.assignAll(details.employeesDetails ?? []);
+        isScreenLoding.value = false;
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllPayrollRuns();
+          return await getPayrollRunsDetails(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -201,13 +281,17 @@ class PayrollRunsController extends GetxController {
         logout();
       }
       isScreenLoding.value = false;
+      return false;
     } catch (e) {
       isScreenLoding.value = false;
+      return false;
     }
   }
 
   Future<void> payrollRun() async {
     try {
+      if (!_validatePayrollRun()) return;
+
       addingNewValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -249,8 +333,10 @@ class PayrollRunsController extends GetxController {
     }
   }
 
-  Future<void> payrollRollback(String runId) async {
+  Future<bool> payrollRollback(String runId) async {
     try {
+      if (runId.isEmpty) return false;
+
       rollingBack.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -264,10 +350,12 @@ class PayrollRunsController extends GetxController {
       );
       if (response.statusCode == 200) {
         allPayrollRuns.removeWhere((i) => i.id == runId);
+        rollingBack.value = false;
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await payrollRun();
+          return await payrollRollback(runId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -275,12 +363,14 @@ class PayrollRunsController extends GetxController {
         logout();
       }
       rollingBack.value = false;
+      return false;
     } catch (e) {
       alertMessage(
         context: Get.context!,
         content: "Coud not rollback please try again later",
       );
       rollingBack.value = false;
+      return false;
     }
   }
 
@@ -292,7 +382,7 @@ class PayrollRunsController extends GetxController {
       filteredPayrollRunsEmployeeList.assignAll(
         payrollRunsEmployeeList.where((employee) {
           return employee.employeeName.toString().toLowerCase().contains(
-            emploeeQuery,
+            emploeeQuery.value,
           );
         }).toList(),
       );
@@ -307,7 +397,7 @@ class PayrollRunsController extends GetxController {
       filteredPayrollRunsEmployeeElementsList.assignAll(
         payrollRunsEmployeeElementsList.where((employee) {
           return employee.elementName.toString().toLowerCase().contains(
-            elementQuery,
+            elementQuery.value,
           );
         }).toList(),
       );

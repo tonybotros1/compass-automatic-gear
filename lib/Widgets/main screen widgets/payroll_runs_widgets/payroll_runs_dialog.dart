@@ -44,7 +44,9 @@ Future<dynamic> payrollRunsDialog({
 
                   GetX<PayrollRunsController>(
                     builder: (controller) => ClickableHoverText(
-                      onTap: onPressed,
+                      onTap: controller.addingNewValue.isFalse
+                          ? onPressed
+                          : null,
                       text: controller.addingNewValue.value == false
                           ? 'Run'
                           : "•••",

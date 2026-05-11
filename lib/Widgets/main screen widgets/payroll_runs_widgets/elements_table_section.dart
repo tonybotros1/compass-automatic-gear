@@ -71,7 +71,7 @@ Widget tableOfScreens({
     ],
     rows:
         controller.filteredPayrollRunsEmployeeElementsList.isEmpty &&
-            controller.employeeSearch.value.text.isEmpty
+            controller.elementSearch.value.text.isEmpty
         ? controller.payrollRunsEmployeeElementsList.map<DataRow>((doc) {
             return dataRowForTheTable(doc, constraints, controller);
           }).toList()

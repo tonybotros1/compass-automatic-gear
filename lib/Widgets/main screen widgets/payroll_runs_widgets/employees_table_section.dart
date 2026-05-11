@@ -92,13 +92,7 @@ DataRow dataRowForTheTable(
 ) {
   return DataRow2(
     onTap: () {
-      controller.filteredPayrollRunsEmployeeElementsList.clear();
-      controller.payrollRunsEmployeeElementsList.assignAll(
-        data.runEmployeeDetails ?? [],
-      );
-      controller.payrollRunsEmployeeElementsInformationList.assignAll(
-        data.runEmployeeInformation ?? [],
-      );
+      controller.selectPayrollRunEmployee(data);
     },
     cells: [
       DataCell(

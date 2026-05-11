@@ -17,19 +17,21 @@ class PayrollRunsModel {
 
   factory PayrollRunsModel.fromJson(Map<String, dynamic> json) {
     return PayrollRunsModel(
-      id: json.containsKey('_id') ? json['_id'] ?? '' : '',
-      runNumber: json.containsKey('run_number') ? json['run_number'] ?? '' : '',
+      id: json.containsKey('_id') ? json['_id']?.toString() ?? '' : '',
+      runNumber: json.containsKey('run_number')
+          ? json['run_number']?.toString() ?? ''
+          : '',
       payrollName: json.containsKey('payroll_name')
-          ? json['payroll_name'] ?? ""
+          ? json['payroll_name']?.toString() ?? ""
           : "",
       periodName: json.containsKey('period_name')
-          ? json['period_name'] ?? ""
+          ? json['period_name']?.toString() ?? ""
           : "",
       description: json.containsKey('description')
-          ? json['description'] ?? ""
+          ? json['description']?.toString() ?? ""
           : "",
       paymentNumber: json.containsKey('payment_number')
-          ? json['payment_number'] ?? ''
+          ? json['payment_number']?.toString() ?? ''
           : '',
     );
   }
