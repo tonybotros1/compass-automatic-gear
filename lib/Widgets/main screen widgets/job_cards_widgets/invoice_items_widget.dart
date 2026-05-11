@@ -254,8 +254,7 @@ Widget deleteSection(
 ) {
   return IconButton(
     onPressed: () {
-      if (controller.jobStatus1.value == 'New' ||
-          controller.jobStatus1.isEmpty) {
+      if (controller.ensureCanEditInvoiceItems()) {
         alertDialog(
           context: context,
           content: 'Are you sure you want to remove this item?',
@@ -263,8 +262,6 @@ Widget deleteSection(
             controller.deleteInvoiceItem(invoiceItemsId);
           },
         );
-      } else {
-        alertMessage(context: Get.context!, content: 'Only New Jobs Allowed');
       }
     },
     icon: const Icon(Icons.delete, color: Colors.red),
@@ -280,8 +277,7 @@ Widget editSection(
 ) {
   return IconButton(
     onPressed: () {
-      if (controller.jobStatus1.value == 'New' ||
-          controller.jobStatus1.isEmpty) {
+      // if (controller.ensureCanEditInvoiceItems()) {
         controller.invoiceItemNameId.value = invoiceItemsData.nameId ?? '';
         controller.invoiceItemName.text = invoiceItemsData.name ?? '';
         controller.lineNumber.text = (invoiceItemsData.lineNumber ?? '')
@@ -303,9 +299,7 @@ Widget editSection(
                   controller.editInvoiceItem(invoiceItemsId);
                 },
         );
-      } else {
-        alertMessage(context: Get.context!, content: 'Only New Jobs Allowed');
-      }
+      // }
     },
     icon: const Icon(Icons.edit_note_rounded, color: Colors.blue),
   );
@@ -319,6 +313,7 @@ ElevatedButton newinvoiceItemsButton(
 ) {
   return ElevatedButton(
     onPressed: () {
+      if (!controller.ensureCanEditInvoiceItems()) return;
       controller.clearInvoiceItemsVariables();
 
       invoiceItemsForJobDialog(

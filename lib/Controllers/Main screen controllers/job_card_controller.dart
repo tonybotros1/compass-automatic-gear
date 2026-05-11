@@ -466,6 +466,118 @@ class JobCardController extends GetxController {
   String? selectedValue;
   final TextEditingController textEditingController = TextEditingController();
 
+  bool get canEditInvoiceItems =>
+      jobStatus1.value == 'New' || jobStatus1.value.isEmpty;
+
+  bool ensureCanEditInvoiceItems() {
+    if (canEditInvoiceItems) return true;
+    alertMessage(
+      context: Get.context!,
+      content: 'Only New job/sale cards can be edited',
+    );
+    return false;
+  }
+
+  bool _validateRequiredValue(String value, String label) {
+    if (value.trim().isNotEmpty) return true;
+    alertMessage(context: Get.context!, content: 'Please enter $label');
+    return false;
+  }
+
+  bool _validateDateValue(
+    TextEditingController controller,
+    String label, {
+    bool required = false,
+  }) {
+    final value = controller.text.trim();
+    if (value.isEmpty) {
+      if (!required) return true;
+      alertMessage(context: Get.context!, content: 'Please enter $label');
+      return false;
+    }
+
+    if (convertDateToIson(value) != null) return true;
+    alertMessage(context: Get.context!, content: 'Please enter valid $label');
+    return false;
+  }
+
+  bool _validateJobCardBeforeSave() {
+    final jobDateLabel = isSales.isTrue ? 'sale date' : 'job date';
+    if (!_validateDateValue(jobCardDate.value, jobDateLabel, required: true)) {
+      return false;
+    }
+    if (!_validateDateValue(invoiceDate.value, 'invoice date')) return false;
+    if (!_validateDateValue(approvalDate.value, 'approval date')) return false;
+    if (!_validateDateValue(startDate.value, 'start date')) return false;
+    if (!_validateDateValue(finishDate.value, 'finish date')) return false;
+    if (!_validateDateValue(deliveryDate.value, 'delivery date')) return false;
+    if (!_validateDateValue(jobCancelationDate.value, 'cancelation date')) {
+      return false;
+    }
+    if (!_validateDateValue(jobWarrentyEndDate.value, 'warranty end date')) {
+      return false;
+    }
+
+    if (!_validateRequiredValue(customerId.value, 'customer')) return false;
+    if (!_validateRequiredValue(customerBranchId.value, 'branch')) return false;
+    if (!_validateRequiredValue(customerCurrencyId.value, 'currency')) {
+      return false;
+    }
+
+    if (isSales.isFalse) {
+      if (!_validateRequiredValue(carBrandId.value, 'car brand')) return false;
+      if (!_validateRequiredValue(carModelId.value, 'car model')) return false;
+      if (!_validateRequiredValue(plateNumber.text, 'plate number')) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  bool _validateInvoiceItemBeforeSave() {
+    if (!ensureCanEditInvoiceItems()) return false;
+    if (!(formKeyForInvoiceItems.currentState?.validate() ?? false)) {
+      return false;
+    }
+
+    final currentLineNumber = int.tryParse(lineNumber.text) ?? 0;
+    if (currentLineNumber <= 0) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Line number must be greater than zero',
+      );
+      return false;
+    }
+
+    final currentQuantity = double.tryParse(quantity.text) ?? 0;
+    if (currentQuantity <= 0) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Quantity must be greater than zero',
+      );
+      return false;
+    }
+
+    final currentAmount = double.tryParse(amount.text) ?? 0;
+    final currentDiscount = double.tryParse(discount.text) ?? 0;
+    if (currentDiscount > currentAmount) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Discount cannot be greater than amount',
+      );
+      return false;
+    }
+
+    final currentNet = double.tryParse(net.text) ?? 0;
+    if (currentNet < 0) {
+      alertMessage(context: Get.context!, content: 'Net cannot be negative');
+      return false;
+    }
+
+    return true;
+  }
+
   void onChooseForDatePicker(int i) {
     switch (i) {
       case 1:
@@ -1335,6 +1447,8 @@ class JobCardController extends GetxController {
         }
       }
 
+      if (!_validateJobCardBeforeSave()) return;
+
       addingNewValue.value = true;
       Map<String, dynamic> newData = {
         'label': isReturned.isTrue ? 'Returned' : 'Not Returned',
@@ -1537,14 +1651,17 @@ class JobCardController extends GetxController {
             }
             if (updatedItems.isNotEmpty) {
               for (var item in updatedItems) {
-                var uid = item['uid'];
-                var id = item['_id'];
-                final localIndex = allInvoiceItems.indexWhere(
-                  (item) => item.uid == uid,
-                );
+                final uid = item['uid']?.toString() ?? '';
+                final id =
+                    item['_id']?.toString() ?? item['id']?.toString() ?? '';
+                final localIndex = allInvoiceItems.indexWhere((localItem) {
+                  if (uid.isNotEmpty) return localItem.uid == uid;
+                  if (id.isNotEmpty) return localItem.id == id;
+                  return false;
+                });
 
                 if (localIndex != -1) {
-                  allInvoiceItems[localIndex].id = id;
+                  if (id.isNotEmpty) allInvoiceItems[localIndex].id = id;
                   allInvoiceItems[localIndex].added = false;
                   allInvoiceItems[localIndex].isModified = false;
                   allInvoiceItems[localIndex].deleted = false;
@@ -1733,6 +1850,8 @@ class JobCardController extends GetxController {
   }
 
   void addNewInvoiceItem() {
+    if (!_validateInvoiceItemBeforeSave()) return;
+
     final String uniqueId = _uuid.v4();
 
     allInvoiceItems.add(
@@ -1758,10 +1877,21 @@ class JobCardController extends GetxController {
   }
 
   Future<void> deleteInvoiceItem(String itemId) async {
+    if (!ensureCanEditInvoiceItems()) return;
+
     int index = allInvoiceItems.indexWhere(
       (item) => (item.id == itemId || item.uid == itemId),
     );
     if (index == -1) return;
+
+    if (allInvoiceItems[index].id == null || allInvoiceItems[index].id == '') {
+      allInvoiceItems.removeAt(index);
+      allInvoiceItems.refresh();
+      isJobInvoicesModified.value = true;
+      Get.back();
+      return;
+    }
+
     allInvoiceItems[index].deleted = true;
     allInvoiceItems.refresh();
     isJobInvoicesModified.value = true;
@@ -1769,32 +1899,39 @@ class JobCardController extends GetxController {
   }
 
   Future<void> editInvoiceItem(String itemId) async {
-    int index = allInvoiceItems.indexWhere(
-      (item) => (item.id == itemId || item.uid == itemId),
-    );
+    if (ensureCanEditInvoiceItems()) {
+      if (!_validateInvoiceItemBeforeSave()) return;
 
-    if (index != -1) {
-      final oldItem = allInvoiceItems[index];
-      allInvoiceItems[index] = JobCardInvoiceItemsModel(
-        id: oldItem.id,
-        uid: oldItem.uid,
-        nameId: invoiceItemNameId.value,
-        name: invoiceItemName.text,
-        lineNumber: int.tryParse(lineNumber.text) ?? 0,
-        description: description.text,
-        quantity: double.tryParse(quantity.text) ?? 0,
-        price: double.tryParse(price.text) ?? 0.0,
-        amount: double.tryParse(amount.text) ?? 0.0,
-        discount: double.tryParse(discount.text) ?? 0.0,
-        total: double.tryParse(total.text) ?? 0.0,
-        vat: double.tryParse(vat.text) ?? 0.0,
-        net: double.tryParse(net.text) ?? 0.0,
-        isModified: true,
+      int index = allInvoiceItems.indexWhere(
+        (item) => (item.id == itemId || item.uid == itemId),
       );
-    }
-    isJobInvoicesModified.value = true;
 
-    Get.back();
+      if (index != -1) {
+        final oldItem = allInvoiceItems[index];
+        allInvoiceItems[index] = JobCardInvoiceItemsModel(
+          id: oldItem.id,
+          uid: oldItem.uid,
+          nameId: invoiceItemNameId.value,
+          name: invoiceItemName.text,
+          lineNumber: int.tryParse(lineNumber.text) ?? 0,
+          description: description.text,
+          quantity: double.tryParse(quantity.text) ?? 0,
+          price: double.tryParse(price.text) ?? 0.0,
+          amount: double.tryParse(amount.text) ?? 0.0,
+          discount: double.tryParse(discount.text) ?? 0.0,
+          total: double.tryParse(total.text) ?? 0.0,
+          vat: double.tryParse(vat.text) ?? 0.0,
+          net: double.tryParse(net.text) ?? 0.0,
+          isModified: true,
+          added: oldItem.added,
+          deleted: oldItem.deleted,
+          jobId: oldItem.jobId,
+        );
+      }
+      isJobInvoicesModified.value = true;
+
+      Get.back();
+    }
   }
 
   Future<JobCardModel?> copyJob(String id) async {

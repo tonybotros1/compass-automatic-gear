@@ -106,7 +106,6 @@ Widget addNewJobCardOrEdit({
         DefaultTabController(
           length: controller.jobCardTabs.length,
           child: Column(
-            // spacing: 10,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
