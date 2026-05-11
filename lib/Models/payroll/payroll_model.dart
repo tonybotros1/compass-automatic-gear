@@ -19,18 +19,20 @@ class PayrollModel {
 
   factory PayrollModel.fromJson(Map<String, dynamic> json) {
     return PayrollModel(
-      id: json.containsKey('_id') ? json['_id'] ?? '' : '',
-      name: json.containsKey('name') ? json['name'] ?? '' : '',
-      notes: json.containsKey('notes') ? json['notes'] ?? "" : "",
+      id: json.containsKey('_id') ? json['_id']?.toString() ?? '' : '',
+      name: json.containsKey('name') ? json['name']?.toString() ?? '' : '',
+      notes: json.containsKey('notes') ? json['notes']?.toString() ?? "" : "",
       paymentTypeId: json.containsKey('payment_type')
-          ? json['payment_type'] ?? ""
+          ? json['payment_type']?.toString() ?? ""
           : "",
       paymentType: json.containsKey('payment_type_name')
-          ? json['payment_type_name'] ?? ""
+          ? json['payment_type_name']?.toString() ?? ""
           : "",
-      allParollDetails: json['details'] != null
+      allParollDetails: json['details'] is List
           ? List<PeriodDetailsModel>.from(
-              json['details'].map((det) => PeriodDetailsModel.fromJson(det)),
+              (json['details'] as List).whereType<Map<String, dynamic>>().map(
+                (det) => PeriodDetailsModel.fromJson(det),
+              ),
             )
           : [],
     );

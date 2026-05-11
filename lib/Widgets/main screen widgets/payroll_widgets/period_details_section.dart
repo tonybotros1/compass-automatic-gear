@@ -140,8 +140,15 @@ IconButton deleteSection(
       alertDialog(
         context: context,
         content: "The document will be deleted permanently",
-        onPressed: () {
-          controller.deletePayrollPeriod(id);
+        onPressed: () async {
+          final deleted = await controller.deletePayrollPeriod(id);
+          Get.back();
+          if (!deleted) {
+            alertMessage(
+              context: Get.context!,
+              content: 'Could not delete period',
+            );
+          }
         },
       );
     },

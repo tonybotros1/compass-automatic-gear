@@ -47,8 +47,10 @@ Container parollDetails(PayrollController controller) {
                       controller.paymentType.clear();
                     },
                     onSelected: (value) {
-                      controller.paymentTypeId.value = value['_id'];
-                      controller.paymentType.text = value['type'];
+                      controller.paymentTypeId.value =
+                          value['_id']?.toString() ?? '';
+                      controller.paymentType.text =
+                          value['type']?.toString() ?? '';
                     },
                   ),
                   const SizedBox(height: 10),
@@ -62,6 +64,7 @@ Container parollDetails(PayrollController controller) {
                         );
                         return;
                       }
+                      controller.clearMonthlyPeriodValues();
                       monthlyPeriodsDialog(
                         controller: controller,
                         onPressed: () async {
@@ -80,6 +83,7 @@ Container parollDetails(PayrollController controller) {
                 maxLines: 7,
                 labelText: 'Notes',
                 controller: controller.notes,
+                validate: false,
               ),
             ),
           ],

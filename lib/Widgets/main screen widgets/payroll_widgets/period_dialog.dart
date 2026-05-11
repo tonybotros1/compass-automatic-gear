@@ -37,7 +37,9 @@ Future<dynamic> periodDialog({
                   const Spacer(),
                   GetX<PayrollController>(
                     builder: (controller) => ClickableHoverText(
-                      onTap: onPressed,
+                      onTap: controller.addingNewPeriodValue.isFalse
+                          ? onPressed
+                          : null,
                       text: controller.addingNewPeriodValue.value == false
                           ? 'Save'
                           : "•••",

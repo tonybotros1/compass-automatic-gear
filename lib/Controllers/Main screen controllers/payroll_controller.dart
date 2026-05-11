@@ -12,6 +12,10 @@ import '../../helpers.dart';
 import 'main_screen_contro.dart';
 
 class PayrollController extends GetxController {
+  final GlobalKey<FormState> payrollFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> periodFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> monthlyPeriodsFormKey = GlobalKey<FormState>();
+
   // header
   TextEditingController name = TextEditingController();
   TextEditingController notes = TextEditingController();
@@ -47,6 +51,133 @@ class PayrollController extends GetxController {
     super.onInit();
   }
 
+  @override
+  void onClose() {
+    name.dispose();
+    notes.dispose();
+    paymentType.dispose();
+    periodName.dispose();
+    periodStartDate.dispose();
+    periodEndDate.dispose();
+    yearStartDate.dispose();
+    super.onClose();
+  }
+
+  void clearPayrollValues() {
+    payrollFormKey.currentState?.reset();
+    currentPayrollId.value = '';
+    name.clear();
+    notes.clear();
+    paymentType.clear();
+    paymentTypeId.value = '';
+    allPeriodDetails.clear();
+    clearPeriodValues();
+    clearMonthlyPeriodValues();
+  }
+
+  void clearPeriodValues() {
+    periodFormKey.currentState?.reset();
+    periodName.clear();
+    periodStartDate.clear();
+    periodEndDate.clear();
+    isActiveSelected.value = true;
+  }
+
+  void clearMonthlyPeriodValues() {
+    monthlyPeriodsFormKey.currentState?.reset();
+    yearStartDate.clear();
+  }
+
+  DateTime? _dateFromController(TextEditingController controller) {
+    final isoDate = convertDateToIson(controller.text);
+    return isoDate == null ? null : DateTime.tryParse(isoDate);
+  }
+
+  bool _validatePayroll() {
+    if (!(payrollFormKey.currentState?.validate() ?? false)) return false;
+    if (name.text.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please enter payroll name');
+      return false;
+    }
+    if (paymentTypeId.value.trim().isEmpty) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Please select payment type',
+      );
+      return false;
+    }
+    return true;
+  }
+
+  bool _validatePeriod() {
+    if (currentPayrollId.value.isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please save payroll first');
+      return false;
+    }
+    if (!(periodFormKey.currentState?.validate() ?? false)) return false;
+    if (periodName.text.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please enter period name');
+      return false;
+    }
+
+    final startDate = _dateFromController(periodStartDate);
+    if (startDate == null) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Please enter valid start date',
+      );
+      return false;
+    }
+
+    final endDate = _dateFromController(periodEndDate);
+    if (endDate == null) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Please enter valid end date',
+      );
+      return false;
+    }
+
+    if (endDate.isBefore(startDate)) {
+      alertMessage(
+        context: Get.context!,
+        content: 'End date cannot be before start date',
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  bool _validateMonthlyPeriods() {
+    if (currentPayrollId.value.isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please save payroll first');
+      return false;
+    }
+    if (!(monthlyPeriodsFormKey.currentState?.validate() ?? false)) {
+      return false;
+    }
+    if (_dateFromController(yearStartDate) == null) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Please enter valid year start date',
+      );
+      return false;
+    }
+    return true;
+  }
+
+  void _upsertPayroll(PayrollModel payroll) {
+    final payrollId = payroll.id;
+    if (payrollId == null || payrollId.isEmpty) return;
+    final index = allPayrolls.indexWhere((i) => i.id == payrollId);
+    if (index == -1) {
+      allPayrolls.insert(0, payroll);
+    } else {
+      allPayrolls[index] = payroll;
+    }
+  }
+
   String getScreenName() {
     MainScreenController mainScreenController =
         Get.find<MainScreenController>();
@@ -74,9 +205,11 @@ class PayrollController extends GetxController {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        List payrolls = decoded['all_payrolls'];
+        List payrolls = decoded['all_payrolls'] ?? [];
         allPayrolls.assignAll(
-          payrolls.map((branch) => PayrollModel.fromJson(branch)),
+          payrolls.whereType<Map<String, dynamic>>().map(
+            (branch) => PayrollModel.fromJson(branch),
+          ),
         );
         isScreenLoding.value = false;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
@@ -84,6 +217,7 @@ class PayrollController extends GetxController {
         if (refreshed == RefreshResult.success) {
           await getAllPayrolls();
         } else if (refreshed == RefreshResult.invalidToken) {
+          isScreenLoding.value = false;
           logout();
         }
       } else if (response.statusCode == 401) {
@@ -97,8 +231,10 @@ class PayrollController extends GetxController {
     }
   }
 
-  Future<void> getCurrentPayrollDetails(String id) async {
+  Future<bool> getCurrentPayrollDetails(String id) async {
     try {
+      if (id.isEmpty) return false;
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -112,17 +248,18 @@ class PayrollController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         PayrollModel payroll = PayrollModel.fromJson(
-          decoded['payroll_details'],
+          Map<String, dynamic>.from(decoded['payroll_details'] ?? {}),
         );
         name.text = payroll.name ?? '';
         notes.text = payroll.notes ?? '';
         paymentType.text = payroll.paymentType ?? '';
         paymentTypeId.value = payroll.paymentTypeId ?? '';
         allPeriodDetails.assignAll(payroll.allParollDetails ?? []);
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllPayrolls();
+          return await getCurrentPayrollDetails(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -130,13 +267,16 @@ class PayrollController extends GetxController {
         isScreenLoding.value = false;
         logout();
       }
+      return false;
     } catch (e) {
-      // print(e);
+      return false;
     }
   }
 
   Future<void> addNewPayroll() async {
     try {
+      if (!_validatePayroll()) return;
+
       addingNewValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -158,10 +298,10 @@ class PayrollController extends GetxController {
         if (response.statusCode == 200) {
           final decoded = jsonDecode(response.body);
           PayrollModel addedPayroll = PayrollModel.fromJson(
-            decoded['added_details'],
+            Map<String, dynamic>.from(decoded['added_details'] ?? {}),
           );
           currentPayrollId.value = addedPayroll.id ?? '';
-          allPayrolls.insert(0, addedPayroll);
+          _upsertPayroll(addedPayroll);
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -191,13 +331,9 @@ class PayrollController extends GetxController {
         if (response.statusCode == 200) {
           final decoded = jsonDecode(response.body);
           PayrollModel updatedPayroll = PayrollModel.fromJson(
-            decoded['updated_data'],
+            Map<String, dynamic>.from(decoded['updated_data'] ?? {}),
           );
-          int index = allPayrolls.indexWhere(
-            (i) => i.id == currentPayrollId.value,
-          );
-
-          allPayrolls[index] = updatedPayroll;
+          _upsertPayroll(updatedPayroll);
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -216,8 +352,10 @@ class PayrollController extends GetxController {
     }
   }
 
-  Future<void> deletePayroll(String payrollId) async {
+  Future<bool> deletePayroll(String payrollId) async {
     try {
+      if (payrollId.isEmpty) return false;
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -228,24 +366,30 @@ class PayrollController extends GetxController {
       );
       if (response.statusCode == 200) {
         allPayrolls.removeWhere((i) => i.id == payrollId);
+        if (currentPayrollId.value == payrollId) {
+          clearPayrollValues();
+        }
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deletePayroll(payrollId);
+          return await deletePayroll(payrollId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
       }
-      Get.close(2);
+      return false;
     } catch (e) {
-      //
+      return false;
     }
   }
 
   Future<void> addNewPayrollPeriod() async {
     try {
+      if (!_validatePeriod()) return;
+
       addingNewPeriodValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -272,20 +416,9 @@ class PayrollController extends GetxController {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        Map added = decoded['added_period'];
-        allPeriodDetails.add(
-          PeriodDetailsModel(
-            id: added['_id'],
-            period: added['period_name'],
-            startDate: added['start_date'] != null
-                ? DateTime.tryParse(added['start_date'])
-                : null,
-            endDate: added['end_date'] != null
-                ? DateTime.tryParse(added['end_date'])
-                : null,
-            status: added['status'],
-          ),
-        );
+        final added = Map<String, dynamic>.from(decoded['added_period'] ?? {});
+        allPeriodDetails.add(PeriodDetailsModel.fromJson(added));
+        Get.back();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -297,7 +430,6 @@ class PayrollController extends GetxController {
         logout();
       }
       addingNewPeriodValue.value = false;
-      Get.back();
     } catch (e) {
       addingNewPeriodValue.value = false;
     }
@@ -305,6 +437,9 @@ class PayrollController extends GetxController {
 
   Future<void> updatePayrollPeriod(String periodId) async {
     try {
+      if (periodId.isEmpty) return;
+      if (!_validatePeriod()) return;
+
       addingNewPeriodValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -329,22 +464,14 @@ class PayrollController extends GetxController {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        Map added = decoded['updated_period'];
-        PeriodDetailsModel updated = PeriodDetailsModel(
-          id: added['_id'],
-          period: added['period_name'],
-          startDate: added['start_date'] != null
-              ? DateTime.tryParse(added['start_date'])
-              : null,
-          endDate: added['end_date'] != null
-              ? DateTime.tryParse(added['end_date'])
-              : null,
-          status: added['status'],
+        PeriodDetailsModel updated = PeriodDetailsModel.fromJson(
+          Map<String, dynamic>.from(decoded['updated_period'] ?? {}),
         );
         int index = allPeriodDetails.indexWhere((i) => i.id == periodId);
         if (index != -1) {
           allPeriodDetails[index] = updated;
         }
+        Get.back();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -356,14 +483,15 @@ class PayrollController extends GetxController {
         logout();
       }
       addingNewPeriodValue.value = false;
-      Get.back();
     } catch (e) {
       addingNewPeriodValue.value = false;
     }
   }
 
-  Future<void> deletePayrollPeriod(String periodId) async {
+  Future<bool> deletePayrollPeriod(String periodId) async {
     try {
+      if (periodId.isEmpty) return false;
+
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -374,24 +502,27 @@ class PayrollController extends GetxController {
       );
       if (response.statusCode == 200) {
         allPeriodDetails.removeWhere((i) => i.id == periodId);
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deletePayrollPeriod(periodId);
+          return await deletePayrollPeriod(periodId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
       }
-      Get.back();
+      return false;
     } catch (e) {
-      //
+      return false;
     }
   }
 
   Future<void> generateMonthlyPeriods() async {
     try {
+      if (!_validateMonthlyPeriods()) return;
+
       generatingMonthlyPeriods.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -411,10 +542,13 @@ class PayrollController extends GetxController {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        List addedPeriods = decoded['periods'];
+        List addedPeriods = decoded['periods'] ?? [];
         allPeriodDetails.assignAll(
-          addedPeriods.map((p) => PeriodDetailsModel.fromJson(p)),
+          addedPeriods.whereType<Map<String, dynamic>>().map(
+            (p) => PeriodDetailsModel.fromJson(p),
+          ),
         );
+        Get.back();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -426,7 +560,6 @@ class PayrollController extends GetxController {
         logout();
       }
       generatingMonthlyPeriods.value = false;
-      Get.back();
     } catch (e) {
       generatingMonthlyPeriods.value = false;
     }

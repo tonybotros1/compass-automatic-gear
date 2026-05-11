@@ -96,7 +96,7 @@ Widget tableOfScreens({
       ),
       DataColumn2(
         size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Notes'),
+        label: AutoSizedText(constraints: constraints, text: 'Payment Type'),
       ),
 
       DataColumn2(
@@ -152,15 +152,26 @@ IconButton editSection(
 ) {
   return IconButton(
     onPressed: () async {
+      controller.clearPayrollValues();
       controller.currentPayrollId.value = id;
-      await controller.getCurrentPayrollDetails(id);
+      final loaded = await controller.getCurrentPayrollDetails(id);
+      if (!loaded) return;
       payrollDialog(
         onPressedForDelete: () {
           alertDialog(
             context: Get.context!,
             content: "Are you sure you want to delete this payroll?",
-            onPressed: () {
-              controller.deletePayroll(id);
+            onPressed: () async {
+              final deleted = await controller.deletePayroll(id);
+              if (deleted) {
+                Get.close(2);
+              } else {
+                Get.back();
+                alertMessage(
+                  context: Get.context!,
+                  content: 'Could not delete payroll',
+                );
+              }
             },
           );
         },
@@ -185,12 +196,7 @@ ElevatedButton newPayrollButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      controller.name.clear();
-      controller.notes.clear();
-      controller.paymentType.clear();
-      controller.allPeriodDetails.clear();
-      controller.currentPayrollId.value = '';
-      controller.paymentTypeId.value = '';
+      controller.clearPayrollValues();
       payrollDialog(
         onPressedForDelete: null,
         context: context,
