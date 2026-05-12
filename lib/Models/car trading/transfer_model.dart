@@ -27,21 +27,26 @@ class TransferModel {
     this.transferCounter,
   });
 
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
   TransferModel.fromJson(Map<String, dynamic> json) {
-    id = json['_id'];
-    date = json['date'];
-    fromAccount = json['from_account'];
-    fromAccountName = json['from_account_name'];
-    toAccount = json['to_account'];
-    toAccountName = json['to_account_name'];
-    amount = json['amount'];
-    status = json.containsKey('status') ? json['status'] ?? '' : '';
+    id = json['_id']?.toString() ?? '';
+    date = json['date']?.toString() ?? '';
+    fromAccount = json['from_account']?.toString() ?? '';
+    fromAccountName = json['from_account_name']?.toString() ?? '';
+    toAccount = json['to_account']?.toString() ?? '';
+    toAccountName = json['to_account_name']?.toString() ?? '';
+    amount = _toDouble(json['amount']);
+    status = json.containsKey('status') ? json['status']?.toString() ?? '' : '';
     transferCounter = json.containsKey('transfer_number')
-        ? json['transfer_number'] ?? ''
+        ? json['transfer_number']?.toString() ?? ''
         : '';
-    comment = json['comment'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
+    comment = json['comment']?.toString() ?? '';
+    createdAt = json['createdAt']?.toString() ?? '';
+    updatedAt = json['updatedAt']?.toString() ?? '';
   }
 
   Map<String, dynamic> toJson() {

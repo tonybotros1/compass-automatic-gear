@@ -42,13 +42,16 @@ Future<dynamic> itemDialog({
                         style: fontStyleForScreenNameUsedInButtons,
                       ),
                       const Spacer(),
-                      GetBuilder<CarTradingDashboardController>(
-                        builder: (controller) => ClickableHoverText(
-                          onTap: isTrade && controller.addingNewValue.isTrue
-                              ? null
-                              : onPressed,
-                          text:  'Save',
-                        ),
+                      GetX<CarTradingDashboardController>(
+                        builder: (controller) {
+                          final isSaving = isTrade
+                              ? controller.addingTradeItem.isTrue
+                              : controller.isCapitalLoading.isTrue;
+                          return ClickableHoverText(
+                            onTap: isSaving ? null : onPressed,
+                            text: isSaving ? '•••' : 'Save',
+                          );
+                        },
                       ),
                       separator(),
                       closeIcon(),

@@ -19,15 +19,20 @@ class AccountSummaryModel {
     this.accountDisplay,
   });
 
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
   AccountSummaryModel.fromJson(Map<String, dynamic> json) {
-    totalCarsNet = json['total_cars_net'];
-    totalCapitalsNet = json['total_capitals_net'];
-    totalOutstandingNet = json['total_outstanding_net'];
-    totalExpensesNet = json['total_expenses_net'];
-    finalNet = json['final_net'];
-    accountName = json['account_name'];
-    accountId = json['account_id'];
-    accountDisplay = json['account_display'];
+    totalCarsNet = _toDouble(json['total_cars_net']);
+    totalCapitalsNet = _toDouble(json['total_capitals_net']);
+    totalOutstandingNet = _toDouble(json['total_outstanding_net']);
+    totalExpensesNet = _toDouble(json['total_expenses_net']);
+    finalNet = _toDouble(json['final_net']);
+    accountName = json['account_name']?.toString() ?? '';
+    accountId = json['account_id']?.toString() ?? '';
+    accountDisplay = json['account_display']?.toString() ?? '';
   }
 
   Map<String, dynamic> toJson() {

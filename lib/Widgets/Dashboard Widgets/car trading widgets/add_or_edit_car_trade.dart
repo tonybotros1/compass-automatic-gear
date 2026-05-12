@@ -17,257 +17,263 @@ Widget addNewCarTradeOrEdit({
   required bool canEdit,
   required BoxConstraints constraints,
 }) {
-  return Column(
-    children: [
-      Expanded(
-        child: CustomScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 7,
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: Column(
-                          children: [
-                            labelContainer(
-                              lable: Text('Car Information', style: fontStyle1),
-                            ),
-                            carInformation(
-                              context: context,
-                              constraints: constraints,
-                              controller: controller,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: Column(
-                          children: [
-                            labelContainer(
-                              lable: Text('Buy / Sell', style: fontStyle1),
-                            ),
-                            buySellSection(
-                              context: context,
-                              constraints: constraints,
-                              controller: controller,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        flex: 5,
-                        child: Column(
-                          children: [
-                            labelContainer(
-                              lable: Text('Note', style: fontStyle1),
-                            ),
-                            noteSection(
-                              context: context,
-                              constraints: constraints,
-                              controller: controller,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 10),
-                ],
-              ),
-            ),
-            SliverFillRemaining(
-              hasScrollBody: true,
-              child: Container(
-                decoration: containerDecor,
-                child: DefaultTabController(
-                  length: controller.carsTabs.length,
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: BoxBorder.fromLTRB(
-                            top: const BorderSide(color: Colors.grey),
-                            bottom: const BorderSide(color: Colors.grey),
+  return Form(
+    key: controller.carTradeFormKey,
+    child: Column(
+      children: [
+        Expanded(
+          child: CustomScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 7,
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: Column(
+                            children: [
+                              labelContainer(
+                                lable: Text(
+                                  'Car Information',
+                                  style: fontStyle1,
+                                ),
+                              ),
+                              carInformation(
+                                context: context,
+                                constraints: constraints,
+                                controller: controller,
+                              ),
+                            ],
                           ),
                         ),
-                        child: TabBar(
-                          onTap: (i) {
-                            if (i == 1) {
-                              controller.itemsPageName.value = 'items';
-                            } else {
-                              controller.itemsPageName.value =
-                                  'purchase agreement items';
-                            }
-                          },
-                          unselectedLabelColor: Colors.grey,
-                          tabAlignment: TabAlignment.start,
-                          isScrollable: true,
-                          indicatorColor: mainColor,
-                          labelColor: mainColor,
-                          splashBorderRadius: BorderRadius.circular(5),
-                          dividerColor: Colors.transparent,
-
-                          tabs: controller.carsTabs,
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            children: [
+                              labelContainer(
+                                lable: Text('Buy / Sell', style: fontStyle1),
+                              ),
+                              buySellSection(
+                                context: context,
+                                constraints: constraints,
+                                controller: controller,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        Expanded(
+                          flex: 5,
+                          child: Column(
+                            children: [
+                              labelContainer(
+                                lable: Text('Note', style: fontStyle1),
+                              ),
+                              noteSection(
+                                context: context,
+                                constraints: constraints,
+                                controller: controller,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
 
-                      Expanded(
-                        child: TabBarView(
-                          children: [
-                            Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  color: Colors.white,
-                                  child: Row(
-                                    children: [
-                                      const Spacer(),
-                                      newItemButtonForSalesAgreement(
-                                        context,
-                                        controller,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: GetX<CarTradingDashboardController>(
-                                    builder: (controller) {
-                                      return SingleChildScrollView(
-                                        scrollDirection: Axis.vertical,
-                                        child: SizedBox(
-                                          width: constraints.maxWidth,
-                                          child:
-                                              tableOfScreensForSalesAgreement(
-                                                constraints: constraints,
-                                                context: context,
-                                                controller: controller,
-                                              ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
+                    const SizedBox(height: 10),
+                  ],
+                ),
+              ),
+              SliverFillRemaining(
+                hasScrollBody: true,
+                child: Container(
+                  decoration: containerDecor,
+                  child: DefaultTabController(
+                    length: controller.carsTabs.length,
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: BoxBorder.fromLTRB(
+                              top: const BorderSide(color: Colors.grey),
+                              bottom: const BorderSide(color: Colors.grey),
                             ),
-                            Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  color: Colors.white,
-                                  child: Row(
-                                    children: [
-                                      const Spacer(),
-                                      newItemButton(context, controller),
-                                    ],
+                          ),
+                          child: TabBar(
+                            onTap: (i) {
+                              if (i == 1) {
+                                controller.itemsPageName.value = 'items';
+                              } else {
+                                controller.itemsPageName.value =
+                                    'purchase agreement items';
+                              }
+                            },
+                            unselectedLabelColor: Colors.grey,
+                            tabAlignment: TabAlignment.start,
+                            isScrollable: true,
+                            indicatorColor: mainColor,
+                            labelColor: mainColor,
+                            splashBorderRadius: BorderRadius.circular(5),
+                            dividerColor: Colors.transparent,
+
+                            tabs: controller.carsTabs,
+                          ),
+                        ),
+
+                        Expanded(
+                          child: TabBarView(
+                            children: [
+                              Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    color: Colors.white,
+                                    child: Row(
+                                      children: [
+                                        const Spacer(),
+                                        newItemButtonForSalesAgreement(
+                                          context,
+                                          controller,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Expanded(
-                                  child: GetX<CarTradingDashboardController>(
-                                    builder: (controller) {
-                                      return SingleChildScrollView(
-                                        scrollDirection: Axis.vertical,
-                                        child: SizedBox(
-                                          width: constraints.maxWidth,
-                                          child: tableOfScreens(
-                                            constraints: constraints,
-                                            context: context,
-                                            controller: controller,
+                                  Expanded(
+                                    child: GetX<CarTradingDashboardController>(
+                                      builder: (controller) {
+                                        return SingleChildScrollView(
+                                          scrollDirection: Axis.vertical,
+                                          child: SizedBox(
+                                            width: constraints.maxWidth,
+                                            child:
+                                                tableOfScreensForSalesAgreement(
+                                                  constraints: constraints,
+                                                  context: context,
+                                                  controller: controller,
+                                                ),
                                           ),
-                                        ),
-                                      );
-                                    },
+                                        );
+                                      },
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    color: Colors.white,
+                                    child: Row(
+                                      children: [
+                                        const Spacer(),
+                                        newItemButton(context, controller),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: GetX<CarTradingDashboardController>(
+                                      builder: (controller) {
+                                        return SingleChildScrollView(
+                                          scrollDirection: Axis.vertical,
+                                          child: SizedBox(
+                                            width: constraints.maxWidth,
+                                            child: tableOfScreens(
+                                              constraints: constraints,
+                                              context: context,
+                                              controller: controller,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      Padding(
-        padding: const EdgeInsets.only(top: 8, right: 4),
-        child: GetX<CarTradingDashboardController>(
-          builder: (controller) {
-            return controller.itemsPageName.value.toLowerCase() == 'items'
-                ? Row(
-                    spacing: 10,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      const Text(
-                        'Total Paid:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      textForDataRowInTable(
-                        text: '${controller.totalPays.value}',
-                        color: Colors.red,
-                        isBold: true,
-                      ),
-                      const Text(
-                        'Total Received:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      textForDataRowInTable(
-                        text: '${controller.totalReceives.value}',
-                        color: Colors.green,
-                        isBold: true,
-                      ),
-                      const Text(
-                        'Net:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      textForDataRowInTable(
-                        text: '${controller.totalNETs.value}',
-                        color: Colors.blueGrey,
-                        isBold: true,
-                      ),
-                    ],
-                  )
-                : Row(
-                    spacing: 10,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      const Text(
-                        'Total Amount:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      textForDataRowInTable(
-                        text:
-                            '${controller.totalPurchaseAgreementAmount.value}',
-                        color: Colors.green,
-                        isBold: true,
-                      ),
-                      const Text(
-                        'Total Down Payment:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      textForDataRowInTable(
-                        text:
-                            '${controller.totalPurchaseAgreementDownPayment.value}',
-                        color: Colors.red,
-                        isBold: true,
-                      ),
-                    ],
-                  );
-          },
+        Padding(
+          padding: const EdgeInsets.only(top: 8, right: 4),
+          child: GetX<CarTradingDashboardController>(
+            builder: (controller) {
+              return controller.itemsPageName.value.toLowerCase() == 'items'
+                  ? Row(
+                      spacing: 10,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text(
+                          'Total Paid:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        textForDataRowInTable(
+                          text: '${controller.totalPays.value}',
+                          color: Colors.red,
+                          isBold: true,
+                        ),
+                        const Text(
+                          'Total Received:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        textForDataRowInTable(
+                          text: '${controller.totalReceives.value}',
+                          color: Colors.green,
+                          isBold: true,
+                        ),
+                        const Text(
+                          'Net:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        textForDataRowInTable(
+                          text: '${controller.totalNETs.value}',
+                          color: Colors.blueGrey,
+                          isBold: true,
+                        ),
+                      ],
+                    )
+                  : Row(
+                      spacing: 10,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text(
+                          'Total Amount:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        textForDataRowInTable(
+                          text:
+                              '${controller.totalPurchaseAgreementAmount.value}',
+                          color: Colors.green,
+                          isBold: true,
+                        ),
+                        const Text(
+                          'Total Down Payment:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        textForDataRowInTable(
+                          text:
+                              '${controller.totalPurchaseAgreementDownPayment.value}',
+                          color: Colors.red,
+                          isBold: true,
+                        ),
+                      ],
+                    );
+            },
+          ),
         ),
-      ),
-    ],
+      ],
+    ),
   );
 }
 
@@ -385,8 +391,8 @@ IconButton deleteSection(
         context: context,
         content: 'This will be deleted permanently',
         onPressed: () async {
-          await controller.deleteItem(itemData.id ?? '');
-          controller.calculateTotals();
+          final deleted = await controller.deleteItem(itemData.id ?? '');
+          if (deleted) controller.calculateTotals();
         },
       );
     },
@@ -405,8 +411,10 @@ IconButton deleteSectionForPurchaseAgreement(
         context: context,
         content: 'Are you sure you want to delete purchase agreement item?',
         onPressed: () async {
-          await controller.deletePurchaseAgreementItem(itemData.id ?? '');
-          controller.calculatePurchaseAgreementTotals();
+          final deleted = await controller.deletePurchaseAgreementItem(
+            itemData.id ?? '',
+          );
+          if (deleted) controller.calculatePurchaseAgreementTotals();
         },
       );
     },
@@ -464,8 +472,8 @@ IconButton editSection(
         controller: controller,
         canEdit: true,
         onPressed: () async {
-          await controller.updateItem(itemData.id ?? '');
-          controller.calculateTotals();
+          final saved = await controller.updateItem(itemData.id ?? '');
+          if (saved) controller.calculateTotals();
         },
       );
     },
@@ -499,9 +507,10 @@ IconButton editSectionForPurchaseAgreement(
         controller: controller,
         canEdit: true,
         onPressed: () async {
-          await controller.updatePurchaseAgreementItem(itemData.id ?? '');
-          controller.calculatePurchaseAgreementTotals();
-          Get.back();
+          final saved = await controller.updatePurchaseAgreementItem(
+            itemData.id ?? '',
+          );
+          if (saved) controller.calculatePurchaseAgreementTotals();
         },
       );
     },
@@ -533,8 +542,8 @@ ElevatedButton newItemButton(
         controller: controller,
         canEdit: true,
         onPressed: () async {
-          await controller.addNewItem();
-          controller.calculateTotals();
+          final saved = await controller.addNewItem();
+          if (saved) controller.calculateTotals();
         },
       );
     },
@@ -680,8 +689,8 @@ ElevatedButton newItemButtonForSalesAgreement(
         controller: controller,
         canEdit: true,
         onPressed: () async {
-          await controller.addNewPurchaseAgreementItem();
-          controller.calculatePurchaseAgreementTotals();
+          final saved = await controller.addNewPurchaseAgreementItem();
+          if (saved) controller.calculatePurchaseAgreementTotals();
         },
       );
     },

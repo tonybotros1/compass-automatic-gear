@@ -39,7 +39,7 @@ Future<dynamic> transferItemDialog({
                         style: fontStyleForScreenNameUsedInButtons,
                       ),
                       const Spacer(),
-                      GetBuilder<CarTradingDashboardController>(
+                      GetX<CarTradingDashboardController>(
                         builder: (controller) => ClickableHoverText(
                           onTap: controller.addingNewTransferValue.isTrue
                               ? null

@@ -74,32 +74,32 @@ class CarTradingPurchaseAgreementModel {
 
   factory CarTradingPurchaseAgreementModel.fromJson(Map<String, dynamic> json) {
     return CarTradingPurchaseAgreementModel(
-      id: json['_id'] ?? '',
-      agreementNumber: json['agreement_number'] ?? '',
+      id: json['_id']?.toString() ?? '',
+      agreementNumber: json['agreement_number']?.toString() ?? '',
       agreementDate:
           json['agreement_date'] != null && json['agreement_date'] != ''
-          ? DateTime.tryParse(json['agreement_date'])
+          ? DateTime.tryParse(json['agreement_date'].toString())
           : null,
       aownpayment: _toDouble(json['agreement_down_payment']),
       amount: _toDouble(json['agreement_amount']),
       sellerName: json.containsKey('seller_name')
-          ? json['seller_name'] ?? ''
+          ? json['seller_name']?.toString() ?? ''
           : '',
       sellerEmail: json.containsKey('seller_email')
-          ? json['seller_email'] ?? ''
+          ? json['seller_email']?.toString() ?? ''
           : '',
-      sellerID: json['seller_ID'] ?? '',
-      note: json.containsKey('note') ? json['note'] ?? '' : '',
-      sellerPhone: json['seller_phone'] ?? '',
-      buyerEmail: json['buyer_email'] ?? '',
-      buyerID: json['buyer_ID'] ?? '',
-      buyerName: json['buyer_name'] ?? '',
-      buyerPhone: json['buyer_phone'] ?? '',
+      sellerID: json['seller_ID']?.toString() ?? '',
+      note: json.containsKey('note') ? json['note']?.toString() ?? '' : '',
+      sellerPhone: json['seller_phone']?.toString() ?? '',
+      buyerEmail: json['buyer_email']?.toString() ?? '',
+      buyerID: json['buyer_ID']?.toString() ?? '',
+      buyerName: json['buyer_name']?.toString() ?? '',
+      buyerPhone: json['buyer_phone']?.toString() ?? '',
       createdAt: json['createdAt'] != null && json['createdAt'] != ''
-          ? DateTime.tryParse(json['createdAt'])
+          ? DateTime.tryParse(json['createdAt'].toString())
           : null,
       updatedAt: json['updatedAt'] != null && json['updatedAt'] != ''
-          ? DateTime.tryParse(json['updatedAt'])
+          ? DateTime.tryParse(json['updatedAt'].toString())
           : null,
     );
   }

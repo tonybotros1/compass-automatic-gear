@@ -58,6 +58,7 @@ Widget carInformation({
                           width: 130,
                           labelText: 'Mileage',
                           isnumber: true,
+                          validate: false,
                           controller: controller.mileage.value,
                           onChanged: (_) {
                             controller.carModified.value = true;
@@ -316,6 +317,7 @@ Widget carInformation({
             myTextFormFieldWithBorder(
               labelText: 'VIN',
               width: 570,
+              validate: false,
               controller: controller.vin.value,
               onChanged: (_) {
                 controller.carModified.value = true;

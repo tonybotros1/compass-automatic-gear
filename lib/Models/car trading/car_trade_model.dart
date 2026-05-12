@@ -86,62 +86,78 @@ class CarTradeModel {
     }
   }
 
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static int _toInt(dynamic value) {
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ??
+        double.tryParse(value?.toString() ?? '')?.toInt() ??
+        0;
+  }
+
   CarTradeModel.fromJson(Map<String, dynamic> json) {
-    id = json['_id'];
-    boughtFrom = json['bought_from'] ?? '';
-    boughtFromId = json['bought_from_id'] ?? '';
-    soldTo = json['sold_to'] ?? '';
-    soldToId = json['sold_to_id'] ?? '';
-    date = parseDate(json['date']);
+    id = json['_id']?.toString() ?? '';
+    boughtFrom = json['bought_from']?.toString() ?? '';
+    boughtFromId = json['bought_from_id']?.toString() ?? '';
+    soldTo = json['sold_to']?.toString() ?? '';
+    soldToId = json['sold_to_id']?.toString() ?? '';
+    date = parseDate(json['date']?.toString());
     warrantyEndDate = json.containsKey('warranty_end_date')
-        ? parseDate(json['warranty_end_date'])
+        ? parseDate(json['warranty_end_date']?.toString())
         : null;
     serviceContractEndDate = json.containsKey('service_contract_end_date')
-        ? parseDate(json['service_contract_end_date'])
+        ? parseDate(json['service_contract_end_date']?.toString())
         : null;
-    buyDate = parseDate(json['buy_date']);
-    sellDate = parseDate(json['sell_date']);
-    carBrand = json['car_brand'] ?? '';
-    carBrandId = json['car_brand_id'] ?? '';
-    carModel = json['car_model'] ?? '';
-    carModelId = json['car_model_id'] ?? '';
-    mileage = (json['mileage'] is num) ? (json['mileage'] as num).toInt() : 0;
-    specification = json['specification'] ?? '';
-    specificationId = json['specification_id'] ?? '';
-    engineSize = json['engine_size'] ?? '';
-    engineSizeId = json['engine_size_id'] ?? '';
-    colorIn = json['color_in'] ?? '';
-    colorInId = json['color_in_id'] ?? '';
-    colorOut = json['color_out'] ?? '';
-    colorOutId = json['color_out_id'] ?? '';
-    year = json['year'] ?? '';
-    yearId = json['year_id'] ?? '';
-    vin = json.containsKey('vin') ? json['vin'] ?? '' : '';
-    note = json['note'] ?? '';
-    status = json['status'] ?? '';
-    soldBy = json.containsKey('sold_by') ? json['sold_by'] ?? '' : '';
-    soldById = json.containsKey('sold_by_id') ? json['sold_by_id'] ?? '' : '';
-    boughtBy = json.containsKey('bought_by') ? json['bought_by'] ?? '' : '';
-    boughtById = json.containsKey('bought_by_id')
-        ? json['bought_by_id'] ?? ''
+    buyDate = parseDate(json['buy_date']?.toString());
+    sellDate = parseDate(json['sell_date']?.toString());
+    carBrand = json['car_brand']?.toString() ?? '';
+    carBrandId = json['car_brand_id']?.toString() ?? '';
+    carModel = json['car_model']?.toString() ?? '';
+    carModelId = json['car_model_id']?.toString() ?? '';
+    mileage = _toInt(json['mileage']);
+    specification = json['specification']?.toString() ?? '';
+    specificationId = json['specification_id']?.toString() ?? '';
+    engineSize = json['engine_size']?.toString() ?? '';
+    engineSizeId = json['engine_size_id']?.toString() ?? '';
+    colorIn = json['color_in']?.toString() ?? '';
+    colorInId = json['color_in_id']?.toString() ?? '';
+    colorOut = json['color_out']?.toString() ?? '';
+    colorOutId = json['color_out_id']?.toString() ?? '';
+    year = json['year']?.toString() ?? '';
+    yearId = json['year_id']?.toString() ?? '';
+    vin = json.containsKey('vin') ? json['vin']?.toString() ?? '' : '';
+    note = json['note']?.toString() ?? '';
+    status = json['status']?.toString() ?? '';
+    soldBy = json.containsKey('sold_by')
+        ? json['sold_by']?.toString() ?? ''
         : '';
-    totalPay = (json['total_pay'] is num)
-        ? (json['total_pay'] as num).toDouble()
-        : 0;
-
-    totalReceive = (json['total_receive'] is num)
-        ? (json['total_receive'] as num).toDouble()
-        : 0;
-
-    net = (json['net'] is num) ? (json['net'] as num).toDouble() : 0;
+    soldById = json.containsKey('sold_by_id')
+        ? json['sold_by_id']?.toString() ?? ''
+        : '';
+    boughtBy = json.containsKey('bought_by')
+        ? json['bought_by']?.toString() ?? ''
+        : '';
+    boughtById = json.containsKey('bought_by_id')
+        ? json['bought_by_id']?.toString() ?? ''
+        : '';
+    totalPay = _toDouble(json['total_pay']);
+    totalReceive = _toDouble(json['total_receive']);
+    net = _toDouble(json['net']);
 
     // Parse trade items
-    if (json['trade_items'] != null &&
+    if (json['trade_items'] is List &&
         (json['trade_items'] as List).isNotEmpty) {
       tradeItems = <CarTradingItemsModel>[];
-      json['trade_items'].forEach((v) {
-        tradeItems!.add(CarTradingItemsModel.fromJson(v));
-      });
+      for (final item in json['trade_items']) {
+        if (item is Map) {
+          tradeItems!.add(
+            CarTradingItemsModel.fromJson(Map<String, dynamic>.from(item)),
+          );
+        }
+      }
     }
   }
 }

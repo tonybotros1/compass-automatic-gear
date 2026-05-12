@@ -60,28 +60,28 @@ class CarTradingItemsModel {
 
   factory CarTradingItemsModel.fromJson(Map<String, dynamic> json) {
     return CarTradingItemsModel(
-      id: json['_id'] ?? '',
-      item: json['item'] ?? '',
-      itemId: json['item_id'] ?? '',
+      id: json['_id']?.toString() ?? '',
+      item: json['item']?.toString() ?? '',
+      itemId: json['item_id']?.toString() ?? '',
       pay: _toDouble(json['pay']),
-      tradeId: json['trade_id'] ?? '',
+      tradeId: json['trade_id']?.toString() ?? '',
       receive: _toDouble(json['receive']),
       accountName: json.containsKey('account_name')
-          ? json['account_name'] ?? ''
+          ? json['account_name']?.toString() ?? ''
           : '',
       accountNameId: json.containsKey('account_name_id')
-          ? json['account_name_id'] ?? ''
+          ? json['account_name_id']?.toString() ?? ''
           : '',
-      comment: json['comment'] ?? '',
-      companyId: json['company_id'] ?? '',
+      comment: json['comment']?.toString() ?? '',
+      companyId: json['company_id']?.toString() ?? '',
       date: json['date'] != null && json['date'] != ''
-          ? DateTime.tryParse(json['date'])
+          ? DateTime.tryParse(json['date'].toString())
           : null,
       createdAt: json['createdAt'] != null && json['createdAt'] != ''
-          ? DateTime.tryParse(json['createdAt'])
+          ? DateTime.tryParse(json['createdAt'].toString())
           : null,
       updatedAt: json['updatedAt'] != null && json['updatedAt'] != ''
-          ? DateTime.tryParse(json['updatedAt'])
+          ? DateTime.tryParse(json['updatedAt'].toString())
           : null,
     );
   }

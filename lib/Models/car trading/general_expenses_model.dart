@@ -27,24 +27,34 @@ class GeneralExpensesModel {
     required this.updatedAt,
   });
 
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static DateTime _toDate(dynamic value) {
+    return DateTime.tryParse(value?.toString() ?? '') ??
+        DateTime.fromMillisecondsSinceEpoch(0);
+  }
+
   factory GeneralExpensesModel.fromJson(Map<String, dynamic> json) {
     return GeneralExpensesModel(
-      id: json['_id'] ?? '',
-      item: json['item'] ?? '',
-      itemId: json['item_id'] ?? '',
-      pay: json['pay'] ?? '',
-      receive: json['receive'] ?? '',
+      id: json['_id']?.toString() ?? '',
+      item: json['item']?.toString() ?? '',
+      itemId: json['item_id']?.toString() ?? '',
+      pay: _toDouble(json['pay']),
+      receive: _toDouble(json['receive']),
       accountName: json.containsKey('account_name')
-          ? json['account_name'] ?? ''
+          ? json['account_name']?.toString() ?? ''
           : '',
       accountNameId: json.containsKey('account_name_id')
-          ? json['account_name_id'] ?? ''
+          ? json['account_name_id']?.toString() ?? ''
           : '',
-      comment: json['comment'] ?? '',
-      companyId: json['company_id'] ?? '',
-      date: DateTime.parse(json['date']),
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      comment: json['comment']?.toString() ?? '',
+      companyId: json['company_id']?.toString() ?? '',
+      date: _toDate(json['date']),
+      createdAt: _toDate(json['createdAt']),
+      updatedAt: _toDate(json['updatedAt']),
     );
   }
 }

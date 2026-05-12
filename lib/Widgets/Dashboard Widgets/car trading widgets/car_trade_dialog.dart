@@ -84,7 +84,9 @@ Future<dynamic> carTradesDialog({
                           GetX<CarTradingDashboardController>(
                             builder: (controller) {
                               return ClickableHoverText(
-                                onTap: onPressed,
+                                onTap: controller.addingNewValue.isFalse
+                                    ? onPressed
+                                    : null,
                                 text: controller.addingNewValue.value == false
                                     ? 'Save'
                                     : "...",

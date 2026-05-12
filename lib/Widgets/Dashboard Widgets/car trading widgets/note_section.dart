@@ -14,6 +14,7 @@ Widget noteSection({
     decoration: containerDecor,
     child: myTextFormFieldWithBorder(
       controller: controller.note,
+      validate: false,
       maxLines: 10,
       onChanged: (_) {
         controller.carModified.value = true;

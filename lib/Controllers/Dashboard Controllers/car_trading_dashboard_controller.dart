@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+
 import 'package:datahubai/Controllers/Main%20screen%20controllers/car_brands_controller.dart';
 import 'package:datahubai/Controllers/Main%20screen%20controllers/list_of_values_controller.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +27,11 @@ import '../../helpers.dart';
 import '../Main screen controllers/websocket_controller.dart';
 
 class CarTradingDashboardController extends GetxController {
+  final GlobalKey<FormState> carTradeFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> lineItemFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> salesAgreementFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> transferFormKey = GlobalKey<FormState>();
+
   Rx<TextEditingController> searchForCapitalsOrOutstandingOrGeneralExpenses =
       TextEditingController().obs;
   Rx<TextEditingController> carModelFilter = TextEditingController().obs;
@@ -152,6 +159,7 @@ class CarTradingDashboardController extends GetxController {
   RxBool isTransfersLoading = RxBool(false);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
+  StreamSubscription? _carTradingEventsSubscription;
   RxBool gettingCapitalsSummary = RxBool(false);
   RxBool gettingOutstandingSummary = RxBool(false);
   RxBool gettingGeneralExpensesSummary = RxBool(false);
@@ -249,30 +257,111 @@ class CarTradingDashboardController extends GetxController {
   }
 
   @override
-  void onInit() async {
+  void onInit() {
+    super.onInit();
     connectWebSocket();
-    await getCompanyDetails();
+    getCompanyDetails();
     allSearches();
     focusNodeForitems1.addListener(() {
       if (!focusNodeForitems1.hasFocus) {
         normalizeDate(itemDate.value.text, itemDate.value);
       }
     });
-    super.onInit();
   }
 
   @override
-  void dispose() {
+  void onClose() {
+    _carTradingEventsSubscription?.cancel();
+    searchForCapitalsOrOutstandingOrGeneralExpenses.value.dispose();
+    carModelFilter.value.dispose();
+    carBrandFilter.value.dispose();
+    carEngineSizeFilter.value.dispose();
+    carBoughtFromFilter.value.dispose();
+    carSoldToFilter.value.dispose();
+    carSoldByFilter.value.dispose();
+    carBoughtByFilter.value.dispose();
+    carSpecificationFilter.value.dispose();
+    searchForItems.value.dispose();
+    searchForTransfers.value.dispose();
+    date.value.dispose();
+    mileage.value.dispose();
+    colorOut.value.dispose();
+    colorIn.value.dispose();
+    carSpecification.value.dispose();
+    carBrand.value.dispose();
+    carModel.value.dispose();
+    engineSize.value.dispose();
+    boughtFrom.value.dispose();
+    boughtBy.value.dispose();
+    year.value.dispose();
+    vin.value.dispose();
+    soldTo.value.dispose();
+    soldBy.value.dispose();
+    serviceContractEndDate.value.dispose();
+    warrantyEndDate.value.dispose();
+    pay.dispose();
+    receive.dispose();
+    comments.value.dispose();
+    note.dispose();
+    item.dispose();
+    name.dispose();
+    accountName.dispose();
+    itemDate.value.dispose();
+    fromDate.value.dispose();
+    fromDateForChanges.value.dispose();
+    toDate.value.dispose();
+    toDateForChanges.value.dispose();
+    minAmount.value.dispose();
+    maxAmount.value.dispose();
+    accountForLastChanges.value.dispose();
+    scrollControllerForTable.dispose();
+    scrollControllerForCarInformation.dispose();
+    scrollControllerForBuySell.dispose();
     focusNodeForitems1.dispose();
-    super.dispose();
+    focusNodeForitems2.dispose();
+    focusNodeForitems3.dispose();
+    focusNodeForitems4.dispose();
+    focusNodeForitems5.dispose();
+    focusNodeForCarInformation1.dispose();
+    focusNodeForCarInformation2.dispose();
+    focusNodeForCarInformation3.dispose();
+    focusNodeForCarInformation4.dispose();
+    focusNodeForCarInformation5.dispose();
+    focusNodeForCarInformation6.dispose();
+    focusNodeForCarInformation7.dispose();
+    focusNodeForCarInformation8.dispose();
+    focusNodeForCarInformation9.dispose();
+    focusNodeForBuySell1.dispose();
+    focusNodeForBuySell2.dispose();
+    focusNodeForBuySell3.dispose();
+    focusNodeForBuySell4.dispose();
+    agreementNumber.dispose();
+    agreementdate.dispose();
+    sellerName.dispose();
+    sellerID.dispose();
+    sellerPhone.dispose();
+    sellerEmail.dispose();
+    buyerName.dispose();
+    buyerID.dispose();
+    buyerPhone.dispose();
+    buyerEmail.dispose();
+    agreementNote.dispose();
+    agreementTotal.dispose();
+    agreementdownpayment.dispose();
+    transferDate.value.dispose();
+    fromAccount.dispose();
+    toAccount.dispose();
+    transferAmount.dispose();
+    transferComments.value.dispose();
+    super.onClose();
   }
 
-  void allSearches() {
-    filterSearch();
-    filterGeneralExpensesSearch();
-    getCashOnHandOrBankBalance();
-    getCapitalsOROutstandingSummary('capitals');
-    getCapitalsOROutstandingSummary('outstanding');
+  Future<void> allSearches() async {
+    await filterSearch();
+    await filterGeneralExpensesSearch();
+    await getCashOnHandOrBankBalance();
+    await getCapitalsOROutstandingSummary('capitals');
+    await getCapitalsOROutstandingSummary('outstanding');
   }
 
   void onChooseForDatePicker(int i) {
@@ -349,6 +438,7 @@ class CarTradingDashboardController extends GetxController {
           allSearches();
         } else {
           isNewStatusSelected.value = false;
+          allSearches();
         }
         break;
       case 3:
@@ -359,6 +449,7 @@ class CarTradingDashboardController extends GetxController {
           allSearches();
         } else {
           isSoldStatusSelected.value = false;
+          allSearches();
         }
         break;
 
@@ -410,135 +501,333 @@ class CarTradingDashboardController extends GetxController {
     buttonLoadingStates.refresh(); // Notify listeners
   }
 
+  void _showError(String content, {String? title}) {
+    final context = Get.context;
+    if (context == null) return;
+    alertMessage(context: context, title: title, content: content);
+  }
+
+  Future<String> _accessToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken') ?? '';
+  }
+
+  Future<String> _refreshToken() async {
+    return await secureStorage.read(key: "refreshToken") ?? '';
+  }
+
+  Map<String, dynamic> _jsonObject(String body) {
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+    } catch (e) {
+      //
+    }
+    return {};
+  }
+
+  double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  int _toInt(dynamic value) {
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ??
+        double.tryParse(value?.toString() ?? '')?.toInt() ??
+        0;
+  }
+
+  String? _isoDateFromText(
+    TextEditingController controller,
+    String label, {
+    bool required = false,
+  }) {
+    final value = controller.text.trim();
+    if (value.isEmpty) {
+      if (required) _showError('Please add valid $label');
+      return null;
+    }
+    try {
+      return inputFormat.parseStrict(value).toIso8601String();
+    } catch (e) {
+      _showError('Please add valid $label');
+      return null;
+    }
+  }
+
+  bool _validateForm(GlobalKey<FormState> key) {
+    return key.currentState?.validate() ?? true;
+  }
+
+  bool validateTradeForm() {
+    if (addingNewValue.value) return false;
+    if (!_validateForm(carTradeFormKey)) return false;
+    if (_isoDateFromText(date.value, 'Transaction Date', required: true) ==
+        null) {
+      return false;
+    }
+    if (carBrandId.value.isEmpty) {
+      _showError('Please select car brand');
+      return false;
+    }
+    if (carModelId.value.isEmpty) {
+      _showError('Please select car model');
+      return false;
+    }
+    return true;
+  }
+
+  bool validateLineItemForm({
+    required bool isTrade,
+    required bool isGeneralExpenses,
+  }) {
+    if (addingTradeItem.value || isCapitalLoading.value) return false;
+    if (!_validateForm(lineItemFormKey)) return false;
+    if (_isoDateFromText(itemDate.value, 'Date', required: true) == null) {
+      return false;
+    }
+    if (isTrade || isGeneralExpenses) {
+      if (itemId.value.isEmpty) {
+        _showError('Please select item');
+        return false;
+      }
+    } else if (nameId.value.isEmpty) {
+      _showError('Please select name');
+      return false;
+    }
+    if (accountNameId.value.isEmpty) {
+      _showError('Please select account name');
+      return false;
+    }
+    return true;
+  }
+
+  bool validateTransferForm() {
+    if (addingNewTransferValue.value) return false;
+    if (!_validateForm(transferFormKey)) return false;
+    if (_isoDateFromText(transferDate.value, 'Date', required: true) == null) {
+      return false;
+    }
+    if (fromAccountId.value.isEmpty || toAccountId.value.isEmpty) {
+      _showError('Please add both accounts');
+      return false;
+    }
+    if (fromAccountId.value == toAccountId.value) {
+      _showError('Please choose different accounts');
+      return false;
+    }
+    return true;
+  }
+
+  bool validateSalesAgreementForm() {
+    if (addingPurchaseAgreement.value) return false;
+    if (!_validateForm(salesAgreementFormKey)) return false;
+    if (currentTradId.value.isEmpty) {
+      _showError('Save trade first');
+      return false;
+    }
+    if (_isoDateFromText(agreementdate, 'Agreement Date', required: true) ==
+        null) {
+      return false;
+    }
+    return true;
+  }
+
+  void _upsertCapital(
+    RxList<CapitalsAndOutstandingModel> list,
+    CapitalsAndOutstandingModel model,
+  ) {
+    final index = list.indexWhere((item) => item.id == model.id);
+    if (index == -1) {
+      list.insert(0, model);
+    } else {
+      list[index] = model;
+    }
+  }
+
+  void _upsertGeneralExpense(GeneralExpensesModel model) {
+    final index = allGeneralExpenses.indexWhere((item) => item.id == model.id);
+    if (index == -1) {
+      allGeneralExpenses.insert(0, model);
+    } else {
+      allGeneralExpenses[index] = model;
+    }
+  }
+
+  void _upsertTransfer(TransferModel model) {
+    final id = model.id;
+    if (id == null || id.isEmpty) return;
+    final index = alltransfers.indexWhere((item) => item.id == id);
+    if (index == -1) {
+      alltransfers.insert(0, model);
+    } else {
+      alltransfers[index] = model;
+    }
+  }
+
+  void _upsertTradeItem(CarTradingItemsModel model) {
+    final id = model.id;
+    if (id == null || id.isEmpty) return;
+    final index = addedItems.indexWhere((item) => item.id == id);
+    if (index == -1) {
+      addedItems.insert(0, model);
+    } else {
+      addedItems[index] = model;
+    }
+  }
+
+  void _upsertPurchaseAgreement(CarTradingPurchaseAgreementModel model) {
+    final id = model.id;
+    if (id == null || id.isEmpty) return;
+    final index = purchaseAgreementAddedItems.indexWhere(
+      (item) => item.id == id,
+    );
+    if (index == -1) {
+      purchaseAgreementAddedItems.insert(0, model);
+    } else {
+      purchaseAgreementAddedItems[index] = model;
+    }
+  }
+
   void connectWebSocket() {
-    ws.events.listen((message) {
-      switch (message["type"]) {
-        case "capital_created":
-          final newCapital = CapitalsAndOutstandingModel.fromJson(
-            message["data"],
-          );
-          allCapitals.add(newCapital);
-          break;
+    _carTradingEventsSubscription?.cancel();
+    _carTradingEventsSubscription = ws.events.listen((message) {
+      try {
+        switch (message["type"]) {
+          case "capital_created":
+            final newCapital = CapitalsAndOutstandingModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            _upsertCapital(allCapitals, newCapital);
+            break;
 
-        case "capital_updated":
-          final updated = CapitalsAndOutstandingModel.fromJson(message["data"]);
-          final totals = message['totals'];
-          final index = allCapitals.indexWhere((b) => b.id == updated.id);
-          if (index != -1) {
-            allCapitals[index] = updated;
-            totalPays.value = totals['pay'];
-            totalReceives.value = totals['receive'];
-            totalNETs.value = totals['net'];
-          }
-          break;
+          case "capital_updated":
+            final updated = CapitalsAndOutstandingModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            final totals = message['totals'] ?? {};
+            _upsertCapital(allCapitals, updated);
+            totalPays.value = _toDouble(totals['pay']);
+            totalReceives.value = _toDouble(totals['receive']);
+            totalNETs.value = _toDouble(totals['net']);
+            break;
 
-        case "capital_deleted":
-          final deletedId = message["data"]["_id"];
-          allCapitals.removeWhere((b) => b.id == deletedId);
-          break;
+          case "capital_deleted":
+            final deletedId = message["data"]["_id"]?.toString();
+            allCapitals.removeWhere((b) => b.id == deletedId);
+            break;
 
-        case "outstanding_created":
-          final newModel = CapitalsAndOutstandingModel.fromJson(
-            message["data"],
-          );
-          allOutstanding.add(newModel);
-          break;
+          case "outstanding_created":
+            final newModel = CapitalsAndOutstandingModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            _upsertCapital(allOutstanding, newModel);
+            break;
 
-        case "outstanding_updated":
-          final updated = CapitalsAndOutstandingModel.fromJson(message["data"]);
-          final totals = message['totals'];
-          final index = allOutstanding.indexWhere((m) => m.id == updated.id);
-          if (index != -1) {
-            allOutstanding[index] = updated;
-            totalPays.value = totals['pay'];
-            totalReceives.value = totals['receive'];
-            totalNETs.value = totals['net'];
-          }
-          break;
+          case "outstanding_updated":
+            final updated = CapitalsAndOutstandingModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            final totals = message['totals'] ?? {};
+            _upsertCapital(allOutstanding, updated);
+            totalPays.value = _toDouble(totals['pay']);
+            totalReceives.value = _toDouble(totals['receive']);
+            totalNETs.value = _toDouble(totals['net']);
+            break;
 
-        case "outstanding_deleted":
-          final deletedId = message["data"]["_id"];
-          allOutstanding.removeWhere((m) => m.id == deletedId);
-          break;
+          case "outstanding_deleted":
+            final deletedId = message["data"]["_id"]?.toString();
+            allOutstanding.removeWhere((m) => m.id == deletedId);
+            break;
 
-        case "general_expenses_created":
-          final newModel = GeneralExpensesModel.fromJson(message["data"]);
-          allGeneralExpenses.add(newModel);
-          break;
+          case "general_expenses_created":
+            final newModel = GeneralExpensesModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            _upsertGeneralExpense(newModel);
+            break;
 
-        case "general_expenses_updated":
-          final updated = GeneralExpensesModel.fromJson(message["data"]);
-          final totals = message['totals'];
-          final index = allGeneralExpenses.indexWhere(
-            (m) => m.id == updated.id,
-          );
-          if (index != -1) {
-            allGeneralExpenses[index] = updated;
-            totalPays.value = totals['pay'];
-            totalReceives.value = totals['receive'];
-            totalNETs.value = totals['net'];
-          }
-          break;
+          case "general_expenses_updated":
+            final updated = GeneralExpensesModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            final totals = message['totals'] ?? {};
+            _upsertGeneralExpense(updated);
+            totalPays.value = _toDouble(totals['pay']);
+            totalReceives.value = _toDouble(totals['receive']);
+            totalNETs.value = _toDouble(totals['net']);
+            break;
 
-        case "general_expenses_deleted":
-          final deletedId = message["data"]["_id"];
-          allGeneralExpenses.removeWhere((m) => m.id == deletedId);
-          break;
+          case "general_expenses_deleted":
+            final deletedId = message["data"]["_id"]?.toString();
+            allGeneralExpenses.removeWhere((m) => m.id == deletedId);
+            break;
 
-        case "purchase_agreement_item_created":
-          final newModel = CarTradingPurchaseAgreementModel.fromJson(
-            message["data"],
-          );
-          purchaseAgreementAddedItems.add(newModel);
-          break;
-        case "purchase_agreement_item_updated":
-          final updated = CarTradingPurchaseAgreementModel.fromJson(
-            message["data"],
-          );
-          final index = purchaseAgreementAddedItems.indexWhere(
-            (m) => m.id == updated.id,
-          );
-          if (index != -1) {
-            purchaseAgreementAddedItems[index] = updated;
-          }
-          break;
+          case "purchase_agreement_item_created":
+            final newModel = CarTradingPurchaseAgreementModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            _upsertPurchaseAgreement(newModel);
+            calculatePurchaseAgreementTotals();
+            break;
+          case "purchase_agreement_item_updated":
+            final updated = CarTradingPurchaseAgreementModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            _upsertPurchaseAgreement(updated);
+            calculatePurchaseAgreementTotals();
+            break;
 
-        case "purchase_agreement_item_deleted":
-          final deletedId = message["data"]["_id"];
-          purchaseAgreementAddedItems.removeWhere((m) => m.id == deletedId);
-          break;
+          case "purchase_agreement_item_deleted":
+            final deletedId = message["data"]["_id"]?.toString();
+            purchaseAgreementAddedItems.removeWhere((m) => m.id == deletedId);
+            calculatePurchaseAgreementTotals();
+            break;
 
-        case "transfer_created":
-          final newModel = TransferModel.fromJson(message["data"]);
-          alltransfers.add(newModel);
-          break;
-        case "transfer_deleted":
-          final deletedId = message["data"]["_id"];
-          alltransfers.removeWhere((m) => m.id == deletedId);
-          break;
-        case "transfer_updated":
-          final updated = TransferModel.fromJson(message["data"]);
-          final index = alltransfers.indexWhere((m) => m.id == updated.id);
-          if (index != -1) {
-            alltransfers[index] = updated;
-          }
-          break;
+          case "transfer_created":
+            final newModel = TransferModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            _upsertTransfer(newModel);
+            calculateTransfersAmount();
+            break;
+          case "transfer_deleted":
+            final deletedId = message["data"]["_id"]?.toString();
+            alltransfers.removeWhere((m) => m.id == deletedId);
+            calculateTransfersAmount();
+            break;
+          case "transfer_updated":
+            final updated = TransferModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            _upsertTransfer(updated);
+            calculateTransfersAmount();
+            break;
 
-        case "trade_item_added":
-          final newModel = CarTradingItemsModel.fromJson(message["data"]);
-          addedItems.add(newModel);
-          break;
-        case "trade_item_updated":
-          final updated = CarTradingItemsModel.fromJson(message["data"]);
-          final index = addedItems.indexWhere((m) => m.id == updated.id);
-          if (index != -1) {
-            addedItems[index] = updated;
-          }
-          break;
-        case "trade_item_deleted":
-          final deletedId = message["data"]["_id"];
-          addedItems.removeWhere((m) => m.id == deletedId);
-          break;
+          case "trade_item_added":
+            final newModel = CarTradingItemsModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            _upsertTradeItem(newModel);
+            calculateTotals();
+            break;
+          case "trade_item_updated":
+            final updated = CarTradingItemsModel.fromJson(
+              Map<String, dynamic>.from(message["data"]),
+            );
+            _upsertTradeItem(updated);
+            calculateTotals();
+            break;
+          case "trade_item_deleted":
+            final deletedId = message["data"]["_id"]?.toString();
+            addedItems.removeWhere((m) => m.id == deletedId);
+            calculateTotals();
+            break;
+        }
+      } catch (e) {
+        //
       }
     });
   }
@@ -1042,25 +1331,26 @@ class CarTradingDashboardController extends GetxController {
   Future<void> getAllTransferes() async {
     try {
       isTransfersLoading.value = true;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse('$backendUrl/car_trading/get_all_transfers');
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        List transferes = decoded['transfers'];
+        final decoded = _jsonObject(response.body);
+        List transferes = decoded['transfers'] ?? [];
         alltransfers.assignAll(
-          transferes.map((tr) => TransferModel.fromJson(tr)),
+          transferes.whereType<Map>().map(
+            (tr) => TransferModel.fromJson(Map<String, dynamic>.from(tr)),
+          ),
         );
         calculateTransfersAmount();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllTransferes();
+          return await getAllTransferes();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1073,19 +1363,18 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> addNewTransfer() async {
+  Future<bool> addNewTransfer() async {
     try {
-      if (fromAccountId.value.isEmpty || toAccountId.value.isEmpty) {
-        alertMessage(
-          context: Get.context!,
-          content: 'Please add both accounts',
-        );
-        return;
-      }
+      if (!validateTransferForm()) return false;
+      final isoDate = _isoDateFromText(
+        transferDate.value,
+        'Date',
+        required: true,
+      );
+      if (isoDate == null) return false;
       addingNewTransferValue.value = true;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse('$backendUrl/car_trading/add_new_transfer');
       final response = await http.post(
         url,
@@ -1094,7 +1383,7 @@ class CarTradingDashboardController extends GetxController {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          "date": convertDateToIson(transferDate.value.text),
+          "date": isoDate,
           "from_account": fromAccountId.value,
           "to_account": toAccountId.value,
           "amount": double.tryParse(transferAmount.text) ?? 0.0,
@@ -1102,42 +1391,46 @@ class CarTradingDashboardController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
+        await getAllTransferes();
         calculateTransfersAmount();
+        addingNewTransferValue.value = false;
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewTransfer();
+          addingNewTransferValue.value = false;
+          return await addNewTransfer();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not save transfer. Please try again.');
       }
-      Get.back();
       addingNewTransferValue.value = false;
+      return false;
     } catch (e) {
       addingNewTransferValue.value = false;
-      Get.back();
-      alertMessage(
-        context: Get.context!,
-        content: 'Something went wrong please try again',
-      );
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  Future<void> updateTransfer(String id) async {
+  Future<bool> updateTransfer(String id) async {
     try {
-      if (fromAccountId.value.isEmpty || toAccountId.value.isEmpty) {
-        alertMessage(
-          context: Get.context!,
-          content: 'Please add both accounts',
-        );
-        return;
-      }
+      if (id.isEmpty) return false;
+      if (!validateTransferForm()) return false;
+      final isoDate = _isoDateFromText(
+        transferDate.value,
+        'Date',
+        required: true,
+      );
+      if (isoDate == null) return false;
       addingNewTransferValue.value = true;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse('$backendUrl/car_trading/update_new_transfer/$id');
       final response = await http.patch(
         url,
@@ -1146,7 +1439,7 @@ class CarTradingDashboardController extends GetxController {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          "date": convertDateToIson(transferDate.value.text),
+          "date": isoDate,
           "from_account": fromAccountId.value,
           "to_account": toAccountId.value,
           "amount": double.tryParse(transferAmount.text) ?? 0.0,
@@ -1154,54 +1447,64 @@ class CarTradingDashboardController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
+        await getAllTransferes();
         calculateTransfersAmount();
+        addingNewTransferValue.value = false;
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await updateTransfer(id);
+          addingNewTransferValue.value = false;
+          return await updateTransfer(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not update transfer. Please try again.');
       }
-      Get.back();
       addingNewTransferValue.value = false;
+      return false;
     } catch (e) {
       addingNewTransferValue.value = false;
-      Get.back();
-      alertMessage(
-        context: Get.context!,
-        content: 'Something went wrong please try again',
-      );
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  Future<void> deleteTransfer(String id) async {
+  Future<bool> deleteTransfer(String id) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      if (id.isEmpty) return false;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse('$backendUrl/car_trading/delete_transfer/$id');
       final response = await http.delete(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
+        alltransfers.removeWhere((item) => item.id == id);
         calculateTransfersAmount();
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deleteTransfer(id);
+          return await deleteTransfer(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not delete transfer. Please try again.');
       }
-      Get.back();
+      return false;
     } catch (e) {
-      //
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
@@ -1210,10 +1513,14 @@ class CarTradingDashboardController extends GetxController {
   void filterLastChangesSearch() async {
     Map body = {};
     if (fromDateForChanges.value.text.isNotEmpty) {
-      body['from_date'] = convertDateToIson(fromDateForChanges.value.text);
+      final fromIso = _isoDateFromText(fromDateForChanges.value, 'From Date');
+      if (fromIso == null) return;
+      body['from_date'] = fromIso;
     }
     if (toDateForChanges.value.text.isNotEmpty) {
-      body['to_date'] = convertDateToIson(toDateForChanges.value.text);
+      final toIso = _isoDateFromText(toDateForChanges.value, 'To Date');
+      if (toIso == null) return;
+      body['to_date'] = toIso;
     }
     if (minAmount.value.text.isNotEmpty) {
       body['min_amount'] = minAmount.value.text;
@@ -1230,9 +1537,8 @@ class CarTradingDashboardController extends GetxController {
   Future<void> getLastChanges(Map body) async {
     try {
       changesSearching.value = true;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse('$backendUrl/car_trading/get_last_changes');
       final response = await http.post(
         url,
@@ -1243,15 +1549,19 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
+        final decoded = _jsonObject(response.body);
         List changes = decoded['last_changes'] ?? [];
         lastChanges.assignAll(
-          changes.map((change) => LastCarTradingChangesModel.fromJson(change)),
+          changes.whereType<Map>().map(
+            (change) => LastCarTradingChangesModel.fromJson(
+              Map<String, dynamic>.from(change),
+            ),
+          ),
         );
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getLastChanges(body);
+          return await getLastChanges(body);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1268,9 +1578,8 @@ class CarTradingDashboardController extends GetxController {
 
   Future<void> getCapitalsOROutstandingSummary(String type) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/get_capitals_or_outstanding_summary/$type',
       );
@@ -1279,13 +1588,15 @@ class CarTradingDashboardController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        Map totals = decoded["summary"];
+        final decoded = _jsonObject(response.body);
+        Map totals = decoded["summary"] ?? {};
         if (type == 'capitals') {
-          totalPaysForAllCapitals.value = totals['total_pay'];
-          totalReceivesForAllCapitals.value = totals['total_receive'];
-          totalNETsForAllCapitals.value = totals['total_net'];
-          numberOfCapitalsDocs.value = totals['count'];
+          totalPaysForAllCapitals.value = _toDouble(totals['total_pay']);
+          totalReceivesForAllCapitals.value = _toDouble(
+            totals['total_receive'],
+          );
+          totalNETsForAllCapitals.value = _toDouble(totals['total_net']);
+          numberOfCapitalsDocs.value = _toInt(totals['count']);
 
           int i = summaryData.indexWhere(
             (data) => data['category'].contains('Capital Docs'),
@@ -1298,10 +1609,12 @@ class CarTradingDashboardController extends GetxController {
             'net': totalNETsForAllCapitals.value,
           };
         } else if (type == 'outstanding') {
-          totalPaysForAllOutstanding.value = totals['total_pay'];
-          totalReceivesForAllOutstanding.value = totals['total_receive'];
-          totalNETsForAllOutstanding.value = totals['total_net'];
-          numberOfOutstandingDocs.value = totals['count'];
+          totalPaysForAllOutstanding.value = _toDouble(totals['total_pay']);
+          totalReceivesForAllOutstanding.value = _toDouble(
+            totals['total_receive'],
+          );
+          totalNETsForAllOutstanding.value = _toDouble(totals['total_net']);
+          numberOfOutstandingDocs.value = _toInt(totals['count']);
           int i = summaryData.indexWhere(
             (data) => data['category'].contains('Outstanding'),
           );
@@ -1319,7 +1632,7 @@ class CarTradingDashboardController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCapitalsOROutstandingSummary(type);
+          return await getCapitalsOROutstandingSummary(type);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1337,9 +1650,8 @@ class CarTradingDashboardController extends GetxController {
       totalPays.value = 0;
       totalReceives.value = 0;
       totalNETs.value = 0;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/get_all_capitals_or_outstanding/$type',
       );
@@ -1348,26 +1660,34 @@ class CarTradingDashboardController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        List data = decoded['data'];
-        Map totals = decoded["totals"];
-        totalPays.value = totals['total_pay'];
-        totalReceives.value = totals['total_receive'];
-        totalNETs.value = totals['total_net'];
+        final decoded = _jsonObject(response.body);
+        List data = decoded['data'] ?? [];
+        Map totals = decoded["totals"] ?? {};
+        totalPays.value = _toDouble(totals['total_pay']);
+        totalReceives.value = _toDouble(totals['total_receive']);
+        totalNETs.value = _toDouble(totals['total_net']);
         if (type == "capitals") {
           allCapitals.assignAll(
-            data.map((c) => CapitalsAndOutstandingModel.fromJson(c)),
+            data.whereType<Map>().map(
+              (c) => CapitalsAndOutstandingModel.fromJson(
+                Map<String, dynamic>.from(c),
+              ),
+            ),
           );
         } else if (type == "outstanding") {
           allOutstanding.assignAll(
-            data.map((c) => CapitalsAndOutstandingModel.fromJson(c)),
+            data.whereType<Map>().map(
+              (c) => CapitalsAndOutstandingModel.fromJson(
+                Map<String, dynamic>.from(c),
+              ),
+            ),
           );
         }
         isCapitalLoading.value = false;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllCapitalsOROutstanding(type);
+          return await getAllCapitalsOROutstanding(type);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1382,17 +1702,16 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> addNewCapitalOrOutstanding(String type) async {
+  Future<bool> addNewCapitalOrOutstanding(String type) async {
     try {
-      if (itemDate.value.text.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Please add valid Date');
-        return;
+      if (!validateLineItemForm(isTrade: false, isGeneralExpenses: false)) {
+        return false;
       }
-      final parsedDate = inputFormat.parse(itemDate.value.text);
-      final isoDate = parsedDate.toIso8601String();
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final isoDate = _isoDateFromText(itemDate.value, 'Date', required: true);
+      if (isoDate == null) return false;
+      isCapitalLoading.value = true;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/add_new_capital_or_outstanding/$type',
       );
@@ -1412,34 +1731,39 @@ class CarTradingDashboardController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
-        totalPays.value += double.tryParse(pay.text) ?? 0.0;
-        totalReceives.value += double.tryParse(receive.text) ?? 0.0;
-        totalNETs.value = totalReceives.value - totalPays.value;
+        await getAllCapitalsOROutstanding(type);
+        await getCapitalsOROutstandingSummary(type);
+        await getCashOnHandOrBankBalance();
+        isCapitalLoading.value = false;
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewCapitalOrOutstanding(type);
+          isCapitalLoading.value = false;
+          return await addNewCapitalOrOutstanding(type);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not save item. Please try again.');
       }
-      Get.back();
+      isCapitalLoading.value = false;
+      return false;
     } catch (e) {
-      Get.back();
-      alertMessage(
-        context: Get.context!,
-        content: 'Something went wrong please try again',
-      );
+      isCapitalLoading.value = false;
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  Future<void> deleteCapitalOrOutstanding(String id, String type) async {
+  Future<bool> deleteCapitalOrOutstanding(String id, String type) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      if (id.isEmpty) return false;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/delete_capital_or_outstanding/$type/$id',
       );
@@ -1448,38 +1772,48 @@ class CarTradingDashboardController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        Map totals = decoded["totals"];
-        totalPays.value -= totals["pay"];
-        totalReceives.value -= totals["receive"];
-        totalNETs.value = totalReceives.value - totalPays.value;
+        if (type == 'capitals') {
+          allCapitals.removeWhere((item) => item.id == id);
+        } else {
+          allOutstanding.removeWhere((item) => item.id == id);
+        }
+        await getCapitalsOROutstandingSummary(type);
+        await getCashOnHandOrBankBalance();
+        calculateTotalsForCapitals(
+          type == 'capitals' ? allCapitals : allOutstanding,
+        );
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deleteCapitalOrOutstanding(id, type);
+          return await deleteCapitalOrOutstanding(id, type);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not delete item. Please try again.');
       }
-      Get.back();
+      return false;
     } catch (e) {
-      //
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  Future<void> updateCapitalOrOutstanding(String id, String type) async {
+  Future<bool> updateCapitalOrOutstanding(String id, String type) async {
     try {
-      if (itemDate.value.text.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Please add valid Date');
-        return;
+      if (id.isEmpty) return false;
+      if (!validateLineItemForm(isTrade: false, isGeneralExpenses: false)) {
+        return false;
       }
-      final parsedDate = inputFormat.parse(itemDate.value.text);
-      final isoDate = parsedDate.toIso8601String();
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final isoDate = _isoDateFromText(itemDate.value, 'Date', required: true);
+      if (isoDate == null) return false;
+      isCapitalLoading.value = true;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/update_capital_or_outstanding/$type/$id',
       );
@@ -1499,23 +1833,31 @@ class CarTradingDashboardController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
+        await getAllCapitalsOROutstanding(type);
+        await getCapitalsOROutstandingSummary(type);
+        await getCashOnHandOrBankBalance();
+        isCapitalLoading.value = false;
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await updateCapitalOrOutstanding(id, type);
+          isCapitalLoading.value = false;
+          return await updateCapitalOrOutstanding(id, type);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not update item. Please try again.');
       }
-      Get.back();
+      isCapitalLoading.value = false;
+      return false;
     } catch (e) {
-      Get.back();
-      alertMessage(
-        context: Get.context!,
-        content: 'Something went wrong please try again',
-      );
+      isCapitalLoading.value = false;
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
@@ -1527,31 +1869,32 @@ class CarTradingDashboardController extends GetxController {
       totalPays.value = 0;
       totalReceives.value = 0;
       totalNETs.value = 0;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse('$backendUrl/car_trading/get_all_general_expenses');
       final response = await http.get(
         url,
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        List data = decoded['data'];
-        Map totals = decoded["totals"];
-        totalPays.value = totals['total_pay'];
-        totalReceives.value = totals['total_receive'];
-        totalNETs.value = totals['total_net'];
+        final decoded = _jsonObject(response.body);
+        List data = decoded['data'] ?? [];
+        Map totals = decoded["totals"] ?? {};
+        totalPays.value = _toDouble(totals['total_pay']);
+        totalReceives.value = _toDouble(totals['total_receive']);
+        totalNETs.value = _toDouble(totals['total_net']);
 
         allGeneralExpenses.assignAll(
-          data.map((g) => GeneralExpensesModel.fromJson(g)),
+          data.whereType<Map>().map(
+            (g) => GeneralExpensesModel.fromJson(Map<String, dynamic>.from(g)),
+          ),
         );
 
         isCapitalLoading.value = false;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllGeneralExpenses();
+          return await getAllGeneralExpenses();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1566,7 +1909,7 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  void filterGeneralExpensesSearch() async {
+  Future<void> filterGeneralExpensesSearch() async {
     searching.value = true;
 
     Map<String, dynamic> body = {};
@@ -1580,16 +1923,20 @@ class CarTradingDashboardController extends GetxController {
       body["this_year"] = true;
     }
     if (fromDate.value.text.isNotEmpty) {
-      final parsedDate = inputFormat
-          .parse(fromDate.value.text)
-          .toIso8601String();
-
-      body["from_date"] = parsedDate;
+      final fromIso = _isoDateFromText(fromDate.value, 'From Date');
+      if (fromIso == null) {
+        searching.value = false;
+        return;
+      }
+      body["from_date"] = fromIso;
     }
     if (toDate.value.text.isNotEmpty) {
-      final parsedDate = inputFormat.parse(toDate.value.text).toIso8601String();
-
-      body["to_date"] = parsedDate;
+      final toIso = _isoDateFromText(toDate.value, 'To Date');
+      if (toIso == null) {
+        searching.value = false;
+        return;
+      }
+      body["to_date"] = toIso;
     }
     if (body.isNotEmpty) {
       await getGeneralExpensesSummary(body);
@@ -1601,9 +1948,8 @@ class CarTradingDashboardController extends GetxController {
 
   Future<void> getGeneralExpensesSummary(Map body) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/get_general_expenses_summary',
       );
@@ -1616,13 +1962,15 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode(body),
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        Map totals = decoded["summary"];
-        totalPaysForAllGeneralExpenses.value = totals['total_pay'];
-        totalReceivesForAllGeneralExpenses.value = totals['total_receive'];
-        totalNETsForAllGeneralExpenses.value = totals['total_net'];
-        numberOfGeneralExpensesDocs.value = totals['count'];
-        totalNetProfit.value = totals['net_profit'];
+        final decoded = _jsonObject(response.body);
+        Map totals = decoded["summary"] ?? {};
+        totalPaysForAllGeneralExpenses.value = _toDouble(totals['total_pay']);
+        totalReceivesForAllGeneralExpenses.value = _toDouble(
+          totals['total_receive'],
+        );
+        totalNETsForAllGeneralExpenses.value = _toDouble(totals['total_net']);
+        numberOfGeneralExpensesDocs.value = _toInt(totals['count']);
+        totalNetProfit.value = _toDouble(totals['net_profit']);
 
         int i = summaryData.indexWhere(
           (data) => data['category'].contains('Expenses'),
@@ -1637,7 +1985,7 @@ class CarTradingDashboardController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getGeneralExpensesSummary(body);
+          return await getGeneralExpensesSummary(body);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1649,17 +1997,16 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> addNewGeneralExpenses() async {
+  Future<bool> addNewGeneralExpenses() async {
     try {
-      if (itemDate.value.text.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Please add valid Date');
-        return;
+      if (!validateLineItemForm(isTrade: false, isGeneralExpenses: true)) {
+        return false;
       }
-      final parsedDate = inputFormat.parse(itemDate.value.text);
-      final isoDate = parsedDate.toIso8601String();
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final isoDate = _isoDateFromText(itemDate.value, 'Date', required: true);
+      if (isoDate == null) return false;
+      isCapitalLoading.value = true;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse('$backendUrl/car_trading/add_new_general_expenses');
       final response = await http.post(
         url,
@@ -1677,34 +2024,39 @@ class CarTradingDashboardController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
-        totalPays.value += double.tryParse(pay.text) ?? 0.0;
-        totalReceives.value += double.tryParse(receive.text) ?? 0.0;
-        totalNETs.value = totalReceives.value - totalPays.value;
+        await getAllGeneralExpenses();
+        await getGeneralExpensesSummary({"all": true});
+        await getCashOnHandOrBankBalance();
+        isCapitalLoading.value = false;
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewGeneralExpenses();
+          isCapitalLoading.value = false;
+          return await addNewGeneralExpenses();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not save expense. Please try again.');
       }
-      Get.back();
+      isCapitalLoading.value = false;
+      return false;
     } catch (e) {
-      Get.back();
-      alertMessage(
-        context: Get.context!,
-        content: 'Something went wrong please try again',
-      );
+      isCapitalLoading.value = false;
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  Future<void> deleteGeneralExpenses(String id) async {
+  Future<bool> deleteGeneralExpenses(String id) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      if (id.isEmpty) return false;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/delete_general_expenses/$id',
       );
@@ -1713,38 +2065,42 @@ class CarTradingDashboardController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        Map totals = decoded["totals"];
-        totalPays.value -= totals["pay"];
-        totalReceives.value -= totals["receive"];
-        totalNETs.value = totalReceives.value - totalPays.value;
+        allGeneralExpenses.removeWhere((item) => item.id == id);
+        await getGeneralExpensesSummary({"all": true});
+        await getCashOnHandOrBankBalance();
+        calculateTotalsForCapitals(allGeneralExpenses);
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deleteGeneralExpenses(id);
+          return await deleteGeneralExpenses(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not delete expense. Please try again.');
       }
-      Get.back();
+      return false;
     } catch (e) {
-      //
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  Future<void> updateGeneralEpenses(String id) async {
+  Future<bool> updateGeneralEpenses(String id) async {
     try {
-      if (itemDate.value.text.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Please add valid Date');
-        return;
+      if (id.isEmpty) return false;
+      if (!validateLineItemForm(isTrade: false, isGeneralExpenses: true)) {
+        return false;
       }
-      final parsedDate = inputFormat.parse(itemDate.value.text);
-      final isoDate = parsedDate.toIso8601String();
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final isoDate = _isoDateFromText(itemDate.value, 'Date', required: true);
+      if (isoDate == null) return false;
+      isCapitalLoading.value = true;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/update_generale_expenses/$id',
       );
@@ -1764,23 +2120,31 @@ class CarTradingDashboardController extends GetxController {
         }),
       );
       if (response.statusCode == 200) {
+        await getAllGeneralExpenses();
+        await getGeneralExpensesSummary({"all": true});
+        await getCashOnHandOrBankBalance();
+        isCapitalLoading.value = false;
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await updateGeneralEpenses(id);
+          isCapitalLoading.value = false;
+          return await updateGeneralEpenses(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not update expense. Please try again.');
       }
-      Get.back();
+      isCapitalLoading.value = false;
+      return false;
     } catch (e) {
-      Get.back();
-      alertMessage(
-        context: Get.context!,
-        content: 'Something went wrong please try again',
-      );
+      isCapitalLoading.value = false;
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
@@ -1792,8 +2156,8 @@ class CarTradingDashboardController extends GetxController {
     totalReceives.value = 0.0;
 
     for (var item in addedItems) {
-      totalPays.value += item.pay!;
-      totalReceives.value += item.receive!;
+      totalPays.value += item.pay ?? 0;
+      totalReceives.value += item.receive ?? 0;
     }
 
     totalNETs.value = totalReceives.value - totalPays.value;
@@ -1802,7 +2166,7 @@ class CarTradingDashboardController extends GetxController {
   void calculateTransfersAmount() {
     totalTransfersAmount.value = 0.0;
     for (var item in alltransfers) {
-      totalTransfersAmount.value += item.amount!;
+      totalTransfersAmount.value += item.amount ?? 0;
     }
   }
 
@@ -1811,25 +2175,29 @@ class CarTradingDashboardController extends GetxController {
     totalPurchaseAgreementDownPayment.value = 0.0;
 
     for (var item in purchaseAgreementAddedItems) {
-      totalPurchaseAgreementAmount.value += item.amount!;
-      totalPurchaseAgreementDownPayment.value += item.aownpayment!;
+      totalPurchaseAgreementAmount.value += item.amount ?? 0;
+      totalPurchaseAgreementDownPayment.value += item.aownpayment ?? 0;
     }
   }
 
-  Future<void> addNewItem() async {
+  Future<bool> addNewItem() async {
     try {
       if (currentTradId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Save trade first');
-        return;
+        _showError('Save trade first');
+        return false;
       }
+      if (!validateLineItemForm(isTrade: true, isGeneralExpenses: false)) {
+        return false;
+      }
+      final isoDate = _isoDateFromText(itemDate.value, 'Date', required: true);
+      if (isoDate == null) return false;
       addingTradeItem.value = true;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse('$backendUrl/car_trading/add_trade_item');
       Map data = {
         "trade_id": currentTradId.value,
-        "date": convertDateToIson(itemDate.value.text),
+        "date": isoDate,
         "item": itemId.value,
         "account_name": accountNameId.value,
         "pay": double.tryParse(pay.value.text) ?? 0,
@@ -1845,39 +2213,60 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode(data),
       );
       if (response.statusCode == 200) {
+        final decoded = _jsonObject(response.body);
+        final itemData = decoded['item'] ?? decoded['data'];
+        if (itemData is Map) {
+          _upsertTradeItem(
+            CarTradingItemsModel.fromJson(Map<String, dynamic>.from(itemData)),
+          );
+        }
+        calculateTotals();
+        addingTradeItem.value = false;
         Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewItem();
+          addingTradeItem.value = false;
+          return await addNewItem();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not save item. Please try again.');
       }
       addingTradeItem.value = false;
+      return false;
     } catch (e) {
       addingTradeItem.value = false;
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  Future<void> updateItem(String tradeItemID) async {
+  Future<bool> updateItem(String tradeItemID) async {
     try {
       if (currentTradId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Save trade first');
-        return;
+        _showError('Save trade first');
+        return false;
       }
+      if (tradeItemID.isEmpty) return false;
+      if (!validateLineItemForm(isTrade: true, isGeneralExpenses: false)) {
+        return false;
+      }
+      final isoDate = _isoDateFromText(itemDate.value, 'Date', required: true);
+      if (isoDate == null) return false;
       addingTradeItem.value = true;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/update_trade_item/$tradeItemID',
       );
       Map data = {
         "trade_id": currentTradId.value,
-        "date": convertDateToIson(itemDate.value.text),
+        "date": isoDate,
         "item": itemId.value,
         "account_name": accountNameId.value,
         "pay": double.tryParse(pay.value.text) ?? 0,
@@ -1893,32 +2282,48 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode(data),
       );
       if (response.statusCode == 200) {
+        final decoded = _jsonObject(response.body);
+        final itemData = decoded['item'] ?? decoded['data'];
+        if (itemData is Map) {
+          _upsertTradeItem(
+            CarTradingItemsModel.fromJson(Map<String, dynamic>.from(itemData)),
+          );
+        }
+        calculateTotals();
+        addingTradeItem.value = false;
         Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await updateItem(tradeItemID);
+          addingTradeItem.value = false;
+          return await updateItem(tradeItemID);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not update item. Please try again.');
       }
       addingTradeItem.value = false;
+      return false;
     } catch (e) {
       addingTradeItem.value = false;
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  Future<void> deleteItem(String tradeItemID) async {
+  Future<bool> deleteItem(String tradeItemID) async {
     try {
       if (currentTradId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Save trade first');
-        return;
+        _showError('Save trade first');
+        return false;
       }
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      if (tradeItemID.isEmpty) return false;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/delete_trade_item/$tradeItemID',
       );
@@ -1928,27 +2333,33 @@ class CarTradingDashboardController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
+        addedItems.removeWhere((item) => item.id == tradeItemID);
+        calculateTotals();
         Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deleteItem(tradeItemID);
+          return await deleteItem(tradeItemID);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not delete item. Please try again.');
       }
+      return false;
     } catch (e) {
-      //
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
   Future<void> getPurchaseAgreementForCurrentTrade(String tradeId) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/get_purchase_agreement_for_current_trade/$tradeId',
       );
@@ -1958,17 +2369,19 @@ class CarTradingDashboardController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        List purchase = decoded['purchase_agreement_items'];
+        final decoded = _jsonObject(response.body);
+        List purchase = decoded['purchase_agreement_items'] ?? [];
         purchaseAgreementAddedItems.assignAll(
-          purchase.map(
-            (item) => CarTradingPurchaseAgreementModel.fromJson(item),
+          purchase.whereType<Map>().map(
+            (item) => CarTradingPurchaseAgreementModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ),
           ),
         );
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getPurchaseAgreementForCurrentTrade(tradeId);
+          return await getPurchaseAgreementForCurrentTrade(tradeId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1980,18 +2393,24 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> addNewPurchaseAgreementItem() async {
+  Future<bool> addNewPurchaseAgreementItem() async {
     try {
+      if (!validateSalesAgreementForm()) return false;
+      final agreementIso = _isoDateFromText(
+        agreementdate,
+        'Agreement Date',
+        required: true,
+      );
+      if (agreementIso == null) return false;
       addingPurchaseAgreement.value = true;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/add_purchase_agreement_item',
       );
       Map data = {
         "trade_id": currentTradId.value,
-        "agreement_date": convertDateToIson(agreementdate.text),
+        "agreement_date": agreementIso,
         "seller_name": sellerName.text,
         "seller_email": sellerEmail.text,
         "seller_phone": sellerPhone.text,
@@ -2014,39 +2433,66 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode(data),
       );
       if (response.statusCode == 200) {
+        final decoded = _jsonObject(response.body);
+        final itemData = decoded['item'] ?? decoded['data'];
+        if (itemData is Map) {
+          _upsertPurchaseAgreement(
+            CarTradingPurchaseAgreementModel.fromJson(
+              Map<String, dynamic>.from(itemData),
+            ),
+          );
+        } else {
+          await getPurchaseAgreementForCurrentTrade(currentTradId.value);
+        }
+        calculatePurchaseAgreementTotals();
+        addingPurchaseAgreement.value = false;
         Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewPurchaseAgreementItem();
+          addingPurchaseAgreement.value = false;
+          return await addNewPurchaseAgreementItem();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
+      } else {
+        _showError('Could not save sales agreement. Please try again.');
+      }
       addingPurchaseAgreement.value = false;
+      return false;
     } catch (e) {
       addingPurchaseAgreement.value = false;
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  Future<void> updatePurchaseAgreementItem(String id) async {
+  Future<bool> updatePurchaseAgreementItem(String id) async {
     try {
       if (currentTradId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Save trade first');
-        return;
+        _showError('Save trade first');
+        return false;
       }
+      if (id.isEmpty) return false;
+      if (!validateSalesAgreementForm()) return false;
+      final agreementIso = _isoDateFromText(
+        agreementdate,
+        'Agreement Date',
+        required: true,
+      );
+      if (agreementIso == null) return false;
       addingPurchaseAgreement.value = true;
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/update_purchase_agreement_item/$id',
       );
       Map data = {
         "trade_id": currentTradId.value,
-        "agreement_date": convertDateToIson(agreementdate.text),
+        "agreement_date": agreementIso,
         "seller_name": sellerName.text,
         "seller_email": sellerEmail.text,
         "seller_phone": sellerPhone.text,
@@ -2069,27 +2515,48 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode(data),
       );
       if (response.statusCode == 200) {
+        final decoded = _jsonObject(response.body);
+        final itemData = decoded['item'] ?? decoded['data'];
+        if (itemData is Map) {
+          _upsertPurchaseAgreement(
+            CarTradingPurchaseAgreementModel.fromJson(
+              Map<String, dynamic>.from(itemData),
+            ),
+          );
+        } else {
+          await getPurchaseAgreementForCurrentTrade(currentTradId.value);
+        }
+        calculatePurchaseAgreementTotals();
+        addingPurchaseAgreement.value = false;
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await updatePurchaseAgreementItem(id);
+          addingPurchaseAgreement.value = false;
+          return await updatePurchaseAgreementItem(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
+      } else {
+        _showError('Could not update sales agreement. Please try again.');
+      }
       addingPurchaseAgreement.value = false;
+      return false;
     } catch (e) {
       addingPurchaseAgreement.value = false;
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  Future<void> deletePurchaseAgreementItem(String id) async {
+  Future<bool> deletePurchaseAgreementItem(String id) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      if (id.isEmpty) return false;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
       Uri url = Uri.parse(
         '$backendUrl/car_trading/delete_purchase_agreement_item/$id',
       );
@@ -2098,19 +2565,26 @@ class CarTradingDashboardController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
+        purchaseAgreementAddedItems.removeWhere((item) => item.id == id);
+        calculatePurchaseAgreementTotals();
+        Get.back();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deletePurchaseAgreementItem(id);
+          return await deletePurchaseAgreementItem(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        _showError('Could not delete sales agreement. Please try again.');
       }
-      Get.back();
+      return false;
     } catch (e) {
-      //
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
@@ -2128,20 +2602,23 @@ class CarTradingDashboardController extends GetxController {
   //   }
   // }
 
-  Future<void> addNewTrade() async {
+  Future<bool> addNewTrade() async {
     try {
-      if (date.value.text.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Please add valid Date');
-        return;
-      }
+      if (!validateTradeForm()) return false;
 
       addingNewValue.value = true;
 
-      final parsedDate = inputFormat.parse(date.value.text);
-      final isoDate = parsedDate.toIso8601String();
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final isoDate = _isoDateFromText(
+        date.value,
+        'Transaction Date',
+        required: true,
+      );
+      if (isoDate == null) {
+        addingNewValue.value = false;
+        return false;
+      }
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
 
       Uri addUrl = Uri.parse('$backendUrl/car_trading/add_new_trade');
       Uri updateTradeUrl = Uri.parse(
@@ -2173,28 +2650,30 @@ class CarTradingDashboardController extends GetxController {
 
       final rawDate = warrantyEndDate.value.text.trim();
       if (rawDate.isNotEmpty) {
-        try {
-          body['warranty_end_date'] = convertDateToIson(rawDate);
-        } catch (e) {
-          alertMessage(
-            context: Get.context!,
-            content: 'Please enter valid Warranty End Date',
-          );
+        final warrantyIso = _isoDateFromText(
+          warrantyEndDate.value,
+          'Warranty End Date',
+        );
+        if (warrantyIso == null) {
+          addingNewValue.value = false;
+          return false;
         }
+        body['warranty_end_date'] = warrantyIso;
       } else {
         body['warranty_end_date'] = null;
       }
 
       final rawDate2 = serviceContractEndDate.value.text.trim();
       if (rawDate2.isNotEmpty) {
-        try {
-          body['service_contract_end_date'] = convertDateToIson(rawDate2);
-        } catch (e) {
-          alertMessage(
-            context: Get.context!,
-            content: 'Please enter valid Service Contract End Date',
-          );
+        final serviceIso = _isoDateFromText(
+          serviceContractEndDate.value,
+          'Service Contract End Date',
+        );
+        if (serviceIso == null) {
+          addingNewValue.value = false;
+          return false;
         }
+        body['service_contract_end_date'] = serviceIso;
       } else {
         body['service_contract_end_date'] = null;
       }
@@ -2207,26 +2686,29 @@ class CarTradingDashboardController extends GetxController {
           body: jsonEncode(body),
         );
 
-        final decoded = jsonDecode(response.body);
+        final decoded = _jsonObject(response.body);
         if (response.statusCode == 200) {
-          String tradeId = decoded["trade_id"];
+          String tradeId = decoded["trade_id"]?.toString() ?? '';
           currentTradId.value = tradeId;
           status.value = 'New';
           carModified.value = false;
+          await filterSearch();
+          addingNewValue.value = false;
+          return true;
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
-            await addNewTrade();
+            addingNewValue.value = false;
+            return await addNewTrade();
           } else if (refreshed == RefreshResult.invalidToken) {
             logout();
           }
         } else if (response.statusCode == 401) {
           logout();
         } else {
-          alertMessage(
+          _showError(
+            decoded["detail"]?.toString() ?? "Failed to add trade",
             title: 'Error',
-            content: decoded["detail"] ?? "Failed to add trade",
-            context: Get.context!,
           );
         }
       } else {
@@ -2241,38 +2723,43 @@ class CarTradingDashboardController extends GetxController {
             headers: headers,
             body: jsonEncode(body),
           );
-          final decoded = jsonDecode(carResponse.body);
+          final decoded = _jsonObject(carResponse.body);
           if (carResponse.statusCode == 200) {
             carModified.value = false;
+            await filterSearch();
+            addingNewValue.value = false;
+            return true;
           } else if (carResponse.statusCode == 401 && refreshToken.isNotEmpty) {
             final refreshed = await helper.refreshAccessToken(refreshToken);
             if (refreshed == RefreshResult.success) {
-              await addNewTrade();
+              addingNewValue.value = false;
+              return await addNewTrade();
             } else if (refreshed == RefreshResult.invalidToken) {
               logout();
             }
           } else if (carResponse.statusCode == 401) {
             logout();
           } else {
-            alertMessage(
+            _showError(
+              decoded["detail"]?.toString() ?? "Failed to update trade",
               title: 'Error',
-              content: decoded["detail"] ?? "Failed to update trade",
-              context: Get.context!,
             );
           }
+        } else {
+          addingNewValue.value = false;
+          return true;
         }
       }
       addingNewValue.value = false;
+      return false;
     } catch (e) {
       addingNewValue.value = false;
-      alertMessage(
-        context: Get.context!,
-        content: 'Something went wrong please try again',
-      );
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
-  void filterSearch() async {
+  Future<void> filterSearch() async {
     searching.value = true;
 
     Map<String, dynamic> body = {};
@@ -2319,16 +2806,20 @@ class CarTradingDashboardController extends GetxController {
       body["this_year"] = true;
     }
     if (fromDate.value.text.isNotEmpty) {
-      final parsedDate = inputFormat
-          .parse(fromDate.value.text)
-          .toIso8601String();
-
-      body["from_date"] = parsedDate;
+      final fromIso = _isoDateFromText(fromDate.value, 'From Date');
+      if (fromIso == null) {
+        searching.value = false;
+        return;
+      }
+      body["from_date"] = fromIso;
     }
     if (toDate.value.text.isNotEmpty) {
-      final parsedDate = inputFormat.parse(toDate.value.text).toIso8601String();
-
-      body["to_date"] = parsedDate;
+      final toIso = _isoDateFromText(toDate.value, 'To Date');
+      if (toIso == null) {
+        searching.value = false;
+        return;
+      }
+      body["to_date"] = toIso;
     }
     if (body.isNotEmpty) {
       await searchEngine(body);
@@ -2340,9 +2831,8 @@ class CarTradingDashboardController extends GetxController {
 
   Future<void> searchEngine(Map<String, dynamic> body) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
-      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
 
       final url = Uri.parse(
         '$backendUrl/car_trading/search_engine_for_car_trading',
@@ -2358,14 +2848,21 @@ class CarTradingDashboardController extends GetxController {
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        final data = decoded is List ? decoded[0] : decoded;
+        final data = decoded is List && decoded.isNotEmpty
+            ? decoded[0]
+            : decoded;
+        if (data is! Map) return;
         List trades = data["trades"] ?? [];
-        totalPaysForAllTrades.value = data['grand_total_pay'] ?? 0;
-        totalReceivesForAllTrades.value = data['grand_total_receive'] ?? 0;
-        totalNETsForAllTrades.value = data['grand_net'] ?? 0;
+        totalPaysForAllTrades.value = _toDouble(data['grand_total_pay']);
+        totalReceivesForAllTrades.value = _toDouble(
+          data['grand_total_receive'],
+        );
+        totalNETsForAllTrades.value = _toDouble(data['grand_net']);
 
         filteredTrades.assignAll(
-          trades.map((item) => CarTradeModel.fromJson(item)),
+          trades.whereType<Map>().map(
+            (item) => CarTradeModel.fromJson(Map<String, dynamic>.from(item)),
+          ),
         );
         numberOfCars.value = trades.length;
         int i = summaryData.indexWhere(
@@ -2381,7 +2878,7 @@ class CarTradingDashboardController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await searchEngine(body); // retry once
+          return await searchEngine(body);
         } else {
           logout();
         }
@@ -2393,11 +2890,11 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> deleteTrade(String id) async {
+  Future<bool> deleteTrade(String id) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
-      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      if (id.isEmpty) return false;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
 
       final url = Uri.parse('$backendUrl/car_trading/delete_trade/$id');
       final response = await http.delete(
@@ -2406,12 +2903,16 @@ class CarTradingDashboardController extends GetxController {
       );
       if (response.statusCode == 200) {
         filteredTrades.removeWhere((trade) => trade.id == id);
-        numberOfCars.value -= 1;
+        numberOfCars.value = numberOfCars.value > 0
+            ? numberOfCars.value - 1
+            : 0;
+        await allSearches();
         Get.close(2);
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deleteTrade(id);
+          return await deleteTrade(id);
         } else {
           logout();
         }
@@ -2419,24 +2920,19 @@ class CarTradingDashboardController extends GetxController {
         logout();
       } else {
         Get.back();
-        alertMessage(
-          context: Get.context!,
-          content: 'Something went wrong please try again',
-        );
+        _showError('Something went wrong please try again');
       }
+      return false;
     } catch (e) {
-      alertMessage(
-        context: Get.context!,
-        content: 'Something went wrong please try again',
-      );
+      _showError('Something went wrong please try again');
+      return false;
     }
   }
 
   Future<void> getCashOnHandOrBankBalance() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken') ?? '';
-      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
 
       final url = Uri.parse(
         '$backendUrl/car_trading/get_cash_on_hand_or_bank_balance',
@@ -2446,12 +2942,15 @@ class CarTradingDashboardController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        Map data = decoded['totals'];
-        List totals = data['all_accounts'];
-        totalMoneyForAccounts.value = data['total_final_net'];
+        final decoded = _jsonObject(response.body);
+        Map data = decoded['totals'] ?? {};
+        List totals = data['all_accounts'] ?? [];
+        totalMoneyForAccounts.value = _toDouble(data['total_final_net']);
         accountsSummary.assignAll(
-          totals.map((acc) => AccountSummaryModel.fromJson(acc)),
+          totals.whereType<Map>().map(
+            (acc) =>
+                AccountSummaryModel.fromJson(Map<String, dynamic>.from(acc)),
+          ),
         );
         // if (accountName == 'CASH') {
         //   totalNETsForAll.value = decoded['totals']['final_net'];
@@ -2461,14 +2960,12 @@ class CarTradingDashboardController extends GetxController {
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCashOnHandOrBankBalance();
+          return await getCashOnHandOrBankBalance();
         } else {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {
-        Get.back();
       }
     } catch (e) {
       //
@@ -2670,8 +3167,9 @@ class CarTradingDashboardController extends GetxController {
     carEngineSizeFilter.value.clear();
     carEngineSizeFilterId.value = '';
     carSpecificationFilter.value.clear();
-    carSpecificationFilterId.value == '';
+    carSpecificationFilterId.value = '';
     fromDate.value.clear();
     toDate.value.clear();
+    allSearches();
   }
 }

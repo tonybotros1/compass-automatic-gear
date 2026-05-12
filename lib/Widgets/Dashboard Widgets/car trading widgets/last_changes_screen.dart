@@ -69,10 +69,10 @@ Widget lastChangesScreen({
                         controller.accountForLastChanges.value.text =
                             value['name'];
                       },
-                      onDelete: (){
-                         controller.accountForLastChanges.value.clear();
+                      onDelete: () {
+                        controller.accountForLastChanges.value.clear();
                       },
-                      onOpen: (){
+                      onOpen: () {
                         return controller.getNamesOfAccount();
                       },
                     ),

@@ -25,6 +25,11 @@ class LastCarTradingChangesModel {
     this.updatedAt,
   });
 
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
   LastCarTradingChangesModel.fromJson(Map<String, dynamic> json) {
     brandName = json.containsKey('brand_name')
         ? json['brand_name']?.toString() ?? ''
@@ -35,9 +40,9 @@ class LastCarTradingChangesModel {
     description = json.containsKey('description')
         ? json['description']?.toString() ?? ''
         : '';
-    pay = json.containsKey('pay') ? json['pay'] ?? 0 : 0;
+    pay = json.containsKey('pay') ? _toDouble(json['pay']) : 0;
     type = json.containsKey('type') ? json['type']?.toString() : '';
-    receive = json.containsKey('receive') ? json['receive'] ?? 0 : 0;
+    receive = json.containsKey('receive') ? _toDouble(json['receive']) : 0;
     year = json.containsKey('year') ? json['year']?.toString() ?? '' : '';
     id = json.containsKey('_id') ? json['_id']?.toString() ?? '' : '';
     accountName = json.containsKey('account_name')
@@ -46,7 +51,7 @@ class LastCarTradingChangesModel {
     itemName = json.containsKey('item_name')
         ? json['item_name']?.toString() ?? ''
         : '';
-    updatedAt = DateTime.tryParse(json['updatedAt']);
+    updatedAt = DateTime.tryParse(json['updatedAt']?.toString() ?? '');
   }
 
   Map<String, dynamic> toJson() {
