@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -127,6 +128,7 @@ class EmployeesController extends GetxController {
   String backendUrl = backendTestURI;
   RxList<EmployeesModel> allEmployees = RxList<EmployeesModel>([]);
   WebSocketService ws = Get.find<WebSocketService>();
+  StreamSubscription<Map<String, dynamic>>? _employeeEventsSubscription;
   Uint8List? imageBytes;
   RxInt initStatusPickersValue = RxInt(1);
   RxInt initTypePickersValue = RxInt(1);
@@ -186,10 +188,84 @@ class EmployeesController extends GetxController {
     Tab(text: 'Non-recurring Elements'),
   ];
   @override
-  void onInit() async {
-    connectWebSocket();
-    // getAllEmployees();
+  void onInit() {
     super.onInit();
+    connectWebSocket();
+    getAllEmployees();
+  }
+
+  @override
+  void onClose() {
+    _employeeEventsSubscription?.cancel();
+    for (final controller in [
+      search.value,
+      contactsAndRelativesSearch.value,
+      leavesSearch.value,
+      employeeName,
+      employeeNameFilter,
+      employerFilter,
+      departmentFilter,
+      jobTitleFilter,
+      locationFilter,
+      genderFilter,
+      employeeGender,
+      employeeDateOfBirth,
+      employeePlaceOfBirth,
+      employeeCountryOfBirth,
+      employeeNationality,
+      employeeMaritalStatus,
+      employeeLegislation,
+      employeeEmail,
+      employeePhoneNumber,
+      employeeEmergencyPhoneNumber,
+      employeeEmergencyName,
+      employeeAddress,
+      jobTitle,
+      jobLocation,
+      hireDate,
+      endDate,
+      jobEmployer,
+      jobDepartment,
+      reportingManager,
+      payroll,
+      country,
+      employeePayrollElementName,
+      employeePayrollElementvalue,
+      employeePayrollElementStartDate,
+      employeePayrollElementEndDate,
+      employeePayrollElementNote,
+      line,
+      city,
+      nationality,
+      phoneType,
+      emailType,
+      phoneNumber,
+      emailAddress,
+      employeeBankName,
+      employeeAccountNumber,
+      employeeIBAN,
+      employeeSWIFTCode,
+      nationalityStartDate,
+      nationalityEndDate,
+      contactAndRelativeFullName,
+      contactAndRelativeRelationship,
+      contactAndRelativePhoneNumber,
+      contactAndRelativeGender,
+      contactAndRelativeDateOfBirth,
+      contactAndRelativeNationality,
+      contactAndRelativeEmailAddress,
+      contactAndRelativeNotes,
+      typeFilter,
+      employeeLeaveType,
+      employeeLeaveStartTime,
+      employeeLeaveEndTime,
+      employeeLeaveNumberOfDays,
+      employeeLeaveNote,
+      periodFilter,
+    ]) {
+      controller.dispose();
+    }
+    super.onClose();
   }
 
   String getScreenName() {
@@ -281,8 +357,9 @@ class EmployeesController extends GetxController {
     return await helper.getPayrolls();
   }
 
-  Future getCurrentEmployeeLeaveStatus(String id) async {
-    return await helper.getEmployeeLeaveStatus(id);
+  Future<String> getCurrentEmployeeLeaveStatus(String id) async {
+    final status = await helper.getEmployeeLeaveStatus(id);
+    return status?.toString() ?? '';
   }
 
   void onChooseForTypePicker(int i) {
@@ -340,6 +417,11 @@ class EmployeesController extends GetxController {
       });
       current = DateTime(current.year, current.month + 1);
     }
+    if (periods.isEmpty) {
+      periods.add({
+        "period_name": "${now.year}-${now.month.toString().padLeft(2, '0')}",
+      });
+    }
     periodFilter.text = periods.last['period_name'] ?? '';
     return periods.reversed.toList();
   }
@@ -389,20 +471,33 @@ class EmployeesController extends GetxController {
     }
   }
 
+  void _upsertEmployee(EmployeesModel employee, {bool insertAtStart = false}) {
+    final id = employee.id;
+    if (id == null || id.isEmpty) return;
+    final index = allEmployees.indexWhere((m) => m.id == id);
+    if (index != -1) {
+      allEmployees[index] = employee;
+      return;
+    }
+    if (insertAtStart) {
+      allEmployees.insert(0, employee);
+    } else {
+      allEmployees.add(employee);
+    }
+  }
+
   void connectWebSocket() {
-    ws.events.listen((message) {
+    _employeeEventsSubscription?.cancel();
+    _employeeEventsSubscription = ws.events.listen((message) {
       switch (message["type"]) {
         case "employee_added":
           final newCounter = EmployeesModel.fromJson(message["data"]);
-          allEmployees.insert(0, newCounter);
+          _upsertEmployee(newCounter, insertAtStart: true);
           break;
 
         case "employee_updated":
           final updated = EmployeesModel.fromJson(message["data"]);
-          final index = allEmployees.indexWhere((m) => m.id == updated.id);
-          if (index != -1) {
-            allEmployees[index] = updated;
-          }
+          _upsertEmployee(updated);
           break;
 
         case "employee_deleted":
@@ -628,6 +723,14 @@ class EmployeesController extends GetxController {
           final decoded = jsonDecode(responseData);
           final employeeID = decoded["employee_id"];
           currentEmployeeId.value = employeeID ?? '';
+          if (decoded["employee"] is Map) {
+            _upsertEmployee(
+              EmployeesModel.fromJson(
+                Map<String, dynamic>.from(decoded["employee"]),
+              ),
+              insertAtStart: true,
+            );
+          }
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -657,6 +760,15 @@ class EmployeesController extends GetxController {
         final response = await updatingREQUEST.send();
         if (response.statusCode == 200) {
           imageBytes = null;
+          final responseData = await response.stream.bytesToString();
+          final decoded = jsonDecode(responseData);
+          if (decoded["employee"] is Map) {
+            _upsertEmployee(
+              EmployeesModel.fromJson(
+                Map<String, dynamic>.from(decoded["employee"]),
+              ),
+            );
+          }
         } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
@@ -1537,7 +1649,7 @@ class EmployeesController extends GetxController {
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse('$backendUrl/employees/edit_employee_email/$id');
-      final response = await http.post(
+      final response = await http.patch(
         url,
         headers: {
           'Authorization': 'Bearer $accessToken',
@@ -1965,38 +2077,30 @@ class EmployeesController extends GetxController {
   }
 
   void filterContactsAndRelatives() {
-    contactsAndRelativesQuery.value = contactsAndRelativesSearch.value.text
-        .toLowerCase();
-    if (contactsAndRelativesQuery.value.isEmpty) {
+    final query = contactsAndRelativesSearch.value.text.trim().toLowerCase();
+    contactsAndRelativesQuery.value = query;
+    if (query.isEmpty) {
       filteredContactsAndRelativesList.clear();
     } else {
       filteredContactsAndRelativesList.assignAll(
         contactsAndRelativesList.where((contact) {
-          return contact.fullName.toString().toLowerCase().contains(
-                contactsAndRelativesQuery,
-              ) ||
+          return contact.fullName.toString().toLowerCase().contains(query) ||
               contact.relationshipName.toString().toLowerCase().contains(
-                contactsAndRelativesQuery,
+                query,
               ) ||
-              contact.phoneNumber.toString().toLowerCase().contains(
-                contactsAndRelativesQuery,
-              ) ||
-              contact.genderName.toString().toLowerCase().contains(
-                contactsAndRelativesQuery,
-              ) ||
+              contact.phoneNumber.toString().toLowerCase().contains(query) ||
+              contact.genderName.toString().toLowerCase().contains(query) ||
               contact.nationalityName.toString().toLowerCase().contains(
-                contactsAndRelativesQuery,
+                query,
               ) ||
-              contact.emailAddress.toString().toLowerCase().contains(
-                contactsAndRelativesQuery,
-              ) ||
+              contact.emailAddress.toString().toLowerCase().contains(query) ||
               // (contact.isEmergency.toString().toLowerCase() == 'true'
               //         ? 'emergency'
               //         : '-')
               //     .contains(query) ||
               textToDate(
                 contact.dateOfBirth,
-              ).toString().toLowerCase().contains(contactsAndRelativesQuery);
+              ).toString().toLowerCase().contains(query);
         }).toList(),
       );
     }

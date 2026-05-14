@@ -388,7 +388,7 @@ IconButton deleteSection(
         context: context,
         content: "This employee will be deleted permanently",
         onPressed: () {
-          // controller.deleteEmployee(employeeId);
+          controller.deleteEmployee(employeeId);
         },
       );
     },
@@ -501,7 +501,7 @@ ElevatedButton newEmployeeButton(
           );
         },
         onPressedForAttachment: () {
-          if (controller.currentEmployeeId.isEmpty) {
+          if (controller.currentEmployeeId.value.isEmpty) {
             alertMessage(context: context, content: " Please save doc first");
             return;
           }

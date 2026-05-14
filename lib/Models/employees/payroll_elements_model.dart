@@ -16,11 +16,16 @@ class EmployeePayrollElementsModel {
     this.note,
   });
 
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
   EmployeePayrollElementsModel.fromJson(Map<String, dynamic> json) {
     id = json.containsKey('_id') ? json['_id'] ?? '' : '';
     name = json.containsKey('name_value') ? json['name_value'] ?? '' : '';
     nameId = json.containsKey('name') ? json['name'] ?? '' : '';
-    value = json.containsKey('value') ? json['value'] ?? 0 : 0;
+    value = json.containsKey('value') ? _toDouble(json['value']) : 0;
     startDate = json.containsKey('start_date')
         ? json['start_date'] != null
               ? DateTime.tryParse(json['start_date'])

@@ -32,12 +32,13 @@ Widget addNewLeaveOrEdit({
             controller.employeeLeaveNumberOfDays.clear();
           },
           onSelected: (value) {
+            final leaveTypeCalculation = value['type']?.toString() ?? '';
             if (value.containsKey('type')) {
-              if (value['type'] != null || value['type'] != '') {
+              if (leaveTypeCalculation.isNotEmpty) {
                 controller
                         .employeeLeaveTypeTypeToCheckForHowToCalculateTheHolidays
                         .value =
-                    value['type'];
+                    leaveTypeCalculation;
               } else {
                 alertMessage(
                   context: Get.context!,

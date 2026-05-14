@@ -118,10 +118,7 @@ ElevatedButton newPhoneButton({required EmployeesController controller}) {
       );
     },
     style: newButtonStyle,
-    child: const Text(
-      'New',
-      style: TextStyle(fontWeight: FontWeight.bold),
-    ),
+    child: const Text('New', style: TextStyle(fontWeight: FontWeight.bold)),
   );
 }
 
@@ -131,8 +128,14 @@ IconButton removePhoneButton({
 }) {
   return IconButton(
     onPressed: () {
-      Get.back();
-      controller.deletePhone(id);
+      alertDialog(
+        context: Get.context!,
+        content: "Are you sure you want to delete this phone?",
+        onPressed: () {
+          Get.back();
+          controller.deletePhone(id);
+        },
+      );
     },
     icon: deleteIcon,
   );

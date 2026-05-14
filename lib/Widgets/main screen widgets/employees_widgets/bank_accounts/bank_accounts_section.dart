@@ -135,6 +135,10 @@ DataRow dataRowForTheTable(
 ElevatedButton newBankAccountButton({required EmployeesController controller}) {
   return ElevatedButton(
     onPressed: () {
+      if (controller.currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Please save doc first");
+        return;
+      }
       controller.employeeBankName.clear();
       controller.employeeBankNameId.value = '';
       controller.employeeAccountNumber.clear();

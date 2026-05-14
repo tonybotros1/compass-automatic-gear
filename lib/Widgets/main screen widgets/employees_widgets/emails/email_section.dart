@@ -117,6 +117,10 @@ DataRow dataRowForTheTable(
 ElevatedButton newEmailButton({required EmployeesController controller}) {
   return ElevatedButton(
     onPressed: () {
+      if (controller.currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Please save doc first");
+        return;
+      }
       controller.emailType.clear();
       controller.emailTypeId.value = '';
       controller.emailAddress.clear();
