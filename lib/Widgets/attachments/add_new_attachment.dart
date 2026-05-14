@@ -166,21 +166,33 @@ Widget addNewAttachment({
                   children: [
                     Text('Attachments', style: textFieldLabelStyle),
                     InkWell(
-                      onTap: () {
-                        FilePickerService.pickFile(
-                          controller.fileBytes,
-                          controller.fileType,
-                          controller.fileName,
-                        ).then(
-                          (value) => controller.selectedAttachments.add(
-                            SelectedAttachmentsModel(
-                              fileBytes: controller.fileBytes.value,
-                              fileName: controller.fileName.value,
-                              fileType: controller.fileType.value,
-                            ),
-                          ),
-                        );
-                      },
+                      onTap: canEdit
+                          ? () async {
+                              controller.fileBytes.value = null;
+                              controller.fileType.value = '';
+                              controller.fileName.value = '';
+
+                              await FilePickerService.pickFile(
+                                controller.fileBytes,
+                                controller.fileType,
+                                controller.fileName,
+                              );
+
+                              final fileBytes = controller.fileBytes.value;
+                              final fileName = controller.fileName.value.trim();
+                              if (fileBytes == null || fileName.isEmpty) {
+                                return;
+                              }
+
+                              controller.selectedAttachments.add(
+                                SelectedAttachmentsModel(
+                                  fileBytes: fileBytes,
+                                  fileName: fileName,
+                                  fileType: controller.fileType.value,
+                                ),
+                              );
+                            }
+                          : null,
                       child: const Row(
                         spacing: 5,
                         children: [
@@ -205,35 +217,35 @@ Widget addNewAttachment({
                       borderRadius: BorderRadius.circular(5),
                       // color: Colors.white,
                     ),
-                    child: GetX<AttachmentController>(
-                      builder: (controller) {
-                        return ListView.builder(
-                          // padding: const EdgeInsets.all(5),
-                          shrinkWrap: true,
-                          itemCount: controller.selectedAttachments.length,
-                          itemBuilder: (context, i) {
-                            return Padding(
-                              padding: EdgeInsets.fromLTRB(
-                                5,
-                                5,
-                                5,
-                                i == controller.selectedAttachments.length - 1
-                                    ? 5
-                                    : 0,
+                    child: Obx(() {
+                      return ListView.builder(
+                        // padding: const EdgeInsets.all(5),
+                        shrinkWrap: true,
+                        itemCount: controller.selectedAttachments.length,
+                        itemBuilder: (context, i) {
+                          return Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              5,
+                              5,
+                              5,
+                              i == controller.selectedAttachments.length - 1
+                                  ? 5
+                                  : 0,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4,
+                                horizontal: 8,
                               ),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 4,
-                                  horizontal: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: Colors.white,
-                                  border: Border.all(color: Colors.grey),
-                                ),
-                                child: Row(
-                                  spacing: 10,
-                                  children: [
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: Colors.white,
+                                border: Border.all(color: Colors.grey),
+                              ),
+                              child: Row(
+                                spacing: 10,
+                                children: [
+                                  if (canEdit)
                                     InkWell(
                                       onTap: () {
                                         controller.selectedAttachments.removeAt(
@@ -245,57 +257,56 @@ Widget addNewAttachment({
                                         color: Colors.red,
                                       ),
                                     ),
-                                    returnFileLogo(
-                                      width: 30,
-                                      fileName:
-                                          controller
-                                              .selectedAttachments[i]
-                                              .fileName ??
-                                          '',
-                                    ),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        spacing: 2,
-                                        children: [
-                                          AutoSizedText(
-                                            text:
-                                                controller
-                                                    .selectedAttachments[i]
-                                                    .fileName ??
-                                                '',
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
-                                            ),
-                                            constraints: const BoxConstraints(),
+                                  returnFileLogo(
+                                    width: 30,
+                                    fileName:
+                                        controller
+                                            .selectedAttachments[i]
+                                            .fileName ??
+                                        '',
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      spacing: 2,
+                                      children: [
+                                        AutoSizedText(
+                                          text:
+                                              controller
+                                                  .selectedAttachments[i]
+                                                  .fileName ??
+                                              '',
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
                                           ),
-                                          AutoSizedText(
-                                            text:
-                                                controller
-                                                    .selectedAttachments[i]
-                                                    .fileType ??
-                                                '',
-                                            style: const TextStyle(
-                                              color: Colors.grey,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 11,
-                                            ),
-                                            constraints: const BoxConstraints(),
+                                          constraints: const BoxConstraints(),
+                                        ),
+                                        AutoSizedText(
+                                          text:
+                                              controller
+                                                  .selectedAttachments[i]
+                                                  .fileType ??
+                                              '',
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 11,
                                           ),
-                                        ],
-                                      ),
+                                          constraints: const BoxConstraints(),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            );
-                          },
-                        );
-                      },
-                    ),
+                            ),
+                          );
+                        },
+                      );
+                    }),
                   ),
                 ),
               ],

@@ -55,8 +55,16 @@ class Attachments {
   String? attachUrl;
   String? attachPublicId;
   String? fileName;
+  String? resourceType;
+  String? format;
 
-  Attachments({this.attachUrl, this.attachPublicId, this.fileName});
+  Attachments({
+    this.attachUrl,
+    this.attachPublicId,
+    this.fileName,
+    this.resourceType,
+    this.format,
+  });
 
   Attachments.fromJson(Map<String, dynamic> json) {
     attachUrl = json.containsKey('attach_url') ? json['attach_url'] : '';
@@ -64,6 +72,10 @@ class Attachments {
         ? json['attach_public_id']
         : '';
     fileName = json.containsKey('file_name') ? json['file_name'] : '';
+    resourceType = json.containsKey('resource_type')
+        ? json['resource_type']
+        : '';
+    format = json.containsKey('format') ? json['format'] : '';
   }
 
   Map<String, dynamic> toJson() {
@@ -71,6 +83,8 @@ class Attachments {
     data['attach_url'] = attachUrl;
     data['attach_public_id'] = attachPublicId;
     data['file_name'] = fileName;
+    data['resource_type'] = resourceType;
+    data['format'] = format;
     return data;
   }
 }

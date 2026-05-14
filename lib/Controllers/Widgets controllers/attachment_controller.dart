@@ -38,9 +38,23 @@ class AttachmentController extends GetxController {
   final formKey = GlobalKey<FormState>();
   ScrollController scrollController = ScrollController();
   @override
-  void onInit() async {
-    getAllAttachments();
+  void onInit() {
     super.onInit();
+    getAllAttachments();
+  }
+
+  @override
+  void onClose() {
+    name.dispose();
+    type.dispose();
+    number.dispose();
+    startDate.dispose();
+    endDate.dispose();
+    fileNameWhenSelectFile.dispose();
+    note.dispose();
+    search.value.dispose();
+    scrollController.dispose();
+    super.onClose();
   }
 
   Future<Map<String, dynamic>> getAttachmentTypes() async {
@@ -50,8 +64,8 @@ class AttachmentController extends GetxController {
   Future<void> getAllAttachments() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       Uri url = Uri.parse('$backendUrl/attachment/get_all_attachment');
       final response = await http.post(
         url,
@@ -83,12 +97,55 @@ class AttachmentController extends GetxController {
     }
   }
 
+  String _responseErrorMessage(http.Response response) {
+    try {
+      final decoded = jsonDecode(response.body);
+      final detail = decoded['detail'];
+      if (detail is String && detail.trim().isNotEmpty) return detail;
+    } catch (_) {
+      //
+    }
+    return 'Something went wrong please try again';
+  }
+
+  String? _optionalIsoDate(TextEditingController controller, String label) {
+    final rawDate = controller.text.trim();
+    if (rawDate.isEmpty) return null;
+
+    final isoDate = convertDateToIson(rawDate);
+    if (isoDate == null) {
+      showSnackBar('Alert', '$label is invalid');
+    }
+    return isoDate;
+  }
+
   Future<void> addAttachments() async {
+    if (addingNewAttachment.value) return;
+
+    final startDateValue = _optionalIsoDate(startDate, 'Start date');
+    if (startDate.text.trim().isNotEmpty && startDateValue == null) return;
+
+    final endDateValue = _optionalIsoDate(endDate, 'End date');
+    if (endDate.text.trim().isNotEmpty && endDateValue == null) return;
+
+    final validAttachments = selectedAttachments
+        .where(
+          (attachment) =>
+              attachment.fileBytes != null &&
+              (attachment.fileName?.trim().isNotEmpty ?? false),
+        )
+        .toList();
+    if (validAttachments.length != selectedAttachments.length ||
+        validAttachments.isEmpty) {
+      showSnackBar('Alert', 'Please select valid attachment files');
+      return;
+    }
+
     try {
       addingNewAttachment.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       Uri url = Uri.parse('$backendUrl/attachment/add_new_attachment');
       final request = http.MultipartRequest('POST', url);
       request.headers.addAll({'Authorization': 'Bearer $accessToken'});
@@ -96,24 +153,19 @@ class AttachmentController extends GetxController {
       request.fields['document_id'] = documentId;
       request.fields['name'] = name.text;
 
-      if (startDate.text.isNotEmpty) {
-        request.fields['start_date'] = convertDateToIson(
-          startDate.text,
-        ).toString();
-      }
-
-      if (endDate.text.isNotEmpty) {
-        request.fields['end_date'] = convertDateToIson(endDate.text).toString();
-      }
+      if (startDateValue != null) request.fields['start_date'] = startDateValue;
+      if (endDateValue != null) request.fields['end_date'] = endDateValue;
       request.fields['note'] = note.text;
       request.fields['number'] = number.text;
-      request.fields['attachment_type'] = typeId.value;
-      for (int i = 0; i < selectedAttachments.length; i++) {
+      if (typeId.value.isNotEmpty) {
+        request.fields['attachment_type'] = typeId.value;
+      }
+      for (final attachment in validAttachments) {
         request.files.add(
           http.MultipartFile.fromBytes(
             'attachments',
-            selectedAttachments[i].fileBytes!,
-            filename: selectedAttachments[i].fileName,
+            attachment.fileBytes!,
+            filename: attachment.fileName,
           ),
         );
       }
@@ -127,30 +179,39 @@ class AttachmentController extends GetxController {
           decoded['result'],
         );
         attachesList.add(newAttachment);
+        filterAttachments();
+        Get.back();
+        return;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
+          addingNewAttachment.value = false;
           await addAttachments();
+          return;
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
+          return;
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
-      addingNewAttachment.value = false;
-      Get.back();
+        return;
+      } else {
+        showSnackBar('Alert', _responseErrorMessage(response));
+      }
     } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+    } finally {
       addingNewAttachment.value = false;
-
-      Get.back();
     }
   }
 
-  Future<void> deleteattachmenth(String id) async {
+  Future<void> deleteAttachment(String id) async {
+    if (id.isEmpty) return;
+
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       Uri url = Uri.parse('$backendUrl/attachment/delete_attachment/$id');
       final response = await http.delete(
         url,
@@ -158,19 +219,26 @@ class AttachmentController extends GetxController {
       );
       if (response.statusCode == 200) {
         attachesList.removeWhere((att) => att.id == id);
+        filterAttachments();
+        Get.back();
+        return;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deleteattachmenth(id);
+          await deleteAttachment(id);
+          return;
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
+          return;
         }
       } else if (response.statusCode == 401) {
         logout();
+        return;
+      } else {
+        showSnackBar('Alert', _responseErrorMessage(response));
       }
-      Get.back();
     } catch (e) {
-      //
+      showSnackBar('Alert', 'Something went wrong please try again');
     }
   }
 

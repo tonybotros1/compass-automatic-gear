@@ -9,15 +9,46 @@ import '../Auth screens widgets/register widgets/search_bar.dart';
 import 'attachment_dialog.dart';
 import 'documents_screen.dart';
 
-class AttachmentScreen extends StatelessWidget {
-  AttachmentScreen({super.key, required this.code, required this.documentId});
+class AttachmentScreen extends StatefulWidget {
+  const AttachmentScreen({
+    super.key,
+    required this.code,
+    required this.documentId,
+  });
 
   final String code;
   final String documentId;
-  late final AttachmentController controller = Get.put(
-    AttachmentController(code: code, documentId: documentId),
-    tag: documentId,
-  );
+
+  @override
+  State<AttachmentScreen> createState() => _AttachmentScreenState();
+}
+
+class _AttachmentScreenState extends State<AttachmentScreen> {
+  late final String controllerTag;
+  late final AttachmentController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controllerTag = '${widget.code}:${widget.documentId}';
+    controller = Get.isRegistered<AttachmentController>(tag: controllerTag)
+        ? Get.find<AttachmentController>(tag: controllerTag)
+        : Get.put(
+            AttachmentController(
+              code: widget.code,
+              documentId: widget.documentId,
+            ),
+            tag: controllerTag,
+          );
+  }
+
+  @override
+  void dispose() {
+    if (Get.isRegistered<AttachmentController>(tag: controllerTag)) {
+      Get.delete<AttachmentController>(tag: controllerTag);
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +60,7 @@ class AttachmentScreen extends StatelessWidget {
         backgroundColor: mainColor,
         // leading: const SizedBox(),
         actions: [
-          GetBuilder<AttachmentController>(
-            init: AttachmentController(code: code, documentId: documentId),
-            builder: (controller) {
-              return newAttachmentButton(context, controller);
-            },
-          ),
+          newAttachmentButton(context, controller),
           const SizedBox(width: 10),
           separator(),
           const SizedBox(width: 10),
@@ -46,73 +72,63 @@ class AttachmentScreen extends StatelessWidget {
         builder: (context, constraints) {
           return Column(
             children: [
-              GetBuilder<AttachmentController>(
-                init: AttachmentController(code: code, documentId: documentId),
-                builder: (controller) {
-                  return searchBar(
-                    onChanged: (_) {
-                      controller.filterAttachments();
-                    },
-                    onPressedForClearSearch: () {
-                      controller.search.value.clear();
-                      controller.filterAttachments();
-                    },
-                    search: controller.search,
-                    constraints: constraints,
-                    context: context,
-                    title: 'Search for attachments',
-                  );
+              searchBar(
+                onChanged: (_) {
+                  controller.filterAttachments();
                 },
+                onPressedForClearSearch: () {
+                  controller.search.value.clear();
+                  controller.filterAttachments();
+                },
+                search: controller.search,
+                constraints: constraints,
+                context: context,
+                title: 'Search for attachments',
               ),
               Expanded(
-                child: GetX<AttachmentController>(
-                  builder: (controller) {
-                    return PaginatedDataTable2(
-                      border: TableBorder.symmetric(
-                        inside: BorderSide(
-                          color: Colors.grey.shade200,
-                          width: 0.5,
-                        ),
-                      ),
-                      smRatio: 0.67,
-                      lmRatio: 3,
-                      autoRowsToHeight: true,
-                      showCheckboxColumn: false,
-                      headingRowHeight: 60,
-                      columnSpacing: 5,
-                      showFirstLastButtons: true,
-                      horizontalMargin: 5,
-                      dataRowHeight: 40,
-                      columns: const [
-                        DataColumn2(size: ColumnSize.S, label: SizedBox()),
-                        DataColumn2(size: ColumnSize.M, label: Text('Type')),
-                        DataColumn2(size: ColumnSize.M, label: Text('Name')),
+                child: Obx(() {
+                  final cards = controller.query.value.isEmpty
+                      ? controller.attachesList.toList()
+                      : controller.filteredAttachesList.toList();
 
-                        DataColumn2(size: ColumnSize.S, label: Text('Number')),
-                        DataColumn2(
-                          size: ColumnSize.M,
-                          label: Text('Start Date'),
-                        ),
-                        DataColumn2(
-                          size: ColumnSize.M,
-                          label: Text('End Date'),
-                        ),
-                        DataColumn2(size: ColumnSize.L, label: Text('Note')),
-
-                        DataColumn2(size: ColumnSize.S, label: Text('Files')),
-                      ],
-                      source: CardDataSource(
-                        cards:
-                            controller.search.value.text.isEmpty &&
-                                controller.filteredAttachesList.isEmpty
-                            ? controller.attachesList
-                            : controller.filteredAttachesList,
-                        context: context,
-                        controller: controller,
+                  return PaginatedDataTable2(
+                    border: TableBorder.symmetric(
+                      inside: BorderSide(
+                        color: Colors.grey.shade200,
+                        width: 0.5,
                       ),
-                    );
-                  },
-                ),
+                    ),
+                    smRatio: 0.67,
+                    lmRatio: 3,
+                    autoRowsToHeight: true,
+                    showCheckboxColumn: false,
+                    headingRowHeight: 60,
+                    columnSpacing: 5,
+                    showFirstLastButtons: true,
+                    horizontalMargin: 5,
+                    dataRowHeight: 40,
+                    columns: const [
+                      DataColumn2(size: ColumnSize.S, label: SizedBox()),
+                      DataColumn2(size: ColumnSize.M, label: Text('Type')),
+                      DataColumn2(size: ColumnSize.M, label: Text('Name')),
+
+                      DataColumn2(size: ColumnSize.S, label: Text('Number')),
+                      DataColumn2(
+                        size: ColumnSize.M,
+                        label: Text('Start Date'),
+                      ),
+                      DataColumn2(size: ColumnSize.M, label: Text('End Date')),
+                      DataColumn2(size: ColumnSize.L, label: Text('Note')),
+
+                      DataColumn2(size: ColumnSize.S, label: Text('Files')),
+                    ],
+                    source: CardDataSource(
+                      cards: cards,
+                      context: context,
+                      controller: controller,
+                    ),
+                  );
+                }),
               ),
             ],
           );
@@ -237,19 +253,17 @@ ClickableHoverText newAttachmentButton(
         context: context,
         controller: controller,
         canEdit: true,
-        onPressed: controller.addingNewAttachment.isFalse
-            ? () {
-                if (!controller.formKey.currentState!.validate()) return;
-                if (controller.selectedAttachments.isEmpty) {
-                  alertMessage(
-                    context: context,
-                    content: 'Please add at least one attachment',
-                  );
-                  return;
-                }
-                controller.addAttachments();
-              }
-            : null,
+        onPressed: () {
+          if (!controller.formKey.currentState!.validate()) return;
+          if (controller.selectedAttachments.isEmpty) {
+            alertMessage(
+              context: context,
+              content: 'Please add at least one attachment',
+            );
+            return;
+          }
+          controller.addAttachments();
+        },
       );
     },
     text: 'New Attachment',
@@ -262,15 +276,17 @@ IconButton deleteSection(
   BuildContext context,
 ) {
   return IconButton(
-    onPressed: () {
-      alertDialog(
-        context: context,
-        content: "The file will be deleted permanently",
-        onPressed: () {
-          controller.deleteattachmenth(id);
-        },
-      );
-    },
+    onPressed: id.isEmpty
+        ? null
+        : () {
+            alertDialog(
+              context: context,
+              content: "The file will be deleted permanently",
+              onPressed: () {
+                controller.deleteAttachment(id);
+              },
+            );
+          },
     icon: deleteIcon,
   );
 }

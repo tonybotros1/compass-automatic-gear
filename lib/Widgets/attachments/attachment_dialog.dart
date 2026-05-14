@@ -1,8 +1,8 @@
-import 'package:datahubai/Controllers/Widgets%20controllers/attachment_controller.dart';
 import 'package:datahubai/Widgets/text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../consts.dart';
+import '../../Controllers/Widgets controllers/attachment_controller.dart';
+import '../../consts.dart';
 import 'add_new_attachment.dart';
 
 Future<dynamic> attachmentDialog({
@@ -37,8 +37,8 @@ Future<dynamic> attachmentDialog({
                     style: fontStyleForScreenNameUsedInButtons,
                   ),
                   const Spacer(),
-                  GetX<AttachmentController>(
-                    builder: (controller) => ClickableHoverText(
+                  Obx(
+                    () => ClickableHoverText(
                       onTap: controller.addingNewAttachment.isFalse
                           ? onPressed
                           : null,
