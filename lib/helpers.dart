@@ -23,6 +23,9 @@ class Helpers {
   bool _isRefreshing = false;
   Completer<RefreshResult>? _refreshCompleter;
 
+  bool _hasRefreshToken(String token) =>
+      token.trim().isNotEmpty && token.trim() != 'null';
+
   Future<RefreshResult> refreshAccessToken(String refreshToken) async {
     // If a refresh is already in progress → wait for its result
     if (_isRefreshing && _refreshCompleter != null) {
@@ -66,8 +69,8 @@ class Helpers {
   Future<Map<String, dynamic>> getCountries() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendUrl/countries/get_countries');
 
       final response = await http.get(
@@ -82,10 +85,10 @@ class Helpers {
           for (var country in jsonDate) country['_id']: country,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCountries();
+          return await getCountries();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -105,8 +108,8 @@ class Helpers {
   Future<Map<String, dynamic>> getCitiesValues(String countryId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendUrl/countries/get_cities/$countryId');
       final response = await http.get(
         url,
@@ -119,7 +122,7 @@ class Helpers {
           for (var city in jsonData) city['_id']: city,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getCitiesValues(countryId);
@@ -141,8 +144,8 @@ class Helpers {
   Future<Map<String, dynamic>> getAllRoles() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendUrl/responsibilities/get_roles_based_on_status',
       );
@@ -157,10 +160,10 @@ class Helpers {
           for (var role in jsonData) role['_id']: role,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllRoles();
+          return await getAllRoles();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -180,8 +183,8 @@ class Helpers {
   Future<Map<String, dynamic>> getAllRolesForCurrentCompany() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendUrl/users/get_company_admin_roles');
       final response = await http.get(
         url,
@@ -194,10 +197,10 @@ class Helpers {
           for (var role in jsonData) role['_id']: role,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllRolesForCurrentCompany();
+          return await getAllRolesForCurrentCompany();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -217,11 +220,11 @@ class Helpers {
   Future<Map<String, dynamic>> getAllListValues(String code) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse(
-        '$backendUrl/list_of_values/get_list_values_by_code?code=$code',
-      );
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final url = Uri.parse(
+        '$backendUrl/list_of_values/get_list_values_by_code',
+      ).replace(queryParameters: {'code': code});
       final response = await http.get(
         url,
         headers: {"Authorization": "Bearer $accessToken"},
@@ -233,7 +236,7 @@ class Helpers {
           for (var role in jsonData) role['_id']: role,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getAllListValues(code);
@@ -256,8 +259,8 @@ class Helpers {
   Future<Map<String, dynamic>> getAllLegislations() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendUrl/legislation/get_all_legislations');
       final response = await http.get(
         url,
@@ -270,7 +273,7 @@ class Helpers {
           for (var role in jsonData) role['_id']: role,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getAllLegislations();
@@ -292,8 +295,8 @@ class Helpers {
   Future<Map<String, dynamic>> getAllLeaveTypes() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendUrl/leave_types/get_all_leave_types_for_lov',
       );
@@ -308,7 +311,7 @@ class Helpers {
           for (var role in jsonData) role['_id']: role,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getAllLeaveTypes();
@@ -333,8 +336,8 @@ class Helpers {
   ) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendUrl/employees/get_number_of_days/$employeeId',
       );
@@ -353,10 +356,10 @@ class Helpers {
       } else if (response.statusCode == 400) {
         alertMessage(context: Get.context!, content: "Invalid date range");
         return {};
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          return await getAllLeaveTypes();
+          return await getEmployeeWorkingDays(employeeId, body);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -375,8 +378,8 @@ class Helpers {
   Future<Map<String, dynamic>> getPayrollPeriods(String payrollNameId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/payroll_runs/get_payroll_periods_for_lov/$payrollNameId',
       );
@@ -391,7 +394,7 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getPayrollPeriods(payrollNameId);
@@ -414,8 +417,8 @@ class Helpers {
   Future<Map<String, dynamic>> getAllPayrollElements() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendUrl/payroll_elements/get_payroll_elements_for_lov',
       );
@@ -430,7 +433,7 @@ class Helpers {
           for (var role in jsonData) role['_id']: role,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getAllPayrollElements();
@@ -454,8 +457,8 @@ class Helpers {
   ) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendUrl/payroll_elements/get_payroll_elements_for_lov_for_payroll_elements',
       );
@@ -474,10 +477,10 @@ class Helpers {
           for (var role in jsonData) role['_id']: role,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          return await getAllPayrollElements();
+          return await getAllPayrollElementsForPayrollElements(elementID);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -499,11 +502,11 @@ class Helpers {
   ) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse(
-        '$backendUrl/employees/get_employees_by_department?department=$department',
-      );
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final url = Uri.parse(
+        '$backendUrl/employees/get_employees_by_department',
+      ).replace(queryParameters: {'department': department});
       final response = await http.get(
         url,
         headers: {"Authorization": "Bearer $accessToken"},
@@ -515,10 +518,10 @@ class Helpers {
           for (var role in jsonData) role['_id']: role,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllEmployeesByDepartment(department);
+          return await getAllEmployeesByDepartment(department);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -537,11 +540,11 @@ class Helpers {
   Future<Map<String, dynamic>> getListDetails(String code) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse(
-        '$backendUrl/list_of_values/get_list_details_by_code?code=$code',
-      );
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final url = Uri.parse(
+        '$backendUrl/list_of_values/get_list_details_by_code',
+      ).replace(queryParameters: {'code': code});
       final response = await http.get(
         url,
         headers: {"Authorization": "Bearer $accessToken"},
@@ -550,10 +553,10 @@ class Helpers {
         final decoded = jsonDecode(response.body);
         Map<String, dynamic> jsonData = decoded["list_details"];
         return jsonData;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getListDetails(code);
+          return await getListDetails(code);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -572,8 +575,8 @@ class Helpers {
   Future<Map<String, dynamic>> getCarBrands() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       final response = await http.get(
         Uri.parse('$backendTestURI/brands/get_all_brands_by_status'),
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -585,10 +588,10 @@ class Helpers {
           for (var brand in jsonData) brand['_id']: brand,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCarBrands();
+          return await getCarBrands();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -607,21 +610,23 @@ class Helpers {
   Future<List<Map<String, dynamic>>> getCarBrands2() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       final response = await http.get(
         Uri.parse('$backendTestURI/brands/get_all_brands_by_status'),
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
-        List<Map<String, dynamic>> jsonData = decoded['brands'];
+        final jsonData = (decoded['brands'] as List<dynamic>? ?? [])
+            .map((brand) => Map<String, dynamic>.from(brand as Map))
+            .toList();
 
         return jsonData;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCarBrands();
+          return await getCarBrands2();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -640,8 +645,8 @@ class Helpers {
   Future<Map<String, dynamic>> getModelsValues(String brandId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/brands/get_models_by_status/$brandId',
       );
@@ -656,10 +661,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getModelsValues(brandId);
+          return await getModelsValues(brandId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -677,8 +682,8 @@ class Helpers {
   Future<Map<String, dynamic>> getSalesMan() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/salesman/get_all_salesman');
       final response = await http.get(
         url,
@@ -691,10 +696,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getSalesMan();
+          return await getSalesMan();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -713,8 +718,8 @@ class Helpers {
   Future<Map<String, dynamic>> getCurrencies() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/currencies/get_all_currencies_for_drop_down_menu',
       );
@@ -729,10 +734,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCurrencies();
+          return await getCurrencies();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -751,8 +756,8 @@ class Helpers {
   Future<Map<String, dynamic>> getCurrentCompanyDetails() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/companies/get_current_company_details',
       );
@@ -764,7 +769,7 @@ class Helpers {
         final decode = jsonDecode(response.body);
         final jsonData = decode['company_details'];
         return jsonData ?? {};
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getCurrentCompanyDetails();
@@ -787,8 +792,8 @@ class Helpers {
   ) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/currencies/get_currency_name_subunit_by_id/$currencyId',
       );
@@ -800,7 +805,7 @@ class Helpers {
         final decode = jsonDecode(response.body);
         final jsonData = decode['name_subunit'];
         return jsonData ?? {};
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getCurrencyNameAndSubunit(currencyId);
@@ -823,8 +828,8 @@ class Helpers {
   ) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/entity_information/get_entity_information_for_printing/$id',
       );
@@ -836,7 +841,7 @@ class Helpers {
         final decode = jsonDecode(response.body);
         final jsonData = decode['entity_details'];
         return jsonData ?? {};
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getEntityInformationForPrinting(id);
@@ -857,8 +862,8 @@ class Helpers {
   Future<Map<String, dynamic>> getBrunches() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/branches/get_all_branches_by_status',
       );
@@ -873,10 +878,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getBrunches();
+          return await getBrunches();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -895,8 +900,8 @@ class Helpers {
   Future<Map<String, dynamic>> getUserBrunches() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/branches/get_all_customer_branches');
       final response = await http.get(
         url,
@@ -909,10 +914,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getUserBrunches();
+          return await getUserBrunches();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -931,8 +936,8 @@ class Helpers {
   // Future<Map<String, dynamic>> getCustomers() async {
   //   try {
   //     final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //     var accessToken = '${prefs.getString('accessToken')}';
-  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+  //     final accessToken = prefs.getString('accessToken') ?? '';
+  //     final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
   //     var url = Uri.parse(
   //       '$backendTestURI/entity_information/get_all_customers',
   //     );
@@ -947,7 +952,7 @@ class Helpers {
   //         for (var model in jsonData) model['_id']: model,
   //       };
   //       return map;
-  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+  //     } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
   //       final refreshed = await helper.refreshAccessToken(refreshToken);
   //       if (refreshed == RefreshResult.success) {
   //         await getCustomers();
@@ -984,7 +989,7 @@ class Helpers {
 
       // 🔴 Handle auth
       if (streamedResponse.statusCode == 401) {
-        if (refreshToken.isNotEmpty) {
+        if (_hasRefreshToken(refreshToken)) {
           final refreshed = await helper.refreshAccessToken(refreshToken);
           if (refreshed == RefreshResult.success) {
             return await getCustomers();
@@ -1021,8 +1026,8 @@ class Helpers {
   Future<Map<String, dynamic>> getVendors() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/entity_information/get_all_vendors');
       final response = await http.get(
         url,
@@ -1035,10 +1040,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getVendors();
+          return await getVendors();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1054,11 +1059,11 @@ class Helpers {
     }
   }
 
-  Future getSysUsers() async {
+  Future<Map<String, dynamic>> getSysUsers() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/users/get_all_users');
       final response = await http.get(
         url,
@@ -1078,10 +1083,10 @@ class Helpers {
             },
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getSysUsers();
+          return await getSysUsers();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1090,6 +1095,7 @@ class Helpers {
       } else {
         return {};
       }
+      return {};
     } catch (e) {
       return {};
     }
@@ -1098,8 +1104,8 @@ class Helpers {
   Future<Map<String, dynamic>> getSysUsersForLOV() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/users/get_all_users_for_lov');
       final response = await http.get(
         url,
@@ -1112,10 +1118,10 @@ class Helpers {
           for (var user in jsonData) user['_id']: user,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          return await getSysUsers();
+          return await getSysUsersForLOV();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1131,8 +1137,8 @@ class Helpers {
   Future<Map<String, dynamic>> getInvoiceItems() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/invoice_items/get_all_invoice_items',
       );
@@ -1147,10 +1153,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getInvoiceItems();
+          return await getInvoiceItems();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1169,8 +1175,8 @@ class Helpers {
   Future<Map<String, dynamic>> getPayrolls() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/payroll_runs/get_payroll_for_lov');
       final response = await http.get(
         url,
@@ -1183,10 +1189,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getPayrolls();
+          return await getPayrolls();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1205,8 +1211,8 @@ class Helpers {
   Future getJobCardStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/job_cards/get_job_card_status/$id');
       final response = await http.get(
         url,
@@ -1216,7 +1222,7 @@ class Helpers {
         final decoded = jsonDecode(response.body);
         final status = decoded['data'];
         return status;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getJobCardStatus(id);
@@ -1236,8 +1242,8 @@ class Helpers {
   Future getEmployeeLeaveStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/employees/get_employee_leave_status/$id',
       );
@@ -1250,10 +1256,10 @@ class Helpers {
         final status = decoded['status'];
 
         return status;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          return await getJobCardStatus(id);
+          return await getEmployeeLeaveStatus(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1270,8 +1276,8 @@ class Helpers {
   Future getReceivingStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/receiving/get_receiving_status/$id');
       final response = await http.get(
         url,
@@ -1281,7 +1287,7 @@ class Helpers {
         final decoded = jsonDecode(response.body);
         final status = decoded['data'];
         return status;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getReceivingStatus(id);
@@ -1301,8 +1307,8 @@ class Helpers {
   Future getQuotationCardStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/quotation_cards/get_quotation_card_status/$id',
       );
@@ -1314,7 +1320,7 @@ class Helpers {
         final decoded = jsonDecode(response.body);
         final status = decoded['data'];
         return status;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getQuotationCardStatus(id);
@@ -1334,8 +1340,8 @@ class Helpers {
   Future getConverterStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/converters/get_converter_status/$id',
       );
@@ -1347,7 +1353,7 @@ class Helpers {
         final decoded = jsonDecode(response.body);
         final status = decoded['data'];
         return status;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getConverterStatus(id);
@@ -1367,8 +1373,8 @@ class Helpers {
   Future getIssuingStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/issue_items/get_issuing_status/$id');
       final response = await http.get(
         url,
@@ -1378,7 +1384,7 @@ class Helpers {
         final decoded = jsonDecode(response.body);
         final status = decoded['data'];
         return status;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getIssuingStatus(id);
@@ -1398,8 +1404,8 @@ class Helpers {
   Future getJobNumberForQuotationCard(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/quotation_cards/get_job_number_for_quotation/$id',
       );
@@ -1411,10 +1417,10 @@ class Helpers {
         final decoded = jsonDecode(response.body);
         final number = decoded['job_number'];
         return number;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getJobNumberForQuotationCard(id);
+          return await getJobNumberForQuotationCard(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1431,8 +1437,8 @@ class Helpers {
   Future<Map<String, dynamic>> getAllTechnicians() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/technicians/get_all_technicians');
       final response = await http.get(
         url,
@@ -1445,10 +1451,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllTechnicians();
+          return await getAllTechnicians();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1467,8 +1473,8 @@ class Helpers {
   Future<Map<String, dynamic>> getAllBanksAndOthers() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/banks_and_others/get_all_banks');
       final response = await http.get(
         url,
@@ -1481,10 +1487,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllBanksAndOthers();
+          return await getAllBanksAndOthers();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1503,8 +1509,8 @@ class Helpers {
   Future<double> getCustomerOutstanding(String customerId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/job_cards/get_customer_outstanding/$customerId',
       );
@@ -1517,10 +1523,10 @@ class Helpers {
         double outstanding = decode['outstanding'];
 
         return outstanding;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getCustomerOutstanding(customerId);
+          return await getCustomerOutstanding(customerId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1539,8 +1545,8 @@ class Helpers {
   Future<double> getVendorOutstanding(String vendorId) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/ap_invoices/get_vendor_outstanding/$vendorId',
       );
@@ -1553,10 +1559,10 @@ class Helpers {
         double outstanding = decode['outstanding'];
 
         return outstanding;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getVendorOutstanding(vendorId);
+          return await getVendorOutstanding(vendorId);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1575,8 +1581,8 @@ class Helpers {
   Future getARREceiptStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/ar_receipts/get_ar_receipt_status/$id',
       );
@@ -1588,10 +1594,10 @@ class Helpers {
         final decoded = jsonDecode(response.body);
         final status = decoded['data'];
         return status;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getARREceiptStatus(id);
+          return await getARREceiptStatus(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1608,8 +1614,8 @@ class Helpers {
   Future getAPPaymentStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/ap_payments/get_ap_payment_status/$id',
       );
@@ -1621,10 +1627,10 @@ class Helpers {
         final decoded = jsonDecode(response.body);
         final status = decoded['data'];
         return status;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAPPaymentStatus(id);
+          return await getAPPaymentStatus(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1641,8 +1647,8 @@ class Helpers {
   Future<Map<String, dynamic>> getAllAPPaymentTypes() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/ap_payment_types/get_all_ap_payment_types',
       );
@@ -1657,10 +1663,10 @@ class Helpers {
           for (var model in jsonData) model['_id']: model,
         };
         return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAllAPPaymentTypes();
+          return await getAllAPPaymentTypes();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1679,8 +1685,8 @@ class Helpers {
   Future getAPInvoiceStatus(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/ap_invoices/get_ap_invoice_status/$id',
       );
@@ -1692,10 +1698,10 @@ class Helpers {
         final decoded = jsonDecode(response.body);
         final status = decoded['data'];
         return status;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await getAPInvoiceStatus(id);
+          return await getAPInvoiceStatus(id);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
@@ -1712,8 +1718,8 @@ class Helpers {
   Future<List<JobCardModel>> getAllJobCards() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse('$backendTestURI/job_cards/get_all_job_cards');
       final response = await http.get(
         url,
@@ -1725,7 +1731,7 @@ class Helpers {
         List<JobCardModel> listOfJobs = [];
         listOfJobs.assignAll(jsonData.map((job) => JobCardModel.fromJson(job)));
         return listOfJobs;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getAllJobCards();
@@ -1747,8 +1753,8 @@ class Helpers {
   Future<List> getSystemVariablesValues(String code) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       var url = Uri.parse(
         '$backendTestURI/system_variables/get_variable_values/$code',
       );
@@ -1760,7 +1766,7 @@ class Helpers {
         final decode = jsonDecode(response.body);
         List<dynamic> jsonData = decode['values'];
         return jsonData;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
           return await getSystemVariablesValues(code);
