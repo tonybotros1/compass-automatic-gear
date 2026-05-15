@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Models/to do list/to_do_list_description_model.dart';
 import '../../Models/to do list/to_do_list_model.dart';
+import '../../Services/notification_sound_service.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import 'main_screen_contro.dart';
@@ -53,6 +54,8 @@ class ToDoListController extends GetxController {
   String backendUrl = backendTestURI;
   final selectedRowIndex = (-1).obs;
   WebSocketService ws = Get.find<WebSocketService>();
+  NotificationSoundService notificationSound =
+      Get.find<NotificationSoundService>();
   StreamSubscription<Map<String, dynamic>>? _wsSub;
   MainScreenController mainScreenController = Get.find<MainScreenController>();
   RxString userId = RxString('');
@@ -60,6 +63,7 @@ class ToDoListController extends GetxController {
   Rx<Uint8List?> fileBytes = Rx<Uint8List?>(null);
   RxString fileType = RxString('');
   RxString fileName = RxString('');
+  RxString editingTaskId = RxString('');
 
   @override
   void onInit() async {
@@ -75,11 +79,131 @@ class ToDoListController extends GetxController {
   @override
   void onClose() {
     _wsSub?.cancel();
+    numberFilter.dispose();
+    number.dispose();
+    dateFilter.dispose();
+    date.dispose();
+    dueDateFilter.dispose();
+    dueDate.dispose();
+    createdByFilter.dispose();
+    createdBy.dispose();
+    assignedToFilter.dispose();
+    assignedTo.dispose();
+    statusFilter.dispose();
+    status.dispose();
+    description.dispose();
+    fromDate.value.dispose();
+    toDate.value.dispose();
+    textFieldFocusNode.dispose();
+    descriptionNote.value.dispose();
+    scrollControllerForNotes.dispose();
     super.onClose();
   }
 
   Future<Map<String, dynamic>> getSysUsersForLOV() async {
     return await helper.getSysUsersForLOV();
+  }
+
+  String _responseErrorMessage(http.Response response) {
+    try {
+      final decoded = jsonDecode(response.body);
+      final detail = decoded['detail'];
+      if (detail is String && detail.trim().isNotEmpty) return detail;
+    } catch (_) {
+      //
+    }
+    return 'Something went wrong please try again';
+  }
+
+  String? _isoDateOrAlert(TextEditingController controller, String label) {
+    final value = controller.text.trim();
+    if (value.isEmpty) {
+      showSnackBar('Alert', '$label is required');
+      return null;
+    }
+
+    final isoDate = convertDateToIson(value);
+    if (isoDate == null) {
+      showSnackBar('Alert', '$label is invalid');
+      return null;
+    }
+    return isoDate;
+  }
+
+  void _upsertTask(ToDoListModel task) {
+    final index = allToDoLists.indexWhere((item) => item.id == task.id);
+    if (index == -1) {
+      allToDoLists.add(task);
+    } else {
+      allToDoLists[index] = task;
+    }
+    allToDoLists.refresh();
+  }
+
+  void _upsertNote(ToDoListDescriptionModel note) {
+    final noteId = note.id ?? '';
+    final index = noteId.isEmpty
+        ? -1
+        : allDescriptionNotes.indexWhere((item) => item.id == noteId);
+    if (index == -1) {
+      allDescriptionNotes.add(note);
+    } else {
+      allDescriptionNotes[index] = note;
+    }
+    allDescriptionNotes.refresh();
+  }
+
+  ToDoListModel? _taskFromResponseBody(String body) {
+    final decoded = jsonDecode(body);
+    if (decoded is! Map<String, dynamic>) return null;
+
+    final taskPayload = decoded['task'];
+    if (taskPayload is Map<String, dynamic>) {
+      return ToDoListModel.fromJson(taskPayload);
+    }
+    if (taskPayload is Map) {
+      return ToDoListModel.fromJson(Map<String, dynamic>.from(taskPayload));
+    }
+    return ToDoListModel.fromJson(decoded);
+  }
+
+  void _showTaskNotification(String title, String body) {
+    notificationSound.playTaskNotification();
+    showSnackBar(title, body);
+  }
+
+  bool canEditTask(ToDoListModel task) {
+    final currentUserId = (companyDetails['current_user_id'] ?? userId.value)
+        .toString();
+    return companyDetails['is_admin'] == true ||
+        (task.createdById ?? '') == currentUserId;
+  }
+
+  void prepareNewTask() {
+    editingTaskId.value = '';
+    number.clear();
+    date.text = textToDate(DateTime.now());
+    dueDate.text = textToDate(DateTime.now());
+    createdBy.text = (companyDetails['current_user_name'] ?? '').toString();
+    createdById.value = (companyDetails['current_user_id'] ?? userId.value)
+        .toString();
+    assignedTo.clear();
+    assignedToId.value = '';
+    status.text = 'Open';
+    description.clear();
+  }
+
+  void prepareEditTask(ToDoListModel task) {
+    editingTaskId.value = task.id ?? '';
+    number.text = task.number ?? '';
+    date.text = textToDate(task.date);
+    dueDate.text = textToDate(task.dueDate);
+    createdBy.text = task.createdBy ?? '';
+    createdById.value = task.createdById ?? '';
+    assignedTo.text = task.assignedTo ?? '';
+    assignedToId.value = task.assignedToId ?? '';
+    status.text = task.status ?? '';
+    description.clear();
   }
 
   Future<void> getCompanyDetails() async {
@@ -93,8 +217,8 @@ class ToDoListController extends GetxController {
     companyId.value = (prefs.getString('companyId') ?? '').trim();
   }
 
-  void initSocket(String userId) {
-    final normalizedUserId = userId.trim();
+  void initSocket(String socketUserId) {
+    final normalizedUserId = socketUserId.trim();
     final normalizedCompanyId = companyId.trim();
     if (normalizedUserId.isNotEmpty && normalizedCompanyId.isNotEmpty) {
       ws.connect(normalizedUserId, normalizedCompanyId);
@@ -106,33 +230,82 @@ class ToDoListController extends GetxController {
         case "chat_message":
           final taskId = (message["task_id"] ?? "").toString();
           final payload = message["data"];
+          final fromUserId = (message["from_user_id"] ?? '').toString();
           if (taskId == currentTaskId.value) {
             if (payload is Map<String, dynamic>) {
               final newNote = ToDoListDescriptionModel.fromJson(payload);
-              allDescriptionNotes.add(newNote);
-              allDescriptionNotes.refresh();
+              _upsertNote(newNote);
               await markTaskAsRead(taskId);
             } else if (payload is Map) {
               final newNote = ToDoListDescriptionModel.fromJson(
                 Map<String, dynamic>.from(payload),
               );
-              allDescriptionNotes.add(newNote);
-              allDescriptionNotes.refresh();
+              _upsertNote(newNote);
               await markTaskAsRead(taskId);
             }
+          } else if (fromUserId.isNotEmpty && fromUserId != userId.value) {
+            _showTaskNotification('To Do List', 'New message on a task');
           }
           break;
 
         case 'new_task_created':
           final payload = message["data"];
+          final createdBy = (message["created_by"] ?? '').toString();
           if (payload is Map<String, dynamic>) {
             final newTask = ToDoListModel.fromJson(payload);
-            allToDoLists.add(newTask);
+            _upsertTask(newTask);
           } else if (payload is Map) {
             final newTask = ToDoListModel.fromJson(
               Map<String, dynamic>.from(payload),
             );
-            allToDoLists.add(newTask);
+            _upsertTask(newTask);
+          }
+          if (createdBy.isNotEmpty && createdBy != userId.value) {
+            _showTaskNotification('To Do List', 'New task assigned to you');
+          }
+          break;
+
+        case 'task_updated':
+          final payload = message["data"];
+          final updatedBy = (message["updated_by"] ?? '').toString();
+          if (payload is Map<String, dynamic>) {
+            _upsertTask(ToDoListModel.fromJson(payload));
+          } else if (payload is Map) {
+            _upsertTask(
+              ToDoListModel.fromJson(Map<String, dynamic>.from(payload)),
+            );
+          }
+          if (updatedBy.isNotEmpty && updatedBy != userId.value) {
+            _showTaskNotification('To Do List', 'A task was updated');
+          }
+          break;
+
+        case 'task_deleted':
+          final payload = message["data"];
+          final deletedBy = (message["deleted_by"] ?? '').toString();
+          final taskId = payload is Map
+              ? (payload['_id'] ?? '').toString()
+              : '';
+          allToDoLists.removeWhere((task) => task.id == taskId);
+          if (currentTaskId.value == taskId) {
+            currentTaskId.value = '';
+            allDescriptionNotes.clear();
+            selectedRowIndex.value = -1;
+          }
+          if (deletedBy.isNotEmpty && deletedBy != userId.value) {
+            _showTaskNotification('To Do List', 'A task was deleted');
+          }
+          break;
+
+        case 'task_note_deleted':
+          final taskId = (message["task_id"] ?? '').toString();
+          final noteId = (message["note_id"] ?? '').toString();
+          final deletedBy = (message["deleted_by"] ?? '').toString();
+          if (taskId == currentTaskId.value) {
+            allDescriptionNotes.removeWhere((note) => note.id == noteId);
+          }
+          if (deletedBy.isNotEmpty && deletedBy != userId.value) {
+            _showTaskNotification('To Do List', 'A task note was deleted');
           }
           break;
 
@@ -163,6 +336,10 @@ class ToDoListController extends GetxController {
               allToDoLists.refresh();
             }
           }
+          final updatedBy = (message["updated_by"] ?? '').toString();
+          if (updatedBy.isNotEmpty && updatedBy != userId.value) {
+            _showTaskNotification('To Do List', 'Task status changed');
+          }
           break;
       }
     });
@@ -170,7 +347,8 @@ class ToDoListController extends GetxController {
 
   Future<void> markTaskAsRead(String taskId) async {
     final prefs = await SharedPreferences.getInstance();
-    final accessToken = '${prefs.getString('accessToken')}';
+    final accessToken = prefs.getString('accessToken') ?? '';
+    if (accessToken.isEmpty || taskId.trim().isEmpty) return;
 
     final url = Uri.parse('$backendUrl/to_do_list/tasks/$taskId/read');
     final res = await http.post(
@@ -184,7 +362,7 @@ class ToDoListController extends GetxController {
     if (res.statusCode == 200) {
       final body = jsonDecode(res.body);
       mainScreenController.unreadChatCount.value =
-          (body['unread_total'] ?? 0) as int;
+          int.tryParse((body['unread_total'] ?? 0).toString()) ?? 0;
     }
   }
 
@@ -210,20 +388,16 @@ class ToDoListController extends GetxController {
     final todayDateOnly = DateTime(today.year, today.month, today.day);
     final inputDateOnly = DateTime(date.year, date.month, date.day);
 
-    final diffDays = todayDateOnly.difference(inputDateOnly).inDays;
+    final diffDays = inputDateOnly.difference(todayDateOnly).inDays;
 
     if (diffDays < 0) {
-      // Date already passed
       return Colors.red;
-    } else if (diffDays <= 0) {
-      // Today
+    } else if (diffDays == 0) {
       return Colors.green;
     } else if (diffDays <= 15) {
-      // Tomorrow up to +15 days
       return Colors.orange;
     } else {
-      // Beyond 15 days
-      return Colors.red;
+      return Colors.black;
     }
   }
 
@@ -272,7 +446,7 @@ class ToDoListController extends GetxController {
 
   bool whoCanEdit() {
     return companyDetails['current_user_id'] == createdById.value ||
-        companyDetails['is_admin'];
+        companyDetails['is_admin'] == true;
   }
 
   void onChooseForDatePicker(int i) {
@@ -328,11 +502,30 @@ class ToDoListController extends GetxController {
   }
 
   Future<void> addNewTask() async {
+    if (addingNewValue.value) return;
+
+    final taskDate = _isoDateOrAlert(date, 'Date');
+    if (taskDate == null) return;
+    final taskDueDate = _isoDateOrAlert(dueDate, 'Due date');
+    if (taskDueDate == null) return;
+    if (createdById.value.trim().isEmpty) {
+      showSnackBar('Alert', 'Created By is required');
+      return;
+    }
+    if (assignedToId.value.trim().isEmpty) {
+      showSnackBar('Alert', 'Assigned To is required');
+      return;
+    }
+    if (description.text.trim().isEmpty) {
+      showSnackBar('Alert', 'Description is required');
+      return;
+    }
+
     try {
       addingNewValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       Uri url = Uri.parse('$backendUrl/to_do_list/add_new_task');
       final response = await http.post(
         url,
@@ -341,97 +534,129 @@ class ToDoListController extends GetxController {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
-          "date": convertDateToIson(date.text),
-          "due_date": convertDateToIson(dueDate.text),
+          "date": taskDate,
+          "due_date": taskDueDate,
           "created_by": createdById.value,
           "assigned_to": assignedToId.value,
-          "status": status.text,
           "description": description.text.trim(),
         }),
       );
       if (response.statusCode == 200) {
+        final newTask = _taskFromResponseBody(response.body);
+        if (newTask != null) _upsertTask(newTask);
+        Get.back();
+        return;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
+          addingNewValue.value = false;
           await addNewTask();
+          return;
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
+          return;
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
-      addingNewValue.value = false;
-      Get.back();
+        return;
+      } else {
+        showSnackBar('Alert', _responseErrorMessage(response));
+      }
     } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+    } finally {
       addingNewValue.value = false;
     }
   }
 
-  Future<void> addNewTaskDescriptionNote(
+  Future<bool> addNewTaskDescriptionNote(
     String toDoListId,
     Map<String, dynamic> note,
   ) async {
-    try {
-      if (currentTaskId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Select task first');
-        return;
+    if (addingNewDescriptionNotProcess.value) return false;
+    if (currentTaskId.value.isEmpty || toDoListId.trim().isEmpty) {
+      showSnackBar('Alert', 'Select task first');
+      return false;
+    }
+
+    final noteType = (note['note_type'] ?? '').toString();
+    if (noteType == 'text') {
+      final message = (note['note'] ?? '').toString().trim();
+      if (message.isEmpty) {
+        showSnackBar('Alert', 'Message is required');
+        return false;
       }
+      note['note'] = message;
+    } else {
+      final mediaNote = note['media_note'];
+      final selectedFileName = (note['file_name'] ?? '').toString().trim();
+      if (selectedFileName.isEmpty || mediaNote is! List<int>) {
+        showSnackBar('Alert', 'Please select a valid file');
+        return false;
+      }
+    }
+
+    try {
       addingNewDescriptionNotProcess.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       Uri url = Uri.parse(
         '$backendUrl/to_do_list/add_new_task_description_note/$toDoListId',
       );
       final request = http.MultipartRequest('POST', url);
-      request.headers.addAll({
-        'Authorization': 'Bearer $accessToken',
-        'Content-Type': 'multipart/form-data',
-      });
-      if (note.containsKey('note_type')) {
-        if (note['note_type'] == 'text') {
-          request.fields['note'] = note['note'];
-          request.fields['note_type'] = note['note_type'];
-        } else {
-          request.fields['file_name'] = note['file_name'];
-          request.fields['note_type'] = note['note_type'];
-          request.files.add(
-            http.MultipartFile.fromBytes(
-              'media_note',
-              note['media_note'],
-              filename: note['file_name'],
-            ),
-          );
-        }
+      request.headers.addAll({'Authorization': 'Bearer $accessToken'});
+      if (noteType == 'text') {
+        request.fields['note'] = note['note'];
+        request.fields['note_type'] = noteType;
+      } else {
+        request.fields['file_name'] = note['file_name'];
+        request.fields['note_type'] = noteType;
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'media_note',
+            note['media_note'],
+            filename: note['file_name'],
+          ),
+        );
       }
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
-      // final response = await http.post(
-      //   url,
-      //   headers: {
-      //     'Authorization': 'Bearer $accessToken',
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: jsonEncode({
-      //     "to_do_list_id": currentTaskId.value,
-      //     "type": 'text',
-      //     "description": noteMessage.value.trim(),
-      //   }),
-      // );
       if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final notePayload = decoded is Map<String, dynamic>
+            ? decoded['data']
+            : null;
+        if (notePayload is Map<String, dynamic>) {
+          _upsertNote(ToDoListDescriptionModel.fromJson(notePayload));
+        } else if (notePayload is Map) {
+          _upsertNote(
+            ToDoListDescriptionModel.fromJson(
+              Map<String, dynamic>.from(notePayload),
+            ),
+          );
+        }
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await addNewTaskDescriptionNote(toDoListId, note);
+          addingNewDescriptionNotProcess.value = false;
+          return await addNewTaskDescriptionNote(toDoListId, note);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
+          return false;
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
-      addingNewDescriptionNotProcess.value = false;
+      } else {
+        showSnackBar('Alert', _responseErrorMessage(response));
+      }
+      return false;
     } catch (e) {
+      showSnackBar('Alert', 'Something went wrong please try again');
+      return false;
+    } finally {
       addingNewDescriptionNotProcess.value = false;
     }
   }
@@ -441,8 +666,8 @@ class ToDoListController extends GetxController {
       isDescriptionNotesLoading.value = true;
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       Uri url = Uri.parse(
         '$backendUrl/to_do_list/get_task_descriptions/$taskId',
       );
@@ -465,19 +690,26 @@ class ToDoListController extends GetxController {
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        showSnackBar('Alert', _responseErrorMessage(response));
       }
 
       isDescriptionNotesLoading.value = false;
     } catch (e) {
+      showSnackBar('Alert', 'Could not load task notes');
       isDescriptionNotesLoading.value = false;
     }
   }
 
-  Future<void> updateTaskStatus(String id, String status) async {
+  Future<bool> updateTaskStatus(String id, String status) async {
+    if (id.trim().isEmpty) {
+      showSnackBar('Alert', 'Please select valid task');
+      return false;
+    }
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       Uri url = Uri.parse('$backendUrl/to_do_list/update_task_status/$id');
       final response = await http.patch(
         url,
@@ -488,27 +720,194 @@ class ToDoListController extends GetxController {
         body: jsonEncode({"status": status}),
       );
       if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) {
+          final taskId = (decoded['_id'] ?? id).toString();
+          final nextStatus = (decoded['status'] ?? status).toString();
+          final index = allToDoLists.indexWhere((task) => task.id == taskId);
+          if (index != -1) {
+            allToDoLists[index].status = nextStatus;
+            allToDoLists.refresh();
+          }
+        }
+        return true;
       } else if (response.statusCode == 400) {
-        alertMessage(
-          context: Get.context!,
-          content: "Please select valid task",
-        );
-        return;
+        showSnackBar('Alert', _responseErrorMessage(response));
+        return false;
       } else if (response.statusCode == 404) {
-        alertMessage(context: Get.context!, content: "Task not found");
+        showSnackBar('Alert', 'Task not found');
+        return false;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await updateTaskStatus(id, status);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+          return false;
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        showSnackBar('Alert', _responseErrorMessage(response));
+      }
+      return false;
+    } catch (e) {
+      showSnackBar('Alert', 'Could not update task status');
+      return false;
+    }
+  }
+
+  Future<void> updateTaskDetails(String id) async {
+    if (addingNewValue.value) return;
+    if (id.trim().isEmpty) {
+      showSnackBar('Alert', 'Please select valid task');
+      return;
+    }
+
+    final taskDate = _isoDateOrAlert(date, 'Date');
+    if (taskDate == null) return;
+    final taskDueDate = _isoDateOrAlert(dueDate, 'Due date');
+    if (taskDueDate == null) return;
+    if (createdById.value.trim().isEmpty) {
+      showSnackBar('Alert', 'Created By is required');
+      return;
+    }
+    if (assignedToId.value.trim().isEmpty) {
+      showSnackBar('Alert', 'Assigned To is required');
+      return;
+    }
+
+    try {
+      addingNewValue.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final url = Uri.parse('$backendUrl/to_do_list/update_task/$id');
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "date": taskDate,
+          "due_date": taskDueDate,
+          "created_by": createdById.value,
+          "assigned_to": assignedToId.value,
+          "description": description.text.trim(),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final updatedTask = _taskFromResponseBody(response.body);
+        if (updatedTask != null) _upsertTask(updatedTask);
+        Get.back();
         return;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await updateTaskStatus(id, status);
+          addingNewValue.value = false;
+          await updateTaskDetails(id);
+          return;
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
+          return;
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
+        return;
+      } else {
+        showSnackBar('Alert', _responseErrorMessage(response));
+      }
     } catch (e) {
-      //
+      showSnackBar('Alert', 'Something went wrong please try again');
+    } finally {
+      addingNewValue.value = false;
+    }
+  }
+
+  Future<bool> deleteTask(String id) async {
+    if (id.trim().isEmpty) {
+      showSnackBar('Alert', 'Please select valid task');
+      return false;
+    }
+
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final url = Uri.parse('$backendUrl/to_do_list/delete_task/$id');
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode == 200) {
+        allToDoLists.removeWhere((task) => task.id == id);
+        if (currentTaskId.value == id) {
+          currentTaskId.value = '';
+          allDescriptionNotes.clear();
+          selectedRowIndex.value = -1;
+        }
+        return true;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await deleteTask(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+          return false;
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        showSnackBar('Alert', _responseErrorMessage(response));
+      }
+      return false;
+    } catch (e) {
+      showSnackBar('Alert', 'Could not delete task');
+      return false;
+    }
+  }
+
+  Future<bool> deleteTaskDescriptionNote(String noteId) async {
+    if (noteId.trim().isEmpty) {
+      showSnackBar('Alert', 'Please select valid note');
+      return false;
+    }
+
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final url = Uri.parse(
+        '$backendUrl/to_do_list/delete_task_description_note/$noteId',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode == 200) {
+        allDescriptionNotes.removeWhere((note) => note.id == noteId);
+        return true;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await deleteTaskDescriptionNote(noteId);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+          return false;
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        showSnackBar('Alert', _responseErrorMessage(response));
+      }
+      return false;
+    } catch (e) {
+      showSnackBar('Alert', 'Could not delete note');
+      return false;
     }
   }
 
@@ -518,25 +917,45 @@ class ToDoListController extends GetxController {
       body["number"] = numberFilter.text;
     }
     if (dateFilter.text.isNotEmpty) {
-      body["date"] = dateFilter.text;
+      final isoDate = convertDateToIson(dateFilter.text);
+      if (isoDate == null) {
+        showSnackBar('Alert', 'Date is invalid');
+        return;
+      }
+      body["date"] = isoDate;
     }
     if (dueDateFilter.text.isNotEmpty) {
-      body["due_date"] = dueDateFilter.text;
+      final isoDueDate = convertDateToIson(dueDateFilter.text);
+      if (isoDueDate == null) {
+        showSnackBar('Alert', 'Due date is invalid');
+        return;
+      }
+      body["due_date"] = isoDueDate;
     }
-    if (createdByFilter.text.isNotEmpty) {
-      body["created_by"] = createdByFilter.text;
+    if (createdByFilterId.value.isNotEmpty) {
+      body["created_by"] = createdByFilterId.value;
     }
-    if (assignedToFilter.text.isNotEmpty) {
-      body["assigned_to"] = assignedToFilter.text;
+    if (assignedToFilterId.value.isNotEmpty) {
+      body["assigned_to"] = assignedToFilterId.value;
     }
     if (statusFilter.text.isNotEmpty) {
-      body["status"] = statusFilter.value.text;
+      body["status"] = statusFilter.text;
     }
     if (fromDate.value.text.isNotEmpty) {
-      body["from_date"] = convertDateToIson(fromDate.value.text);
+      final isoFromDate = convertDateToIson(fromDate.value.text);
+      if (isoFromDate == null) {
+        showSnackBar('Alert', 'From date is invalid');
+        return;
+      }
+      body["from_date"] = isoFromDate;
     }
     if (toDate.value.text.isNotEmpty) {
-      body["to_date"] = convertDateToIson(toDate.value.text);
+      final isoToDate = convertDateToIson(toDate.value.text);
+      if (isoToDate == null) {
+        showSnackBar('Alert', 'To date is invalid');
+        return;
+      }
+      body["to_date"] = isoToDate;
     }
     if (body.isNotEmpty) {
       await searchEngine(body);
@@ -549,11 +968,12 @@ class ToDoListController extends GetxController {
     try {
       isScreenLoding.value = true;
       currentTaskId.value = '';
+      selectedRowIndex.value = -1;
       allDescriptionNotes.clear();
 
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       Uri url = Uri.parse(
         '$backendUrl/to_do_list/search_engine_for_to_do_list',
       );
@@ -580,10 +1000,13 @@ class ToDoListController extends GetxController {
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        showSnackBar('Alert', _responseErrorMessage(response));
       }
 
       isScreenLoding.value = false;
     } catch (e) {
+      showSnackBar('Alert', 'Could not load tasks');
       isScreenLoding.value = false;
     }
   }
@@ -594,11 +1017,13 @@ class ToDoListController extends GetxController {
     dueDateFilter.clear();
     createdByFilter.clear();
     assignedToFilter.clear();
+    statusFilter.clear();
     createdByFilterId.value = '';
     assignedToFilterId.value = '';
     fromDate.value.clear();
     toDate.value.clear();
     initDatePickerValue.value = 1;
     initStatusPickersValue.value = 1;
+    searchEngine({"all": true});
   }
 }

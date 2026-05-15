@@ -13,6 +13,7 @@ import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';
 import 'Screens/Main screens/main_screen.dart';
 import 'Screens/mobile Screens/main_screen_fro_mobile.dart';
+import 'Services/notification_sound_service.dart';
 import 'Widgets/main screen widgets/job_cards_widgets/image_gallery_viewer.dart';
 import 'security.dart';
 // import 'package:web/web.dart' as web;
@@ -28,6 +29,7 @@ void main() async {
       : const SizedBox();
   globalPrefs = await SharedPreferences.getInstance();
 
+  Get.put(NotificationSoundService(), permanent: true);
   final ws = Get.put(WebSocketService(), permanent: true);
   final savedUserId = globalPrefs?.getString('userId')?.trim() ?? '';
   final companyId = globalPrefs?.getString('companyId')?.trim() ?? '';

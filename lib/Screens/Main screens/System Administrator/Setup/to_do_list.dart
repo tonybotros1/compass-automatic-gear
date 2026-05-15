@@ -102,7 +102,7 @@ class ToDoList extends StatelessWidget {
                                     controller.createdByFilterId.value =
                                         value['_id'];
                                     controller.createdByFilter.text =
-                                        value['name'];
+                                        value['user_name'];
                                   },
                                 ),
                                 MenuWithValues(
@@ -124,7 +124,7 @@ class ToDoList extends StatelessWidget {
                                     controller.assignedToFilterId.value =
                                         value['_id'];
                                     controller.assignedToFilter.text =
-                                        value['name'];
+                                        value['user_name'];
                                   },
                                 ),
                               ],
@@ -460,10 +460,23 @@ DataRow dataRowForTheTable(
           mainAxisAlignment: MainAxisAlignment.end,
           spacing: 5,
           children: [
-            closeTaskButton(context, constraints, controller, toDoListId),
-            cancelTaskTaskButton(context, constraints, controller, toDoListId),
-            reOpenTaskButton(context, constraints, controller, toDoListId),
+            if ((data.status ?? '') == 'Open' && controller.canEditTask(data))
+              closeTaskButton(context, constraints, controller, toDoListId),
+            if ((data.status ?? '') == 'Open' && controller.canEditTask(data))
+              cancelTaskTaskButton(
+                context,
+                constraints,
+                controller,
+                toDoListId,
+              ),
             viewButton(context, constraints, controller, toDoListId, index),
+
+            if ((data.status ?? '') != 'Open' && controller.canEditTask(data))
+              reOpenTaskButton(context, constraints, controller, toDoListId),
+            if (controller.canEditTask(data))
+              editTaskButton(context, constraints, controller, data),
+            if (controller.canEditTask(data))
+              deleteTaskButton(context, constraints, controller, toDoListId),
           ],
         ),
       ),
@@ -478,17 +491,7 @@ ElevatedButton newTaskButton(
 ) {
   return ElevatedButton(
     onPressed: () {
-      controller.number.clear();
-      controller.date.text = textToDate(DateTime.now());
-      controller.dueDate.text = textToDate(DateTime.now());
-      controller.createdBy.text =
-          controller.companyDetails['current_user_name'] ?? '';
-      controller.createdById.value =
-          controller.companyDetails['current_user_id'];
-      controller.assignedTo.clear();
-      controller.assignedToId.value = '';
-      controller.status.clear();
-      controller.description.clear();
+      controller.prepareNewTask();
       toDoListDialog(
         constraints: constraints,
         controller: controller,
@@ -516,9 +519,9 @@ ElevatedButton closeTaskButton(
       alertDialog(
         context: context,
         content: 'Are you sure you want to close this task?',
-        onPressed: () {
-          controller.updateTaskStatus(id, 'Closed');
-          Get.back();
+        onPressed: () async {
+          final updated = await controller.updateTaskStatus(id, 'Closed');
+          if (updated) Get.back();
         },
       );
     },
@@ -538,9 +541,9 @@ ElevatedButton cancelTaskTaskButton(
       alertDialog(
         context: context,
         content: 'Are you sure you want to Cancel this task?',
-        onPressed: () {
-          controller.updateTaskStatus(id, 'Cancelled');
-          Get.back();
+        onPressed: () async {
+          final updated = await controller.updateTaskStatus(id, 'Cancelled');
+          if (updated) Get.back();
         },
       );
     },
@@ -560,14 +563,61 @@ ElevatedButton reOpenTaskButton(
       alertDialog(
         context: context,
         content: 'Are you sure you want to reopen this task?',
-        onPressed: () {
-          controller.updateTaskStatus(id, 'Open');
-          Get.back();
+        onPressed: () async {
+          final updated = await controller.updateTaskStatus(id, 'Open');
+          if (updated) Get.back();
         },
       );
     },
     style: reOpenTaskButtonStyle,
     child: const Text('Reopen'),
+  );
+}
+
+IconButton editTaskButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  ToDoListController controller,
+  ToDoListModel task,
+) {
+  return IconButton(
+    tooltip: 'Edit',
+    onPressed: () {
+      controller.prepareEditTask(task);
+      toDoListDialog(
+        constraints: constraints,
+        controller: controller,
+        context: context,
+        onPressed: controller.addingNewValue.value
+            ? null
+            : () async {
+                await controller.updateTaskDetails(task.id ?? '');
+              },
+      );
+    },
+    icon: Icon(Icons.edit, color: mainColor, size: 20),
+  );
+}
+
+IconButton deleteTaskButton(
+  BuildContext context,
+  BoxConstraints constraints,
+  ToDoListController controller,
+  String id,
+) {
+  return IconButton(
+    tooltip: 'Delete',
+    onPressed: () {
+      alertDialog(
+        context: context,
+        content: 'Are you sure you want to delete this task?',
+        onPressed: () async {
+          final deleted = await controller.deleteTask(id);
+          if (deleted) Get.back();
+        },
+      );
+    },
+    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
   );
 }
 
@@ -581,8 +631,10 @@ ElevatedButton viewButton(
   return ElevatedButton(
     onPressed: () async {
       int i = controller.allToDoLists.indexWhere((t) => t.id == toDoListId);
-      controller.allToDoLists[i].unreadNotes = 0;
-      controller.allToDoLists.refresh();
+      if (i != -1) {
+        controller.allToDoLists[i].unreadNotes = 0;
+        controller.allToDoLists.refresh();
+      }
       controller.currentTaskId.value = toDoListId;
       controller.selectRow(index);
       await controller.getTaskDescriptions(toDoListId);

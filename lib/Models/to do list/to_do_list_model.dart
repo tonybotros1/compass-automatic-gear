@@ -8,6 +8,7 @@ class ToDoListModel {
   String? assignedTo;
   String? assignedToId;
   String? status;
+  String? description;
   int? unreadNotes;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -18,8 +19,12 @@ class ToDoListModel {
     this.date,
     this.dueDate,
     this.createdBy,
+    this.createdById,
     this.assignedTo,
+    this.assignedToId,
     this.status,
+    this.description,
+    this.unreadNotes,
     this.createdAt,
     this.updatedAt,
   });
@@ -43,6 +48,9 @@ class ToDoListModel {
     assignedTo = json.containsKey('assigned_to_name')
         ? json['assigned_to_name'] ?? ''
         : '';
+    description = json.containsKey('description')
+        ? json['description'] ?? ''
+        : '';
     unreadNotes = json.containsKey('unread_notes_count')
         ? json['unread_notes_count'] ?? 0
         : 0;
@@ -60,9 +68,10 @@ class ToDoListModel {
     data['number'] = number;
     data['date'] = date;
     data['due_date'] = dueDate;
-    data['created_by'] = createdBy;
-    data['assigned_to'] = assignedTo;
+    data['created_by'] = createdById;
+    data['assigned_to'] = assignedToId;
     data['status'] = status;
+    data['description'] = description;
     data['createdAt'] = createdAt;
     data['updatedAt'] = updatedAt;
     return data;

@@ -39,7 +39,7 @@ Future<dynamic> toDoListDialog({
                   const Spacer(),
                   GetX<ToDoListController>(
                     builder: (controller) => ClickableHoverText(
-                      onTap: onPressed,
+                      onTap: controller.addingNewValue.value ? null : onPressed,
                       text: controller.addingNewValue.value == false
                           ? 'Save'
                           : '•••',

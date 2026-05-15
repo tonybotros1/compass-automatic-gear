@@ -24,7 +24,6 @@ Widget addNewToDoListTaskOrEdit({
           labelText: 'Date',
           controller: controller.date,
           suffixIcon: IconButton(
-            focusNode: FocusNode(skipTraversal: true),
             onPressed: () async {
               selectDateContext(context, controller.date);
             },
@@ -43,7 +42,6 @@ Widget addNewToDoListTaskOrEdit({
           isEnabled: controller.whoCanEdit(),
           controller: controller.dueDate,
           suffixIcon: IconButton(
-            focusNode: FocusNode(skipTraversal: true),
             onPressed: () async {
               selectDateContext(context, controller.dueDate);
             },
@@ -59,7 +57,7 @@ Widget addNewToDoListTaskOrEdit({
         MenuWithValues(
           labelText: 'Created By',
           headerLqabel: 'Users',
-          isEnabled: controller.companyDetails['is_admin'],
+          isEnabled: controller.companyDetails['is_admin'] == true,
           dialogWidth: 600,
           width: 310,
           controller: controller.createdBy,
@@ -99,7 +97,9 @@ Widget addNewToDoListTaskOrEdit({
           },
         ),
         myTextFormFieldWithBorder(
-          labelText: 'Description',
+          labelText: controller.editingTaskId.value.isEmpty
+              ? 'Description'
+              : 'Update Note',
           width: double.infinity,
           controller: controller.description,
           maxLines: 7,

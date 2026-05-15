@@ -6,6 +6,7 @@ class ToDoListDescriptionModel {
   String? type;
   String? description;
   String? fileName;
+  String? notePublicId;
   String? companyId;
   bool? isThisUserTheCurrentUser;
   DateTime? createdAt;
@@ -22,6 +23,7 @@ class ToDoListDescriptionModel {
     this.updatedAt,
     this.isThisUserTheCurrentUser,
     this.fileName,
+    this.notePublicId,
   });
 
   ToDoListDescriptionModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,9 @@ class ToDoListDescriptionModel {
         ? DateTime.tryParse(json['createdAt'])
         : null;
     fileName = json.containsKey('file_name') ? json['file_name'] ?? '' : '';
+    notePublicId = json.containsKey('note_public_id')
+        ? json['note_public_id'] ?? ''
+        : '';
     updatedAt = json.containsKey('updatedAt')
         ? DateTime.tryParse(json['updatedAt'])
         : null;
@@ -54,6 +59,8 @@ class ToDoListDescriptionModel {
     data['user_id'] = userId;
     data['type'] = type;
     data['description'] = description;
+    data['file_name'] = fileName;
+    data['note_public_id'] = notePublicId;
     data['company_id'] = companyId;
     data['createdAt'] = createdAt;
     data['updatedAt'] = updatedAt;

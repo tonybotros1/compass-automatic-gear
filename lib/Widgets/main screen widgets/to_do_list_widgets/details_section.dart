@@ -77,7 +77,9 @@ Widget detailsSection(
                 // Filter only valid image URLs from the notes.
                 List<String> listOfImages = [
                   for (int i = 0; i < items.length; i++)
-                    if (items[i].type.toString().startsWith('image'))
+                    if (items[i].type.toString().toLowerCase().startsWith(
+                      'image',
+                    ))
                       items[i].description.toString(),
                 ];
 
@@ -87,6 +89,9 @@ Widget detailsSection(
                   itemBuilder: (context, index) {
                     ToDoListDescriptionModel note = items[index];
                     bool isUserNote = note.isThisUserTheCurrentUser ?? false;
+                    bool canDeleteNote =
+                        isUserNote ||
+                        controller.companyDetails['is_admin'] == true;
                     DateTime noteTime = note.createdAt ?? DateTime.now();
                     bool showHeader = false;
                     if (index == 0) {
@@ -158,10 +163,44 @@ Widget detailsSection(
                                               : Colors.green,
                                         ),
                                       ),
-                                      Text(
-                                        textAlign: TextAlign.end,
-                                        DateFormat.jm().format(noteTime),
-                                        style: TextStyle(color: mainColor),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            textAlign: TextAlign.end,
+                                            DateFormat.jm().format(noteTime),
+                                            style: TextStyle(color: mainColor),
+                                          ),
+                                          if (canDeleteNote)
+                                            IconButton(
+                                              tooltip: 'Delete note',
+                                              constraints:
+                                                  const BoxConstraints.tightFor(
+                                                    width: 28,
+                                                    height: 28,
+                                                  ),
+                                              padding: EdgeInsets.zero,
+                                              onPressed: () {
+                                                alertDialog(
+                                                  context: context,
+                                                  content:
+                                                      'Are you sure you want to delete this note?',
+                                                  onPressed: () async {
+                                                    final deleted = await controller
+                                                        .deleteTaskDescriptionNote(
+                                                          note.id ?? '',
+                                                        );
+                                                    if (deleted) Get.back();
+                                                  },
+                                                );
+                                              },
+                                              icon: const Icon(
+                                                Icons.delete_outline,
+                                                color: Colors.red,
+                                                size: 18,
+                                              ),
+                                            ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -183,13 +222,17 @@ Widget detailsSection(
                                             color: Colors.grey[800],
                                           ),
                                         )
-                                      : note.type.toString().startsWith("image")
+                                      : note.type
+                                            .toString()
+                                            .toLowerCase()
+                                            .startsWith("image")
                                       ? InkWell(
                                           onTap: () {
                                             // Calculate the tapped image index within the filtered list.
                                             final tappedIndex = listOfImages
                                                 .indexWhere(
-                                                  (url) => url == note.description,
+                                                  (url) =>
+                                                      url == note.description,
                                                 );
                                             openImageViewer(
                                               listOfImages,
@@ -318,8 +361,11 @@ Widget detailsSection(
                     padding: const EdgeInsets.fromLTRB(8, 10, 0, 16),
                     child: InkWell(
                       onTap: controller.currentTaskId.value.isNotEmpty
-                          ? () {
-                              FilePickerService.pickFile(
+                          ? () async {
+                              controller.fileBytes.value = null;
+                              controller.fileType.value = '';
+                              controller.fileName.value = '';
+                              await FilePickerService.pickFile(
                                 controller.fileBytes,
                                 controller.fileType,
                                 controller.fileName,
@@ -336,31 +382,37 @@ Widget detailsSection(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(8, 10, 16, 16),
                       child: controller.fileBytes.value != null
-                          ? controller.fileType.value.startsWith('image/')
+                          ? controller.fileType.value.toLowerCase().startsWith(
+                                  'image',
+                                )
                                 ? Row(
                                     spacing: 20,
                                     children: [
                                       IconButton(
                                         onPressed: () {
                                           controller.fileBytes.value = null;
+                                          controller.fileType.value = '';
+                                          controller.fileName.value = '';
                                         },
                                         icon: const Icon(Icons.clear),
                                       ),
                                       Image.memory(
                                         controller.fileBytes.value!,
-                                        height: 200,
+                                        height: 90,
                                       ),
                                     ],
                                   )
-                                : controller.fileType.value.startsWith(
-                                    'application/pdf',
-                                  )
+                                : controller.fileType.value
+                                      .toLowerCase()
+                                      .startsWith('pdf')
                                 ? Row(
                                     spacing: 20,
                                     children: [
                                       IconButton(
                                         onPressed: () {
                                           controller.fileBytes.value = null;
+                                          controller.fileType.value = '';
+                                          controller.fileName.value = '';
                                         },
                                         icon: const Icon(Icons.clear),
                                       ),
@@ -376,6 +428,8 @@ Widget detailsSection(
                                       IconButton(
                                         onPressed: () {
                                           controller.fileBytes.value = null;
+                                          controller.fileType.value = '';
+                                          controller.fileName.value = '';
                                         },
                                         icon: const Icon(Icons.clear),
                                       ),
@@ -428,30 +482,38 @@ Widget detailsSection(
                                   if (controller.noteMessage.value
                                       .trim()
                                       .isNotEmpty) {
-                                    controller.descriptionNote.value.clear();
-                                    await controller.addNewTaskDescriptionNote(
-                                      controller.currentTaskId.value,
-                                      {
-                                        'note_type': 'text',
-                                        'note': controller.noteMessage.value
-                                            .trim(),
-                                      },
-                                    );
-                                    controller.noteMessage.value = '';
+                                    final sent = await controller
+                                        .addNewTaskDescriptionNote(
+                                          controller.currentTaskId.value,
+                                          {
+                                            'note_type': 'text',
+                                            'note': controller.noteMessage.value
+                                                .trim(),
+                                          },
+                                        );
+                                    if (sent) {
+                                      controller.descriptionNote.value.clear();
+                                      controller.noteMessage.value = '';
+                                    }
                                   } else if (controller.fileBytes.value !=
                                       null) {
-                                    await controller.addNewTaskDescriptionNote(
-                                      controller.currentTaskId.value,
-                                      {
-                                        'file_name': controller.fileName.value,
-                                        'note_type': controller.fileType.value,
-                                        'media_note':
-                                            controller.fileBytes.value,
-                                      },
-                                    );
-                                    controller.fileBytes.value = null;
-                                    controller.fileType.value = '';
-                                    controller.fileName.value = '';
+                                    final sent = await controller
+                                        .addNewTaskDescriptionNote(
+                                          controller.currentTaskId.value,
+                                          {
+                                            'file_name':
+                                                controller.fileName.value,
+                                            'note_type':
+                                                controller.fileType.value,
+                                            'media_note':
+                                                controller.fileBytes.value,
+                                          },
+                                        );
+                                    if (sent) {
+                                      controller.fileBytes.value = null;
+                                      controller.fileType.value = '';
+                                      controller.fileName.value = '';
+                                    }
                                   }
                                   Future.delayed(
                                     const Duration(milliseconds: 100),

@@ -55,6 +55,7 @@ import '../../Screens/Main screens/System Administrator/User Management/menus.da
 import '../../Screens/Main screens/System Administrator/User Management/responsibilities.dart';
 import '../../Screens/Main screens/System Administrator/User Management/users.dart';
 import '../../Widgets/main screen widgets/first_main_screen_widgets/first_main_screen.dart';
+import '../../Services/notification_sound_service.dart';
 import '../../consts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -89,6 +90,8 @@ class MainScreenController extends GetxController {
   MyTreeNode? previouslySelectedNode;
   RxBool isHovered = RxBool(false);
   WebSocketService ws = Get.find<WebSocketService>();
+  NotificationSoundService notificationSound =
+      Get.find<NotificationSoundService>();
   String backendUrl = backendTestURI;
   final secureStorage = const FlutterSecureStorage();
   Helpers helper = Helpers();
@@ -132,7 +135,19 @@ class MainScreenController extends GetxController {
           favoriteScreens.removeWhere((m) => m.id == deletedId);
           break;
         case "chat_unread":
-          unreadChatCount.value = (message["unread_total"] ?? 0) as int;
+          final previousCount = unreadChatCount.value;
+          final nextCount =
+              int.tryParse((message["unread_total"] ?? 0).toString()) ?? 0;
+          unreadChatCount.value = nextCount;
+          if (nextCount > previousCount) {
+            notificationSound.playTaskNotification();
+            showSnackBar(
+              'To Do List',
+              nextCount == 1
+                  ? 'You have 1 unread task message'
+                  : 'You have $nextCount unread task messages',
+            );
+          }
           break;
       }
     });
