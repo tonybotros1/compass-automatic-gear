@@ -196,10 +196,10 @@ ElevatedButton newElementButton({
       loanAndAdvancesDialog(
         controller: controller,
         canEdit: true,
-        onPressed: controller.addingNewEmployeePayrollValue.isTrue
+        onPressed: controller.addingNewEmployeeLoanAndAdvances.isTrue
             ? null
             : () {
-                // controller.addNewEmployeePayroll();
+                controller.addNewEmployeeLoanAndAdvances();
               },
         context: context,
       );
@@ -221,7 +221,7 @@ IconButton removePayrollButton({
         content: "Are you sure you want to delete this document?",
         onPressed: () {
           Get.back();
-          // controller.deleteEmployeePayroll(id);
+          controller.deleteEmployeeLoanAndAdvances(id);
         },
       );
     },
@@ -250,10 +250,10 @@ IconButton updatePayrollButton({
       loanAndAdvancesDialog(
         controller: controller,
         canEdit: true,
-        onPressed: controller.addingNewEmployeePayrollValue.isTrue
+        onPressed: controller.addingNewEmployeeLoanAndAdvances.isTrue
             ? null
             : () {
-                // controller.updateEmployeePayroll(id);
+                controller.updateEmployeeLoanAndAdvances(id);
               },
         context: context,
       );

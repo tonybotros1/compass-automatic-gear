@@ -56,7 +56,7 @@ class EmployeeLoanAndAdvancesModel {
     type = json.containsKey('type_name')
         ? json['type_name']?.toString() ?? ''
         : '';
-    type = json.containsKey('type') ? json['type']?.toString() ?? '' : '';
+    typeId = json.containsKey('type') ? json['type']?.toString() ?? '' : '';
   }
 
   Map<String, dynamic> toJson() {
@@ -68,7 +68,8 @@ class EmployeeLoanAndAdvancesModel {
       'paid_to_date': paidToDate,
       'remaining_amount': remainingAmount,
       'note': note,
-      'type': type,
+      'type': typeId,
+      'type_name': type,
     };
   }
 }

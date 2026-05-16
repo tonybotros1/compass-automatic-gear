@@ -3,6 +3,7 @@ import 'email_model.dart';
 import 'employee_account_banks_model.dart';
 import 'employee_assignments_balances_model.dart';
 import 'nationality_model.dart';
+import 'employee_loan_and_advances_model.dart';
 import 'payroll_elements_model.dart';
 import 'phone_model.dart';
 
@@ -40,6 +41,7 @@ class EmployeesModel {
   List<EmailModel>? emailList;
   List<EmployeeAccountBanksModel>? bankAccountsList;
   List<EmployeePayrollElementsModel>? payrollsList;
+  List<EmployeeLoanAndAdvancesModel>? loanAndAdvancesList;
   List<EmployeeAssignmentsBalancesModel>? balances;
 
   String? genderName;
@@ -167,6 +169,16 @@ class EmployeesModel {
     } else {
       model.payrollsList = [];
     }
+
+    if (json.containsKey('loan_and_advances_details') &&
+        json['loan_and_advances_details'] != null) {
+      model.loanAndAdvancesList = (json['loan_and_advances_details'] as List)
+          .map((e) => EmployeeLoanAndAdvancesModel.fromJson(e))
+          .toList();
+    } else {
+      model.loanAndAdvancesList = [];
+    }
+
     if (json.containsKey('bank_accounts_list') &&
         json['bank_accounts_list'] != null) {
       model.bankAccountsList = (json['bank_accounts_list'] as List)

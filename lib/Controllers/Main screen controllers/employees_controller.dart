@@ -251,6 +251,11 @@ class EmployeesController extends GetxController {
       employeePayrollElementStartDate,
       employeePayrollElementEndDate,
       employeePayrollElementNote,
+      loanAndAdvancesTotalAmount,
+      loanAndAdvancesMonthlyInstallment,
+      loanAndAdvancesDeductionDate,
+      loanAndAdvancesNote,
+      loanAndAdvancesType,
       line,
       city,
       nationality,
@@ -841,6 +846,7 @@ class EmployeesController extends GetxController {
     payrollId.value = '';
     currentEmployeeId.value = '';
     payrollElementsList.clear();
+    loanAndAdvancesList.clear();
     employeeImage.value = '';
     bankAccountsList.clear();
     employeeName.clear();
@@ -882,6 +888,12 @@ class EmployeesController extends GetxController {
     leavesSearchQuery.value = '';
     filteredPayrollElementsList.clear();
     balancesList.clear();
+    loanAndAdvancesTotalAmount.clear();
+    loanAndAdvancesMonthlyInstallment.clear();
+    loanAndAdvancesDeductionDate.clear();
+    loanAndAdvancesNote.clear();
+    loanAndAdvancesType.clear();
+    loanAndAdvancesTypeId.value = '';
     periodFilter.clear();
     imageBytes = null;
     update();
@@ -924,6 +936,7 @@ class EmployeesController extends GetxController {
     phonesList.assignAll(employee.phoneList ?? []);
     emailsList.assignAll(employee.emailList ?? []);
     payrollElementsList.assignAll(employee.payrollsList ?? []);
+    loanAndAdvancesList.assignAll(employee.loanAndAdvancesList ?? []);
     bankAccountsList.assignAll(employee.bankAccountsList ?? []);
     balancesList.assignAll(employee.balances ?? []);
   }
@@ -2314,6 +2327,163 @@ class EmployeesController extends GetxController {
       }
     } catch (e) {
       //
+    }
+  }
+
+  // ======================== Loan and Advances section ========================
+  Future<void> addNewEmployeeLoanAndAdvances() async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewEmployeeLoanAndAdvances.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/add_new_employee_loan_and_advances/${currentEmployeeId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "type": loanAndAdvancesTypeId.value,
+          "total_amount": loanAndAdvancesTotalAmount.text.isNotEmpty
+              ? double.tryParse(loanAndAdvancesTotalAmount.text)
+              : 0,
+          "monthly_installment":
+              loanAndAdvancesMonthlyInstallment.text.isNotEmpty
+              ? double.tryParse(loanAndAdvancesMonthlyInstallment.text)
+              : 0,
+          "deduction_date": loanAndAdvancesDeductionDate.text.isNotEmpty
+              ? convertDateToIson(loanAndAdvancesDeductionDate.text)
+              : null,
+          "note": loanAndAdvancesNote.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        EmployeeLoanAndAdvancesModel newLoan =
+            EmployeeLoanAndAdvancesModel.fromJson(
+              decoded['new_loan_and_advances'],
+            );
+        loanAndAdvancesList.insert(0, newLoan);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await addNewEmployeeLoanAndAdvances();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewEmployeeLoanAndAdvances.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeeLoanAndAdvances.value = false;
+    }
+  }
+
+  Future<void> updateEmployeeLoanAndAdvances(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      addingNewEmployeeLoanAndAdvances.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/update_employee_loan_and_advances/$id',
+      );
+      final response = await http.patch(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "type": loanAndAdvancesTypeId.value,
+          "total_amount": loanAndAdvancesTotalAmount.text.isNotEmpty
+              ? double.tryParse(loanAndAdvancesTotalAmount.text)
+              : 0,
+          "monthly_installment":
+              loanAndAdvancesMonthlyInstallment.text.isNotEmpty
+              ? double.tryParse(loanAndAdvancesMonthlyInstallment.text)
+              : 0,
+          "deduction_date": loanAndAdvancesDeductionDate.text.isNotEmpty
+              ? convertDateToIson(loanAndAdvancesDeductionDate.text)
+              : null,
+          "note": loanAndAdvancesNote.text,
+        }),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        EmployeeLoanAndAdvancesModel updatedLoan =
+            EmployeeLoanAndAdvancesModel.fromJson(
+              decoded['updated_loan_and_advances'],
+            );
+        int index = loanAndAdvancesList.indexWhere((i) => i.id == id);
+        if (index != -1) {
+          loanAndAdvancesList[index] = updatedLoan;
+          loanAndAdvancesList.refresh();
+        }
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await updateEmployeeLoanAndAdvances(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      addingNewEmployeeLoanAndAdvances.value = false;
+      Get.back();
+    } catch (e) {
+      addingNewEmployeeLoanAndAdvances.value = false;
+    }
+  }
+
+  Future<void> deleteEmployeeLoanAndAdvances(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "contact does not exist");
+        return;
+      }
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/delete_employee_loan_and_advances/$id',
+      );
+      final response = await http.delete(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        loanAndAdvancesList.removeWhere((loan) => loan.id == id);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await deleteEmployeeLoanAndAdvances(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
     }
   }
 }
