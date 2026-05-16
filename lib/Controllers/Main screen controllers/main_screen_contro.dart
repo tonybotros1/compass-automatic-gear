@@ -13,6 +13,7 @@ import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/in
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/job_card.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/job_tasks.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/list_of_values.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/loan_and_advances_types.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/sales_man.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/technician.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/User%20Management/functions.dart';
@@ -350,6 +351,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: PayrollRuns());
       case '/balances':
         return const SizedBox(child: Balances());
+      case '/loanAndAdvancesTypes':
+        return const SizedBox(child: LoanAndAdvancesTypes());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }
