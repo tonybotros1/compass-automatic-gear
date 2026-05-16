@@ -452,6 +452,45 @@ class Helpers {
     }
   }
 
+  // this function is to get all legislations by code for drop down menu
+  Future<Map<String, dynamic>> getAllLoanAndAdvancesTypes() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      var url = Uri.parse(
+        '$backendUrl/loan_and_advances_types/get_all_loan_and_advances_types_for_lov',
+      );
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> jsonData = decoded["loan_and_advances_types"];
+        Map<String, dynamic> map = {
+          for (var role in jsonData) role['_id']: role,
+        };
+        return map;
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getAllLoanAndAdvancesTypes();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
   Future<Map<String, dynamic>> getAllPayrollElementsForPayrollElements(
     String elementID,
   ) async {

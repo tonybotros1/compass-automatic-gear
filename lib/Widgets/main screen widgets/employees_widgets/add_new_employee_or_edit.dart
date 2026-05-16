@@ -5,6 +5,7 @@ import '../../../consts.dart';
 import 'balances_section.dart';
 import 'bank_accounts/bank_accounts_section.dart';
 import 'emails/email_section.dart';
+import 'loan_and_advances/loan_and_advances_section.dart';
 import 'payroll_elements/payroll_elements_section.dart';
 import 'phone/phone_section.dart';
 import 'address/address_section.dart';
@@ -209,7 +210,6 @@ Widget addNewEmployeeOrEdit({
                                   height: 410,
                                   child: TabBarView(
                                     children: [
-                                      // TAB 1
                                       assignmentInformation(
                                         context,
                                         controller,
@@ -224,31 +224,81 @@ Widget addNewEmployeeOrEdit({
                         ),
                       ),
                       // Expanded(
-                      //   child: Column(
-                      //     children: [
-                      //       labelContainer(
-                      //         lable: Text(
-                      //           'Assignment Information',
-                      //           style: fontStyle1,
+                      //   child: SizedBox(
+                      //     width: 600,
+                      //     child: Column(
+                      //       children: [
+                      //         labelContainer(
+                      //           lable: Text(
+                      //             'Payroll Elements',
+                      //             style: fontStyle1,
+                      //           ),
                       //         ),
-                      //       ),
-                      //       assignmentInformation(context, controller),
-                      //     ],
+                      //         payrollElementsSection(constraints, context),
+                      //       ],
+                      //     ),
                       //   ),
                       // ),
                       Expanded(
                         child: SizedBox(
                           width: 600,
-                          child: Column(
-                            children: [
-                              labelContainer(
-                                lable: Text(
-                                  'Payroll Elements',
-                                  style: fontStyle1,
+                          child: DefaultTabController(
+                            length: controller.elementsTabs.length,
+                            child: Column(
+                              children: [
+                                Container(
+                                  height: 50,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: secColor,
+                                    border: BoxBorder.fromLTRB(
+                                      left: const BorderSide(
+                                        color: Colors.grey,
+                                      ),
+                                      right: const BorderSide(
+                                        color: Colors.grey,
+                                      ),
+                                      top: const BorderSide(color: Colors.grey),
+                                    ),
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(5),
+                                      topRight: Radius.circular(5),
+                                    ),
+                                  ),
+                                  child: TabBar(
+                                    unselectedLabelColor: Colors.white,
+                                    tabAlignment: TabAlignment.start,
+                                    isScrollable: true,
+                                    indicatorColor: Colors.yellow,
+                                    labelColor: Colors.yellow,
+                                    splashBorderRadius: BorderRadius.circular(
+                                      5,
+                                    ),
+                                    dividerColor: Colors.transparent,
+
+                                    tabs: controller.elementsTabs,
+                                  ),
                                 ),
-                              ),
-                              payrollElementsSection(constraints, context),
-                            ],
+
+                                SizedBox(
+                                  height: 410,
+                                  child: TabBarView(
+                                    children: [
+                                      payrollElementsSection(
+                                        constraints,
+                                        context,
+                                      ),
+                                      loanAndAdvancesSection(
+                                        constraints,
+                                        context,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

@@ -14,6 +14,7 @@ import '../../Models/employees/contact_and_relatives_model.dart';
 import '../../Models/employees/employee_account_banks_model.dart';
 import '../../Models/employees/employee_assignments_balances_model.dart';
 import '../../Models/employees/employee_leaves_model.dart';
+import '../../Models/employees/employee_loan_and_advances_model.dart';
 import '../../Models/employees/employees_model.dart';
 import '../../Models/employees/payroll_elements_model.dart';
 import '../../Models/employees/phone_model.dart';
@@ -78,6 +79,8 @@ class EmployeesController extends GetxController {
       RxList<EmployeePayrollElementsModel>([]);
   RxList<EmployeePayrollElementsModel> filteredPayrollElementsList =
       RxList<EmployeePayrollElementsModel>([]);
+  RxList<EmployeeLoanAndAdvancesModel> loanAndAdvancesList =
+      RxList<EmployeeLoanAndAdvancesModel>([]);
   RxList<EmailModel> emailsList = RxList<EmailModel>([]);
   RxList<EmployeeAccountBanksModel> bankAccountsList =
       RxList<EmployeeAccountBanksModel>([]);
@@ -128,6 +131,7 @@ class EmployeesController extends GetxController {
   RxBool addingNewEmployeeBankAccount = RxBool(false);
   RxBool addingNewEmployeeNationalityValue = RxBool(false);
   RxBool addingNewEmployeePayrollValue = RxBool(false);
+  RxBool addingNewEmployeeLoanAndAdvances = RxBool(false);
   String backendUrl = backendTestURI;
   RxList<EmployeesModel> allEmployees = RxList<EmployeesModel>([]);
   WebSocketService ws = Get.find<WebSocketService>();
@@ -177,6 +181,15 @@ class EmployeesController extends GetxController {
   var buttonLoadingStates = <String, bool>{}.obs;
   TextEditingController periodFilter = TextEditingController();
 
+  // =================== Loan and Advances Section ===================
+  TextEditingController loanAndAdvancesTotalAmount = TextEditingController();
+  TextEditingController loanAndAdvancesMonthlyInstallment =
+      TextEditingController();
+  TextEditingController loanAndAdvancesDeductionDate = TextEditingController();
+  TextEditingController loanAndAdvancesNote = TextEditingController();
+  TextEditingController loanAndAdvancesType = TextEditingController();
+  RxString loanAndAdvancesTypeId = RxString('');
+
   List<Widget> contactsTabs = const [
     Tab(text: 'Address'),
     Tab(text: 'Nationality'),
@@ -188,6 +201,11 @@ class EmployeesController extends GetxController {
   List<Widget> assignmentsTabs = const [
     Tab(text: 'Assignment Information'),
     Tab(text: 'Balances'),
+  ];
+
+  List<Widget> elementsTabs = const [
+    Tab(text: 'Payroll Elements'),
+    Tab(text: 'Loan and Advances'),
   ];
   @override
   void onInit() {
@@ -290,6 +308,10 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getAllPayrollElements() async {
     return await helper.getAllPayrollElements();
+  }
+
+  Future<Map<String, dynamic>> getAllLoanAndAdvancesTypes() async {
+    return await helper.getAllLoanAndAdvancesTypes();
   }
 
   Future<Map<String, dynamic>> getEmployeeStatus() async {
