@@ -9,11 +9,12 @@ import 'loan_and_advances_dialog.dart';
 
 Widget loanAndAdvancesSection(
   BoxConstraints constraints,
-  BuildContext context,
-) {
+  BuildContext context, {
+  double height = 410,
+}) {
   return Container(
     decoration: containerDecor,
-    height: 410,
+    height: height,
     child: GetX<EmployeesController>(
       builder: (controller) {
         return Column(

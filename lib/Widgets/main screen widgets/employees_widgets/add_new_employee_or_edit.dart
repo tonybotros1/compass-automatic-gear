@@ -19,12 +19,28 @@ Widget addNewEmployeeOrEdit({
 }) {
   return LayoutBuilder(
     builder: (context, constraints) {
+      final contentWidth = constraints.maxWidth - 16;
+      const topSectionHeight = 295.0;
+      const sectionSpacing = 20.0;
+      const tabHeaderHeight = 50.0;
+      const minimumEmploymentTabHeight = 410.0;
+      final availableEmploymentTabHeight = constraints.hasBoundedHeight
+          ? constraints.maxHeight -
+                topSectionHeight -
+                sectionSpacing -
+                tabHeaderHeight
+          : minimumEmploymentTabHeight;
+      final employmentTabHeight =
+          availableEmploymentTabHeight < minimumEmploymentTabHeight
+          ? minimumEmploymentTabHeight
+          : availableEmploymentTabHeight;
+
       return SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: ConstrainedBox(
-            constraints: BoxConstraints(minWidth: constraints.maxWidth - 16),
+            constraints: BoxConstraints(minWidth: contentWidth),
             child: IntrinsicWidth(
               child: Column(
                 spacing: 20,
@@ -161,11 +177,10 @@ Widget addNewEmployeeOrEdit({
                     ],
                   ),
                   Row(
-                    spacing: 20,
                     children: [
                       Expanded(
                         child: SizedBox(
-                          width: 600,
+                          width: contentWidth,
                           child: DefaultTabController(
                             length: controller.assignmentsTabs.length,
                             child: Column(
@@ -207,92 +222,24 @@ Widget addNewEmployeeOrEdit({
                                 ),
 
                                 SizedBox(
-                                  height: 410,
+                                  height: employmentTabHeight,
                                   child: TabBarView(
                                     children: [
                                       assignmentInformation(
                                         context,
                                         controller,
+                                        height: employmentTabHeight,
                                       ),
                                       balancesSection(constraints),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Expanded(
-                      //   child: SizedBox(
-                      //     width: 600,
-                      //     child: Column(
-                      //       children: [
-                      //         labelContainer(
-                      //           lable: Text(
-                      //             'Payroll Elements',
-                      //             style: fontStyle1,
-                      //           ),
-                      //         ),
-                      //         payrollElementsSection(constraints, context),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                      Expanded(
-                        child: SizedBox(
-                          width: 600,
-                          child: DefaultTabController(
-                            length: controller.elementsTabs.length,
-                            child: Column(
-                              children: [
-                                Container(
-                                  height: 50,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: secColor,
-                                    border: BoxBorder.fromLTRB(
-                                      left: const BorderSide(
-                                        color: Colors.grey,
-                                      ),
-                                      right: const BorderSide(
-                                        color: Colors.grey,
-                                      ),
-                                      top: const BorderSide(color: Colors.grey),
-                                    ),
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(5),
-                                      topRight: Radius.circular(5),
-                                    ),
-                                  ),
-                                  child: TabBar(
-                                    unselectedLabelColor: Colors.white,
-                                    tabAlignment: TabAlignment.start,
-                                    isScrollable: true,
-                                    indicatorColor: Colors.yellow,
-                                    labelColor: Colors.yellow,
-                                    splashBorderRadius: BorderRadius.circular(
-                                      5,
-                                    ),
-                                    dividerColor: Colors.transparent,
-
-                                    tabs: controller.elementsTabs,
-                                  ),
-                                ),
-
-                                SizedBox(
-                                  height: 410,
-                                  child: TabBarView(
-                                    children: [
                                       payrollElementsSection(
                                         constraints,
                                         context,
+                                        height: employmentTabHeight,
                                       ),
                                       loanAndAdvancesSection(
                                         constraints,
                                         context,
+                                        height: employmentTabHeight,
                                       ),
                                     ],
                                   ),

@@ -9,11 +9,12 @@ import 'payroll_elements_dialog.dart';
 
 Widget payrollElementsSection(
   BoxConstraints constraints,
-  BuildContext context,
-) {
+  BuildContext context, {
+  double height = 410,
+}) {
   return Container(
     decoration: containerDecor,
-    height: 410,
+    height: height,
     child: GetX<EmployeesController>(
       builder: (controller) {
         return Column(

@@ -6,10 +6,11 @@ import '../../my_text_field.dart';
 
 Container assignmentInformation(
   BuildContext context,
-  EmployeesController controller,
-) {
+  EmployeesController controller, {
+  double height = 410,
+}) {
   return Container(
-    height: 410,
+    height: height,
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     width: double.infinity,
