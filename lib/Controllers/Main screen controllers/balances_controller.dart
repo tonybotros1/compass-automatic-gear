@@ -20,6 +20,7 @@ class BalancesController extends GetxController {
   TextEditingController balanceTypeFilter = TextEditingController();
   TextEditingController balanceName = TextEditingController();
   TextEditingController balanceType = TextEditingController();
+  TextEditingController balanceDimension = TextEditingController();
   TextEditingController balanceDescription = TextEditingController();
   RxBool showOnPayroll = RxBool(false);
   RxBool showOnLeave = RxBool(false);
@@ -46,6 +47,13 @@ class BalancesController extends GetxController {
     '1': {'name': 'Add'},
     '2': {'name': 'Subtract'},
   });
+
+  RxMap balanceDimensions = RxMap({
+    '1': {'name': 'Year to Date'},
+    '2': {'name': 'Inseption to Date'},
+    '3': {'name': 'Run to Date'},
+  });
+
   StreamSubscription? _balanceEventsSubscription;
 
   @override
@@ -87,6 +95,7 @@ class BalancesController extends GetxController {
     balanceTypeFilter.dispose();
     balanceName.dispose();
     balanceType.dispose();
+    balanceDimension.dispose();
     balanceDescription.dispose();
     basedElementName.dispose();
     basedElementType.dispose();
@@ -109,6 +118,7 @@ class BalancesController extends GetxController {
       id: currentBalanceId.value,
       name: balanceName.text,
       type: balanceType.text,
+      dimension: balanceDimension.text,
       description: balanceDescription.text,
       showInAssignment: showOnAssignment.value,
       showInPayroll: showOnPayroll.value,
@@ -127,6 +137,13 @@ class BalancesController extends GetxController {
       alertMessage(
         context: Get.context!,
         content: 'Please select balance type',
+      );
+      return false;
+    }
+    if (balanceDimension.text.trim().isEmpty) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Please select balance dimension',
       );
       return false;
     }
@@ -216,6 +233,7 @@ class BalancesController extends GetxController {
       Map<String, dynamic> data = {
         "name": balanceName.text,
         "type": balanceType.text,
+        "balance_dimension": balanceDimension.text,
         "description": balanceDescription.text,
         "show_on_payroll": showOnPayroll.value,
         "show_on_assignment": showOnAssignment.value,
@@ -505,6 +523,7 @@ class BalancesController extends GetxController {
     currentBalanceId.value = '';
     balanceName.clear();
     balanceType.clear();
+    balanceDimension.clear();
     balanceDescription.clear();
     showOnAssignment.value = false;
     showOnLeave.value = false;
@@ -522,6 +541,7 @@ class BalancesController extends GetxController {
     currentBalanceId.value = details.id ?? '';
     balanceName.text = details.name ?? '';
     balanceType.text = details.type ?? '';
+    balanceDimension.text = details.dimension ?? '';
     balanceDescription.text = details.description ?? '';
     showOnAssignment.value = details.showInAssignment ?? false;
     showOnLeave.value = details.showInLeave ?? false;

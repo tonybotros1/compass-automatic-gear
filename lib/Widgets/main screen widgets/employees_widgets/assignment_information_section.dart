@@ -173,7 +173,6 @@ Container assignmentInformation(
           ),
         ),
         Expanded(
-          // need to edit
           child: Column(
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -198,24 +197,6 @@ Container assignmentInformation(
                   controller.payroll.text = value['name'];
                   controller.payrollId.value = value['_id'];
                 },
-              ),
-              myTextFormFieldWithBorder(
-                labelText: 'Sick Leave Balance',
-                isDouble: true,
-                width: 310,
-                readOnly: true,
-              ),
-              myTextFormFieldWithBorder(
-                labelText: 'Annual Leave Balance',
-                isDouble: true,
-                width: 310,
-                readOnly: true,
-              ),
-              myTextFormFieldWithBorder(
-                labelText: 'Unpaid Leave Balance',
-                isDouble: true,
-                width: 310,
-                readOnly: true,
               ),
             ],
           ),

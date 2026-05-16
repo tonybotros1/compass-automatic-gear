@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Models/employees/address_model.dart';
 import '../../Models/employees/contact_and_relatives_model.dart';
 import '../../Models/employees/employee_account_banks_model.dart';
+import '../../Models/employees/employee_assignments_balances_model.dart';
 import '../../Models/employees/employee_leaves_model.dart';
 import '../../Models/employees/employees_model.dart';
 import '../../Models/employees/payroll_elements_model.dart';
@@ -71,6 +72,8 @@ class EmployeesController extends GetxController {
   RxString jobEmployerId = RxString('');
   RxList<EmployeeAddressModel> addressesList = RxList<EmployeeAddressModel>([]);
   RxList<PhoneModel> phonesList = RxList<PhoneModel>([]);
+  RxList<EmployeeAssignmentsBalancesModel> balancesList =
+      RxList<EmployeeAssignmentsBalancesModel>([]);
   RxList<EmployeePayrollElementsModel> payrollElementsList =
       RxList<EmployeePayrollElementsModel>([]);
   RxList<EmployeePayrollElementsModel> filteredPayrollElementsList =
@@ -184,8 +187,7 @@ class EmployeesController extends GetxController {
 
   List<Widget> assignmentsTabs = const [
     Tab(text: 'Assignment Information'),
-    Tab(text: 'Payroll Elements'),
-    Tab(text: 'Non-recurring Elements'),
+    Tab(text: 'Balances'),
   ];
   @override
   void onInit() {
@@ -860,6 +862,7 @@ class EmployeesController extends GetxController {
     leavesSearch.value.clear();
     leavesSearchQuery.value = '';
     filteredPayrollElementsList.clear();
+    balancesList.clear();
     periodFilter.clear();
     imageBytes = null;
     update();
@@ -903,6 +906,7 @@ class EmployeesController extends GetxController {
     emailsList.assignAll(employee.emailList ?? []);
     payrollElementsList.assignAll(employee.payrollsList ?? []);
     bankAccountsList.assignAll(employee.bankAccountsList ?? []);
+    balancesList.assignAll(employee.balances ?? []);
   }
 
   // ======================== leaves section ========================
@@ -1412,46 +1416,46 @@ class EmployeesController extends GetxController {
     }
   }
 
-  Future<void> filterEmployeeNationalityElementsByPeriod(String period) async {
-    try {
-      if (currentEmployeeId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: "Save doc first please");
-        return;
-      }
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse(
-        '$backendUrl/employees/filter_employee_nationalities_on_period_date/${currentEmployeeId.value}',
-      );
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $accessToken',
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({"period": period}),
-      );
-      if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        List nationalities = decoded['nationality_elements'] ?? [];
-        nationalityList.assignAll(
-          nationalities.map((nat) => NationalityModel.fromJson(nat)),
-        );
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
-        final refreshed = await helper.refreshAccessToken(refreshToken);
-        if (refreshed == RefreshResult.success) {
-          await filterEmployeeNationalityElementsByPeriod(period);
-        } else if (refreshed == RefreshResult.invalidToken) {
-          logout();
-        }
-      } else if (response.statusCode == 401) {
-        logout();
-      }
-    } catch (e) {
-      //
-    }
-  }
+  // Future<void> filterEmployeeNationalityElementsByPeriod(String period) async {
+  //   try {
+  //     if (currentEmployeeId.value.isEmpty) {
+  //       alertMessage(context: Get.context!, content: "Save doc first please");
+  //       return;
+  //     }
+  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     var accessToken = '${prefs.getString('accessToken')}';
+  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+  //     Uri url = Uri.parse(
+  //       '$backendUrl/employees/filter_employee_nationalities_on_period_date/${currentEmployeeId.value}',
+  //     );
+  //     final response = await http.post(
+  //       url,
+  //       headers: {
+  //         'Authorization': 'Bearer $accessToken',
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: jsonEncode({"period": period}),
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final decoded = jsonDecode(response.body);
+  //       List nationalities = decoded['nationality_elements'] ?? [];
+  //       nationalityList.assignAll(
+  //         nationalities.map((nat) => NationalityModel.fromJson(nat)),
+  //       );
+  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+  //       final refreshed = await helper.refreshAccessToken(refreshToken);
+  //       if (refreshed == RefreshResult.success) {
+  //         await filterEmployeeNationalityElementsByPeriod(period);
+  //       } else if (refreshed == RefreshResult.invalidToken) {
+  //         logout();
+  //       }
+  //     } else if (response.statusCode == 401) {
+  //       logout();
+  //     }
+  //   } catch (e) {
+  //     //
+  //   }
+  // }
 
   // ======================== phone section ========================
   Future<void> addNewPhone() async {

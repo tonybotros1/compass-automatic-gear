@@ -49,12 +49,12 @@ Future<dynamic> employeeDialog({
                       convertDateToIson(controller.hireDate.text).toString(),
                     ),
                     onSelected: (value) async {
-                      controller.filterEmployeePayrollElementsByPeriod(
+                      await controller.filterEmployeePayrollElementsByPeriod(
                         value['period_name'],
                       );
-                      controller.filterEmployeeNationalityElementsByPeriod(
-                        value['period_name'],
-                      );
+                      // controller.filterEmployeeNationalityElementsByPeriod(
+                      //   value['period_name'],
+                      // );
                     },
                   ),
                   const Spacer(),

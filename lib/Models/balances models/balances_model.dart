@@ -4,6 +4,7 @@ class BalancesModel {
   String? id;
   String? name;
   String? type;
+  String? dimension;
   String? description;
   bool? showInAssignment;
   bool? showInPayroll;
@@ -20,6 +21,7 @@ class BalancesModel {
     this.showInPayroll,
     this.showInLeave,
     this.elementDetails,
+    this.dimension,
     // this.elementDetails,
   });
 
@@ -41,6 +43,9 @@ class BalancesModel {
           : null,
       name: json.containsKey('name') ? json['name']?.toString() : null,
       type: json.containsKey('type') ? json['type']?.toString() : null,
+      dimension: json.containsKey('balance_dimension')
+          ? json['balance_dimension']?.toString()
+          : null,
       showInAssignment: json.containsKey('show_on_assignment')
           ? _toBool(json['show_on_assignment'])
           : false,

@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
+
 import 'package:datahubai/Middleware/route_middleware.dart';
 import 'package:datahubai/Screens/mobile%20Screens/card_images_screen.dart';
 import 'package:flutter/foundation.dart';
@@ -20,8 +23,30 @@ import 'security.dart';
 
 SharedPreferences? globalPrefs;
 
-void main() async {
+bool _isExpectedWebSocketConnectionError(Object error) {
+  final message = error.toString();
+  return message.contains('WebSocketChannelException') &&
+      (message.contains('Failed to connect WebSocket') ||
+          message.contains('WebSocket connection failed'));
+}
+
+void _handleUncaughtError(Object error, StackTrace stack) {
+  if (_isExpectedWebSocketConnectionError(error)) return;
+
+  FlutterError.reportError(FlutterErrorDetails(exception: error, stack: stack));
+}
+
+void main() {
+  runZonedGuarded(_startApp, _handleUncaughtError);
+}
+
+Future<void> _startApp() async {
   WidgetsFlutterBinding.ensureInitialized();
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (_isExpectedWebSocketConnectionError(error)) return true;
+    return false;
+  };
+
   kIsWeb
       ? await Firebase.initializeApp(options: options)
       : Platform.isAndroid

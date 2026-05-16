@@ -12,28 +12,74 @@ class WebSocketService extends GetxService {
 
   Stream<Map<String, dynamic>> get events => _events.stream;
   String? _userId;
+  String? _companyId;
+  Timer? _reconnectTimer;
   bool manualClose = false;
+
+  void _scheduleReconnect([Duration delay = const Duration(seconds: 2)]) {
+    if (manualClose ||
+        _userId == null ||
+        _userId!.isEmpty ||
+        _companyId == null ||
+        _companyId!.isEmpty) {
+      return;
+    }
+    if (_reconnectTimer?.isActive ?? false) return;
+
+    _reconnectTimer = Timer(delay, () {
+      _reconnectTimer = null;
+      if (channel == null &&
+          !manualClose &&
+          _userId != null &&
+          _userId!.isNotEmpty &&
+          _companyId != null &&
+          _companyId!.isNotEmpty) {
+        connect(_userId, _companyId);
+      }
+    });
+  }
+
   void connect(String? userId, String? companyId) {
     final normalizedUserId = (userId ?? '').trim();
-      final normalizedCompanyId = (companyId ?? '').trim();
+    final normalizedCompanyId = (companyId ?? '').trim();
 
     if (normalizedUserId.isEmpty || normalizedCompanyId.isEmpty) return;
 
-    if (channel != null && _userId == normalizedUserId) return;
+    if (channel != null &&
+        _userId == normalizedUserId &&
+        _companyId == normalizedCompanyId) {
+      return;
+    }
 
-    if (channel != null && _userId != normalizedUserId) {
+    if (channel != null) {
       channel?.sink.close();
       channel = null;
     }
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
 
     _userId = normalizedUserId;
+    _companyId = normalizedCompanyId;
     try {
       manualClose = false;
-      channel = WebSocketChannel.connect(
+      final nextChannel = WebSocketChannel.connect(
         Uri.parse('$webSocketURL/$normalizedCompanyId/$normalizedUserId'),
       );
+      channel = nextChannel;
 
-      channel!.stream.listen(
+      unawaited(
+        nextChannel.ready.then<void>(
+          (_) {},
+          onError: (Object error, StackTrace stackTrace) {
+            if (channel == nextChannel) {
+              channel = null;
+              _scheduleReconnect();
+            }
+          },
+        ),
+      );
+
+      nextChannel.stream.listen(
         (event) {
           try {
             final raw = event?.toString() ?? '';
@@ -71,39 +117,28 @@ class WebSocketService extends GetxService {
         },
         onError: (error) {
           // print("⚠️ WebSocket error: $error");
-          channel = null;
-          if (manualClose || _userId == null || _userId!.isEmpty) return;
-          Future.delayed(const Duration(seconds: 2), () {
-            if (channel == null && _userId != null && _userId!.isNotEmpty) {
-              connect(_userId,companyId);
-            }
-          }); // 🔁 auto reconnect
+          if (channel == nextChannel) channel = null;
+          _scheduleReconnect();
         },
         onDone: () {
           // print("🔌 WebSocket disconnected, reconnecting...");
-          channel = null;
-          if (manualClose || _userId == null || _userId!.isEmpty) return;
-          Future.delayed(const Duration(seconds: 2), () {
-            if (channel == null && _userId != null && _userId!.isNotEmpty) {
-              connect(_userId,companyId);
-            }
-          }); // 🔁 auto reconnect
+          if (channel == nextChannel) channel = null;
+          _scheduleReconnect();
         },
       );
     } catch (e) {
       channel = null;
-      Future.delayed(const Duration(seconds: 3), () {
-        if (channel == null && _userId != null && _userId!.isNotEmpty) {
-          connect(_userId,companyId);
-        }
-      }); // Retry after short delay
+      _scheduleReconnect(const Duration(seconds: 3));
     }
   }
 
   void disconnect() {
     manualClose = true;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
     channel?.sink.close();
     channel = null;
     _userId = null;
+    _companyId = null;
   }
 }

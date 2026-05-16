@@ -46,13 +46,29 @@ Container balanceDetails(BuildContext context, BalancesController controller) {
                       controller.balanceType.text = value['name'];
                     },
                   ),
+                  MenuWithValues(
+                    labelText: 'Balance Dimensions',
+                    headerLqabel: 'Balance Dimensions',
+                    dialogWidth: 600,
+                    width: 310,
+                    controller: controller.balanceDimension,
+                    displayKeys: const ['name'],
+                    displaySelectedKeys: const ['name'],
+                    data: controller.balanceDimensions,
+                    onDelete: () {
+                      controller.balanceDimension.clear();
+                    },
+                    onSelected: (value) {
+                      controller.balanceDimension.text = value['name'];
+                    },
+                  ),
                 ],
               ),
             ),
             Expanded(
               flex: 5,
               child: myTextFormFieldWithBorder(
-                maxLines: 5,
+                maxLines: 7,
                 labelText: 'Description',
                 controller: controller.balanceDescription,
                 validate: false,

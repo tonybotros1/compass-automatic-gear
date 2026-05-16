@@ -2,6 +2,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_cont
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../consts.dart';
+import 'balances_section.dart';
 import 'bank_accounts/bank_accounts_section.dart';
 import 'emails/email_section.dart';
 import 'payroll_elements/payroll_elements_section.dart';
@@ -162,18 +163,79 @@ Widget addNewEmployeeOrEdit({
                     spacing: 20,
                     children: [
                       Expanded(
-                        child: Column(
-                          children: [
-                            labelContainer(
-                              lable: Text(
-                                'Assignment Information',
-                                style: fontStyle1,
-                              ),
+                        child: SizedBox(
+                          width: 600,
+                          child: DefaultTabController(
+                            length: controller.assignmentsTabs.length,
+                            child: Column(
+                              children: [
+                                Container(
+                                  height: 50,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: secColor,
+                                    border: BoxBorder.fromLTRB(
+                                      left: const BorderSide(
+                                        color: Colors.grey,
+                                      ),
+                                      right: const BorderSide(
+                                        color: Colors.grey,
+                                      ),
+                                      top: const BorderSide(color: Colors.grey),
+                                    ),
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(5),
+                                      topRight: Radius.circular(5),
+                                    ),
+                                  ),
+                                  child: TabBar(
+                                    unselectedLabelColor: Colors.white,
+                                    tabAlignment: TabAlignment.start,
+                                    isScrollable: true,
+                                    indicatorColor: Colors.yellow,
+                                    labelColor: Colors.yellow,
+                                    splashBorderRadius: BorderRadius.circular(
+                                      5,
+                                    ),
+                                    dividerColor: Colors.transparent,
+
+                                    tabs: controller.assignmentsTabs,
+                                  ),
+                                ),
+
+                                SizedBox(
+                                  height: 410,
+                                  child: TabBarView(
+                                    children: [
+                                      // TAB 1
+                                      assignmentInformation(
+                                        context,
+                                        controller,
+                                      ),
+                                      balancesSection(constraints),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            assignmentInformation(context, controller),
-                          ],
+                          ),
                         ),
                       ),
+                      // Expanded(
+                      //   child: Column(
+                      //     children: [
+                      //       labelContainer(
+                      //         lable: Text(
+                      //           'Assignment Information',
+                      //           style: fontStyle1,
+                      //         ),
+                      //       ),
+                      //       assignmentInformation(context, controller),
+                      //     ],
+                      //   ),
+                      // ),
                       Expanded(
                         child: SizedBox(
                           width: 600,
