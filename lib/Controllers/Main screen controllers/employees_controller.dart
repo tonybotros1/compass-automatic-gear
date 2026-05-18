@@ -119,6 +119,7 @@ class EmployeesController extends GetxController {
   RxString query = RxString('');
   RxString contactsAndRelativesQuery = RxString('');
   RxBool isScreenLoding = RxBool(false);
+  RxString deletingEmployeeId = RxString('');
   RxInt sortColumnIndex = RxInt(0);
   RxBool isAscending = RxBool(true);
   RxBool addingNewValue = RxBool(false);
@@ -665,11 +666,11 @@ class EmployeesController extends GetxController {
     }
   }
 
-  Future<Map<String, dynamic>> getEmployeeDetails(String id) async {
+  Future<Map<String, dynamic>?> getEmployeeDetails(String id) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
       Uri url = Uri.parse(
         '$backendUrl/employees/get_employee_details_dor_editing/$id',
       );
@@ -679,8 +680,12 @@ class EmployeesController extends GetxController {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        Map<String, dynamic> details = decoded['details'];
-        return details;
+        final details = decoded['details'];
+        if (details is Map) {
+          return Map<String, dynamic>.from(details);
+        }
+        _showErrorMessage('Employee details not found');
+        return null;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -691,9 +696,11 @@ class EmployeesController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       }
-      return {};
+      _showErrorMessage(_responseErrorMessage(response));
+      return null;
     } catch (e) {
-      return {};
+      _showErrorMessage('Could not load employee details please try again');
+      return null;
     }
   }
 
@@ -813,31 +820,88 @@ class EmployeesController extends GetxController {
     }
   }
 
-  Future<void> deleteEmployee(String id) async {
+  String _responseErrorMessage(http.Response response) {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      Uri url = Uri.parse('$backendUrl/employees/delete_employee/$id');
-      final response = await http.delete(
-        url,
-        headers: {'Authorization': 'Bearer $accessToken'},
-      );
-      if (response.statusCode == 200) {
-        allEmployees.removeWhere((employee) => employee.id == id);
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
-        final refreshed = await helper.refreshAccessToken(refreshToken);
-        if (refreshed == RefreshResult.success) {
-          await deleteEmployee(id);
-        } else if (refreshed == RefreshResult.invalidToken) {
-          logout();
-        }
-      } else if (response.statusCode == 401) {
-        logout();
-      }
-      Get.back();
-    } catch (e) {
+      final decoded = jsonDecode(response.body);
+      final detail = decoded['detail'];
+      if (detail is String && detail.trim().isNotEmpty) return detail;
+      if (detail != null) return detail.toString();
+    } catch (_) {
       //
+    }
+    return 'Something went wrong please try again';
+  }
+
+  void _showErrorMessage(String content) {
+    final context = Get.context;
+    if (context == null) return;
+    alertMessage(context: context, content: content);
+  }
+
+  Future<bool> deleteEmployee(String id) async {
+    if (id.isEmpty) {
+      _showErrorMessage('Employee not found');
+      return false;
+    }
+    if (deletingEmployeeId.value.isNotEmpty) return false;
+
+    try {
+      deletingEmployeeId.value = id;
+      var triedRefresh = false;
+      while (true) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        final accessToken = prefs.getString('accessToken') ?? '';
+        final refreshToken =
+            await secureStorage.read(key: "refreshToken") ?? '';
+        Uri url = Uri.parse('$backendUrl/employees/delete_employee/$id');
+        final response = await http.delete(
+          url,
+          headers: {'Authorization': 'Bearer $accessToken'},
+        );
+        if (response.statusCode == 200) {
+          allEmployees.removeWhere((employee) => employee.id == id);
+          if (currentEmployeeId.value == id) {
+            currentEmployeeId.value = '';
+            contactsAndRelativesList.clear();
+            filteredContactsAndRelativesList.clear();
+            leavesList.clear();
+            filteredLeavesList.clear();
+            payrollElementsList.clear();
+            filteredPayrollElementsList.clear();
+            loanAndAdvancesList.clear();
+            addressesList.clear();
+            nationalityList.clear();
+            phonesList.clear();
+            emailsList.clear();
+            bankAccountsList.clear();
+            balancesList.clear();
+            employeeImage.value = '';
+            imageBytes = null;
+          }
+          return true;
+        } else if (response.statusCode == 401 &&
+            refreshToken.isNotEmpty &&
+            !triedRefresh) {
+          triedRefresh = true;
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) continue;
+          if (refreshed == RefreshResult.invalidToken) {
+            logout();
+            return false;
+          }
+        } else if (response.statusCode == 401) {
+          logout();
+          return false;
+        }
+
+        _showErrorMessage(_responseErrorMessage(response));
+        return false;
+      }
+    } catch (e) {
+      _showErrorMessage('Something went wrong please try again');
+      return false;
+    } finally {
+      deletingEmployeeId.value = '';
     }
   }
 
@@ -899,46 +963,59 @@ class EmployeesController extends GetxController {
     update();
   }
 
-  Future<void> loadValues(String selectedEmployeeId) async {
-    final data = await getEmployeeDetails(selectedEmployeeId);
-    final employee = EmployeesModel.fromJson(data);
-    payroll.text = employee.payrollName ?? '';
-    payrollId.value = employee.payroll ?? '';
-    employeeImage.value = employee.personImageUrl ?? '';
-    currentEmployeeId.value = employee.id ?? '';
-    employeeName.text = employee.fullName ?? '';
-    employeeLegislationId.value = employee.legislation ?? '';
-    employeeLegislation.text = employee.legislationName ?? '';
-    employeeCountryOfBirth.text = employee.countryOfBirthName ?? '';
-    employeeCountryOfBirthId.value = employee.countryOfBirth ?? '';
-    employeePlaceOfBirth.text = employee.placeOfBirth ?? '';
-    employeeDateOfBirth.text = textToDate(employee.dateOfBirth);
-    employeeGender.text = employee.genderName ?? '';
-    employeeGenderId.value = employee.gender ?? '';
-    employeeMaritalStatus.text = employee.martialStatusName ?? '';
-    employeeMaritalStatusId.value = employee.martialStatus ?? '';
-    personType.value = employee.personType ?? '';
-    employeeStatus.value = employee.status ?? '';
-    jobEmployer.text = employee.employerName ?? '';
-    jobEmployerId.value = employee.employer ?? '';
-    jobDepartment.text = employee.departmentName ?? '';
-    jobDepartmentId.value = employee.department ?? '';
-    jobTitle.text = employee.jobTitleName ?? '';
-    jobTitleId.value = employee.jobTitle ?? '';
-    jobLocation.text = employee.locationName ?? '';
-    jobLocationId.value = employee.location ?? '';
-    hireDate.text = textToDate(employee.hireDate);
-    endDate.text = textToDate(employee.endDate);
-    reportingManager.text = employee.reportingManagerName ?? '';
-    reportingManagerId.value = employee.reportingManager ?? '';
-    addressesList.assignAll(employee.addressesList ?? []);
-    nationalityList.assignAll(employee.nationalitiesList ?? []);
-    phonesList.assignAll(employee.phoneList ?? []);
-    emailsList.assignAll(employee.emailList ?? []);
-    payrollElementsList.assignAll(employee.payrollsList ?? []);
-    loanAndAdvancesList.assignAll(employee.loanAndAdvancesList ?? []);
-    bankAccountsList.assignAll(employee.bankAccountsList ?? []);
-    balancesList.assignAll(employee.balances ?? []);
+  Future<bool> loadValues(String selectedEmployeeId) async {
+    try {
+      final data = await getEmployeeDetails(selectedEmployeeId);
+      if (data == null || data.isEmpty) return false;
+
+      final employee = EmployeesModel.fromJson(data);
+      if ((employee.id ?? '').isEmpty) {
+        _showErrorMessage('Employee details not found');
+        return false;
+      }
+
+      payroll.text = employee.payrollName ?? '';
+      payrollId.value = employee.payroll ?? '';
+      employeeImage.value = employee.personImageUrl ?? '';
+      currentEmployeeId.value = employee.id ?? '';
+      employeeName.text = employee.fullName ?? '';
+      employeeLegislationId.value = employee.legislation ?? '';
+      employeeLegislation.text = employee.legislationName ?? '';
+      employeeCountryOfBirth.text = employee.countryOfBirthName ?? '';
+      employeeCountryOfBirthId.value = employee.countryOfBirth ?? '';
+      employeePlaceOfBirth.text = employee.placeOfBirth ?? '';
+      employeeDateOfBirth.text = textToDate(employee.dateOfBirth);
+      employeeGender.text = employee.genderName ?? '';
+      employeeGenderId.value = employee.gender ?? '';
+      employeeMaritalStatus.text = employee.martialStatusName ?? '';
+      employeeMaritalStatusId.value = employee.martialStatus ?? '';
+      personType.value = employee.personType ?? '';
+      employeeStatus.value = employee.status ?? '';
+      jobEmployer.text = employee.employerName ?? '';
+      jobEmployerId.value = employee.employer ?? '';
+      jobDepartment.text = employee.departmentName ?? '';
+      jobDepartmentId.value = employee.department ?? '';
+      jobTitle.text = employee.jobTitleName ?? '';
+      jobTitleId.value = employee.jobTitle ?? '';
+      jobLocation.text = employee.locationName ?? '';
+      jobLocationId.value = employee.location ?? '';
+      hireDate.text = textToDate(employee.hireDate);
+      endDate.text = textToDate(employee.endDate);
+      reportingManager.text = employee.reportingManagerName ?? '';
+      reportingManagerId.value = employee.reportingManager ?? '';
+      addressesList.assignAll(employee.addressesList ?? []);
+      nationalityList.assignAll(employee.nationalitiesList ?? []);
+      phonesList.assignAll(employee.phoneList ?? []);
+      emailsList.assignAll(employee.emailList ?? []);
+      payrollElementsList.assignAll(employee.payrollsList ?? []);
+      loanAndAdvancesList.assignAll(employee.loanAndAdvancesList ?? []);
+      bankAccountsList.assignAll(employee.bankAccountsList ?? []);
+      balancesList.assignAll(employee.balances ?? []);
+      return true;
+    } catch (e) {
+      _showErrorMessage('Could not load employee details please try again');
+      return false;
+    }
   }
 
   // ======================== leaves section ========================

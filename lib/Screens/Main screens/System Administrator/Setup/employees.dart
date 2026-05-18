@@ -377,22 +377,30 @@ DataRow dataRowForTheTable(
   );
 }
 
-IconButton deleteSection(
+Widget deleteSection(
   EmployeesController controller,
   String employeeId,
   BuildContext context,
 ) {
-  return IconButton(
-    onPressed: () {
-      alertDialog(
-        context: context,
-        content: "This employee will be deleted permanently",
-        onPressed: () {
-          controller.deleteEmployee(employeeId);
-        },
+  return GetX<EmployeesController>(
+    builder: (_) {
+      final isDeleting = controller.deletingEmployeeId.value == employeeId;
+      return IconButton(
+        onPressed: isDeleting
+            ? null
+            : () {
+                alertDialog(
+                  context: context,
+                  content: "This employee will be deleted permanently",
+                  onPressed: () async {
+                    final deleted = await controller.deleteEmployee(employeeId);
+                    if (deleted) Get.back();
+                  },
+                );
+              },
+        icon: isDeleting ? loadingProcess : deleteIcon,
       );
     },
-    icon: deleteIcon,
   );
 }
 
@@ -410,9 +418,15 @@ Widget editSection(
         onPressed: isLoading
             ? null
             : () async {
-                controller.setButtonLoading(data.id ?? '', true);
-                await controller.loadValues(employeeId);
-                controller.setButtonLoading(data.id ?? '', false);
+                final rowId = data.id ?? '';
+                var loaded = false;
+                controller.setButtonLoading(rowId, true);
+                try {
+                  loaded = await controller.loadValues(employeeId);
+                } finally {
+                  controller.setButtonLoading(rowId, false);
+                }
+                if (!loaded) return;
 
                 employeeDialog(
                   onPressedForLeaves: () async {

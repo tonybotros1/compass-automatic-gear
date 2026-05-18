@@ -56,169 +56,180 @@ class EmployeesModel {
 
   EmployeesModel();
 
+  static String? _stringFromJson(dynamic value) => value?.toString();
+
+  static DateTime? _dateFromJson(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value.toString());
+  }
+
+  static List<T> _listFromJson<T>(
+    Map<String, dynamic> json,
+    String key,
+    T Function(Map<String, dynamic>) parser,
+  ) {
+    final value = json[key];
+    if (value is! List) return <T>[];
+    return value
+        .whereType<Map>()
+        .map((entry) => parser(Map<String, dynamic>.from(entry)))
+        .toList();
+  }
+
   factory EmployeesModel.fromJson(Map<String, dynamic> json) {
     final model = EmployeesModel();
 
-    if (json.containsKey('_id')) model.id = json['_id'];
-    if (json.containsKey('company_id')) model.companyId = json['company_id'];
-    if (json.containsKey('full_name')) model.fullName = json['full_name'];
-    if (json.containsKey('payroll')) model.payroll = json['payroll'];
+    if (json.containsKey('_id')) model.id = _stringFromJson(json['_id']);
+    if (json.containsKey('company_id')) {
+      model.companyId = _stringFromJson(json['company_id']);
+    }
+    if (json.containsKey('full_name')) {
+      model.fullName = _stringFromJson(json['full_name']);
+    }
+    if (json.containsKey('payroll')) {
+      model.payroll = _stringFromJson(json['payroll']);
+    }
     if (json.containsKey('country_of_birth')) {
-      model.countryOfBirth = json['country_of_birth'];
+      model.countryOfBirth = _stringFromJson(json['country_of_birth']);
     }
     if (json.containsKey('place_of_birth')) {
-      model.placeOfBirth = json['place_of_birth'];
+      model.placeOfBirth = _stringFromJson(json['place_of_birth']);
     }
 
     if (json.containsKey('date_of_birth') && json['date_of_birth'] != null) {
-      model.dateOfBirth = DateTime.tryParse(json['date_of_birth']);
+      model.dateOfBirth = _dateFromJson(json['date_of_birth']);
     }
 
-    if (json.containsKey('gender')) model.gender = json['gender'];
+    if (json.containsKey('gender')) {
+      model.gender = _stringFromJson(json['gender']);
+    }
     if (json.containsKey('martial_status')) {
-      model.martialStatus = json['martial_status'];
+      model.martialStatus = _stringFromJson(json['martial_status']);
     }
-    if (json.containsKey('person_type')) model.personType = json['person_type'];
+    if (json.containsKey('person_type')) {
+      model.personType = _stringFromJson(json['person_type']);
+    }
     if (json.containsKey('legislation')) {
-      model.legislation = json['legislation'];
+      model.legislation = _stringFromJson(json['legislation']);
     }
-    if (json.containsKey('status')) model.status = json['status'];
-    if (json.containsKey('employer')) model.employer = json['employer'];
-    if (json.containsKey('department')) model.department = json['department'];
-    if (json.containsKey('job_title')) model.jobTitle = json['job_title'];
-    if (json.containsKey('location')) model.location = json['location'];
+    if (json.containsKey('status')) {
+      model.status = _stringFromJson(json['status']);
+    }
+    if (json.containsKey('employer')) {
+      model.employer = _stringFromJson(json['employer']);
+    }
+    if (json.containsKey('department')) {
+      model.department = _stringFromJson(json['department']);
+    }
+    if (json.containsKey('job_title')) {
+      model.jobTitle = _stringFromJson(json['job_title']);
+    }
+    if (json.containsKey('location')) {
+      model.location = _stringFromJson(json['location']);
+    }
 
     if (json.containsKey('hire_date') && json['hire_date'] != null) {
-      model.hireDate = DateTime.tryParse(json['hire_date']);
+      model.hireDate = _dateFromJson(json['hire_date']);
     }
 
     if (json.containsKey('end_date') && json['end_date'] != null) {
-      model.endDate = DateTime.tryParse(json['end_date']);
+      model.endDate = _dateFromJson(json['end_date']);
     }
 
     if (json.containsKey('reporting_manager')) {
-      model.reportingManager = json['reporting_manager'];
+      model.reportingManager = _stringFromJson(json['reporting_manager']);
     }
 
     if (json.containsKey('createdAt') && json['createdAt'] != null) {
-      model.createdAt = DateTime.tryParse(json['createdAt']);
+      model.createdAt = _dateFromJson(json['createdAt']);
     }
 
     if (json.containsKey('updatedAt') && json['updatedAt'] != null) {
-      model.updatedAt = DateTime.tryParse(json['updatedAt']);
+      model.updatedAt = _dateFromJson(json['updatedAt']);
     }
 
     if (json.containsKey('people_counter')) {
-      model.peopleCounter = json['people_counter'];
+      model.peopleCounter = _stringFromJson(json['people_counter']);
     }
     if (json.containsKey('person_image_url')) {
-      model.personImageUrl = json['person_image_url'];
+      model.personImageUrl = _stringFromJson(json['person_image_url']);
     }
     if (json.containsKey('person_image_public_id')) {
-      model.personImagePublicId = json['person_image_public_id'];
+      model.personImagePublicId = _stringFromJson(
+        json['person_image_public_id'],
+      );
     }
 
     /// Lists
-    if (json.containsKey('addresses_list') && json['addresses_list'] != null) {
-      model.addressesList = (json['addresses_list'] as List)
-          .map((e) => EmployeeAddressModel.fromJson(e))
-          .toList();
-    } else {
-      model.addressesList = [];
-    }
-
-    if (json.containsKey('assignment_balances') &&
-        json['assignment_balances'] != null) {
-      model.balances = (json['assignment_balances'] as List)
-          .map((e) => EmployeeAssignmentsBalancesModel.fromJson(e))
-          .toList();
-    } else {
-      model.balances = [];
-    }
-
-    if (json.containsKey('nationalities_list') &&
-        json['nationalities_list'] != null) {
-      model.nationalitiesList = (json['nationalities_list'] as List)
-          .map((e) => NationalityModel.fromJson(e))
-          .toList();
-    } else {
-      model.nationalitiesList = [];
-    }
-
-    if (json.containsKey('phone_list') && json['phone_list'] != null) {
-      model.phoneList = (json['phone_list'] as List)
-          .map((e) => PhoneModel.fromJson(e))
-          .toList();
-    } else {
-      model.phoneList = [];
-    }
-
-    if (json.containsKey('email_list') && json['email_list'] != null) {
-      model.emailList = (json['email_list'] as List)
-          .map((e) => EmailModel.fromJson(e))
-          .toList();
-    } else {
-      model.emailList = [];
-    }
-
-    if (json.containsKey('payrolls_details') &&
-        json['payrolls_details'] != null) {
-      model.payrollsList = (json['payrolls_details'] as List)
-          .map((e) => EmployeePayrollElementsModel.fromJson(e))
-          .toList();
-    } else {
-      model.payrollsList = [];
-    }
-
-    if (json.containsKey('loan_and_advances_details') &&
-        json['loan_and_advances_details'] != null) {
-      model.loanAndAdvancesList = (json['loan_and_advances_details'] as List)
-          .map((e) => EmployeeLoanAndAdvancesModel.fromJson(e))
-          .toList();
-    } else {
-      model.loanAndAdvancesList = [];
-    }
-
-    if (json.containsKey('bank_accounts_list') &&
-        json['bank_accounts_list'] != null) {
-      model.bankAccountsList = (json['bank_accounts_list'] as List)
-          .map((e) => EmployeeAccountBanksModel.fromJson(e))
-          .toList();
-    } else {
-      model.bankAccountsList = [];
-    }
+    model.addressesList = _listFromJson(
+      json,
+      'addresses_list',
+      EmployeeAddressModel.fromJson,
+    );
+    model.balances = _listFromJson(
+      json,
+      'assignment_balances',
+      EmployeeAssignmentsBalancesModel.fromJson,
+    );
+    model.nationalitiesList = _listFromJson(
+      json,
+      'nationalities_list',
+      NationalityModel.fromJson,
+    );
+    model.phoneList = _listFromJson(json, 'phone_list', PhoneModel.fromJson);
+    model.emailList = _listFromJson(json, 'email_list', EmailModel.fromJson);
+    model.payrollsList = _listFromJson(
+      json,
+      'payrolls_details',
+      EmployeePayrollElementsModel.fromJson,
+    );
+    model.loanAndAdvancesList = _listFromJson(
+      json,
+      'loan_and_advances_details',
+      EmployeeLoanAndAdvancesModel.fromJson,
+    );
+    model.bankAccountsList = _listFromJson(
+      json,
+      'bank_accounts_list',
+      EmployeeAccountBanksModel.fromJson,
+    );
 
     /// Names
-    if (json.containsKey('gender_name')) model.genderName = json['gender_name'];
+    if (json.containsKey('gender_name')) {
+      model.genderName = _stringFromJson(json['gender_name']);
+    }
     if (json.containsKey('legislation_name')) {
-      model.legislationName = json['legislation_name'];
+      model.legislationName = _stringFromJson(json['legislation_name']);
     }
     if (json.containsKey('employer_name')) {
-      model.employerName = json['employer_name'];
+      model.employerName = _stringFromJson(json['employer_name']);
     }
     if (json.containsKey('payroll_name')) {
-      model.payrollName = json['payroll_name'];
+      model.payrollName = _stringFromJson(json['payroll_name']);
     }
     if (json.containsKey('department_name')) {
-      model.departmentName = json['department_name'];
+      model.departmentName = _stringFromJson(json['department_name']);
     }
     if (json.containsKey('job_title_name')) {
-      model.jobTitleName = json['job_title_name'];
+      model.jobTitleName = _stringFromJson(json['job_title_name']);
     }
     if (json.containsKey('location_name')) {
-      model.locationName = json['location_name'];
+      model.locationName = _stringFromJson(json['location_name']);
     }
     if (json.containsKey('martial_status_name')) {
-      model.martialStatusName = json['martial_status_name'];
+      model.martialStatusName = _stringFromJson(json['martial_status_name']);
     }
     if (json.containsKey('country_of_birth_name')) {
-      model.countryOfBirthName = json['country_of_birth_name'];
+      model.countryOfBirthName = _stringFromJson(json['country_of_birth_name']);
     }
     if (json.containsKey('country_name')) {
-      model.countryName = json['country_name'];
+      model.countryName = _stringFromJson(json['country_name']);
     }
     if (json.containsKey('reporting_manager_name')) {
-      model.reportingManagerName = json['reporting_manager_name'];
+      model.reportingManagerName = _stringFromJson(
+        json['reporting_manager_name'],
+      );
     }
 
     return model;
