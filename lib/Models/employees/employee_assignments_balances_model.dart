@@ -2,12 +2,19 @@ class EmployeeAssignmentsBalancesModel {
   String? id;
   String? name;
   double? balance;
+  String? dimension;
 
-  EmployeeAssignmentsBalancesModel({this.id, this.name, this.balance});
+  EmployeeAssignmentsBalancesModel({
+    this.id,
+    this.name,
+    this.balance,
+    this.dimension,
+  });
 
   EmployeeAssignmentsBalancesModel.fromJson(Map<String, dynamic> json) {
     id = _stringFromJson(json['_id']);
     name = _stringFromJson(json['name']);
+    dimension = _stringFromJson(json['balance_dimension']);
     balance = _doubleFromJson(json['balance']);
   }
 

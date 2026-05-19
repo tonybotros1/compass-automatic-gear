@@ -449,7 +449,11 @@ class EmployeesController extends GetxController {
         "period_name": "${now.year}-${now.month.toString().padLeft(2, '0')}",
       });
     }
-    periodFilter.text = periods.last['period_name'] ?? '';
+    final periodNames = periods.map((period) => period['period_name']).toSet();
+    if (periodFilter.text.trim().isEmpty ||
+        !periodNames.contains(periodFilter.text.trim())) {
+      periodFilter.text = periods.last['period_name'] ?? '';
+    }
     return periods.reversed.toList();
   }
 
@@ -2388,10 +2392,18 @@ class EmployeesController extends GetxController {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        List payrolls = decoded['payrolls_elements'] ?? [];
-        payrollElementsList.assignAll(
-          payrolls.map((pay) => EmployeePayrollElementsModel.fromJson(pay)),
-        );
+        final payrolls = decoded['payrolls_elements'];
+        if (payrolls is List) {
+          payrollElementsList.assignAll(
+            payrolls.whereType<Map>().map(
+              (pay) => EmployeePayrollElementsModel.fromJson(
+                Map<String, dynamic>.from(pay),
+              ),
+            ),
+          );
+        } else {
+          payrollElementsList.clear();
+        }
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -2403,7 +2415,7 @@ class EmployeesController extends GetxController {
         logout();
       }
     } catch (e) {
-      //
+      _showErrorMessage('Could not load payroll elements please try again');
     }
   }
 

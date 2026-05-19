@@ -36,6 +36,13 @@ Widget tableOfScreens({
           size: ColumnSize.L,
         ),
         DataColumn2(
+          label: AutoSizedText(
+            constraints: constraints,
+            text: 'Blance Dimension',
+          ),
+          size: ColumnSize.M,
+        ),
+        DataColumn2(
           size: ColumnSize.M,
           label: AutoSizedText(constraints: constraints, text: 'Value'),
           numeric: true,
@@ -57,6 +64,12 @@ DataRow dataRowForTheTable(
     cells: [
       DataCell(
         textForDataRowInTable(text: data.name.toString(), formatDouble: false),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.dimension.toString(),
+          formatDouble: false,
+        ),
       ),
       DataCell(
         Container(

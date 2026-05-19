@@ -21,21 +21,25 @@ class EmployeePayrollElementsModel {
     return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 
+  static String _toStringValue(dynamic value) => value?.toString() ?? '';
+
+  static DateTime? _toDate(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value.toString());
+  }
+
   EmployeePayrollElementsModel.fromJson(Map<String, dynamic> json) {
-    id = json.containsKey('_id') ? json['_id'] ?? '' : '';
-    name = json.containsKey('name_value') ? json['name_value'] ?? '' : '';
-    nameId = json.containsKey('name') ? json['name'] ?? '' : '';
+    id = json.containsKey('_id') ? _toStringValue(json['_id']) : '';
+    name = json.containsKey('name_value')
+        ? _toStringValue(json['name_value'])
+        : '';
+    nameId = json.containsKey('name') ? _toStringValue(json['name']) : '';
     value = json.containsKey('value') ? _toDouble(json['value']) : 0;
     startDate = json.containsKey('start_date')
-        ? json['start_date'] != null
-              ? DateTime.tryParse(json['start_date'])
-              : null
+        ? _toDate(json['start_date'])
         : null;
-    endDate = json.containsKey('end_date')
-        ? json['end_date'] != null
-              ? DateTime.tryParse(json['end_date'])
-              : null
-        : null;
-    note = json.containsKey('notes') ? json['notes'] ?? '' : '';
+    endDate = json.containsKey('end_date') ? _toDate(json['end_date']) : null;
+    note = json.containsKey('notes') ? _toStringValue(json['notes']) : '';
   }
 }

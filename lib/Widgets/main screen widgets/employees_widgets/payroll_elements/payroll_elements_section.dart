@@ -120,6 +120,7 @@ DataRow dataRowForTheTable(
           text: data.value == 0 ? '' : data.value.toString(),
           maxWidth: null,
           formatDouble: false,
+          color: Colors.green,
         ),
       ),
       DataCell(

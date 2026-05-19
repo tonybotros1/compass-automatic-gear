@@ -46,6 +46,12 @@ class PayrollRunsController extends GetxController {
   Rx<TextEditingController> elementSearch = TextEditingController().obs;
 
   @override
+  void onInit() {
+    getAllPayrollRuns();
+    super.onInit();
+  }
+
+  @override
   void onClose() {
     payrollName.dispose();
     periodName.dispose();

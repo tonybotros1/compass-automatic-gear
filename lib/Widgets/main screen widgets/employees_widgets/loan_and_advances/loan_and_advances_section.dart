@@ -55,15 +55,8 @@ Widget tableOfScreens({
       columns: [
         const DataColumn2(label: SizedBox(), size: ColumnSize.S),
         DataColumn2(
-          label: AutoSizedText(constraints: constraints, text: 'Amount'),
-          size: ColumnSize.M,
-        ),
-        DataColumn2(
-          size: ColumnSize.M,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Monthly Installment',
-          ),
+          size: ColumnSize.L,
+          label: AutoSizedText(constraints: constraints, text: 'Type'),
         ),
         DataColumn2(
           size: ColumnSize.M,
@@ -73,23 +66,35 @@ Widget tableOfScreens({
           ),
         ),
         DataColumn2(
+          size: ColumnSize.L,
+          label: AutoSizedText(constraints: constraints, text: 'Note'),
+        ),
+        DataColumn2(
+          numeric: true,
+          label: AutoSizedText(constraints: constraints, text: 'Amount'),
           size: ColumnSize.M,
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
+          label: AutoSizedText(
+            constraints: constraints,
+            text: 'Monthly Installment',
+          ),
+        ),
+
+        DataColumn2(
+          size: ColumnSize.M,
+          numeric: true,
           label: AutoSizedText(constraints: constraints, text: 'Paid to Date'),
         ),
         DataColumn2(
           size: ColumnSize.M,
+          numeric: true,
           label: AutoSizedText(
             constraints: constraints,
             text: 'Remaining Amount',
           ),
-        ),
-        DataColumn2(
-          size: ColumnSize.M,
-          label: AutoSizedText(constraints: constraints, text: 'Type'),
-        ),
-        DataColumn2(
-          size: ColumnSize.L,
-          label: AutoSizedText(constraints: constraints, text: 'Note'),
         ),
       ],
       rows: controller.loanAndAdvancesList.map<DataRow>((invoiceItems) {
@@ -131,14 +136,9 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
-          text: data.totalAmount?.toString() ?? '',
-          formatDouble: true,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.monthlyInstallment?.toString() ?? '',
-          formatDouble: true,
+          text: data.type?.toString() ?? '',
+          formatDouble: false,
+          maxWidth: null,
         ),
       ),
       DataCell(
@@ -149,28 +149,38 @@ DataRow dataRowForTheTable(
       ),
       DataCell(
         textForDataRowInTable(
+          text: data.note ?? '',
+          maxWidth: null,
+          formatDouble: false,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.totalAmount?.toString() ?? '',
+          formatDouble: true,
+          color: Colors.green,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          text: data.monthlyInstallment?.toString() ?? '',
+          formatDouble: true,
+          color: Colors.purpleAccent,
+        ),
+      ),
+
+      DataCell(
+        textForDataRowInTable(
           text: data.paidToDate?.toString() ?? '',
           formatDouble: true,
+          color: Colors.blue,
         ),
       ),
       DataCell(
         textForDataRowInTable(
           text: data.remainingAmount?.toString() ?? '',
           formatDouble: true,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.type?.toString() ?? '',
-          formatDouble: false,
-          maxWidth: null,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: data.note ?? '',
-          maxWidth: null,
-          formatDouble: false,
+          color: Colors.red,
         ),
       ),
     ],

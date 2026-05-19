@@ -50,7 +50,7 @@ class BalancesController extends GetxController {
 
   RxMap balanceDimensions = RxMap({
     '1': {'name': 'Year to Date'},
-    '2': {'name': 'Inseption to Date'},
+    '2': {'name': 'Inception to Date'},
     '3': {'name': 'Run to Date'},
   });
 
