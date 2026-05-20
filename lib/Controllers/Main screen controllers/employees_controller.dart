@@ -13,6 +13,7 @@ import '../../Models/employees/address_model.dart';
 import '../../Models/employees/contact_and_relatives_model.dart';
 import '../../Models/employees/employee_account_banks_model.dart';
 import '../../Models/employees/employee_assignments_balances_model.dart';
+import '../../Models/employees/employee_health_card_model.dart';
 import '../../Models/employees/employee_leaves_model.dart';
 import '../../Models/employees/employee_loan_and_advances_model.dart';
 import '../../Models/employees/employees_model.dart';
@@ -84,6 +85,8 @@ class EmployeesController extends GetxController {
   RxList<EmailModel> emailsList = RxList<EmailModel>([]);
   RxList<EmployeeAccountBanksModel> bankAccountsList =
       RxList<EmployeeAccountBanksModel>([]);
+  RxList<EmployeeHealthCardModel> healthCardsList =
+      RxList<EmployeeHealthCardModel>([]);
   RxList<NationalityModel> nationalityList = RxList<NationalityModel>([]);
   TextEditingController country = TextEditingController();
   TextEditingController employeePayrollElementName = TextEditingController();
@@ -105,6 +108,19 @@ class EmployeesController extends GetxController {
   TextEditingController employeeAccountNumber = TextEditingController();
   TextEditingController employeeIBAN = TextEditingController();
   TextEditingController employeeSWIFTCode = TextEditingController();
+  TextEditingController healthCardType = TextEditingController();
+  RxString healthCardTypeId = RxString('');
+  TextEditingController healthCardHolder = TextEditingController();
+  TextEditingController healthCardHolderType = TextEditingController();
+  RxString healthCardHolderId = RxString('');
+  TextEditingController healthCardNumber = TextEditingController();
+  TextEditingController healthCardInsuranceCompany = TextEditingController();
+  RxString healthCardInsuranceCompanyId = RxString('');
+  TextEditingController healthCardIssueDate = TextEditingController();
+  TextEditingController healthCardExpiryDate = TextEditingController();
+  TextEditingController healthCardCost = TextEditingController();
+  TextEditingController healthCardEmployeeContribution =
+      TextEditingController();
   RxString nationalityId = RxString('');
   RxString phoneTypeId = RxString('');
   RxString emailTypeId = RxString('');
@@ -130,6 +146,7 @@ class EmployeesController extends GetxController {
   RxBool addingNewEmployeePhoneValue = RxBool(false);
   RxBool addingNewEmployeeEmailValue = RxBool(false);
   RxBool addingNewEmployeeBankAccount = RxBool(false);
+  RxBool addingNewEmployeeHealthCard = RxBool(false);
   RxBool addingNewEmployeeNationalityValue = RxBool(false);
   RxBool addingNewEmployeePayrollValue = RxBool(false);
   RxBool addingNewEmployeeLoanAndAdvances = RxBool(false);
@@ -197,6 +214,7 @@ class EmployeesController extends GetxController {
     Tab(text: 'Phones'),
     Tab(text: 'Social Contacts'),
     Tab(text: 'Bank Accounts'),
+    Tab(text: 'Health Card'),
   ];
 
   List<Widget> assignmentsTabs = const [
@@ -268,6 +286,15 @@ class EmployeesController extends GetxController {
       employeeAccountNumber,
       employeeIBAN,
       employeeSWIFTCode,
+      healthCardType,
+      healthCardHolder,
+      healthCardHolderType,
+      healthCardNumber,
+      healthCardInsuranceCompany,
+      healthCardIssueDate,
+      healthCardExpiryDate,
+      healthCardCost,
+      healthCardEmployeeContribution,
       nationalityStartDate,
       nationalityEndDate,
       contactAndRelativeFullName,
@@ -354,6 +381,14 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getAkkBanksNames() async {
     return await helper.getAllListValues('BANKS');
+  }
+
+  Future<Map<String, dynamic>> getHealthCardTypes() async {
+    return await helper.getAllListValues('HEALTH_CARD_TYPES');
+  }
+
+  Future<Map<String, dynamic>> getInsuranceCompanies() async {
+    return await helper.getAllListValues('INSURANCE_COMPANIES');
   }
 
   Future<Map<String, dynamic>> getTypeOfSocial() async {
@@ -878,6 +913,7 @@ class EmployeesController extends GetxController {
             phonesList.clear();
             emailsList.clear();
             bankAccountsList.clear();
+            healthCardsList.clear();
             balancesList.clear();
             employeeImage.value = '';
             imageBytes = null;
@@ -917,6 +953,7 @@ class EmployeesController extends GetxController {
     loanAndAdvancesList.clear();
     employeeImage.value = '';
     bankAccountsList.clear();
+    healthCardsList.clear();
     employeeName.clear();
     employeeCountryOfBirth.clear();
     employeeCountryOfBirthId.value = '';
@@ -1014,6 +1051,7 @@ class EmployeesController extends GetxController {
       payrollElementsList.assignAll(employee.payrollsList ?? []);
       loanAndAdvancesList.assignAll(employee.loanAndAdvancesList ?? []);
       bankAccountsList.assignAll(employee.bankAccountsList ?? []);
+      healthCardsList.assignAll(employee.healthCardsList ?? []);
       balancesList.assignAll(employee.balances ?? []);
       return true;
     } catch (e) {
@@ -1855,6 +1893,43 @@ class EmployeesController extends GetxController {
     }
   }
 
+  void clearHealthCardFields() {
+    healthCardType.clear();
+    healthCardTypeId.value = '';
+    healthCardHolder.clear();
+    healthCardHolderType.clear();
+    healthCardHolderId.value = '';
+    healthCardNumber.clear();
+    healthCardInsuranceCompany.clear();
+    healthCardInsuranceCompanyId.value = '';
+    healthCardIssueDate.clear();
+    healthCardExpiryDate.clear();
+    healthCardCost.clear();
+    healthCardEmployeeContribution.clear();
+  }
+
+  Map<String, dynamic> _employeeHealthCardPayload() {
+    return {
+      "health_card_type": healthCardTypeId.value,
+      "health_card_holder": healthCardHolderId.value,
+      "health_card_holder_type": healthCardHolderType.text,
+      "card_number": healthCardNumber.text,
+      "insurance_company": healthCardInsuranceCompanyId.value,
+      "issue_date": healthCardIssueDate.text.isNotEmpty
+          ? convertDateToIson(healthCardIssueDate.text)
+          : null,
+      "expiry_date": healthCardExpiryDate.text.isNotEmpty
+          ? convertDateToIson(healthCardExpiryDate.text)
+          : null,
+      "cost": healthCardCost.text.isNotEmpty
+          ? double.tryParse(healthCardCost.text)
+          : 0,
+      "employee_contribution": healthCardEmployeeContribution.text.isNotEmpty
+          ? double.tryParse(healthCardEmployeeContribution.text)
+          : 0,
+    };
+  }
+
   // ============================ bank accounts section =============================
   Future<void> addNewEmployeeBankAccount() async {
     try {
@@ -1996,6 +2071,222 @@ class EmployeesController extends GetxController {
         context: Get.context!,
         content: 'Something went wrong please try again',
       );
+    }
+  }
+
+  // ============================ health card section =============================
+  Future<void> addNewEmployeeHealthCard() async {
+    if (currentEmployeeId.value.isEmpty) {
+      alertMessage(context: Get.context!, content: "Save doc first please");
+      return;
+    }
+
+    try {
+      addingNewEmployeeHealthCard.value = true;
+      var triedRefresh = false;
+      while (true) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        final accessToken = prefs.getString('accessToken') ?? '';
+        final refreshToken =
+            await secureStorage.read(key: "refreshToken") ?? '';
+        final url = Uri.parse(
+          '$backendUrl/employees/add_employee_health_card/${currentEmployeeId.value}',
+        );
+        final response = await http.post(
+          url,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(_employeeHealthCardPayload()),
+        );
+
+        if (response.statusCode == 200) {
+          final decoded = jsonDecode(response.body);
+          final healthCardData = decoded['new_health_card'];
+
+          final newHealthCard = EmployeeHealthCardModel.fromJson(
+            Map<String, dynamic>.from(healthCardData),
+          );
+          healthCardsList.insert(0, newHealthCard);
+          Get.back();
+          return;
+        }
+
+        if (response.statusCode == 401 &&
+            refreshToken.isNotEmpty &&
+            !triedRefresh) {
+          triedRefresh = true;
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) continue;
+          if (refreshed == RefreshResult.invalidToken) logout();
+          return;
+        }
+
+        if (response.statusCode == 401) {
+          logout();
+        } else {
+          _showErrorMessage(_responseErrorMessage(response));
+        }
+        return;
+      }
+    } catch (e) {
+      _showErrorMessage('Something went wrong please try again');
+    } finally {
+      addingNewEmployeeHealthCard.value = false;
+    }
+  }
+
+  Future<void> updateEmployeeHealthCard(String id) async {
+    if (currentEmployeeId.value.isEmpty) {
+      alertMessage(context: Get.context!, content: "Save doc first please");
+      return;
+    }
+
+    try {
+      addingNewEmployeeHealthCard.value = true;
+      var triedRefresh = false;
+      while (true) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        final accessToken = prefs.getString('accessToken') ?? '';
+        final refreshToken =
+            await secureStorage.read(key: "refreshToken") ?? '';
+        final url = Uri.parse(
+          '$backendUrl/employees/edit_employee_health_card/$id',
+        );
+        final response = await http.patch(
+          url,
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            "Content-Type": "application/json",
+          },
+          body: jsonEncode(_employeeHealthCardPayload()),
+        );
+
+        if (response.statusCode == 200) {
+          final decoded = jsonDecode(response.body);
+          final healthCardData = decoded['updated_health_card'];
+          final updatedHealthCard = EmployeeHealthCardModel.fromJson(
+            Map<String, dynamic>.from(healthCardData),
+          );
+          final index = healthCardsList.indexWhere((i) => i.id == id);
+          if (index != -1) {
+            healthCardsList[index] = updatedHealthCard;
+            healthCardsList.refresh();
+          }
+          Get.back();
+          return;
+        }
+
+        if (response.statusCode == 401 &&
+            refreshToken.isNotEmpty &&
+            !triedRefresh) {
+          triedRefresh = true;
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) continue;
+          if (refreshed == RefreshResult.invalidToken) logout();
+          return;
+        }
+
+        if (response.statusCode == 401) {
+          logout();
+        } else {
+          _showErrorMessage(_responseErrorMessage(response));
+        }
+        return;
+      }
+    } catch (e) {
+      _showErrorMessage('Something went wrong please try again');
+    } finally {
+      addingNewEmployeeHealthCard.value = false;
+    }
+  }
+
+  Future<void> deleteEmployeeHealthCard(String id) async {
+    try {
+      if (currentEmployeeId.value.isEmpty) {
+        alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      var triedRefresh = false;
+      while (true) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        final accessToken = prefs.getString('accessToken') ?? '';
+        final refreshToken =
+            await secureStorage.read(key: "refreshToken") ?? '';
+        final url = Uri.parse(
+          '$backendUrl/employees/delete_employee_health_card/$id',
+        );
+        final response = await http.delete(
+          url,
+          headers: {'Authorization': 'Bearer $accessToken'},
+        );
+
+        if (response.statusCode == 200) {
+          healthCardsList.removeWhere((card) => card.id == id);
+          return;
+        }
+
+        if (response.statusCode == 401 &&
+            refreshToken.isNotEmpty &&
+            !triedRefresh) {
+          triedRefresh = true;
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) continue;
+          if (refreshed == RefreshResult.invalidToken) logout();
+          return;
+        }
+
+        if (response.statusCode == 401) {
+          logout();
+        } else {
+          _showErrorMessage(_responseErrorMessage(response));
+        }
+        return;
+      }
+    } catch (e) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Something went wrong please try again',
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>> getAllHealthCardHolders() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      var url = Uri.parse(
+        '$backendUrl/employees/get_health_card_holders/${currentEmployeeId.value}',
+      );
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> jsonData = decoded["holders"];
+        Map<String, dynamic> map = {
+          for (var role in jsonData) role['_id']: role,
+        };
+        return map;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getAllHealthCardHolders();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
     }
   }
 

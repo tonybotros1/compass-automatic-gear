@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../consts.dart';
 import 'bank_accounts/bank_accounts_section.dart';
 import 'emails/email_section.dart';
+import 'health_card/health_card_section.dart';
 import 'loan_and_advances/loan_and_advances_section.dart';
 import 'payroll_elements/payroll_elements_section.dart';
 import 'phone/phone_section.dart';
@@ -162,6 +163,10 @@ Widget addNewEmployeeOrEdit({
                                         context: context,
                                       ),
                                       bankAccountsSection(
+                                        constraints: constraints,
+                                        context: context,
+                                      ),
+                                      healthCardSection(
                                         constraints: constraints,
                                         context: context,
                                       ),
