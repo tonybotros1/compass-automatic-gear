@@ -201,7 +201,7 @@ class EmployeesController extends GetxController {
 
   List<Widget> assignmentsTabs = const [
     Tab(text: 'Assignment Information'),
-    Tab(text: 'Balances'),
+    // Tab(text: 'Balances'),
     Tab(text: 'Payroll Elements'),
     Tab(text: 'Loan and Advances'),
   ];
