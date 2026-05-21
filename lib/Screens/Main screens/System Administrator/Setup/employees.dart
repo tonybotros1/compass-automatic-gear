@@ -429,6 +429,18 @@ Widget editSection(
                 if (!loaded) return;
 
                 employeeDialog(
+                  onPressedForApplicantStatus: () {
+                    controller.personType.value = 'Applicant';
+                    controller.addNewEmployee();
+                  },
+                  onPressedForEXEmployeeStatus: () {
+                    controller.personType.value = 'Ex-Employee';
+                    controller.addNewEmployee();
+                  },
+                  onPressedForEmployeeStatus: () {
+                    controller.personType.value = 'Employee';
+                    controller.addNewEmployee();
+                  },
                   onPressedForLeaves: () async {
                     controller.leavesSearch.value.clear();
                     controller.filteredLeavesList.clear();
@@ -490,6 +502,9 @@ ElevatedButton newEmployeeButton(
       controller.clearValues(isEmployee);
 
       employeeDialog(
+        onPressedForApplicantStatus: null,
+        onPressedForEXEmployeeStatus: null,
+        onPressedForEmployeeStatus: null,
         onPressedForLeaves: () async {
           if (controller.currentEmployeeId.value.isEmpty) {
             alertMessage(context: context, content: "Please save doc first");

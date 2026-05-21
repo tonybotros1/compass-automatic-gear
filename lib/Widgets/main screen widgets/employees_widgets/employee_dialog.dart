@@ -13,6 +13,9 @@ Future<dynamic> employeeDialog({
   required void Function()? onPressedForAttachment,
   required void Function()? onPressedForContactsAndRelatives,
   required void Function()? onPressedForLeaves,
+  required void Function()? onPressedForEmployeeStatus,
+  required void Function()? onPressedForApplicantStatus,
+  required void Function()? onPressedForEXEmployeeStatus,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -49,9 +52,11 @@ Future<dynamic> employeeDialog({
                       convertDateToIson(controller.hireDate.text).toString(),
                     ),
                     onSelected: (value) async {
-                      await controller.filterEmployeePayrollElementsByPeriod(
+                      controller.filterEmployeePayrollElementsByPeriod(
                         value['period_name'],
                       );
+                      controller.getEmployeeBalances( value['period_name']);
+
                       // controller.filterEmployeeNationalityElementsByPeriod(
                       //   value['period_name'],
                       // );
@@ -66,6 +71,30 @@ Future<dynamic> employeeDialog({
                           : "•••",
                     ),
                   ),
+                  onPressedForEmployeeStatus != null
+                      ? Row(
+                          spacing: 10,
+                          children: [
+                            separator(),
+                            ClickableHoverText(
+                              onTap: onPressedForEmployeeStatus,
+                              text: 'Employee',
+                            ),
+                            point(),
+                            ClickableHoverText(
+                              onTap: onPressedForEXEmployeeStatus,
+                              text: 'Ex-Employee',
+                            ),
+
+                            point(),
+                            ClickableHoverText(
+                              onTap: onPressedForApplicantStatus,
+                              text: 'Applicant',
+                            ),
+                          ],
+                        )
+                      : const SizedBox(),
+
                   separator(),
                   ClickableHoverText(onTap: onPressedForLeaves, text: 'Leaves'),
                   point(),

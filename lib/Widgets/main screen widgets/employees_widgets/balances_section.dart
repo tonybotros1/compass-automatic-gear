@@ -63,17 +63,17 @@ class _AssignmentBalancesCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  DateFormat('MMMM yyyy').format(DateTime.now()),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: _monoStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: _titleColor,
-                  ),
-                ),
+                // const SizedBox(width: 12),
+                // Text(
+                //   DateFormat('MMMM yyyy').format(DateTime.now()),
+                //   maxLines: 1,
+                //   overflow: TextOverflow.ellipsis,
+                //   style: _monoStyle(
+                //     fontSize: 13,
+                //     fontWeight: FontWeight.w800,
+                //     color: _titleColor,
+                //   ),
+                // ),
               ],
             ),
           ),

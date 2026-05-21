@@ -1213,7 +1213,7 @@ Container statusBox(
           ? Colors.blue.shade300.withAlpha(alpha)
           : status == 'Employee' ||
                 status == 'Applicant' ||
-                status == 'Ex Employee'
+                status == 'Ex-Employee'
           ? Colors.orange
           : Colors.brown.withAlpha(alpha),
     ),

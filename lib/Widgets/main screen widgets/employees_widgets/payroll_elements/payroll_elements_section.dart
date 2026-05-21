@@ -113,7 +113,11 @@ DataRow dataRowForTheTable(
         ),
       ),
       DataCell(
-        textForDataRowInTable(text: data.name.toString(), formatDouble: false),
+        textForDataRowInTable(
+          text: data.name.toString(),
+          formatDouble: false,
+          maxWidth: null,
+        ),
       ),
       DataCell(
         textForDataRowInTable(

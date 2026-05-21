@@ -2866,4 +2866,43 @@ class EmployeesController extends GetxController {
       );
     }
   }
+  // ======================== Balances section ========================
+
+  Future<void> getEmployeeBalances(String periodDate) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendUrl/employees/get_assignment_balances_depending_on_period/${currentEmployeeId.value}',
+      );
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({'period_date': periodDate}),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List balances = decoded['balances'];
+        balancesList.assignAll(
+          balances.map((b) => EmployeeAssignmentsBalancesModel.fromJson(b)),
+        );
+        print(balances);
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          await getEmployeeBalances(periodDate);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+    } catch (e) {
+      //
+    }
+  }
 }
