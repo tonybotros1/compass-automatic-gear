@@ -93,6 +93,30 @@ class PayrollController extends GetxController {
     return isoDate == null ? null : DateTime.tryParse(isoDate);
   }
 
+  String _periodMonthKey(DateTime date) => '${date.year}-${date.month}';
+
+  bool _periodMonthExists(DateTime startDate, {String? excludingPeriodId}) {
+    final monthKey = _periodMonthKey(startDate);
+    return allPeriodDetails.any((period) {
+      if (excludingPeriodId != null && period.id == excludingPeriodId) {
+        return false;
+      }
+      final existingStartDate = period.startDate;
+      return existingStartDate != null &&
+          _periodMonthKey(existingStartDate) == monthKey;
+    });
+  }
+
+  String _errorDetail(http.Response response, String fallback) {
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map && decoded['detail'] != null) {
+        return decoded['detail'].toString();
+      }
+    } catch (_) {}
+    return fallback;
+  }
+
   bool _validatePayroll() {
     if (!(payrollFormKey.currentState?.validate() ?? false)) return false;
     if (name.text.trim().isEmpty) {
@@ -109,7 +133,7 @@ class PayrollController extends GetxController {
     return true;
   }
 
-  bool _validatePeriod() {
+  bool _validatePeriod({String? periodId}) {
     if (currentPayrollId.value.isEmpty) {
       alertMessage(context: Get.context!, content: 'Please save payroll first');
       return false;
@@ -146,6 +170,14 @@ class PayrollController extends GetxController {
       return false;
     }
 
+    if (_periodMonthExists(startDate, excludingPeriodId: periodId)) {
+      alertMessage(
+        context: Get.context!,
+        content: 'A period already exists for this month',
+      );
+      return false;
+    }
+
     return true;
   }
 
@@ -175,6 +207,29 @@ class PayrollController extends GetxController {
       allPayrolls.insert(0, payroll);
     } else {
       allPayrolls[index] = payroll;
+    }
+  }
+
+  void _upsertPeriodDetails(
+    List<PeriodDetailsModel> periods, {
+    bool insertNewAtTop = false,
+  }) {
+    final orderedPeriods = insertNewAtTop ? periods.reversed : periods;
+
+    for (final period in orderedPeriods) {
+      final periodId = period.id;
+      if (periodId == null || periodId.isEmpty) continue;
+
+      final index = allPeriodDetails.indexWhere((i) => i.id == periodId);
+      if (index == -1) {
+        if (insertNewAtTop) {
+          allPeriodDetails.insert(0, period);
+        } else {
+          allPeriodDetails.add(period);
+        }
+      } else {
+        allPeriodDetails[index] = period;
+      }
     }
   }
 
@@ -417,8 +472,16 @@ class PayrollController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         final added = Map<String, dynamic>.from(decoded['added_period'] ?? {});
-        allPeriodDetails.add(PeriodDetailsModel.fromJson(added));
+        allPeriodDetails.insert(0, PeriodDetailsModel.fromJson(added));
         Get.back();
+      } else if (response.statusCode == 409) {
+        alertMessage(
+          context: Get.context!,
+          content: _errorDetail(
+            response,
+            'A period already exists for this month',
+          ),
+        );
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -438,7 +501,7 @@ class PayrollController extends GetxController {
   Future<void> updatePayrollPeriod(String periodId) async {
     try {
       if (periodId.isEmpty) return;
-      if (!_validatePeriod()) return;
+      if (!_validatePeriod(periodId: periodId)) return;
 
       addingNewPeriodValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -472,6 +535,14 @@ class PayrollController extends GetxController {
           allPeriodDetails[index] = updated;
         }
         Get.back();
+      } else if (response.statusCode == 409) {
+        alertMessage(
+          context: Get.context!,
+          content: _errorDetail(
+            response,
+            'A period already exists for this month',
+          ),
+        );
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -543,12 +614,20 @@ class PayrollController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List addedPeriods = decoded['periods'] ?? [];
-        allPeriodDetails.assignAll(
-          addedPeriods.whereType<Map<String, dynamic>>().map(
-            (p) => PeriodDetailsModel.fromJson(p),
-          ),
+        _upsertPeriodDetails(
+          addedPeriods
+              .whereType<Map<String, dynamic>>()
+              .map((p) => PeriodDetailsModel.fromJson(p))
+              .toList(),
+          insertNewAtTop: true,
         );
         Get.back();
+        if (decoded['created_count'] == 0) {
+          alertMessage(
+            context: Get.context!,
+            content: 'Monthly periods already exist for this year',
+          );
+        }
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
