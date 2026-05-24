@@ -2890,7 +2890,6 @@ class EmployeesController extends GetxController {
         balancesList.assignAll(
           balances.map((b) => EmployeeAssignmentsBalancesModel.fromJson(b)),
         );
-        print(balances);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {

@@ -14,6 +14,8 @@ class PayrollRunDetailsModel {
   String? id;
   String? payrollName;
   String? periodName;
+  String? periodStartDate;
+  String? periodEndDate;
 
   PayrollRunDetailsModel({
     this.runNumber,
@@ -23,6 +25,8 @@ class PayrollRunDetailsModel {
     this.id,
     this.payrollName,
     this.periodName,
+    this.periodStartDate,
+    this.periodEndDate,
   });
 
   factory PayrollRunDetailsModel.fromJson(Map<String, dynamic> json) {
@@ -42,6 +46,8 @@ class PayrollRunDetailsModel {
       id: _toStr(json['_id']),
       payrollName: _toStr(json['payroll_name']),
       periodName: _toStr(json['period_name']),
+      periodStartDate: _toStr(json['period_start_date']),
+      periodEndDate: _toStr(json['period_end_date']),
     );
   }
 }
@@ -51,6 +57,11 @@ class PayrollRunsEmployeeModel {
   List<PayrollRunsEmployeeElementsModel>? runEmployeeInformation;
 
   String? employeeName;
+  String? employeeNumber;
+  String? bankName;
+  String? accountNumber;
+  String? iban;
+  String? swiftCode;
   double? totalPayments;
   double? totalDeductions;
   double? netSalary;
@@ -59,6 +70,11 @@ class PayrollRunsEmployeeModel {
   PayrollRunsEmployeeModel({
     this.runEmployeeDetails,
     this.employeeName,
+    this.employeeNumber,
+    this.bankName,
+    this.accountNumber,
+    this.iban,
+    this.swiftCode,
     this.totalPayments,
     this.totalDeductions,
     this.netSalary,
@@ -83,6 +99,11 @@ class PayrollRunsEmployeeModel {
               .toList() ??
           [],
       employeeName: _toStr(json['employee_name']),
+      employeeNumber: _toStr(json['employee_number']),
+      bankName: _toStr(json['bank_name']),
+      accountNumber: _toStr(json['account_number']),
+      iban: _toStr(json['iban']),
+      swiftCode: _toStr(json['swift_code']),
       totalPayments: _toDouble(json['total_payments']),
       totalDeductions: _toDouble(json['total_deductions']),
       netSalary: _toDouble(json['net_salary']),

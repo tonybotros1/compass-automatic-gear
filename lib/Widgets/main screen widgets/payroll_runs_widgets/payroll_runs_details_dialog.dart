@@ -38,11 +38,27 @@ Future<dynamic> payrollRunsDetails({
                 const Spacer(),
                 GetX<PayrollRunsController>(
                   builder: (controller) {
-                    return ClickableHoverText(
-                      text: controller.rollingBack.isFalse ? 'Rollback' : "•••",
-                      onTap: controller.rollingBack.isFalse
-                          ? onTapForRollback
-                          : null,
+                    return Row(
+                      spacing: 10,
+                      children: [
+                        ClickableHoverText(
+                          text: controller.exportingBankFile.isFalse
+                              ? 'Bank Export'
+                              : "•••",
+                          onTap: controller.exportingBankFile.isFalse
+                              ? controller.exportBankPaymentFile
+                              : null,
+                        ),
+                        separator(),
+                        ClickableHoverText(
+                          text: controller.rollingBack.isFalse
+                              ? 'Rollback'
+                              : "•••",
+                          onTap: controller.rollingBack.isFalse
+                              ? onTapForRollback
+                              : null,
+                        ),
+                      ],
                     );
                   },
                 ),

@@ -53,6 +53,7 @@ Widget tableOfScreens({
     showBottomBorder: true,
     lmRatio: 2,
     columns: [
+      const DataColumn2(label: SizedBox(), size: ColumnSize.S),
       DataColumn2(
         label: AutoSizedText(constraints: constraints, text: 'Employee Name'),
         size: ColumnSize.L,
@@ -95,6 +96,17 @@ DataRow dataRowForTheTable(
       controller.selectPayrollRunEmployee(data);
     },
     cells: [
+      DataCell(
+        IconButton(
+          tooltip: 'Print Payslip',
+          onPressed: controller.printingPayslip.isFalse
+              ? () {
+                  controller.printPayslip(data);
+                }
+              : null,
+          icon: printIcons,
+        ),
+      ),
       DataCell(
         textForDataRowInTable(
           text: data.employeeName ?? '',

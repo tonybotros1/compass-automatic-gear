@@ -3,7 +3,6 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:datahubai/Models/ar%20receipts%20and%20ap%20payments/ar_receipts_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/cash_management_receipts_controller.dart';
 import '../../../../Models/dynamic_boxes_line_model.dart';
@@ -342,7 +341,7 @@ class CashManagementReceipt extends StatelessWidget {
                                 iconColor: mainColorWithAlpha,
                               ),
                               DynamicBoxesLineModel(
-                                icon: FontAwesomeIcons.receipt,
+                                icon: Icons.receipt_long_rounded,
                                 iconColor: Colors.green.shade100,
                                 width: 300,
                                 label: 'RECEIVED',

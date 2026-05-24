@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_multi_formatter/formatters/currency_input_formatter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -17,16 +16,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-// String backendTestURI = 'http://192.168.1.15:8000';
-// String webSocketURL = "ws://192.168.1.15:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://192.168.1.15:8000';
+String webSocketURL = "ws://192.168.1.15:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
 // String webSocketURL = "ws://10.0.2.2:8000/ws";
 
 // ======== production urls ========
-String backendTestURI = 'https://datahubai-backend.onrender.com';
-String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
+// String backendTestURI = 'https://datahubai-backend.onrender.com';
+// String webSocketURL = "wss://datahubai-backend.onrender.com/ws";
 
 final formatter = CurrencyInputFormatter();
 
@@ -38,7 +37,7 @@ final NumberFormat currencyFormat = NumberFormat.currency(
 );
 final NumberFormat percentFormat = NumberFormat('#,##0.##');
 
-IconData moneyIcon = FontAwesomeIcons.coins;
+IconData moneyIcon = Icons.payments_rounded;
 IconData counterIcon = Icons.dialpad_rounded;
 
 Container coolTextBox({

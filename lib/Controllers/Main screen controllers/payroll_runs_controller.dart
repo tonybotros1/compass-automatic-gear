@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:datahubai/Models/payroll%20runs/payroll_runs_details_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_html/html.dart' as html;
 
 import '../../Models/payroll runs/payroll_runs_model.dart';
 import '../../consts.dart';
@@ -17,6 +22,9 @@ class PayrollRunsController extends GetxController {
   RxList<PayrollRunsModel> allPayrollRuns = RxList<PayrollRunsModel>([]);
   RxBool addingNewValue = RxBool(false);
   RxBool rollingBack = RxBool(false);
+  RxBool printingPayslip = RxBool(false);
+  RxBool exportingBankFile = RxBool(false);
+  RxMap companyDetails = RxMap({});
   TextEditingController payrollName = TextEditingController();
   TextEditingController periodName = TextEditingController();
   TextEditingController employeeName = TextEditingController();
@@ -29,6 +37,10 @@ class PayrollRunsController extends GetxController {
       RxList<PayrollRunsEmployeeModel>();
   RxList<PayrollRunsEmployeeModel> filteredPayrollRunsEmployeeList =
       RxList<PayrollRunsEmployeeModel>();
+  Rxn<PayrollRunDetailsModel> selectedPayrollRunDetails =
+      Rxn<PayrollRunDetailsModel>();
+  Rxn<PayrollRunsEmployeeModel> selectedPayrollRunEmployee =
+      Rxn<PayrollRunsEmployeeModel>();
 
   RxList<PayrollRunsEmployeeElementsModel> payrollRunsEmployeeElementsList =
       RxList<PayrollRunsEmployeeElementsModel>();
@@ -48,6 +60,7 @@ class PayrollRunsController extends GetxController {
   @override
   void onInit() {
     getAllPayrollRuns();
+    getCompanyDetails();
     super.onInit();
   }
 
@@ -106,12 +119,15 @@ class PayrollRunsController extends GetxController {
     elementQuery.value = '';
     payrollRunsEmployeeList.clear();
     filteredPayrollRunsEmployeeList.clear();
+    selectedPayrollRunDetails.value = null;
+    selectedPayrollRunEmployee.value = null;
     payrollRunsEmployeeElementsList.clear();
     filteredPayrollRunsEmployeeElementsList.clear();
     payrollRunsEmployeeElementsInformationList.clear();
   }
 
   void selectPayrollRunEmployee(PayrollRunsEmployeeModel employee) {
+    selectedPayrollRunEmployee.value = employee;
     elementSearch.value.clear();
     elementQuery.value = '';
     filteredPayrollRunsEmployeeElementsList.clear();
@@ -125,6 +141,10 @@ class PayrollRunsController extends GetxController {
 
   Future<Map<String, dynamic>> getAllPayrlls() async {
     return await helper.getPayrolls();
+  }
+
+  Future<void> getCompanyDetails() async {
+    companyDetails.assignAll(await helper.getCurrentCompanyDetails());
   }
 
   Future<Map<String, dynamic>> getAllPayrollElements() async {
@@ -273,6 +293,7 @@ class PayrollRunsController extends GetxController {
         PayrollRunDetailsModel details = PayrollRunDetailsModel.fromJson(
           decoded['payroll_runs_details'],
         );
+        selectedPayrollRunDetails.value = details;
         payrollRunsEmployeeList.assignAll(details.employeesDetails ?? []);
         isScreenLoding.value = false;
         return true;
@@ -292,6 +313,62 @@ class PayrollRunsController extends GetxController {
       isScreenLoding.value = false;
       return false;
     }
+  }
+
+  Future<PayrollRunDetailsModel?> prepareBankExportDetails(String id) async {
+    try {
+      if (id.isEmpty) return null;
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      var accessToken = '${prefs.getString('accessToken')}';
+      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+      Uri url = Uri.parse(
+        '$backendTestURI/payroll_runs/prepare_bank_export/$id',
+      );
+      final response = await http.patch(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final details = PayrollRunDetailsModel.fromJson(
+          decoded['payroll_runs_details'],
+        );
+        selectedPayrollRunDetails.value = details;
+        payrollRunsEmployeeList.assignAll(details.employeesDetails ?? []);
+        _syncPayrollRunList(details);
+        return details;
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await prepareBankExportDetails(id);
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  void _syncPayrollRunList(PayrollRunDetailsModel details) {
+    final id = details.id ?? '';
+    if (id.isEmpty) return;
+
+    final index = allPayrollRuns.indexWhere((run) => run.id == id);
+    if (index == -1) return;
+
+    allPayrollRuns[index] = PayrollRunsModel(
+      id: details.id,
+      runNumber: details.runNumber,
+      payrollName: details.payrollName,
+      periodName: details.periodName,
+      description: details.description,
+      paymentNumber: details.paymentNumber,
+    );
   }
 
   Future<void> payrollRun() async {
@@ -408,5 +485,501 @@ class PayrollRunsController extends GetxController {
         }).toList(),
       );
     }
+  }
+
+  Future<void> exportBankPaymentFile() async {
+    try {
+      final run = selectedPayrollRunDetails.value;
+      if (run == null) {
+        alertMessage(
+          context: Get.context!,
+          content: 'Please open payroll run details first',
+        );
+        return;
+      }
+
+      final currentPayableEmployees = (run.employeesDetails ?? [])
+          .where((employee) => (employee.netSalary ?? 0) > 0)
+          .toList();
+      if (currentPayableEmployees.isEmpty) {
+        alertMessage(
+          context: Get.context!,
+          content: 'No positive net salary found to export',
+        );
+        return;
+      }
+
+      exportingBankFile.value = true;
+      final preparedRun = await prepareBankExportDetails(run.id ?? '');
+      if (preparedRun == null) {
+        exportingBankFile.value = false;
+        alertMessage(
+          context: Get.context!,
+          content: 'Could not prepare bank export please try again later',
+        );
+        return;
+      }
+
+      final employees = preparedRun.employeesDetails ?? [];
+      final payableEmployees = employees
+          .where((employee) => (employee.netSalary ?? 0) > 0)
+          .toList();
+
+      if (companyDetails.isEmpty) await getCompanyDetails();
+
+      final csvContent = _buildBankPaymentCsv(preparedRun, payableEmployees);
+      final fileName = _bankExportFileName(preparedRun);
+      _downloadTextFile(csvContent, fileName, 'text/csv;charset=utf-8');
+      final missingBankCount = payableEmployees
+          .where((employee) => !_hasBankDetails(employee))
+          .length;
+      final message = missingBankCount == 0
+          ? 'Bank export created'
+          : 'Bank export created with $missingBankCount missing bank detail rows';
+      showSnackBar('Done', message);
+      exportingBankFile.value = false;
+    } catch (e) {
+      exportingBankFile.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Could not export bank payment file please try again later',
+      );
+    }
+  }
+
+  Future<void> printPayslip(PayrollRunsEmployeeModel employee) async {
+    try {
+      if (selectedPayrollRunDetails.value == null) {
+        alertMessage(
+          context: Get.context!,
+          content: 'Please open payroll run details first',
+        );
+        return;
+      }
+
+      printingPayslip.value = true;
+      selectedPayrollRunEmployee.value = employee;
+      if (companyDetails.isEmpty) await getCompanyDetails();
+      final pdfData = await generatePayslipPdf(employee);
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfData,
+      );
+      printingPayslip.value = false;
+    } catch (e) {
+      printingPayslip.value = false;
+      alertMessage(
+        context: Get.context!,
+        content: 'Could not generate payslip please try again later',
+      );
+    }
+  }
+
+  Future<Uint8List> generatePayslipPdf(
+    PayrollRunsEmployeeModel employee,
+  ) async {
+    final run = selectedPayrollRunDetails.value;
+    final pdf = pw.Document();
+    final payrollElements = employee.runEmployeeDetails ?? [];
+    final informationElements = employee.runEmployeeInformation ?? [];
+    final periodStartDate = textToDate(run?.periodStartDate);
+    final periodEndDate = textToDate(run?.periodEndDate);
+    final periodDates = periodStartDate.isNotEmpty && periodEndDate.isNotEmpty
+        ? '$periodStartDate - $periodEndDate'
+        : _cleanText(run?.periodName);
+    final currencyCode = _cleanText(
+      companyDetails['currency_code']?.toString(),
+      fallback: 'AED',
+    );
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(28),
+        footer: (context) {
+          return pw.Container(
+            alignment: pw.Alignment.centerRight,
+            child: pw.Text(
+              'Page ${context.pageNumber} of ${context.pagesCount}',
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+            ),
+          );
+        },
+        build: (context) {
+          return [
+            _payslipHeader(run, employee, periodDates),
+            pw.SizedBox(height: 18),
+            _summarySection(employee, currencyCode),
+            pw.SizedBox(height: 18),
+            _sectionTitle('Payroll Elements'),
+            _payrollElementsTable(payrollElements, currencyCode),
+            if (informationElements.isNotEmpty) ...[
+              pw.SizedBox(height: 18),
+              _sectionTitle('Information'),
+              _informationElementsTable(informationElements),
+            ],
+            pw.SizedBox(height: 28),
+            _signatureSection(),
+          ];
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  pw.Widget _payslipHeader(
+    PayrollRunDetailsModel? run,
+    PayrollRunsEmployeeModel employee,
+    String periodDates,
+  ) {
+    final companyName = _cleanText(
+      companyDetails['company_name']?.toString(),
+      fallback: 'Company',
+    );
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  companyName,
+                  style: pw.TextStyle(
+                    fontSize: 16,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.SizedBox(height: 4),
+                pw.Text(
+                  'Generated on ${format.format(DateTime.now())}',
+                  style: const pw.TextStyle(
+                    fontSize: 9,
+                    color: PdfColors.grey700,
+                  ),
+                ),
+              ],
+            ),
+            pw.Text(
+              'PAYSLIP',
+              style: pw.TextStyle(
+                fontSize: 22,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.blueGrey800,
+              ),
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 18),
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.all(10),
+          decoration: pw.BoxDecoration(
+            border: pw.Border.all(color: PdfColors.grey400, width: 0.5),
+            color: PdfColors.grey100,
+          ),
+          child: pw.Wrap(
+            spacing: 18,
+            runSpacing: 8,
+            children: [
+              _headerField('Employee', employee.employeeName),
+              _headerField('Employee No.', employee.employeeNumber),
+              _headerField('Payroll', run?.payrollName),
+              _headerField('Period', run?.periodName),
+              _headerField('Period Dates', periodDates),
+              _headerField('Run No.', run?.runNumber),
+              _headerField('Payment No.', run?.paymentNumber),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _headerField(String label, String? value) {
+    return pw.SizedBox(
+      width: 150,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            label,
+            style: pw.TextStyle(
+              fontSize: 8,
+              color: PdfColors.grey700,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
+          pw.SizedBox(height: 2),
+          pw.Text(_cleanText(value), style: const pw.TextStyle(fontSize: 9)),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _summarySection(
+    PayrollRunsEmployeeModel employee,
+    String currencyCode,
+  ) {
+    return pw.Row(
+      children: [
+        _summaryBox(
+          'Total Payments',
+          '${_formatAmount(employee.totalPayments)} $currencyCode',
+          PdfColors.green700,
+        ),
+        pw.SizedBox(width: 8),
+        _summaryBox(
+          'Total Deductions',
+          '${_formatAmount(employee.totalDeductions)} $currencyCode',
+          PdfColors.red700,
+        ),
+        pw.SizedBox(width: 8),
+        _summaryBox(
+          'Net Salary',
+          '${_formatAmount(employee.netSalary)} $currencyCode',
+          PdfColors.blue700,
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _summaryBox(String label, String value, PdfColor color) {
+    return pw.Expanded(
+      child: pw.Container(
+        padding: const pw.EdgeInsets.all(10),
+        decoration: pw.BoxDecoration(
+          border: pw.Border.all(color: color, width: 0.7),
+          borderRadius: pw.BorderRadius.circular(4),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(
+              label,
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700),
+            ),
+            pw.SizedBox(height: 4),
+            pw.Text(
+              value,
+              style: pw.TextStyle(
+                fontSize: 12,
+                fontWeight: pw.FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  pw.Widget _sectionTitle(String title) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(bottom: 6),
+      child: pw.Text(
+        title,
+        style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+      ),
+    );
+  }
+
+  pw.Widget _payrollElementsTable(
+    List<PayrollRunsEmployeeElementsModel> elements,
+    String currencyCode,
+  ) {
+    final data = elements.isEmpty
+        ? [
+            ['No payroll elements', '', '', '', ''],
+          ]
+        : elements.map((element) {
+            return [
+              _cleanText(element.elementName),
+              _cleanText(element.elementType),
+              _formatOptionalNumber(element.number),
+              '${_formatAmount(element.payment)} $currencyCode',
+              '${_formatAmount(element.deduction)} $currencyCode',
+            ];
+          }).toList();
+
+    return pw.TableHelper.fromTextArray(
+      headers: ['Element', 'Type', 'Number', 'Payment', 'Deduction'],
+      data: data,
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey800),
+      headerStyle: pw.TextStyle(
+        color: PdfColors.white,
+        fontWeight: pw.FontWeight.bold,
+        fontSize: 9,
+      ),
+      cellStyle: const pw.TextStyle(fontSize: 8),
+      cellPadding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+      cellAlignments: {
+        2: pw.Alignment.centerRight,
+        3: pw.Alignment.centerRight,
+        4: pw.Alignment.centerRight,
+      },
+    );
+  }
+
+  pw.Widget _informationElementsTable(
+    List<PayrollRunsEmployeeElementsModel> elements,
+  ) {
+    return pw.TableHelper.fromTextArray(
+      headers: ['Element', 'Number', 'Value'],
+      data: elements.map((element) {
+        return [
+          _cleanText(element.elementName),
+          _formatOptionalNumber(element.number),
+          _formatOptionalNumber(element.information),
+        ];
+      }).toList(),
+      border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+      headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey800),
+      headerStyle: pw.TextStyle(
+        color: PdfColors.white,
+        fontWeight: pw.FontWeight.bold,
+        fontSize: 9,
+      ),
+      cellStyle: const pw.TextStyle(fontSize: 8),
+      cellPadding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+      cellAlignments: {
+        1: pw.Alignment.centerRight,
+        2: pw.Alignment.centerRight,
+      },
+    );
+  }
+
+  pw.Widget _signatureSection() {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        _signatureLine('Prepared By'),
+        _signatureLine('Employee Signature'),
+      ],
+    );
+  }
+
+  pw.Widget _signatureLine(String label) {
+    return pw.SizedBox(
+      width: 190,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Container(height: 0.5, color: PdfColors.grey600),
+          pw.SizedBox(height: 5),
+          pw.Text(label, style: const pw.TextStyle(fontSize: 8)),
+        ],
+      ),
+    );
+  }
+
+  String _buildBankPaymentCsv(
+    PayrollRunDetailsModel run,
+    List<PayrollRunsEmployeeModel> employees,
+  ) {
+    final currencyCode = _cleanText(
+      companyDetails['currency_code']?.toString(),
+      fallback: 'AED',
+    );
+    final headers = [
+      'Run Number',
+      'Payment Number',
+      'Payroll',
+      'Period',
+      'Period Start',
+      'Period End',
+      'Employee Number',
+      'Employee Name',
+      'Bank Name',
+      'Account Number',
+      'IBAN',
+      'SWIFT Code',
+      'Currency',
+      'Net Salary',
+      'Status',
+    ];
+    final rows = employees.map((employee) {
+      return [
+        run.runNumber,
+        run.paymentNumber,
+        run.payrollName,
+        run.periodName,
+        textToDate(run.periodStartDate),
+        textToDate(run.periodEndDate),
+        employee.employeeNumber,
+        employee.employeeName,
+        employee.bankName,
+        employee.accountNumber,
+        employee.iban,
+        employee.swiftCode,
+        currencyCode,
+        _formatBankAmount(employee.netSalary),
+        _hasBankDetails(employee) ? 'Ready' : 'Missing bank details',
+      ];
+    });
+
+    return [_csvRow(headers), ...rows.map(_csvRow)].join('\r\n');
+  }
+
+  String _csvRow(Iterable<dynamic> values) {
+    return values.map((value) => _csvValue(value?.toString() ?? '')).join(',');
+  }
+
+  String _csvValue(String value) {
+    final escaped = value.replaceAll('"', '""');
+    return '"$escaped"';
+  }
+
+  bool _hasBankDetails(PayrollRunsEmployeeModel employee) {
+    final hasBankName = (employee.bankName ?? '').trim().isNotEmpty;
+    final hasAccount = (employee.accountNumber ?? '').trim().isNotEmpty;
+    final hasIban = (employee.iban ?? '').trim().isNotEmpty;
+    return hasBankName && (hasAccount || hasIban);
+  }
+
+  void _downloadTextFile(String content, String fileName, String mimeType) {
+    final blob = html.Blob([utf8.encode(content)], mimeType);
+    final objectUrl = html.Url.createObjectUrlFromBlob(blob);
+    html.AnchorElement(href: objectUrl)
+      ..setAttribute('download', fileName)
+      ..click();
+    html.Url.revokeObjectUrl(objectUrl);
+  }
+
+  String _bankExportFileName(PayrollRunDetailsModel run) {
+    final runNumber = _safeFileNamePart(run.runNumber, fallback: 'payroll-run');
+    final periodName = _safeFileNamePart(run.periodName, fallback: 'period');
+    return 'bank_export_${runNumber}_$periodName.csv';
+  }
+
+  String _safeFileNamePart(String? value, {required String fallback}) {
+    final clean = (value ?? '').trim().replaceAll(
+      RegExp(r'[^A-Za-z0-9]+'),
+      '_',
+    );
+    return clean.isEmpty ? fallback : clean;
+  }
+
+  String _cleanText(String? value, {String fallback = '-'}) {
+    if (value == null || value.trim().isEmpty) return fallback;
+    return value;
+  }
+
+  String _formatAmount(num? value) {
+    return priceFormat.format((value ?? 0).toDouble());
+  }
+
+  String _formatBankAmount(num? value) {
+    return (value ?? 0).toDouble().toStringAsFixed(2);
+  }
+
+  String _formatOptionalNumber(num? value) {
+    if (value == null || value == 0) return '';
+    return priceFormat.format(value.toDouble());
   }
 }
