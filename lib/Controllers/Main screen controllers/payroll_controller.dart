@@ -45,6 +45,17 @@ class PayrollController extends GetxController {
     '3': {'name': 'Daily'},
   });
 
+  List<Color> periodYearColors = const [
+    Color(0xff005f95),
+    Color(0xff328E6E),
+    Color(0xffFA812F),
+    Color(0xff7C4585),
+    Color(0xffD2665A),
+    Color(0xff7886C7),
+    Color(0xff034C53),
+    Color(0xffC95792),
+  ];
+
   @override
   void onInit() async {
     getAllPayrolls();

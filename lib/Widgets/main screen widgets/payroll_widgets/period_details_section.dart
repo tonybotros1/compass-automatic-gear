@@ -66,6 +66,8 @@ DataRow dataRowForTheTable(
   PayrollController controller,
   BuildContext context,
 ) {
+  final periodColor = _periodColorForYear(data, controller);
+
   return DataRow(
     cells: [
       DataCell(
@@ -81,7 +83,8 @@ DataRow dataRowForTheTable(
           text: data.period ?? '',
           formatDouble: false,
           maxWidth: null,
-          color: Colors.blueGrey,
+          color: periodColor,
+          isBold: true,
         ),
       ),
       DataCell(
@@ -103,6 +106,28 @@ DataRow dataRowForTheTable(
       DataCell(statusBox(data.status ?? '')),
     ],
   );
+}
+
+Color _periodColorForYear(
+  PeriodDetailsModel data,
+  PayrollController controller,
+) {
+  final year =
+      data.startDate?.year ??
+      data.endDate?.year ??
+      _yearFromPeriodName(data.period);
+
+  if (year == null) return Colors.blueGrey;
+
+  return controller.periodYearColors[year.abs() %
+      controller.periodYearColors.length];
+}
+
+int? _yearFromPeriodName(String? periodName) {
+  final match = RegExp(r'(?:19|20)\d{2}').firstMatch(periodName ?? '');
+  final yearText = match?.group(0);
+
+  return yearText == null ? null : int.tryParse(yearText);
 }
 
 IconButton editSection(
