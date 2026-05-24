@@ -77,6 +77,7 @@ class PayrollElementsController extends GetxController {
   @override
   void onInit() async {
     connectWebSocket();
+    filterSearch();
     super.onInit();
   }
 
