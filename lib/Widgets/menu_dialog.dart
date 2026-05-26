@@ -82,10 +82,43 @@ class _MenuWithValuesState extends State<MenuWithValues> {
   }
 
   @override
+  void didUpdateWidget(covariant MenuWithValues oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.focusNode == widget.focusNode) return;
+
+    if (oldWidget.focusNode == null) {
+      _effectiveFocusNode.dispose();
+    }
+
+    _effectiveFocusNode = widget.focusNode ?? FocusNode();
+  }
+
+  @override
   void dispose() {
     // Only dispose if we created it locally
     if (widget.focusNode == null) _effectiveFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _openDialog({String? initialSearch}) {
+    return showResponsiveDialog(
+      context,
+      widget.dialogWidth,
+      widget.controller,
+      widget.dialogHeight,
+      initialSearch: initialSearch,
+      flexList: widget.flexList,
+      data: widget.data,
+      onOpen: widget.onOpen,
+      displayKeys: widget.displayKeys,
+      displaySelectedKeys: widget.displaySelectedKeys,
+      onSelected: widget.onSelected,
+      headerLqabel: widget.headerLqabel,
+      nextFocusNode: widget.nextFocusNode,
+      focusNode: _effectiveFocusNode,
+      headerKeys: widget.headerKeys ?? [],
+    );
   }
 
   @override
@@ -132,23 +165,7 @@ class _MenuWithValuesState extends State<MenuWithValues> {
             },
             child: TextFormField(
               onTap: () {
-                showResponsiveDialog(
-                  context,
-                  widget.dialogWidth,
-                  widget.controller,
-                  widget.dialogHeight,
-                  flexList: widget.flexList,
-                  // initialSearch: widget.controller.text,
-                  data: widget.data,
-                  onOpen: widget.onOpen,
-                  displayKeys: widget.displayKeys,
-                  displaySelectedKeys: widget.displaySelectedKeys,
-                  onSelected: widget.onSelected,
-                  headerLqabel: widget.headerLqabel,
-                  nextFocusNode: widget.nextFocusNode,
-                  focusNode: widget.focusNode,
-                  headerKeys: widget.headerKeys ?? [],
-                );
+                _openDialog();
               },
               canRequestFocus: true,
               readOnly: widget.readOnly ?? true,
@@ -157,23 +174,7 @@ class _MenuWithValuesState extends State<MenuWithValues> {
               textInputAction: widget.textInputAction,
               focusNode: _effectiveFocusNode,
               onFieldSubmitted: (value) {
-                showResponsiveDialog(
-                  context,
-                  widget.dialogWidth,
-                  widget.controller,
-                  widget.dialogHeight,
-                  data: widget.data,
-                  // initialSearch: value,
-                  flexList: widget.flexList,
-                  onOpen: widget.onOpen,
-                  displayKeys: widget.displayKeys,
-                  displaySelectedKeys: widget.displaySelectedKeys,
-                  onSelected: widget.onSelected,
-                  headerLqabel: widget.headerLqabel,
-                  nextFocusNode: widget.nextFocusNode,
-                  focusNode: widget.focusNode,
-                  headerKeys: widget.headerKeys ?? [],
-                );
+                _openDialog();
                 widget.onFieldSubmitted?.call(value);
               },
               textAlign: widget.textAlign!,
@@ -210,28 +211,11 @@ class _MenuWithValuesState extends State<MenuWithValues> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const MiniIcon(
+                              MiniIcon(
                                 icon: Icons.more_horiz,
-                                onTap: null,
-                                //  () {
-                                //   // showResponsiveDialog(
-                                //   //   context,
-                                //   //   widget.dialogWidth,
-                                //   //   widget.controller,
-                                //   //   widget.dialogHeight,
-                                //   //   flexList: widget.flexList,
-                                //   //   // initialSearch: widget.controller.text,
-                                //   //   data: widget.data,
-                                //   //   onOpen: widget.onOpen,
-                                //   //   displayKeys: widget.displayKeys,
-                                //   //   displaySelectedKeys:
-                                //   //       widget.displaySelectedKeys,
-                                //   //   onSelected: widget.onSelected,
-                                //   //   headerLqabel: widget.headerLqabel,
-                                //   //   nextFocusNode: widget.nextFocusNode,
-                                //   //   focusNode: widget.focusNode,
-                                //   // );
-                                // },
+                                onTap: widget.isEnabled
+                                    ? () => _openDialog()
+                                    : null,
                               ),
                               if (hasText && widget.hideClearButton != true)
                                 MiniIcon(
@@ -288,7 +272,7 @@ class _MenuWithValuesState extends State<MenuWithValues> {
               ),
               validator: widget.validate != false
                   ? (value) {
-                      if (value!.isEmpty) {
+                      if ((value ?? '').trim().isEmpty) {
                         return 'Please Enter ${widget.labelText ?? ''}';
                       }
                       return null;
@@ -380,8 +364,10 @@ class _LargeDataDialog extends StatefulWidget {
 }
 
 class _LargeDataDialogState extends State<_LargeDataDialog> {
+  static const double _itemExtent = 46.0;
+
   final _searchController = TextEditingController();
-  final _searchFocusNode = FocusNode();
+  late final FocusNode _searchFocusNode;
   final _scrollController = ScrollController();
   final _keyboardFocusNode = FocusNode();
   Timer? _debounce;
@@ -403,6 +389,7 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
   @override
   void initState() {
     super.initState();
+    _searchFocusNode = FocusNode(onKeyEvent: _handleDialogKeyEvent);
     if (widget.initialSearch != null &&
         widget.initialSearch!.trim().isNotEmpty) {
       _searchController.text = widget.initialSearch!;
@@ -437,70 +424,86 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
     });
   }
 
-  void _handleKeyEvent(KeyEvent event) {
-    if (event is! KeyDownEvent) return;
-    if (_visibleIndexes.isEmpty) return;
+  KeyEventResult _handleDialogKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+
+    if (event.logicalKey == LogicalKeyboardKey.escape) {
+      _closeDialog();
+      return KeyEventResult.handled;
+    }
 
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      setState(() {
-        if (_selectedIndex < _visibleIndexes.length - 1) {
-          _selectedIndex++;
-        } else {
-          _selectedIndex = 0;
-        }
-      });
-      _scrollToSelected();
+      _moveSelection(1);
+      return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      setState(() {
-        if (_selectedIndex > 0) {
-          _selectedIndex--;
-        } else {
-          _selectedIndex = _visibleIndexes.length - 1;
-        }
-      });
-      _scrollToSelected();
+      _moveSelection(-1);
+      return KeyEventResult.handled;
     } else if (event.logicalKey == LogicalKeyboardKey.enter) {
       if (_selectedIndex >= 0 && _selectedIndex < _visibleIndexes.length) {
         final item = _items[_visibleIndexes[_selectedIndex]];
         _selectItem(item);
+      } else if (_visibleIndexes.isNotEmpty) {
+        _selectItem(_items[_visibleIndexes.first]);
       }
-    } else if (event.logicalKey == LogicalKeyboardKey.escape) {
-      Navigator.of(context).pop();
+      return KeyEventResult.handled;
     }
+
+    return KeyEventResult.ignored;
+  }
+
+  void _handleKeyboardEvent(KeyEvent event) {
+    _handleDialogKeyEvent(_keyboardFocusNode, event);
+  }
+
+  void _moveSelection(int direction) {
+    if (_visibleIndexes.isEmpty) return;
+
+    final nextIndex = _selectedIndex < 0
+        ? (direction > 0 ? 0 : _visibleIndexes.length - 1)
+        : (_selectedIndex + direction) % _visibleIndexes.length;
+
+    setState(() {
+      _selectedIndex = nextIndex < 0 ? _visibleIndexes.length - 1 : nextIndex;
+    });
+    _scrollToSelected();
   }
 
   void _scrollToSelected() {
     if (!_scrollController.hasClients || _selectedIndex < 0) return;
 
-    const itemHeight = 52.0;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients || _selectedIndex < 0) {
+        return;
+      }
 
-    final viewportHeight = _scrollController.position.viewportDimension;
-    final currentOffset = _scrollController.offset;
+      final viewportHeight = _scrollController.position.viewportDimension;
+      final currentOffset = _scrollController.offset;
 
-    final firstVisibleIndex = (currentOffset / itemHeight).floor();
-    final visibleItemCount = (viewportHeight / itemHeight).floor();
-    final lastVisibleIndex = firstVisibleIndex + visibleItemCount - 1;
+      final firstVisibleIndex = (currentOffset / _itemExtent).floor();
+      final visibleItemCount = (viewportHeight / _itemExtent).floor();
+      final lastVisibleIndex = firstVisibleIndex + visibleItemCount - 1;
 
-    // If selected item is ABOVE visible area
-    if (_selectedIndex < firstVisibleIndex) {
-      final targetOffset = _selectedIndex * itemHeight;
+      double? targetOffset;
+
+      if (_selectedIndex < firstVisibleIndex) {
+        targetOffset = _selectedIndex * _itemExtent;
+      } else if (_selectedIndex > lastVisibleIndex) {
+        targetOffset =
+            (_selectedIndex * _itemExtent) - (viewportHeight - _itemExtent);
+      }
+
+      if (targetOffset == null) return;
+
+      final clampedOffset = targetOffset
+          .clamp(0.0, _scrollController.position.maxScrollExtent)
+          .toDouble();
+
       _scrollController.animateTo(
-        targetOffset,
+        clampedOffset,
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
       );
-    }
-    // If selected item is BELOW visible area
-    else if (_selectedIndex > lastVisibleIndex) {
-      final targetOffset =
-          (_selectedIndex * itemHeight) - (viewportHeight - itemHeight);
-
-      _scrollController.animateTo(
-        targetOffset,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeInOut,
-      );
-    }
+    });
   }
 
   void _selectItem(Map<String, dynamic> item) {
@@ -516,6 +519,106 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
     }
     Navigator.of(context).pop();
     widget.onSelected?.call(item);
+  }
+
+  void _closeDialog() {
+    if (widget.focusNode != null) {
+      widget.focusNode?.requestFocus();
+    }
+    Navigator.of(context).pop();
+  }
+
+  String _selectedTextForItem(Map<String, dynamic> item) {
+    return _textForKeys(item, widget.displaySelectedKeys);
+  }
+
+  String _textForKeys(Map<String, dynamic> item, List<String> keys) {
+    return keys
+        .map((key) => _textForValue(item[key]))
+        .where((value) => value.trim().isNotEmpty)
+        .join(' - ');
+  }
+
+  String _textForValue(dynamic value) {
+    if (value == null) return '';
+    if (value is Iterable) {
+      return value
+          .map((item) => item?.toString() ?? '')
+          .where((item) => item.trim().isNotEmpty)
+          .join(', ');
+    }
+
+    return value.toString();
+  }
+
+  String _normalizedText(String value) {
+    return value
+        .trim()
+        .replaceAll(RegExp(r'\s*-\s*'), ' - ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .toLowerCase();
+  }
+
+  bool _matchesCurrentValue(Map<String, dynamic> item) {
+    final currentValue = _normalizedText(widget.controller?.text ?? '');
+    if (currentValue.isEmpty) return false;
+
+    return _itemMatchesCurrentValue(item, currentValue);
+  }
+
+  bool _itemMatchesCurrentValue(
+    Map<String, dynamic> item,
+    String currentValue,
+  ) {
+    return _matchingTextsForItem(
+      item,
+    ).any((text) => _normalizedText(text) == currentValue);
+  }
+
+  Set<String> _matchingTextsForItem(Map<String, dynamic> item) {
+    final keys = <String>{
+      ...widget.displaySelectedKeys,
+      ...widget.displayKeys,
+      ..._effectiveKeys,
+    };
+
+    return {
+      _selectedTextForItem(item),
+      _textForKeys(item, widget.displayKeys),
+      _textForKeys(item, _effectiveKeys),
+      for (final key in keys) _textForValue(item[key]),
+    }..removeWhere((text) => text.trim().isEmpty);
+  }
+
+  List<int> _moveCurrentValueToTop(
+    List<int> indexes,
+    List<Map<String, dynamic>> items,
+  ) {
+    final currentValue = _normalizedText(widget.controller?.text ?? '');
+    if (currentValue.isEmpty || indexes.length < 2) return indexes;
+
+    final selectedPosition = indexes.indexWhere((index) {
+      return _itemMatchesCurrentValue(items[index], currentValue);
+    });
+
+    if (selectedPosition <= 0) return indexes;
+
+    return [
+      indexes[selectedPosition],
+      ...indexes.where((index) => index != indexes[selectedPosition]),
+    ];
+  }
+
+  int _currentValueVisibleIndex(
+    List<int> indexes,
+    List<Map<String, dynamic>> items,
+  ) {
+    final currentValue = _normalizedText(widget.controller?.text ?? '');
+    if (currentValue.isEmpty) return -1;
+
+    return indexes.indexWhere((index) {
+      return _itemMatchesCurrentValue(items[index], currentValue);
+    });
   }
 
   Map<String, dynamic> _normalizeItem(dynamic item) {
@@ -641,6 +744,17 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
         }
       }
 
+      visibleIndexes = _moveCurrentValueToTop(visibleIndexes, normalized);
+      final currentValueIndex = _currentValueVisibleIndex(
+        visibleIndexes,
+        normalized,
+      );
+      final selectedIndex = currentValueIndex != -1
+          ? currentValueIndex
+          : initialQuery.isNotEmpty && visibleIndexes.isNotEmpty
+          ? 0
+          : -1;
+
       // 7️⃣ Apply everything in ONE setState (no flicker)
       setState(() {
         _items = normalized;
@@ -648,6 +762,7 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
         _searchIndex = searchIndex;
         _allIndexes = allIndexes;
         _visibleIndexes = visibleIndexes;
+        _selectedIndex = selectedIndex;
         _lastQuery = initialQuery;
         _isLoading = false;
         _isFiltering = false;
@@ -668,13 +783,24 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
 
     final query = rawQuery.trim().toLowerCase();
     final requestId = ++_filterRequestId;
+    final highlightedItemIndex =
+        _selectedIndex >= 0 && _selectedIndex < _visibleIndexes.length
+        ? _visibleIndexes[_selectedIndex]
+        : null;
 
     if (query == _lastQuery) return;
 
     if (query.isEmpty) {
       if (!mounted) return;
+      final visibleIndexes = _moveCurrentValueToTop(_allIndexes, _items);
+      var selectedIndex = _currentValueVisibleIndex(visibleIndexes, _items);
+      if (selectedIndex == -1 && highlightedItemIndex != null) {
+        selectedIndex = visibleIndexes.indexOf(highlightedItemIndex);
+      }
+
       setState(() {
-        _visibleIndexes = _allIndexes;
+        _visibleIndexes = visibleIndexes;
+        _selectedIndex = selectedIndex;
         _lastQuery = '';
         _isFiltering = false;
       });
@@ -704,8 +830,18 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
 
     if (!mounted || requestId != _filterRequestId) return;
 
+    final visibleIndexes = _moveCurrentValueToTop(result, _items);
+    var selectedIndex = _currentValueVisibleIndex(visibleIndexes, _items);
+    if (selectedIndex == -1 && highlightedItemIndex != null) {
+      selectedIndex = visibleIndexes.indexOf(highlightedItemIndex);
+    }
+    if (selectedIndex == -1 && visibleIndexes.isNotEmpty) {
+      selectedIndex = 0;
+    }
+
     setState(() {
-      _visibleIndexes = result;
+      _visibleIndexes = visibleIndexes;
+      _selectedIndex = selectedIndex;
       _lastQuery = query;
       _isFiltering = false;
     });
@@ -727,7 +863,7 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
     return KeyboardListener(
       focusNode: _keyboardFocusNode,
       autofocus: true,
-      onKeyEvent: _handleKeyEvent,
+      onKeyEvent: _handleKeyboardEvent,
       child: Dialog(
         constraints: BoxConstraints(
           maxHeight: widget.height ?? MediaQuery.of(context).size.height / 1.5,
@@ -753,12 +889,7 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
-                    onPressed: () {
-                      if (widget.focusNode != null) {
-                        widget.focusNode?.requestFocus();
-                      }
-                      Navigator.of(context).pop();
-                    },
+                    onPressed: _closeDialog,
                   ),
                 ],
               ),
@@ -854,12 +985,25 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
                               child: ListView.builder(
                                 controller: _scrollController,
                                 itemCount: _visibleIndexes.length,
-                                itemExtent: 52,
+                                itemExtent: _itemExtent,
                                 itemBuilder: (context, rowIndex) {
                                   final item =
                                       _items[_visibleIndexes[rowIndex]];
                                   // final isEven = rowIndex % 2 == 0;
                                   final isSelected = rowIndex == _selectedIndex;
+                                  final isCurrentValue = _matchesCurrentValue(
+                                    item,
+                                  );
+                                  final rowColor = isSelected
+                                      ? Colors.blue.shade50
+                                      : isCurrentValue
+                                      ? Colors.green.shade50
+                                      : Colors.transparent;
+                                  final rowBorderColor = isSelected
+                                      ? Colors.blue.shade200
+                                      : isCurrentValue
+                                      ? Colors.green.shade200
+                                      : Colors.transparent;
                                   return Material(
                                     // borderRadius: rowIndex == 0
                                     //     ? const BorderRadius.only(
@@ -876,64 +1020,90 @@ class _LargeDataDialogState extends State<_LargeDataDialog> {
                                     child: Column(
                                       children: [
                                         Expanded(
-                                          child: Container(
-                                            color: isSelected
-                                                ? Colors.blue.shade100
-                                                : Colors.white,
-                                            child: InkWell(
-                                              onTap: () => _selectItem(item),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                    ),
-                                                child: Row(
-                                                  children: [
-                                                    for (
-                                                      var i = 0;
-                                                      i < _effectiveKeys.length;
-                                                      i++
-                                                    )
-                                                      Expanded(
-                                                        flex:
-                                                            (i <
-                                                                    widget
-                                                                        .flexList
-                                                                        .length &&
-                                                                widget.flexList[i] >
-                                                                    0)
-                                                            ? widget.flexList[i]
-                                                            : 1,
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets.only(
-                                                                right: 12,
-                                                              ),
-                                                          child: Text(
-                                                            item[_effectiveKeys[i]]
-                                                                    ?.toString() ??
-                                                                '-',
-                                                            maxLines: 1,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            style:
-                                                                const TextStyle(
-                                                                  fontSize: 14,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 4,
+                                              vertical: 3,
+                                            ),
+                                            child: DecoratedBox(
+                                              decoration: BoxDecoration(
+                                                color: rowColor,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: rowBorderColor,
+                                                ),
+                                              ),
+                                              child: InkWell(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                onTap: () => _selectItem(item),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                      ),
+                                                  child: Row(
+                                                    children: [
+                                                      for (
+                                                        var i = 0;
+                                                        i <
+                                                            _effectiveKeys
+                                                                .length;
+                                                        i++
+                                                      )
+                                                        Expanded(
+                                                          flex:
+                                                              (i <
+                                                                      widget
+                                                                          .flexList
+                                                                          .length &&
+                                                                  widget.flexList[i] >
+                                                                      0)
+                                                              ? widget
+                                                                    .flexList[i]
+                                                              : 1,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets.only(
+                                                                  right: 12,
                                                                 ),
+                                                            child: Text(
+                                                              item[_effectiveKeys[i]]
+                                                                      ?.toString() ??
+                                                                  '-',
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    isSelected ||
+                                                                        isCurrentValue
+                                                                    ? FontWeight
+                                                                          .bold
+                                                                    : FontWeight
+                                                                          .w500,
+                                                                color:
+                                                                    isCurrentValue
+                                                                    ? Colors
+                                                                          .green
+                                                                          .shade800
+                                                                    : Colors
+                                                                          .black,
+                                                              ),
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                             ),
                                           ),
                                         ),
-                                        const Divider(),
+                                        const Divider(height: 1),
                                       ],
                                     ),
                                   );
