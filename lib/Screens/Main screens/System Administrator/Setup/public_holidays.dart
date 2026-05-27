@@ -1,3 +1,4 @@
+import 'package:datahubai/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/holiday_calendar_controller.dart';
@@ -26,24 +27,49 @@ class PublicHolidays extends StatelessWidget {
               builder: (controller) {
                 return Padding(
                   padding: const EdgeInsets.only(left: 20),
-                  child: MenuWithValues(
-                    labelText: 'Year',
-                    headerLqabel: 'Years',
-                    dialogWidth: 600,
-                    width: 200,
-                    controller: controller.yearController,
-                    displayKeys: const ['name'],
-                    displaySelectedKeys: const ['name'],
-                    onOpen: () {
-                      return controller.getAllYears();
-                    },
-                    onDelete: () {},
-                    onSelected: (value) {
-                      final int selectedYear =
-                          int.tryParse(value['name']) ?? DateTime.now().year;
-                      controller.yearController.text = '$selectedYear';
-                      controller.changeYear(selectedYear);
-                    },
+                  child: Row(
+                    spacing: 10,
+                    children: [
+                      MenuWithValues(
+                        labelText: 'Year',
+                        headerLqabel: 'Years',
+                        dialogWidth: 600,
+                        width: 200,
+                        controller: controller.yearController,
+                        displayKeys: const ['name'],
+                        displaySelectedKeys: const ['name'],
+                        onOpen: () {
+                          return controller.getAllYears();
+                        },
+                        onSelected: (value) {
+                          final int selectedYear =
+                              int.tryParse(value['name']?.toString() ?? '') ??
+                              DateTime.now().year;
+                          controller.yearController.text = '$selectedYear';
+                          controller.changeYear(selectedYear);
+                        },
+                        onDelete: controller.resetYear,
+                      ),
+                      MenuWithValues(
+                        labelText: 'Legislation',
+                        headerLqabel: 'Legislations',
+                        dialogWidth: 600,
+                        width: 300,
+                        controller: controller.legislationNameController,
+                        displayKeys: const ['name'],
+                        displaySelectedKeys: const ['name'],
+                        onOpen: () {
+                          return controller.getAllLegislations();
+                        },
+                        onDelete: controller.clearLegislation,
+                        onSelected: (value) {
+                          controller.changeLegislation(
+                            id: value['_id']?.toString() ?? '',
+                            name: value['name']?.toString() ?? '',
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 );
               },
@@ -96,6 +122,14 @@ class PublicHolidays extends StatelessWidget {
     HolidayCalendarController controller,
     DateTime date,
   ) async {
+    if (controller.legislationID.value.trim().isEmpty) {
+      alertMessage(
+        context: context,
+        content: 'Select a legislation before adding a holiday',
+      );
+      return;
+    }
+
     final HolidayEntry? existingHoliday = controller.holidayFor(date);
     final TextEditingController nameController = TextEditingController(
       text: existingHoliday?.name ?? '',
@@ -124,7 +158,7 @@ class PublicHolidays extends StatelessWidget {
                 hintText: 'Example: National Day',
               ),
               onSubmitted: (_) =>
-                  _saveHoliday(date, nameController, controller),
+                  _saveHoliday(date, nameController, controller, context),
             ),
           ],
         ),
@@ -143,7 +177,8 @@ class PublicHolidays extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () => _saveHoliday(date, nameController, controller),
+            onPressed: () =>
+                _saveHoliday(date, nameController, controller, context),
             child: const Text('Save'),
           ),
         ],
@@ -157,17 +192,23 @@ class PublicHolidays extends StatelessWidget {
   void _saveHoliday(
     DateTime date,
     TextEditingController nameController,
-
     HolidayCalendarController controller,
+    BuildContext context,
   ) {
     final String holidayName = nameController.text.trim();
 
+    if (controller.legislationID.value.trim().isEmpty) {
+      alertMessage(
+        context: context,
+        content: 'Select a legislation before adding a holiday',
+      );
+      return;
+    }
+
     if (holidayName.isEmpty) {
-      Get.snackbar(
-        'Holiday name required',
-        'Enter a name for this holiday before saving.',
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(12),
+      alertMessage(
+        context: context,
+        content: 'Enter a name for this holiday before saving',
       );
       return;
     }

@@ -16,6 +16,9 @@ class HolidayCalendarController extends GetxController {
   final Map<int, List<List<DateTime?>>> _monthGridCache =
       <int, List<List<DateTime?>>>{};
   late final TextEditingController yearController;
+  final RxString legislationID = ''.obs;
+  final TextEditingController legislationNameController =
+      TextEditingController();
 
   static const List<String> monthLabels = <String>[
     'January',
@@ -53,20 +56,25 @@ class HolidayCalendarController extends GetxController {
   ];
 
   @override
-  void onInit() async {
+  void onInit() {
+    super.onInit();
     yearController = TextEditingController(text: selectedYear.value.toString());
     getAllHolidays();
-    super.onInit();
   }
 
   @override
-  onClose() async {
+  void onClose() {
     yearController.dispose();
-    super.onInit();
+    legislationNameController.dispose();
+    super.onClose();
   }
 
   Future<Map<String, dynamic>> getAllYears() async {
     return await helper.getAllListValues('YEARS');
+  }
+
+  Future<Map<String, dynamic>> getAllLegislations() async {
+    return await helper.getAllLegislations();
   }
 
   List<DateTime?> buildMonthGrid(int month) {
@@ -116,9 +124,29 @@ class HolidayCalendarController extends GetxController {
 
   void changeYear(int year) {
     if (selectedYear.value == year) {
+      getAllHolidays();
       return;
     }
     selectedYear.value = year;
+    getAllHolidays();
+  }
+
+  void resetYear() {
+    final int currentYear = DateTime.now().year;
+    yearController.text = '$currentYear';
+    changeYear(currentYear);
+  }
+
+  void changeLegislation({required String id, required String name}) {
+    legislationNameController.text = name;
+    legislationID.value = id;
+    getAllHolidays();
+  }
+
+  void clearLegislation() {
+    legislationNameController.clear();
+    legislationID.value = '';
+    getAllHolidays();
   }
 
   void saveHoliday({required DateTime date, required String name}) async {
@@ -185,22 +213,42 @@ class HolidayCalendarController extends GetxController {
   // ==========================================================================
 
   Future<void> getAllHolidays() async {
+    if (legislationID.value.trim().isEmpty) {
+      holidays.clear();
+      return;
+    }
+
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
       Uri url = Uri.parse('$backendUrl/public_holidays/get_all_holidays');
-      final response = await http.get(
+      final response = await http.post(
         url,
-        headers: {'Authorization': 'Bearer $accessToken'},
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "legislation": legislationID.value.trim().isEmpty
+              ? null
+              : legislationID.value.trim(),
+          "year": selectedYear.value,
+        }),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List holi = decoded['holidays'];
+        final Map<String, HolidayEntry> filteredHolidays =
+            <String, HolidayEntry>{};
         for (var element in holi) {
           HolidayEntry ho = HolidayEntry.fromJson(element);
-          holidays[_keyFor(ho.date ?? DateTime.now())] = ho;
+          final DateTime? date = ho.date;
+          if (date != null) {
+            filteredHolidays[_keyFor(_normalize(date))] = ho;
+          }
         }
+        holidays.assignAll(filteredHolidays);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -211,7 +259,6 @@ class HolidayCalendarController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       } else {}
-      Get.back();
     } catch (e) {
       //
     }
@@ -235,6 +282,8 @@ class HolidayCalendarController extends GetxController {
         body: jsonEncode({
           "name": name,
           "date": convertDateToIson(textToDate(date)),
+          if (legislationID.value.trim().isNotEmpty)
+            "legislation": legislationID.value.trim(),
         }),
       );
       if (response.statusCode == 200) {
@@ -278,6 +327,8 @@ class HolidayCalendarController extends GetxController {
         body: jsonEncode({
           "name": name,
           "date": convertDateToIson(textToDate(date)),
+          if (legislationID.value.trim().isNotEmpty)
+            "legislation": legislationID.value.trim(),
         }),
       );
       if (response.statusCode == 200) {
@@ -291,7 +342,6 @@ class HolidayCalendarController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       }
-      Get.back();
     } catch (e) {
       //
     }
@@ -321,7 +371,6 @@ class HolidayCalendarController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       } else {}
-      Get.back();
     } catch (e) {
       //
     }
