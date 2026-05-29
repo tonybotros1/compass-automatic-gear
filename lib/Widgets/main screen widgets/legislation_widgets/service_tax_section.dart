@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../Controllers/Main screen controllers/legislation_controller.dart';
 import '../../../consts.dart';
 
-Container overtimeNormalSection(LegislationController controller) {
+Container serviceTaxSection(LegislationController controller) {
   return Container(
     height: 230,
     padding: const EdgeInsets.all(20),
@@ -14,11 +14,12 @@ Container overtimeNormalSection(LegislationController controller) {
       spacing: 10,
       children: [
         myTextFormFieldWithBorder(
-          labelText: 'Working Hours',
-          controller: controller.numberOfWorkingHoursForOvertimeNormal,
-          isnumber: true,
+          labelText: 'Service Tax Percentage',
+          controller: controller.serviceTax,
+          isDouble: true,
           validate: false,
           width: 150,
+          suffixIcon: const Icon(Icons.percent),
         ),
       ],
     ),

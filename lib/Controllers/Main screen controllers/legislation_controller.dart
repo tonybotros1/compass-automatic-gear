@@ -12,6 +12,28 @@ import '../../helpers.dart';
 import 'main_screen_contro.dart';
 import 'websocket_controller.dart';
 
+class IncomeTaxBracketController {
+  TextEditingController fromAmount = TextEditingController();
+  TextEditingController toAmount = TextEditingController();
+  TextEditingController percentage = TextEditingController();
+
+  IncomeTaxBracketController({IncomeTaxBracketModel? bracket}) {
+    if (bracket != null) {
+      fromAmount.text = (bracket.fromAmount ?? 0).toString();
+      toAmount.text = bracket.toAmount == null
+          ? ''
+          : bracket.toAmount.toString();
+      percentage.text = (bracket.percentage ?? 0).toString();
+    }
+  }
+
+  void dispose() {
+    fromAmount.dispose();
+    toAmount.dispose();
+    percentage.dispose();
+  }
+}
+
 class LegislationController extends GetxController {
   final GlobalKey<FormState> legislationFormKey = GlobalKey<FormState>();
   RxBool isScreenLoding = RxBool(false);
@@ -51,6 +73,16 @@ class LegislationController extends GetxController {
   TextEditingController gratuityFirst5Years = TextEditingController();
   TextEditingController gratuityAfter5Years = TextEditingController();
 
+  // service tax
+  TextEditingController serviceTax = TextEditingController();
+
+  // income tax
+  TextEditingController incomeTaxPercentage = TextEditingController();
+  TextEditingController incomeTaxCeiling = TextEditingController();
+
+  RxList<IncomeTaxBracketController> incomeTaxBrackets =
+      RxList<IncomeTaxBracketController>([]);
+
   final List<String> weekDays = const [
     'Monday',
     'Tuesday',
@@ -87,6 +119,12 @@ class LegislationController extends GetxController {
     socialSecurityCeiling.dispose();
     gratuityFirst5Years.dispose();
     gratuityAfter5Years.dispose();
+    serviceTax.dispose();
+    incomeTaxPercentage.dispose();
+    incomeTaxCeiling.dispose();
+    for (final bracket in incomeTaxBrackets) {
+      bracket.dispose();
+    }
     super.onClose();
   }
 
@@ -155,6 +193,11 @@ class LegislationController extends GetxController {
     return value.isEmpty ? '0' : value;
   }
 
+  String? _nullIfEmpty(TextEditingController controller) {
+    final value = controller.text.trim();
+    return value.isEmpty ? null : value;
+  }
+
   int _intValue(TextEditingController controller) {
     final value = controller.text.trim();
     if (value.isEmpty) return 0;
@@ -174,6 +217,44 @@ class LegislationController extends GetxController {
       return false;
     }
     return true;
+  }
+
+  List<Map<String, dynamic>> _incomeTaxBracketsBody() {
+    return incomeTaxBrackets
+        .where(
+          (bracket) =>
+              bracket.fromAmount.text.trim().isNotEmpty ||
+              bracket.toAmount.text.trim().isNotEmpty ||
+              bracket.percentage.text.trim().isNotEmpty,
+        )
+        .map(
+          (bracket) => {
+            "from_amount": _zeroIfEmpty(bracket.fromAmount),
+            "to_amount": _nullIfEmpty(bracket.toAmount),
+            "percentage": _zeroIfEmpty(bracket.percentage),
+          },
+        )
+        .toList();
+  }
+
+  List<IncomeTaxBracketModel> _currentIncomeTaxBrackets() {
+    return incomeTaxBrackets
+        .where(
+          (bracket) =>
+              bracket.fromAmount.text.trim().isNotEmpty ||
+              bracket.toAmount.text.trim().isNotEmpty ||
+              bracket.percentage.text.trim().isNotEmpty,
+        )
+        .map(
+          (bracket) => IncomeTaxBracketModel(
+            fromAmount: _doubleValue(bracket.fromAmount),
+            toAmount: bracket.toAmount.text.trim().isEmpty
+                ? null
+                : _doubleValue(bracket.toAmount),
+            percentage: _doubleValue(bracket.percentage),
+          ),
+        )
+        .toList();
   }
 
   Map<String, dynamic> _legislationBody() {
@@ -207,6 +288,10 @@ class LegislationController extends GetxController {
         socialSecurityEmployer,
       ),
       "social_security_ceiling": _zeroIfEmpty(socialSecurityCeiling),
+      "service_tax_percentage": _zeroIfEmpty(serviceTax),
+      "income_tax_percentage": _zeroIfEmpty(incomeTaxPercentage),
+      "income_tax_ceiling": _zeroIfEmpty(incomeTaxCeiling),
+      "income_tax_brackets": _incomeTaxBracketsBody(),
       "gratuity_first_5_years": _zeroIfEmpty(gratuityFirst5Years),
       "gratuity_after_5_years": _zeroIfEmpty(gratuityAfter5Years),
     };
@@ -238,6 +323,10 @@ class LegislationController extends GetxController {
       socialSecurityEmployee: _doubleValue(socialSecurityEmployee),
       socialSecurityEmployer: _doubleValue(socialSecurityEmployer),
       socialSecurityCeiling: _doubleValue(socialSecurityCeiling),
+      serviceTaxPercentage: _doubleValue(serviceTax),
+      incomeTaxPercentage: _doubleValue(incomeTaxPercentage),
+      incomeTaxCeiling: _doubleValue(incomeTaxCeiling),
+      incomeTaxBrackets: _currentIncomeTaxBrackets(),
       gratuityFirst5Years: _intValue(gratuityFirst5Years),
       gratuityAfter5Years: _intValue(gratuityAfter5Years),
     );
@@ -429,6 +518,26 @@ class LegislationController extends GetxController {
     filterSearch();
   }
 
+  void addIncomeTaxBracket({IncomeTaxBracketModel? bracket}) {
+    incomeTaxBrackets.add(IncomeTaxBracketController(bracket: bracket));
+  }
+
+  void removeIncomeTaxBracket(int index) {
+    if (index < 0 || index >= incomeTaxBrackets.length) return;
+    final bracket = incomeTaxBrackets.removeAt(index);
+    bracket.dispose();
+    if (incomeTaxBrackets.isEmpty) {
+      addIncomeTaxBracket();
+    }
+  }
+
+  void _clearIncomeTaxBrackets() {
+    for (final bracket in incomeTaxBrackets) {
+      bracket.dispose();
+    }
+    incomeTaxBrackets.clear();
+  }
+
   void loadValues(LegislationModel data) {
     name.text = data.name ?? '';
     numberOfPaidDays.text = (data.numberOfPaidDaysForSickLEave ?? 0).toString();
@@ -449,6 +558,16 @@ class LegislationController extends GetxController {
     socialSecurityEmployee.text = (data.socialSecurityEmployee ?? 0).toString();
     socialSecurityEmployer.text = (data.socialSecurityEmployer ?? 0).toString();
     socialSecurityCeiling.text = (data.socialSecurityCeiling ?? 0).toString();
+    serviceTax.text = (data.serviceTaxPercentage ?? 0).toString();
+    incomeTaxPercentage.text = (data.incomeTaxPercentage ?? 0).toString();
+    incomeTaxCeiling.text = (data.incomeTaxCeiling ?? 0).toString();
+    _clearIncomeTaxBrackets();
+    for (final bracket in data.incomeTaxBrackets ?? <IncomeTaxBracketModel>[]) {
+      addIncomeTaxBracket(bracket: bracket);
+    }
+    if (incomeTaxBrackets.isEmpty) {
+      addIncomeTaxBracket();
+    }
     gratuityFirst5Years.text = (data.gratuityFirst5Years ?? 0).toString();
     gratuityAfter5Years.text = (data.gratuityAfter5Years ?? 0).toString();
     selectedDays.assignAll(data.weekend ?? []);
@@ -471,5 +590,10 @@ class LegislationController extends GetxController {
     socialSecurityCeiling.clear();
     gratuityAfter5Years.clear();
     gratuityFirst5Years.clear();
+    serviceTax.clear();
+    incomeTaxPercentage.clear();
+    incomeTaxCeiling.clear();
+    _clearIncomeTaxBrackets();
+    addIncomeTaxBracket();
   }
 }

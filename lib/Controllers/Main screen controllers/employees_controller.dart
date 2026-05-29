@@ -775,6 +775,7 @@ class EmployeesController extends GetxController {
         "reporting_manager": reportingManagerId.value,
       };
       if (currentEmployeeId.value.isEmpty) {
+        employeeStatus.value = 'Active';
         Uri creatingURL = Uri.parse('$backendUrl/employees/create_employee');
         final creatingREQUEST = http.MultipartRequest('POST', creatingURL);
         creatingREQUEST.headers['Authorization'] = 'Bearer $accessToken';

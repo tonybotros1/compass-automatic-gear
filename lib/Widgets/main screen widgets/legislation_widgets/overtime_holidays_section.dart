@@ -5,7 +5,7 @@ import '../../../consts.dart';
 
 Container overtimeHolidaysSection(LegislationController controller) {
   return Container(
-    height: 100,
+    height: 230,
     padding: const EdgeInsets.all(20),
     decoration: containerDecor,
     width: double.infinity,

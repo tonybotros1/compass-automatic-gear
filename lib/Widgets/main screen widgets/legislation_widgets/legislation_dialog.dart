@@ -16,8 +16,8 @@ Future<dynamic> legislationDialog({
       insetPadding: const EdgeInsets.all(8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
-        width: constraints.maxWidth * 0.75,
-        height: constraints.maxHeight,
+        // width: constraints.maxWidth * 0.75,
+        // height: constraints.maxHeight,
         child: Column(
           children: [
             Container(

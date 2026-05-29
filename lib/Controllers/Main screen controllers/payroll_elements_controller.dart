@@ -70,6 +70,8 @@ class PayrollElementsController extends GetxController {
     '13': {'name': 'PY_SOCIAL_SECURITY_EMPLOYER_FF'},
     '14': {'name': 'PY_GRATUITY_ACCRUAL_FF'},
     '15': {'name': 'PY_LOAN_AND_ADVANCES_FF'},
+    '16': {'name': 'PY_SERVICE_TAX_FF'},
+    '17': {'name': 'PY_INCOME_TAX_DEDUCTION_FF'},
   });
 
   List<Widget> contactsTabs = const [Tab(text: 'Based Elements')];

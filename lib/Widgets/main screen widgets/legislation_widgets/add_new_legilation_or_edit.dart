@@ -3,11 +3,13 @@ import '../../../Controllers/Main screen controllers/legislation_controller.dart
 import '../../../consts.dart';
 import 'compassionate_leave_section.dart';
 import 'gratuitt_accrual_section.dart';
+import 'income_tax_section.dart';
 import 'legilation_information.dart';
 import 'maternity_leave_section.dart';
 import 'overtime_holidays_section.dart';
 import 'overtime_normal_section.dart';
 import 'paternity_leave_section.dart';
+import 'service_tax_section.dart';
 import 'sick_leave_section.dart';
 import 'social_security_section.dart';
 
@@ -94,13 +96,6 @@ Widget addNewLegistlationOrEdit({
                   ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 10,
-            children: [
               Expanded(
                 child: Column(
                   children: [
@@ -116,6 +111,34 @@ Widget addNewLegistlationOrEdit({
                   children: [
                     labelContainer(lable: Text('Gratuity', style: fontStyle1)),
                     gratuityAccrualSection(controller),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 10,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    labelContainer(
+                      lable: Text('Income Tax', style: fontStyle1),
+                    ),
+                    incomeTaxSection(controller),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  children: [
+                    labelContainer(
+                      lable: Text('Service Tax', style: fontStyle1),
+                    ),
+                    serviceTaxSection(controller),
                   ],
                 ),
               ),
