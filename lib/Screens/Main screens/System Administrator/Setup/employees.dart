@@ -300,7 +300,7 @@ Widget tableOfScreens({
       const DataColumn2(label: Text(''), size: ColumnSize.S),
       DataColumn2(
         label: AutoSizedText(text: 'Full Name', constraints: constraints),
-        size: ColumnSize.M,
+        size: ColumnSize.L,
       ),
       DataColumn2(
         size: ColumnSize.M,
@@ -319,7 +319,7 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Department'),
       ),
       DataColumn2(
-        size: ColumnSize.M,
+        size: ColumnSize.L,
         label: AutoSizedText(constraints: constraints, text: 'Job Title'),
       ),
       DataColumn2(
@@ -361,20 +361,94 @@ DataRow dataRowForTheTable(
           text: data.fullName ?? '',
           color: Colors.blueGrey,
           isBold: true,
+          maxWidth: null,
         ),
       ),
-      DataCell(textForDataRowInTable(text: data.personType ?? '')),
-      DataCell(textForDataRowInTable(text: data.status ?? '')),
-      DataCell(textForDataRowInTable(text: data.employerName ?? '')),
-      DataCell(textForDataRowInTable(text: data.departmentName ?? '')),
+      DataCell(_employeeBadge(data.personType ?? '')),
+      DataCell(_employeeBadge(data.status ?? '')),
       DataCell(
-        textForDataRowInTable(isBold: true, text: data.jobTitleName ?? ''),
+        textForDataRowInTable(text: data.employerName ?? '', maxWidth: null),
       ),
       DataCell(
-        textForDataRowInTable(isBold: true, text: data.locationName ?? ''),
+        textForDataRowInTable(text: data.departmentName ?? '', maxWidth: null),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          isBold: true,
+          text: data.jobTitleName ?? '',
+          maxWidth: null,
+        ),
+      ),
+      DataCell(
+        textForDataRowInTable(
+          isBold: true,
+          text: data.locationName ?? '',
+          maxWidth: null,
+        ),
       ),
     ],
   );
+}
+
+Widget _employeeBadge(String value) {
+  final badgeText = value.trim();
+  if (badgeText.isEmpty) return const SizedBox.shrink();
+
+  final badgeColor = _employeeBadgeColor(badgeText);
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: badgeColor.withAlpha(24),
+      border: Border.all(color: badgeColor.withAlpha(70)),
+      borderRadius: BorderRadius.circular(18),
+      boxShadow: [
+        BoxShadow(
+          color: badgeColor.withAlpha(18),
+          blurRadius: 10,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color: badgeColor.withAlpha(220),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          badgeText,
+          style: TextStyle(
+            color: badgeColor.withAlpha(235),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Color _employeeBadgeColor(String value) {
+  switch (value) {
+    case 'Employee':
+      return const Color(0xFF2563EB);
+    case 'Ex-Employee':
+      return const Color(0xFF64748B);
+    case 'Applicant':
+      return const Color(0xFFF59E0B);
+    case 'Active':
+      return const Color(0xFF16A34A);
+    case 'Inactive':
+      return const Color(0xFFDC2626);
+    default:
+      return const Color(0xFF7C3AED);
+  }
 }
 
 Widget deleteSection(

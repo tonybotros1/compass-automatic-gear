@@ -21,6 +21,7 @@ import '../../Models/employees/payroll_elements_model.dart';
 import '../../Models/employees/phone_model.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
+import 'list_of_values_controller.dart';
 import 'main_screen_contro.dart';
 import 'websocket_controller.dart';
 
@@ -207,6 +208,10 @@ class EmployeesController extends GetxController {
   TextEditingController loanAndAdvancesNote = TextEditingController();
   TextEditingController loanAndAdvancesType = TextEditingController();
   RxString loanAndAdvancesTypeId = RxString('');
+
+  ListOfValuesController listOfValuesController = Get.put(
+    ListOfValuesController(),
+  );
 
   List<Widget> contactsTabs = const [
     Tab(text: 'Address'),

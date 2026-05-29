@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../consts.dart';
 import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
+import '../add_new_values_button.dart';
 import 'balances_section.dart';
 
 const _sectionBorderColor = Color(0xff8fa9b9);
@@ -54,7 +55,11 @@ Container assignmentInformation(
         spacing: 18,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _AssignmentTopGrid(context: context, controller: controller),
+          _AssignmentTopGrid(
+            context: context,
+            controller: controller,
+            constraints: constraints,
+          ),
           balancesSection(constraints),
         ],
       ),
@@ -63,10 +68,15 @@ Container assignmentInformation(
 }
 
 class _AssignmentTopGrid extends StatelessWidget {
-  const _AssignmentTopGrid({required this.context, required this.controller});
+  const _AssignmentTopGrid({
+    required this.context,
+    required this.controller,
+    required this.constraints,
+  });
 
   final BuildContext context;
   final EmployeesController controller;
+  final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +87,10 @@ class _AssignmentTopGrid extends StatelessWidget {
             spacing: 18,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _EmploymentDetailsCard(controller: controller),
+              _EmploymentDetailsCard(
+                controller: controller,
+                constraints: constraints,
+              ),
               _ContractDatesCard(
                 context: this.context,
                 controller: controller,
@@ -94,7 +107,10 @@ class _AssignmentTopGrid extends StatelessWidget {
             children: [
               Expanded(
                 flex: 5,
-                child: _EmploymentDetailsCard(controller: controller),
+                child: _EmploymentDetailsCard(
+                  controller: controller,
+                  constraints: constraints,
+                ),
               ),
               const SizedBox(width: 18),
               Expanded(
@@ -114,9 +130,13 @@ class _AssignmentTopGrid extends StatelessWidget {
 }
 
 class _EmploymentDetailsCard extends StatelessWidget {
-  const _EmploymentDetailsCard({required this.controller});
+  const _EmploymentDetailsCard({
+    required this.controller,
+    required this.constraints,
+  });
 
   final EmployeesController controller;
+  final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
@@ -131,85 +151,141 @@ class _EmploymentDetailsCard extends StatelessWidget {
       child: _ResponsiveFieldGrid(
         minSingleColumnWidth: 650,
         children: [
-          MenuWithValues(
-            labelText: 'Employer',
-            headerLqabel: 'Employers',
-            dialogWidth: 600,
-            width: double.infinity,
-            controller: controller.jobEmployer,
-            displayKeys: const ['name'],
-            displaySelectedKeys: const ['name'],
-            onOpen: () {
-              return controller.getallJobEmployers();
-            },
-            onDelete: () {
-              controller.jobEmployer.clear();
-              controller.jobEmployerId.value = '';
-            },
-            onSelected: (value) {
-              controller.jobEmployer.text = value['name'];
-              controller.jobEmployerId.value = value['_id'];
-            },
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: MenuWithValues(
+                  labelText: 'Employer',
+                  headerLqabel: 'Employers',
+                  dialogWidth: 600,
+                  width: double.infinity,
+                  controller: controller.jobEmployer,
+                  displayKeys: const ['name'],
+                  displaySelectedKeys: const ['name'],
+                  onOpen: () {
+                    return controller.getallJobEmployers();
+                  },
+                  onDelete: () {
+                    controller.jobEmployer.clear();
+                    controller.jobEmployerId.value = '';
+                  },
+                  onSelected: (value) {
+                    controller.jobEmployer.text = value['name'];
+                    controller.jobEmployerId.value = value['_id'];
+                  },
+                ),
+              ),
+              valSectionInTheTable(
+                controller.listOfValuesController,
+                constraints,
+                'EMPLOYERS',
+                'New Employer',
+                'Employers',
+              ),
+            ],
           ),
-          MenuWithValues(
-            labelText: 'Department',
-            headerLqabel: 'Departments',
-            dialogWidth: 600,
-            width: double.infinity,
-            controller: controller.jobDepartment,
-            displayKeys: const ['name'],
-            displaySelectedKeys: const ['name'],
-            onOpen: () {
-              return controller.getAllJobDepartments();
-            },
-            onDelete: () {
-              controller.jobDepartment.clear();
-              controller.jobDepartmentId.value = '';
-            },
-            onSelected: (value) {
-              controller.jobDepartment.text = value['name'];
-              controller.jobDepartmentId.value = value['_id'];
-            },
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: MenuWithValues(
+                  labelText: 'Department',
+                  headerLqabel: 'Departments',
+                  dialogWidth: 600,
+                  width: double.infinity,
+                  controller: controller.jobDepartment,
+                  displayKeys: const ['name'],
+                  displaySelectedKeys: const ['name'],
+                  onOpen: () {
+                    return controller.getAllJobDepartments();
+                  },
+                  onDelete: () {
+                    controller.jobDepartment.clear();
+                    controller.jobDepartmentId.value = '';
+                  },
+                  onSelected: (value) {
+                    controller.jobDepartment.text = value['name'];
+                    controller.jobDepartmentId.value = value['_id'];
+                  },
+                ),
+              ),
+              valSectionInTheTable(
+                controller.listOfValuesController,
+                constraints,
+                'DEPARTMENTS',
+                'New Department',
+                'Departments',
+              ),
+            ],
           ),
-          MenuWithValues(
-            labelText: 'Job Title',
-            headerLqabel: 'Job Titles',
-            dialogWidth: 600,
-            width: double.infinity,
-            controller: controller.jobTitle,
-            displayKeys: const ['name'],
-            displaySelectedKeys: const ['name'],
-            onOpen: () {
-              return controller.getallJobTitle();
-            },
-            onDelete: () {
-              controller.jobTitle.clear();
-              controller.jobTitleId.value = '';
-            },
-            onSelected: (value) {
-              controller.jobTitle.text = value['name'];
-              controller.jobTitleId.value = value['_id'];
-            },
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: MenuWithValues(
+                  labelText: 'Job Title',
+                  headerLqabel: 'Job Titles',
+                  dialogWidth: 600,
+                  width: double.infinity,
+                  controller: controller.jobTitle,
+                  displayKeys: const ['name'],
+                  displaySelectedKeys: const ['name'],
+                  onOpen: () {
+                    return controller.getallJobTitle();
+                  },
+                  onDelete: () {
+                    controller.jobTitle.clear();
+                    controller.jobTitleId.value = '';
+                  },
+                  onSelected: (value) {
+                    controller.jobTitle.text = value['name'];
+                    controller.jobTitleId.value = value['_id'];
+                  },
+                ),
+              ),
+              valSectionInTheTable(
+                controller.listOfValuesController,
+                constraints,
+                'JOBS',
+                'New Job',
+                'Jobs',
+              ),
+            ],
           ),
-          MenuWithValues(
-            labelText: 'Location',
-            headerLqabel: 'Locations',
-            dialogWidth: 600,
-            width: double.infinity,
-            controller: controller.jobLocation,
-            displayKeys: const ['name'],
-            displaySelectedKeys: const ['name'],
-            onOpen: () {
-              return controller.getallJobLocations();
-            },
-            onDelete: () {
-              controller.jobLocation.clear();
-              controller.jobLocationId.value = '';
-            },
-            onSelected: (value) {
-              controller.jobLocation.text = value['name'];
-              controller.jobLocationId.value = value['_id'];
-            },
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: MenuWithValues(
+                  labelText: 'Location',
+                  headerLqabel: 'Locations',
+                  dialogWidth: 600,
+                  width: double.infinity,
+                  controller: controller.jobLocation,
+                  displayKeys: const ['name'],
+                  displaySelectedKeys: const ['name'],
+                  onOpen: () {
+                    return controller.getallJobLocations();
+                  },
+                  onDelete: () {
+                    controller.jobLocation.clear();
+                    controller.jobLocationId.value = '';
+                  },
+                  onSelected: (value) {
+                    controller.jobLocation.text = value['name'];
+                    controller.jobLocationId.value = value['_id'];
+                  },
+                ),
+              ),
+              valSectionInTheTable(
+                controller.listOfValuesController,
+                constraints,
+                'LOCATIONS',
+                'New Location',
+                'Locations',
+              ),
+            ],
           ),
           MenuWithValues(
             labelText: 'Reporting Manager',
