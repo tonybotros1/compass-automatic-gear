@@ -311,7 +311,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
             },
           ),
           MenuWithValues(
-            labelText: 'Payroll',
+            labelText: 'Payroll *',
             headerLqabel: 'Payrolls',
             dialogWidth: 600,
             width: double.infinity,

@@ -124,7 +124,7 @@ Container personalInformation(
                     },
                   ),
                   MenuWithValues(
-                    labelText: 'Legislation',
+                    labelText: 'Legislation *',
                     headerLqabel: 'Legilations',
                     dialogWidth: 600,
                     width: 200,

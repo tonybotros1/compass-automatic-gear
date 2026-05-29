@@ -750,6 +750,7 @@ class EmployeesController extends GetxController {
 
   Future<void> addNewEmployee() async {
     try {
+      if (!_validateEmployeeRequiredFields()) return;
       addingNewValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -863,6 +864,18 @@ class EmployeesController extends GetxController {
     } catch (e) {
       addingNewValue.value = false;
     }
+  }
+
+  bool _validateEmployeeRequiredFields() {
+    if (employeeLegislationId.value.trim().isEmpty) {
+      _showErrorMessage('Please select Legislation');
+      return false;
+    }
+    if (payrollId.value.trim().isEmpty) {
+      _showErrorMessage('Please select Payroll');
+      return false;
+    }
+    return true;
   }
 
   String _responseErrorMessage(http.Response response) {
