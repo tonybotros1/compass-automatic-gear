@@ -437,7 +437,7 @@ Widget _employeeBadge(String value) {
 Color _employeeBadgeColor(String value) {
   switch (value) {
     case 'Employee':
-      return const Color(0xFF2563EB);
+      return const Color(0xFF3396D3);
     case 'Ex-Employee':
       return const Color(0xFF64748B);
     case 'Applicant':
@@ -462,17 +462,93 @@ Widget deleteSection(
       return IconButton(
         onPressed: isDeleting
             ? null
-            : () {
-                alertDialog(
-                  context: context,
-                  content: "This employee will be deleted permanently",
-                  onPressed: () async {
-                    final deleted = await controller.deleteEmployee(employeeId);
-                    if (deleted) Get.back();
-                  },
-                );
-              },
+            : () => _showDeleteEmployeeDialog(
+                context: context,
+                controller: controller,
+                employeeId: employeeId,
+              ),
         icon: isDeleting ? loadingProcess : deleteIcon,
+      );
+    },
+  );
+}
+
+Future<dynamic> _showDeleteEmployeeDialog({
+  required BuildContext context,
+  required EmployeesController controller,
+  required String employeeId,
+}) {
+  return showCupertinoDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return GetX<EmployeesController>(
+        builder: (_) {
+          final isDeleting = controller.deletingEmployeeId.value == employeeId;
+          return CupertinoAlertDialog(
+            title: const Text("Alert"),
+            content: isDeleting
+                ? const Padding(
+                    padding: EdgeInsets.only(top: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.red,
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Text("Deleting employee..."),
+                      ],
+                    ),
+                  )
+                : const Text("This employee will be deleted permanently"),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: isDeleting ? null : () => Get.back(),
+                child: const Text("Cancel"),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                isDefaultAction: true,
+                onPressed: isDeleting
+                    ? null
+                    : () async {
+                        final deleted = await controller.deleteEmployee(
+                          employeeId,
+                        );
+                        if (deleted) Get.back();
+                      },
+                child: isDeleting
+                    ? const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            height: 14,
+                            width: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.red,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            "Deleting...",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      )
+                    : const Text('Ok', style: TextStyle(color: Colors.red)),
+              ),
+            ],
+          );
+        },
       );
     },
   );
