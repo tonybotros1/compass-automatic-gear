@@ -38,7 +38,9 @@ Future<dynamic> companyDialog({
                   const Spacer(),
                   GetX<CompanyController>(
                     builder: (controller) => ElevatedButton(
-                      onPressed: onPressed,
+                      onPressed: controller.addingNewCompanyProcess.value
+                          ? null
+                          : onPressed,
                       style: new2ButtonStyle,
                       child: controller.addingNewCompanyProcess.value == false
                           ? const Text(

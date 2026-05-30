@@ -228,54 +228,74 @@ DataRow dataRowForTheTable(
   );
 }
 
-ElevatedButton deleteSection(
+Widget deleteSection(
   CompanyController controller,
   CompanyModel companyData,
   context,
 ) {
-  return ElevatedButton(
-    style: deleteButtonStyle,
-    onPressed: () {
-      alertDialog(
-        context: context,
-        content: "The Company and its users will be deleted permanently",
-        onPressed: () {
-          if (companyData.id != '' && companyData.userId != '') {
-            controller.deleteCompany(
-              companyData.id.toString(),
-              companyData.userId.toString(),
-            );
-          } else {
-            showSnackBar('Alert', 'can\'t proceed');
-          }
-        },
+  return GetX<CompanyController>(
+    builder: (controller) {
+      final isDeleting = controller.deletingCompanyId.value == companyData.id;
+      return ElevatedButton(
+        style: deleteButtonStyle,
+        onPressed: isDeleting
+            ? null
+            : () {
+                alertDialog(
+                  context: context,
+                  content:
+                      "The Company and its users will be deleted permanently",
+                  onPressed: () async {
+                    final deleted = await controller.deleteCompany(
+                      companyData.id.toString(),
+                      companyData.userId.toString(),
+                    );
+                    if (deleted && (Get.isDialogOpen ?? false)) {
+                      Get.back();
+                    }
+                  },
+                );
+              },
+        child: isDeleting ? const Text('Deleting...') : const Text("Delete"),
       );
     },
-    child: const Text("Delete"),
   );
 }
 
-ElevatedButton activeInActiveSection(
+Widget activeInActiveSection(
   CompanyModel companyData,
   CompanyController controller,
   String companyId,
 ) {
-  return ElevatedButton(
-    style: companyData.status == false
-        ? inActiveButtonStyle
-        : activeButtonStyle,
-    onPressed: () {
-      bool status;
-      if (companyData.status == false) {
-        status = true;
-      } else {
-        status = false;
-      }
-      controller.changeCompanyStatus(companyId, status);
+  return GetX<CompanyController>(
+    builder: (controller) {
+      final isChanging = controller.changingCompanyStatusId.value == companyId;
+      return ElevatedButton(
+        style: companyData.status == false
+            ? inActiveButtonStyle
+            : activeButtonStyle,
+        onPressed: isChanging
+            ? null
+            : () {
+                controller.changeCompanyStatus(
+                  companyId,
+                  companyData.status != true,
+                );
+              },
+        child: isChanging
+            ? const SizedBox(
+                height: 16,
+                width: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : companyData.status == true
+            ? const Text('Active')
+            : const Text('Inactive'),
+      );
     },
-    child: companyData.status == true
-        ? const Text('Active')
-        : const Text('Inactive'),
   );
 }
 
@@ -289,6 +309,7 @@ ElevatedButton editEction(
   return ElevatedButton(
     style: editButtonStyle,
     onPressed: () async {
+      controller.isEditingCompany.value = true;
       if (companyData.userCountryId != '' &&
           companyData.userCountryId != null) {
         controller.getCitiesByCountryId(companyData.userCountryId ?? '');
@@ -297,6 +318,7 @@ ElevatedButton editEction(
       controller.industry.value.text = companyData.industry ?? '';
       controller.industryId.value = companyData.industryId ?? '';
       controller.userName.text = companyData.userName ?? '';
+      controller.password.clear();
 
       controller.phoneNumber.text = companyData.userPhoneNumber ?? '';
       controller.email.text = companyData.userEmail ?? '';
@@ -314,8 +336,8 @@ ElevatedButton editEction(
         controller: controller,
         onPressed: controller.addingNewCompanyProcess.value
             ? null
-            : () {
-                controller.updateCompany(
+            : () async {
+                await controller.updateCompany(
                   companyID,
                   companyData.userId.toString(),
                 );
@@ -333,6 +355,7 @@ ElevatedButton newCompanyButton(
 ) {
   return ElevatedButton(
     onPressed: () {
+      controller.isEditingCompany.value = false;
       controller.allCities.clear();
       controller.companyName.clear();
       controller.industry.value.clear();
@@ -344,6 +367,8 @@ ElevatedButton newCompanyButton(
       controller.address.clear();
       controller.country.clear();
       controller.city.clear();
+      controller.selectedCountryId.value = '';
+      controller.selectedCityId.value = '';
       controller.roleIDFromList.clear();
       controller.logoUrl.value = '';
       controller.imageBytes = null;
@@ -353,20 +378,7 @@ ElevatedButton newCompanyButton(
         onPressed: controller.addingNewCompanyProcess.isTrue
             ? null
             : () async {
-                if (controller.userName.text.isNotEmpty &&
-                    controller.companyName.text.isNotEmpty &&
-                    controller.industry.value.text.isNotEmpty &&
-                    controller.password.text.isNotEmpty &&
-                    controller.phoneNumber.text.isNotEmpty &&
-                    controller.email.text.isNotEmpty &&
-                    controller.address.text.isNotEmpty &&
-                    controller.country.text.isNotEmpty &&
-                    controller.city.text.isNotEmpty &&
-                    controller.roleIDFromList.isNotEmpty) {
-                  controller.addNewCompany();
-                } else {
-                  showSnackBar('Note', 'Please fill all fields');
-                }
+                await controller.addNewCompany();
               },
       );
     },

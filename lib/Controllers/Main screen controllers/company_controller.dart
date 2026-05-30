@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
@@ -32,6 +33,9 @@ class CompanyController extends GetxController {
   RxBool isAscending = RxBool(true);
   RxBool warningForImage = RxBool(false);
   RxBool addingNewCompanyProcess = RxBool(false);
+  RxBool isEditingCompany = RxBool(false);
+  RxString deletingCompanyId = RxString('');
+  RxString changingCompanyStatusId = RxString('');
   Uint8List? imageBytes;
   RxList<MainUserRoles> roleIDFromList = RxList<MainUserRoles>([]);
   RxMap allRoles = RxMap({});
@@ -43,6 +47,7 @@ class CompanyController extends GetxController {
   RxMap industryMap = RxMap({});
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
+  StreamSubscription<Map<String, dynamic>>? _companyEventsSubscription;
 
   @override
   void onInit() {
@@ -55,35 +60,47 @@ class CompanyController extends GetxController {
     super.onInit();
   }
 
+  @override
+  void onClose() {
+    _companyEventsSubscription?.cancel();
+    companyName.dispose();
+    industry.value.dispose();
+    userName.dispose();
+    password.dispose();
+    phoneNumber.dispose();
+    email.dispose();
+    address.dispose();
+    country.dispose();
+    city.dispose();
+    search.value.dispose();
+    super.onClose();
+  }
+
   void connectWebSocket() {
-    ws.events.listen((message) {
+    _companyEventsSubscription?.cancel();
+    _companyEventsSubscription = ws.events.listen((message) {
       switch (message["type"]) {
         case "company_created":
-          final newCounter = CompanyModel.fromJson(message["data"]);
-          allCompanies.add(newCounter);
+          final newCompany = CompanyModel.fromJson(message["data"]);
+          _upsertCompany(newCompany, insertAtStart: true);
           break;
 
         case "company_status_updated":
-          final branchId = message["data"]['_id'];
-          final branchStatus = message["data"]['status'];
-          final index = allCompanies.indexWhere((m) => m.id == branchId);
-          if (index != -1) {
-            allCompanies[index].status = branchStatus;
-            allCompanies.refresh();
+          final companyId = message["data"]['_id']?.toString() ?? '';
+          final companyStatus = message["data"]['status'];
+          if (companyId.isNotEmpty && companyStatus is bool) {
+            _updateCompanyStatusLocally(companyId, companyStatus);
           }
           break;
 
         case "company_updated":
           final updated = CompanyModel.fromJson(message["data"]);
-          final index = allCompanies.indexWhere((m) => m.id == updated.id);
-          if (index != -1) {
-            allCompanies[index] = updated;
-          }
+          _upsertCompany(updated);
           break;
 
         case "company_deleted":
-          final deletedId = message["data"]["_id"];
-          allCompanies.removeWhere((m) => m.id == deletedId);
+          final deletedId = message["data"]["_id"]?.toString() ?? '';
+          _removeCompany(deletedId);
           break;
       }
     });
@@ -128,6 +145,8 @@ class CompanyController extends GetxController {
         allCompanies.assignAll(
           comps.map((comp) => CompanyModel.fromJson(comp)),
         );
+        _sortCompanyList(allCompanies);
+        _refreshFilteredCompanies();
         isScreenLoding.value = false;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -141,6 +160,7 @@ class CompanyController extends GetxController {
         logout();
       } else {
         isScreenLoding.value = false;
+        showSnackBar('Alert', _messageFromJsonBody(response.body));
       }
     } catch (e) {
       isScreenLoding.value = false;
@@ -148,7 +168,8 @@ class CompanyController extends GetxController {
     }
   }
 
-  Future<void> addNewCompany() async {
+  Future<bool> addNewCompany() async {
+    if (!_validateCompanyForm(requirePassword: true)) return false;
     try {
       addingNewCompanyProcess.value = true;
       final prefs = await SharedPreferences.getInstance();
@@ -161,13 +182,13 @@ class CompanyController extends GetxController {
       request.headers['Authorization'] = 'Bearer $accessToken';
 
       request.fields.addAll({
-        "company_name": companyName.text,
-        "admin_email": email.text,
-        "admin_password": password.text,
+        "company_name": companyName.text.trim(),
+        "admin_email": email.text.trim(),
+        "admin_password": password.text.trim(),
         "industry": industryId.value,
-        "admin_name": userName.text,
-        "phone_number": phoneNumber.text,
-        "address": address.text,
+        "admin_name": userName.text.trim(),
+        "phone_number": phoneNumber.text.trim(),
+        "address": address.text.trim(),
         "country": selectedCountryId.value,
         "city": selectedCityId.value,
       });
@@ -190,33 +211,38 @@ class CompanyController extends GetxController {
       }
 
       final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 200) {
+        _applyCompanyResponseUpdate(responseBody, insertAtStart: true);
         Get.back();
-        addingNewCompanyProcess.value = false;
-      } else if (response.statusCode == 400) {
-        final respStr = await response.stream.bytesToString();
-        final decoded = jsonDecode(respStr);
-        showSnackBar('Error', decoded['detail'] ?? 'Bad Request');
+        showSnackBar(
+          'Done',
+          _messageFromJsonBody(responseBody, 'Company added successfully'),
+        );
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          // maybe add retry limit here
-          await addNewCompany();
+          return await addNewCompany();
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        showSnackBar('Error', _messageFromJsonBody(responseBody));
       }
     } catch (e) {
       showSnackBar('Alert', 'Something went wrong please try again');
     } finally {
       addingNewCompanyProcess.value = false;
     }
+    return false;
   }
 
-  Future<void> updateCompany(String companyID, String userID) async {
+  Future<bool> updateCompany(String companyID, String userID) async {
+    if (!_validateCompanyForm(requirePassword: false)) return false;
     try {
       addingNewCompanyProcess.value = true;
       final prefs = await SharedPreferences.getInstance();
@@ -231,16 +257,19 @@ class CompanyController extends GetxController {
       request.headers['Authorization'] = 'Bearer $accessToken';
 
       request.fields.addAll({
-        "company_name": companyName.text,
-        "admin_email": email.text,
-        "admin_password": password.text,
+        "company_name": companyName.text.trim(),
+        "admin_email": email.text.trim(),
         "industry": industryId.value,
-        "admin_name": userName.text,
-        "phone_number": phoneNumber.text,
-        "address": address.text,
+        "admin_name": userName.text.trim(),
+        "phone_number": phoneNumber.text.trim(),
+        "address": address.text.trim(),
         "country": selectedCountryId.value,
         "city": selectedCityId.value,
       });
+      final cleanPassword = password.text.trim();
+      if (cleanPassword.isNotEmpty) {
+        request.fields["admin_password"] = cleanPassword;
+      }
       for (var role in roleIDFromList) {
         if (role.sId != null) {
           request.files.add(
@@ -260,33 +289,43 @@ class CompanyController extends GetxController {
       }
 
       final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 200) {
+        _applyCompanyResponseUpdate(responseBody);
         Get.back();
-        addingNewCompanyProcess.value = false;
-      } else if (response.statusCode == 400) {
-        final respStr = await response.stream.bytesToString();
-        final decoded = jsonDecode(respStr);
-        showSnackBar('Error', decoded['detail'] ?? 'Bad Request');
+        showSnackBar(
+          'Done',
+          _messageFromJsonBody(responseBody, 'Company updated successfully'),
+        );
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await updateCompany(companyID, userID);
+          return await updateCompany(companyID, userID);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        showSnackBar('Error', _messageFromJsonBody(responseBody));
       }
     } catch (e) {
       showSnackBar('Alert', 'Something went wrong please try again');
     } finally {
       addingNewCompanyProcess.value = false;
     }
+    return false;
   }
 
-  Future<void> deleteCompany(String companyID, String userID) async {
+  Future<bool> deleteCompany(String companyID, String userID) async {
+    if (companyID.isEmpty || userID.isEmpty) {
+      showSnackBar('Alert', 'can\'t proceed');
+      return false;
+    }
     try {
+      deletingCompanyId.value = companyID;
       final prefs = await SharedPreferences.getInstance();
       final accessToken = prefs.getString('accessToken') ?? '';
       final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
@@ -298,24 +337,37 @@ class CompanyController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
+        _removeCompany(companyID);
+        showSnackBar(
+          'Done',
+          _messageFromJsonBody(response.body, 'Company deleted successfully'),
+        );
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await deleteCompany(companyID, userID);
+          return await deleteCompany(companyID, userID);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
+      } else {
+        showSnackBar('Alert', _messageFromJsonBody(response.body));
       }
-      Get.back();
     } catch (e) {
       showSnackBar('Alert', 'Something went wrong please try again');
+    } finally {
+      if (deletingCompanyId.value == companyID) {
+        deletingCompanyId.value = '';
+      }
     }
+    return false;
   }
 
-  Future<void> changeCompanyStatus(String companyID, bool status) async {
+  Future<bool> changeCompanyStatus(String companyID, bool status) async {
     try {
+      changingCompanyStatusId.value = companyID;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
       final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
@@ -331,19 +383,28 @@ class CompanyController extends GetxController {
         body: jsonEncode(status),
       );
       if (response.statusCode == 200) {
+        _updateCompanyStatusLocally(companyID, status);
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
-          await changeCompanyStatus(companyID, status);
+          return await changeCompanyStatus(companyID, status);
         } else if (refreshed == RefreshResult.invalidToken) {
           logout();
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
+      } else {
+        showSnackBar('Alert', _messageFromJsonBody(response.body));
+      }
     } catch (e) {
-      //
+      showSnackBar('Alert', 'Something went wrong please try again');
+    } finally {
+      if (changingCompanyStatusId.value == companyID) {
+        changingCompanyStatusId.value = '';
+      }
     }
+    return false;
   }
 
   // =====================================================================================================
@@ -373,72 +434,168 @@ class CompanyController extends GetxController {
     roleIDFromList.removeAt(index);
   }
 
+  bool _validateCompanyForm({required bool requirePassword}) {
+    if (companyName.text.trim().isEmpty ||
+        industryId.value.trim().isEmpty ||
+        userName.text.trim().isEmpty ||
+        phoneNumber.text.trim().isEmpty ||
+        email.text.trim().isEmpty ||
+        address.text.trim().isEmpty ||
+        selectedCountryId.value.trim().isEmpty ||
+        selectedCityId.value.trim().isEmpty ||
+        roleIDFromList.isEmpty ||
+        (requirePassword && password.text.trim().isEmpty)) {
+      showSnackBar('Note', 'Please fill all fields');
+      return false;
+    }
+    return true;
+  }
+
+  String _messageFromJsonBody(
+    String body, [
+    String fallback = 'Something went wrong please try again',
+  ]) {
+    if (body.trim().isEmpty) return fallback;
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic>) {
+        final detail = decoded['detail'] ?? decoded['message'];
+        if (detail is String && detail.trim().isNotEmpty) return detail;
+        if (detail is List && detail.isNotEmpty) return detail.join(', ');
+      }
+    } catch (_) {
+      return fallback;
+    }
+    return fallback;
+  }
+
+  void _applyCompanyResponseUpdate(String body, {bool insertAtStart = false}) {
+    try {
+      final decoded = jsonDecode(body);
+      if (decoded is Map<String, dynamic> && decoded['data'] is Map) {
+        _upsertCompany(
+          CompanyModel.fromJson(Map<String, dynamic>.from(decoded['data'])),
+          insertAtStart: insertAtStart,
+        );
+      }
+    } catch (_) {
+      // Websocket will still refresh the row when the response has no payload.
+    }
+  }
+
+  void _upsertCompany(CompanyModel company, {bool insertAtStart = false}) {
+    final companyId = company.id ?? '';
+    if (companyId.isEmpty) return;
+    final index = allCompanies.indexWhere((m) => m.id == companyId);
+    if (index == -1) {
+      insertAtStart
+          ? allCompanies.insert(0, company)
+          : allCompanies.add(company);
+    } else {
+      allCompanies[index] = company;
+    }
+    _sortCompanyList(allCompanies);
+    allCompanies.refresh();
+    _refreshFilteredCompanies();
+  }
+
+  void _removeCompany(String companyId) {
+    if (companyId.isEmpty) return;
+    allCompanies.removeWhere((m) => m.id == companyId);
+    filteredCompanies.removeWhere((m) => m.id == companyId);
+  }
+
+  void _updateCompanyStatusLocally(String companyId, bool status) {
+    final index = allCompanies.indexWhere((m) => m.id == companyId);
+    if (index != -1) {
+      allCompanies[index].status = status;
+      allCompanies.refresh();
+    }
+    final filteredIndex = filteredCompanies.indexWhere(
+      (m) => m.id == companyId,
+    );
+    if (filteredIndex != -1) {
+      filteredCompanies[filteredIndex].status = status;
+      filteredCompanies.refresh();
+    }
+  }
+
+  void _refreshFilteredCompanies() {
+    if (search.value.text.trim().isEmpty) {
+      filteredCompanies.clear();
+      return;
+    }
+    filterCompanies();
+  }
+
   // this function is to sort data in table
   void onSort(int columnIndex, bool ascending) {
-    if (columnIndex == 0) {
-      allCompanies.sort((screen1, screen2) {
-        final String? value1 = screen1.companyName;
-        final String? value2 = screen2.companyName;
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 3) {
-      allCompanies.sort((screen1, screen2) {
-        final String? value1 = screen1.userName;
-        final String? value2 = screen2.userName;
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    } else if (columnIndex == 5) {
-      allCompanies.sort((screen1, screen2) {
-        final String? value1 = screen1.createdAt;
-        final String? value2 = screen2.createdAt;
-
-        // Handle nulls: put nulls at the end
-        if (value1 == null && value2 == null) return 0;
-        if (value1 == null) return 1;
-        if (value2 == null) return -1;
-
-        return compareString(ascending, value1, value2);
-      });
-    }
     sortColumnIndex.value = columnIndex;
     isAscending.value = ascending;
+    _sortCompanyList(allCompanies);
+    allCompanies.refresh();
+    if (filteredCompanies.isNotEmpty) {
+      _sortCompanyList(filteredCompanies);
+      filteredCompanies.refresh();
+    }
+  }
+
+  void _sortCompanyList(List<CompanyModel> companies) {
+    companies.sort((company1, company2) {
+      final value1 = _sortValue(company1, sortColumnIndex.value);
+      final value2 = _sortValue(company2, sortColumnIndex.value);
+      return compareString(isAscending.value, value1, value2);
+    });
+  }
+
+  String _sortValue(CompanyModel company, int columnIndex) {
+    switch (columnIndex) {
+      case 0:
+        return company.companyName?.toLowerCase() ?? '';
+      case 2:
+        return '${company.userCountry ?? ''} ${company.userCity ?? ''}'
+            .toLowerCase();
+      case 3:
+        return company.userName?.toLowerCase() ?? '';
+      case 4:
+        return company.userExpiryDate ?? '';
+      case 6:
+        return company.createdAt ?? '';
+      default:
+        return company.companyName?.toLowerCase() ?? '';
+    }
   }
 
   int compareString(bool ascending, String value1, String value2) {
-    int comparison = value1.compareTo(value2);
-    return ascending ? comparison : -comparison; // Reverse if descending
+    final comparison = value1.compareTo(value2);
+    return ascending ? comparison : -comparison;
   }
 
   // this function is to filter the search results for web
   void filterCompanies() {
-    query.value = search.value.text.toLowerCase();
-    if (query.value.isEmpty) {
+    final queryText = search.value.text.toLowerCase().trim();
+    query.value = queryText;
+    if (queryText.isEmpty) {
       filteredCompanies.clear();
     } else {
       filteredCompanies.assignAll(
         allCompanies.where((company) {
-          return company.companyName.toString().toLowerCase().contains(query) ||
-              company.createdAt.toString().toLowerCase().contains(query) ||
-              company.userCountry.toString().toLowerCase().contains(query) ||
-              company.userCity.toString().toLowerCase().contains(query) ||
-              company.userPhoneNumber.toString().toLowerCase().contains(
-                query,
+          return company.companyName.toString().toLowerCase().contains(
+                queryText,
               ) ||
-              company.userName.toString().toLowerCase().contains(query);
+              company.createdAt.toString().toLowerCase().contains(queryText) ||
+              company.userCountry.toString().toLowerCase().contains(
+                queryText,
+              ) ||
+              company.userCity.toString().toLowerCase().contains(queryText) ||
+              company.userEmail.toString().toLowerCase().contains(queryText) ||
+              company.userPhoneNumber.toString().toLowerCase().contains(
+                queryText,
+              ) ||
+              company.userName.toString().toLowerCase().contains(queryText);
         }).toList(),
       );
+      _sortCompanyList(filteredCompanies);
     }
   }
 }

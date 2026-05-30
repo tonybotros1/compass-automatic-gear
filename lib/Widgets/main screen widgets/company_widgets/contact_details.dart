@@ -46,11 +46,15 @@ Container contactDetails({required CompanyController controller}) {
               ),
             ),
             Expanded(
-              child: myTextFormFieldWithBorder(
-                obscureText: false,
-                controller: controller.password,
-                labelText: 'Password',
-                validate: true,
+              child: GetX<CompanyController>(
+                builder: (controller) => myTextFormFieldWithBorder(
+                  obscureText: false,
+                  controller: controller.password,
+                  labelText: controller.isEditingCompany.value
+                      ? 'New Password (Optional)'
+                      : 'Password',
+                  validate: !controller.isEditingCompany.value,
+                ),
               ),
             ),
           ],
