@@ -448,7 +448,7 @@ class EmployeesController extends GetxController {
         break;
       case 4:
         initTypePickersValue.value = 4;
-        typeFilter.text = 'EX EMPLOYEE';
+        typeFilter.text = 'Ex-Employee';
         filterSearch();
         break;
 
@@ -612,8 +612,10 @@ class EmployeesController extends GetxController {
     if (locationIdFilter.value.isNotEmpty) {
       body["location"] = locationIdFilter.value;
     }
-    if (typeFilter.text.isNotEmpty) {
-      body["type"] = typeFilter.text;
+    final selectedType = typeFilter.text.trim();
+    final shouldFilterTypeLocally = _isExEmployeeType(selectedType);
+    if (selectedType.isNotEmpty && !shouldFilterTypeLocally) {
+      body["type"] = selectedType;
     }
     if (body.isNotEmpty) {
       await searchEngine(body);
@@ -657,9 +659,16 @@ class EmployeesController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List employees = decoded['employees'];
-        allEmployees.assignAll(
-          employees.map((employee) => EmployeesModel.fromJson(employee)),
-        );
+        var employeeModels = employees
+            .map((employee) => EmployeesModel.fromJson(employee))
+            .toList();
+        final selectedType = typeFilter.text.trim();
+        if (selectedType.isNotEmpty) {
+          employeeModels = employeeModels
+              .where((employee) => _matchesEmployeeType(employee, selectedType))
+              .toList();
+        }
+        allEmployees.assignAll(employeeModels);
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -675,6 +684,25 @@ class EmployeesController extends GetxController {
     } catch (e) {
       isScreenLoding.value = false;
     }
+  }
+
+  bool _matchesEmployeeType(EmployeesModel employee, String selectedType) {
+    final selected = _normalizeEmployeeType(selectedType);
+    if (selected.isEmpty) return true;
+    return _normalizeEmployeeType(employee.personType) == selected;
+  }
+
+  bool _isExEmployeeType(String? value) {
+    return _normalizeEmployeeType(value) == 'exemployee';
+  }
+
+  String _normalizeEmployeeType(String? value) {
+    return (value ?? '')
+        .toLowerCase()
+        .replaceAll('-', '')
+        .replaceAll('_', '')
+        .replaceAll(' ', '')
+        .trim();
   }
 
   Future<void> getAllEmployees() async {
