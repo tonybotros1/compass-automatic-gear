@@ -72,7 +72,7 @@ class PdfPreviewScreen extends StatelessWidget {
                   pw.SizedBox(height: 10),
                   pw.Text(
                     'Company: DataHub AI',
-                    style: pw.TextStyle(
+                    style: const pw.TextStyle(
                       fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
                     ),
@@ -97,7 +97,7 @@ class PdfPreviewScreen extends StatelessWidget {
           pw.SizedBox(height: 20),
           pw.Text(
             'Car Details',
-            style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 10),
           pw.Table(
@@ -117,7 +117,7 @@ class PdfPreviewScreen extends StatelessWidget {
           // Car Images
           pw.Text(
             'Car Images',
-            style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 10),
           ...carImagesPdf.map(
@@ -149,7 +149,7 @@ class PdfPreviewScreen extends StatelessWidget {
           padding: const pw.EdgeInsets.all(6),
           child: pw.Text(
             key,
-            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            style: const pw.TextStyle(fontWeight: pw.FontWeight.bold),
           ),
         ),
         pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text(value)),

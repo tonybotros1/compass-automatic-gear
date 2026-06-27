@@ -16,8 +16,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://192.168.1.12:8000';
-String webSocketURL = "ws://192.168.1.12:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://172.168.1.17:8000';
+String webSocketURL = "ws://172.168.1.17:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
@@ -114,7 +114,7 @@ Color textColorDependingOnDateTime(
   }
 }
 
-var fontStyleForPDFLable = pw.TextStyle(
+var fontStyleForPDFLable = const pw.TextStyle(
   color: PdfColors.black,
   fontWeight: pw.FontWeight.bold,
   fontSize: 8,
@@ -129,7 +129,7 @@ pw.TextStyle fontStyleForPDFLableCallable({pw.Font? font}) {
   );
 }
 
-var fontStyleForPDFLableGREY = pw.TextStyle(
+var fontStyleForPDFLableGREY = const pw.TextStyle(
   color: PdfColors.grey,
   fontWeight: pw.FontWeight.bold,
   fontSize: 8,
@@ -158,7 +158,7 @@ var fontStyleForPDFTextGREY = const pw.TextStyle(
   fontSize: 8,
 );
 
-var fontStyleForPDFTableHeader = pw.TextStyle(
+var fontStyleForPDFTableHeader = const pw.TextStyle(
   color: PdfColors.white,
   fontSize: 8,
   fontWeight: pw.FontWeight.bold,

@@ -125,6 +125,37 @@ Widget buySellSection({
                         ),
                       ],
                     ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        CustomDropdown(
+                          width: 300,
+                          showedSelectedName: 'name',
+                          textcontroller: controller.investedBy.value.text,
+                          hintText: 'Invested By',
+                          onChanged: (key, value) {
+                            controller.investedBy.value.text = value['name'];
+                            controller.investedById.value = key;
+                            controller.carModified.value = true;
+                          },
+                          onDelete: () {
+                            controller.investedBy.value.clear();
+                            controller.investedById.value = '';
+                            controller.carModified.value = true;
+                          },
+                          onOpen: () {
+                            return controller.getInvestedBy();
+                          },
+                        ),
+                        valSectionInTheTable(
+                          controller.listOfValuesController,
+                          constraints,
+                          'INVESTED_BY',
+                          'New Investor',
+                          'Investors',
+                        ),
+                      ],
+                    ),
                   ],
                 );
               },

@@ -26,6 +26,8 @@ import 'main_screen_contro.dart';
 import 'websocket_controller.dart';
 
 class EmployeesController extends GetxController {
+  final GlobalKey<FormState> employeePayrollElementFormKey =
+      GlobalKey<FormState>();
   Rx<TextEditingController> search = TextEditingController().obs;
   Rx<TextEditingController> contactsAndRelativesSearch =
       TextEditingController().obs;
@@ -97,6 +99,7 @@ class EmployeesController extends GetxController {
   TextEditingController employeePayrollElementEndDate = TextEditingController();
   TextEditingController employeePayrollElementNote = TextEditingController();
   RxString employeePayrollElementNameId = RxString('');
+  RxString employeePayrollElementFunction = RxString('');
   TextEditingController line = TextEditingController();
   TextEditingController city = TextEditingController();
   TextEditingController nationality = TextEditingController();
@@ -343,6 +346,26 @@ class EmployeesController extends GetxController {
 
   Future<Map<String, dynamic>> getAllPayrollElements() async {
     return await helper.getAllPayrollElements();
+  }
+
+  bool get isIncomeTaxDeductionPayrollElement =>
+      employeePayrollElementFunction.value == 'PY_INCOME_TAX_DEDUCTION_FF';
+
+  Future<void> setEmployeePayrollElementFunctionById(String id) async {
+    final payrollElementId = id.trim();
+    if (payrollElementId.isEmpty) {
+      employeePayrollElementFunction.value = '';
+      return;
+    }
+
+    final payrollElements = await getAllPayrollElements();
+    final payrollElement = payrollElements[payrollElementId];
+    if (payrollElement is Map) {
+      employeePayrollElementFunction.value =
+          payrollElement['function']?.toString() ?? '';
+    } else {
+      employeePayrollElementFunction.value = '';
+    }
   }
 
   Future<Map<String, dynamic>> getAllLoanAndAdvancesTypes() async {
@@ -2562,12 +2585,29 @@ class EmployeesController extends GetxController {
   }
 
   // ======================== Payroll section ========================
+  bool _validateEmployeePayroll() {
+    if (!(employeePayrollElementFormKey.currentState?.validate() ?? false)) {
+      return false;
+    }
+    if (employeePayrollElementNameId.value.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please select Name');
+      return false;
+    }
+    if (isIncomeTaxDeductionPayrollElement &&
+        employeePayrollElementvalue.text.trim().isEmpty) {
+      alertMessage(context: Get.context!, content: 'Please enter Value');
+      return false;
+    }
+    return true;
+  }
+
   Future<void> addNewEmployeePayroll() async {
     try {
       if (currentEmployeeId.value.isEmpty) {
         alertMessage(context: Get.context!, content: "Save doc first please");
         return;
       }
+      if (!_validateEmployeePayroll()) return;
       addingNewEmployeePayrollValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -2623,6 +2663,7 @@ class EmployeesController extends GetxController {
         alertMessage(context: Get.context!, content: "Save doc first please");
         return;
       }
+      if (!_validateEmployeePayroll()) return;
       addingNewEmployeePayrollValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';

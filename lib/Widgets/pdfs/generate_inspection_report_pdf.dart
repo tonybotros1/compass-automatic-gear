@@ -58,7 +58,7 @@ Future<Uint8List> generatePdf(Map data) async {
 
             pw.Text(
               "Notes:",
-              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+              style: const pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
             ),
             pw.SizedBox(height: 10),
             pw.Text(data["notes"]),

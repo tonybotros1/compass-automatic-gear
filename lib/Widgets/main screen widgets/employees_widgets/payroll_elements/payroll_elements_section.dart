@@ -162,8 +162,10 @@ ElevatedButton newElementButton({
         alertMessage(context: Get.context!, content: "Please save doc first");
         return;
       }
+      controller.employeePayrollElementFormKey.currentState?.reset();
       controller.employeePayrollElementName.clear();
       controller.employeePayrollElementNameId.value = '';
+      controller.employeePayrollElementFunction.value = '';
       controller.employeePayrollElementEndDate.clear();
       controller.employeePayrollElementStartDate.clear();
       controller.employeePayrollElementvalue.clear();
@@ -211,9 +213,12 @@ IconButton updatePayrollButton({
   required BuildContext context,
 }) {
   return IconButton(
-    onPressed: () {
+    onPressed: () async {
+      controller.employeePayrollElementFormKey.currentState?.reset();
       controller.employeePayrollElementName.text = data.name ?? '';
       controller.employeePayrollElementNameId.value = data.nameId ?? '';
+      await controller.setEmployeePayrollElementFunctionById(data.nameId ?? '');
+      if (!context.mounted) return;
       controller.employeePayrollElementvalue.text =
           data.value?.toString() ?? '0';
       controller.employeePayrollElementStartDate.text = textToDate(

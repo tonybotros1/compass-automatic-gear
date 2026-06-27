@@ -114,6 +114,7 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> vin = TextEditingController().obs;
   Rx<TextEditingController> soldTo = TextEditingController().obs;
   Rx<TextEditingController> soldBy = TextEditingController().obs;
+  Rx<TextEditingController> investedBy = TextEditingController().obs;
   Rx<TextEditingController> serviceContractEndDate =
       TextEditingController().obs;
   Rx<TextEditingController> warrantyEndDate = TextEditingController().obs;
@@ -139,6 +140,7 @@ class CarTradingDashboardController extends GetxController {
   RxString yearId = RxString('');
   RxString soldToId = RxString('');
   RxString soldById = RxString('');
+  RxString investedById = RxString('');
   RxString itemId = RxString('');
   RxString nameId = RxString('');
   RxList<CarTradingItemsModel> addedItems = RxList([]);
@@ -858,6 +860,10 @@ class CarTradingDashboardController extends GetxController {
 
   Future<Map<String, dynamic>> getBuyersAndSellersBy() async {
     return await helper.getAllListValues('BOUGHT_SOLD_BY');
+  }
+
+  Future<Map<String, dynamic>> getInvestedBy() async {
+    return await helper.getAllListValues('INVESTED_BY');
   }
 
   Future<Map<String, dynamic>> getNamesOfPeople() async {

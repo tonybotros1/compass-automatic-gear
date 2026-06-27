@@ -1129,7 +1129,7 @@ class JobCardController extends GetxController {
                         children: [
                           pw.Text(
                             'JOB CARD',
-                            style: pw.TextStyle(
+                            style: const pw.TextStyle(
                               color: PdfColors.white,
                               fontWeight: pw.FontWeight.bold,
                               fontSize: 10,
@@ -1205,7 +1205,7 @@ class JobCardController extends GetxController {
                                 color: PdfColors.grey500,
                                 child: pw.Text(
                                   'Terms and Conditions',
-                                  style: pw.TextStyle(
+                                  style: const pw.TextStyle(
                                     color: PdfColors.white,
                                     fontWeight: pw.FontWeight.bold,
                                     fontSize: 8,
@@ -1418,7 +1418,7 @@ class JobCardController extends GetxController {
             flex: 2,
             child: pw.Text(
               "$title:",
-              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+              style: const pw.TextStyle(fontWeight: pw.FontWeight.bold),
             ),
           ),
           pw.Expanded(flex: 3, child: pw.Text(value)),

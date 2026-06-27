@@ -649,7 +649,7 @@ class PayrollRunsController extends GetxController {
               children: [
                 pw.Text(
                   companyName,
-                  style: pw.TextStyle(
+                  style: const pw.TextStyle(
                     fontSize: 16,
                     fontWeight: pw.FontWeight.bold,
                   ),
@@ -666,7 +666,7 @@ class PayrollRunsController extends GetxController {
             ),
             pw.Text(
               'PAYSLIP',
-              style: pw.TextStyle(
+              style: const pw.TextStyle(
                 fontSize: 22,
                 fontWeight: pw.FontWeight.bold,
                 color: PdfColors.blueGrey800,
@@ -708,7 +708,7 @@ class PayrollRunsController extends GetxController {
         children: [
           pw.Text(
             label,
-            style: pw.TextStyle(
+            style: const pw.TextStyle(
               fontSize: 8,
               color: PdfColors.grey700,
               fontWeight: pw.FontWeight.bold,
@@ -783,7 +783,7 @@ class PayrollRunsController extends GetxController {
       padding: const pw.EdgeInsets.only(bottom: 6),
       child: pw.Text(
         title,
-        style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+        style: const pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
       ),
     );
   }
@@ -811,7 +811,7 @@ class PayrollRunsController extends GetxController {
       data: data,
       border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
       headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey800),
-      headerStyle: pw.TextStyle(
+      headerStyle: const pw.TextStyle(
         color: PdfColors.white,
         fontWeight: pw.FontWeight.bold,
         fontSize: 9,
@@ -840,7 +840,7 @@ class PayrollRunsController extends GetxController {
       }).toList(),
       border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
       headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey800),
-      headerStyle: pw.TextStyle(
+      headerStyle: const pw.TextStyle(
         color: PdfColors.white,
         fontWeight: pw.FontWeight.bold,
         fontSize: 9,

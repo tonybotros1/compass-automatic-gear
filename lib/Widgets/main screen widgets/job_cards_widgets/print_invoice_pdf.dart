@@ -80,7 +80,7 @@ pw.Widget buildCustomerInfoSection(
           isProformaInvoice
               ? 'PROFORMA INVOICE'
               : 'TAX INVOICE - ${payType.toUpperCase()}',
-          style: pw.TextStyle(
+          style: const pw.TextStyle(
             color: PdfColors.white,
             fontWeight: pw.FontWeight.bold,
             fontSize: 10,
