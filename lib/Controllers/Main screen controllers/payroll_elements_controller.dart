@@ -19,6 +19,7 @@ class PayrollElementsController extends GetxController {
   TextEditingController functionName = TextEditingController();
   TextEditingController elementTypeFilter = TextEditingController();
   TextEditingController elementPriority = TextEditingController();
+  TextEditingController entryValueName = TextEditingController();
   TextEditingController elementPriorityFilter = TextEditingController();
   TextEditingController elementComment = TextEditingController();
   TextEditingController elementCommentFilter = TextEditingController();
@@ -197,6 +198,7 @@ class PayrollElementsController extends GetxController {
         "name": elementName.text,
         "type": elementType.text,
         "priority": elementPriority.text,
+        "entry_value_name": entryValueName.text,
         "comments": elementComment.text,
         "function": functionName.text,
         "is_allow_override": allowOverride.value,
@@ -490,6 +492,7 @@ class PayrollElementsController extends GetxController {
     elementName.clear();
     elementType.clear();
     elementPriority.clear();
+    entryValueName.clear();
     elementComment.clear();
     indirect.value = false;
     currentPayrollElementId.value = '';
@@ -517,6 +520,7 @@ class PayrollElementsController extends GetxController {
     elementKey.text = details.key ?? '';
     elementName.text = details.name ?? '';
     elementPriority.text = details.priority ?? '';
+    entryValueName.text = details.entryValueName ?? '';
     elementComment.text = details.comments ?? '';
     elementType.text = details.type ?? '';
     allowOverride.value = details.isAllowOverride ?? false;

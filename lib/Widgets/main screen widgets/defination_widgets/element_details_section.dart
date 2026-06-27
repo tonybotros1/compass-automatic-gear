@@ -75,11 +75,21 @@ Container elementDetails(
                       ),
                     ],
                   ),
-                  myTextFormFieldWithBorder(
-                    labelText: 'Priority',
-                    isnumber: true,
-                    controller: controller.elementPriority,
-                    width: 200,
+                  Row(
+                    spacing: 10,
+                    children: [
+                      myTextFormFieldWithBorder(
+                        labelText: 'Priority',
+                        isnumber: true,
+                        controller: controller.elementPriority,
+                        width: 200,
+                      ),
+                      myTextFormFieldWithBorder(
+                        labelText: 'Entry Value Name',
+                        controller: controller.entryValueName,
+                        width: 410,
+                      ),
+                    ],
                   ),
                 ],
               ),

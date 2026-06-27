@@ -13,11 +13,6 @@ Future<dynamic> employeeDialog({
   required void Function()? onPressedForAttachment,
   required void Function()? onPressedForContactsAndRelatives,
   required void Function()? onPressedForLeaves,
-  required void Function()? onPressedForEmployeeType,
-  required void Function()? onPressedForApplicantType,
-  required void Function()? onPressedForEXEmployeeType,
-  required void Function()? onPressedForActiveEmployeeStatus,
-  required void Function()? onPressedForInActiveEmployeeStatus,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -73,47 +68,7 @@ Future<dynamic> employeeDialog({
                           : "•••",
                     ),
                   ),
-                  onPressedForEmployeeType != null
-                      ? Row(
-                          spacing: 10,
-                          children: [
-                            separator(),
-                            ClickableHoverText(
-                              onTap: onPressedForEmployeeType,
-                              text: 'Employee',
-                            ),
-                            point(),
-                            ClickableHoverText(
-                              onTap: onPressedForEXEmployeeType,
-                              text: 'Ex-Employee',
-                            ),
 
-                            point(),
-                            ClickableHoverText(
-                              onTap: onPressedForApplicantType,
-                              text: 'Applicant',
-                            ),
-                          ],
-                        )
-                      : const SizedBox(),
-
-                  onPressedForActiveEmployeeStatus != null
-                      ? Row(
-                          spacing: 10,
-                          children: [
-                            separator(),
-                            ClickableHoverText(
-                              onTap: onPressedForActiveEmployeeStatus,
-                              text: 'Active',
-                            ),
-                            point(),
-                            ClickableHoverText(
-                              onTap: onPressedForInActiveEmployeeStatus,
-                              text: 'Inactive',
-                            ),
-                          ],
-                        )
-                      : const SizedBox(),
                   separator(),
                   ClickableHoverText(onTap: onPressedForLeaves, text: 'Leaves'),
                   point(),

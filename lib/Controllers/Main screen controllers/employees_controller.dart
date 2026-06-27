@@ -49,7 +49,6 @@ class EmployeesController extends GetxController {
   TextEditingController employeeGender = TextEditingController();
   TextEditingController employeeDateOfBirth = TextEditingController();
   TextEditingController employeePlaceOfBirth = TextEditingController();
-  RxString personType = RxString('');
   TextEditingController employeeCountryOfBirth = TextEditingController();
   TextEditingController employeeNationality = TextEditingController();
   TextEditingController employeeMaritalStatus = TextEditingController();
@@ -66,7 +65,6 @@ class EmployeesController extends GetxController {
   RxString jobTitleId = RxString('');
   TextEditingController hireDate = TextEditingController();
   TextEditingController endDate = TextEditingController();
-  RxString employeeStatus = RxString('');
   TextEditingController jobEmployer = TextEditingController();
   TextEditingController jobDepartment = TextEditingController();
   TextEditingController reportingManager = TextEditingController();
@@ -94,6 +92,8 @@ class EmployeesController extends GetxController {
   TextEditingController country = TextEditingController();
   TextEditingController employeePayrollElementName = TextEditingController();
   TextEditingController employeePayrollElementvalue = TextEditingController();
+  RxString employeePayrollElementvalueName = RxString('Value');
+  RxString employeePayrollElementvalueComment = RxString('');
   TextEditingController employeePayrollElementStartDate =
       TextEditingController();
   TextEditingController employeePayrollElementEndDate = TextEditingController();
@@ -471,11 +471,32 @@ class EmployeesController extends GetxController {
         break;
       case 4:
         initTypePickersValue.value = 4;
-        typeFilter.text = 'Ex-Employee';
+        typeFilter.text = 'EX-EMPLOYEE';
+        filterSearch();
+        break;
+      case 5:
+        initTypePickersValue.value = 5;
+        typeFilter.text = 'EX-APPLICANT';
         filterSearch();
         break;
 
       default:
+    }
+  }
+
+  String getPersonType(String hireDate, String endDate) {
+    if (hireDate.isEmpty) {
+      if (endDate.isEmpty) {
+        return 'Applicant';
+      } else {
+        return 'Ex-Applicant';
+      }
+    } else {
+      if (endDate.isEmpty) {
+        return 'Employee';
+      } else {
+        return 'Ex-Employee';
+      }
     }
   }
 
@@ -636,8 +657,7 @@ class EmployeesController extends GetxController {
       body["location"] = locationIdFilter.value;
     }
     final selectedType = typeFilter.text.trim();
-    final shouldFilterTypeLocally = _isExEmployeeType(selectedType);
-    if (selectedType.isNotEmpty && !shouldFilterTypeLocally) {
+    if (selectedType.isNotEmpty) {
       body["type"] = selectedType;
     }
     if (body.isNotEmpty) {
@@ -682,16 +702,9 @@ class EmployeesController extends GetxController {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List employees = decoded['employees'];
-        var employeeModels = employees
-            .map((employee) => EmployeesModel.fromJson(employee))
-            .toList();
-        final selectedType = typeFilter.text.trim();
-        if (selectedType.isNotEmpty) {
-          employeeModels = employeeModels
-              .where((employee) => _matchesEmployeeType(employee, selectedType))
-              .toList();
-        }
-        allEmployees.assignAll(employeeModels);
+        allEmployees.assignAll(
+          employees.map((employee) => EmployeesModel.fromJson(employee)),
+        );
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -707,25 +720,6 @@ class EmployeesController extends GetxController {
     } catch (e) {
       isScreenLoding.value = false;
     }
-  }
-
-  bool _matchesEmployeeType(EmployeesModel employee, String selectedType) {
-    final selected = _normalizeEmployeeType(selectedType);
-    if (selected.isEmpty) return true;
-    return _normalizeEmployeeType(employee.personType) == selected;
-  }
-
-  bool _isExEmployeeType(String? value) {
-    return _normalizeEmployeeType(value) == 'exemployee';
-  }
-
-  String _normalizeEmployeeType(String? value) {
-    return (value ?? '')
-        .toLowerCase()
-        .replaceAll('-', '')
-        .replaceAll('_', '')
-        .replaceAll(' ', '')
-        .trim();
   }
 
   Future<void> getAllEmployees() async {
@@ -816,8 +810,6 @@ class EmployeesController extends GetxController {
         "gender": employeeGenderId.value,
         "legislation": employeeLegislationId.value,
         "martial_status": employeeMaritalStatusId.value,
-        "person_type": personType.value,
-        "status": employeeStatus.value,
         "payroll": payrollId.value,
         "employer": jobEmployerId.value,
         "department": jobDepartmentId.value,
@@ -832,7 +824,6 @@ class EmployeesController extends GetxController {
         "reporting_manager": reportingManagerId.value,
       };
       if (currentEmployeeId.value.isEmpty) {
-        employeeStatus.value = 'Active';
         Uri creatingURL = Uri.parse('$backendUrl/employees/create_employee');
         final creatingREQUEST = http.MultipartRequest('POST', creatingURL);
         creatingREQUEST.headers['Authorization'] = 'Bearer $accessToken';
@@ -1015,7 +1006,7 @@ class EmployeesController extends GetxController {
     }
   }
 
-  void clearValues(bool isEmployee) {
+  void clearValues() {
     payroll.clear();
     payrollId.value = '';
     currentEmployeeId.value = '';
@@ -1033,8 +1024,6 @@ class EmployeesController extends GetxController {
     employeeGenderId.value = '';
     employeeMaritalStatus.clear();
     employeeMaritalStatusId.value = '';
-    personType.value = isEmployee == true ? 'Employee' : 'Applicant';
-    employeeStatus.value = '';
     jobEmployer.clear();
     jobEmployerId.value = '';
     employeeLegislationId.value = '';
@@ -1100,8 +1089,6 @@ class EmployeesController extends GetxController {
       employeeGenderId.value = employee.gender ?? '';
       employeeMaritalStatus.text = employee.martialStatusName ?? '';
       employeeMaritalStatusId.value = employee.martialStatus ?? '';
-      personType.value = employee.personType ?? '';
-      employeeStatus.value = employee.status ?? '';
       jobEmployer.text = employee.employerName ?? '';
       jobEmployerId.value = employee.employer ?? '';
       jobDepartment.text = employee.departmentName ?? '';

@@ -41,6 +41,9 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> carSoldToFilter = TextEditingController().obs;
   Rx<TextEditingController> carSoldByFilter = TextEditingController().obs;
   Rx<TextEditingController> carBoughtByFilter = TextEditingController().obs;
+  Rx<TextEditingController> carInvestedByFilter = TextEditingController().obs;
+  Rx<TextEditingController> carConsignmentForFilter =
+      TextEditingController().obs;
   Rx<TextEditingController> carSpecificationFilter =
       TextEditingController().obs;
   RxString carBrandFilterId = RxString('');
@@ -50,6 +53,8 @@ class CarTradingDashboardController extends GetxController {
   RxString carSoldToFilterId = RxString('');
   RxString carSoldByFilterId = RxString('');
   RxString carBoughtByFilterId = RxString('');
+  RxString carInvestedByFilterId = RxString('');
+  RxString carConsignmentForFilterId = RxString('');
   RxString carSpecificationFilterId = RxString('');
   final RxList<CapitalsAndOutstandingModel> allCapitals =
       RxList<CapitalsAndOutstandingModel>([]);
@@ -111,6 +116,7 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> boughtFrom = TextEditingController().obs;
   Rx<TextEditingController> boughtBy = TextEditingController().obs;
   Rx<TextEditingController> year = TextEditingController().obs;
+  Rx<TextEditingController> consignmentFor = TextEditingController().obs;
   Rx<TextEditingController> vin = TextEditingController().obs;
   Rx<TextEditingController> soldTo = TextEditingController().obs;
   Rx<TextEditingController> soldBy = TextEditingController().obs;
@@ -138,6 +144,7 @@ class CarTradingDashboardController extends GetxController {
   RxString boughtFromId = RxString('');
   RxString boughtById = RxString('');
   RxString yearId = RxString('');
+  RxString consignmentForId = RxString('');
   RxString soldToId = RxString('');
   RxString soldById = RxString('');
   RxString investedById = RxString('');
@@ -282,6 +289,8 @@ class CarTradingDashboardController extends GetxController {
     carSoldToFilter.value.dispose();
     carSoldByFilter.value.dispose();
     carBoughtByFilter.value.dispose();
+    carInvestedByFilter.value.dispose();
+    carConsignmentForFilter.value.dispose();
     carSpecificationFilter.value.dispose();
     searchForItems.value.dispose();
     searchForTransfers.value.dispose();
@@ -296,9 +305,11 @@ class CarTradingDashboardController extends GetxController {
     boughtFrom.value.dispose();
     boughtBy.value.dispose();
     year.value.dispose();
+    consignmentFor.value.dispose();
     vin.value.dispose();
     soldTo.value.dispose();
     soldBy.value.dispose();
+    investedBy.value.dispose();
     serviceContractEndDate.value.dispose();
     warrantyEndDate.value.dispose();
     pay.dispose();
@@ -836,6 +847,10 @@ class CarTradingDashboardController extends GetxController {
 
   Future<Map<String, dynamic>> getYears() async {
     return await helper.getAllListValues('YEARS');
+  }
+
+  Future<Map<String, dynamic>> getConsignmentsFor() async {
+    return await helper.getAllListValues('CONSIGNMENT_FOR');
   }
 
   Future<Map<String, dynamic>> getItems() async {
@@ -2641,6 +2656,8 @@ class CarTradingDashboardController extends GetxController {
         'sold_to': soldToId.value,
         'bought_by': boughtById.value,
         'sold_by': soldById.value,
+        'invested_by': investedById.value,
+        'consignment_for': consignmentForId.value,
         'date': isoDate,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
@@ -2794,6 +2811,12 @@ class CarTradingDashboardController extends GetxController {
     }
     if (carSoldByFilterId.value != '') {
       body["sold_by"] = carSoldByFilterId.value;
+    }
+    if (carInvestedByFilterId.value != '') {
+      body["invested_by"] = carInvestedByFilterId.value;
+    }
+    if (carConsignmentForFilterId.value != '') {
+      body["consignment_for"] = carConsignmentForFilterId.value;
     }
     if (isSoldStatusSelected.isTrue) {
       body["status"] = "Sold";
@@ -3072,6 +3095,10 @@ class CarTradingDashboardController extends GetxController {
     vin.value.text = data.vin ?? '';
     soldById.value = data.soldById ?? '';
     soldBy.value.text = data.soldBy ?? '';
+    investedById.value = data.investedById ?? '';
+    investedBy.value.text = data.investedBy ?? '';
+    consignmentForId.value = data.consignmentForId ?? '';
+    consignmentFor.value.text = data.consignmentFor ?? '';
     soldTo.value.text = data.soldTo ?? '';
     soldToId.value = data.soldToId ?? '';
     totalPays.value = data.totalPay ?? 0.0;
@@ -3116,9 +3143,13 @@ class CarTradingDashboardController extends GetxController {
     boughtFrom.value.clear();
     boughtBy.value.clear();
     soldBy.value.clear();
+    investedBy.value.clear();
+    consignmentFor.value.clear();
     boughtFromId.value = '';
     boughtById.value = '';
     soldById.value = '';
+    investedById.value = '';
+    consignmentForId.value = '';
     soldTo.value.clear();
     soldToId.value = '';
     totalPays.value = 0.0;
@@ -3156,6 +3187,12 @@ class CarTradingDashboardController extends GetxController {
     initValueForStatusPicker.value = 1;
     carSoldByFilter.value.clear();
     carBoughtByFilter.value.clear();
+    carInvestedByFilter.value.clear();
+    carConsignmentForFilter.value.clear();
+    carSoldByFilterId.value = '';
+    carBoughtByFilterId.value = '';
+    carInvestedByFilterId.value = '';
+    carConsignmentForFilterId.value = '';
     isTodaySelected.value = false;
     isThisMonthSelected.value = false;
     isThisYearSelected.value = false;

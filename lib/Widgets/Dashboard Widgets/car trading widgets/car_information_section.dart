@@ -314,14 +314,51 @@ Widget carInformation({
                 ),
               ],
             ),
-            myTextFormFieldWithBorder(
-              labelText: 'VIN',
-              width: 570,
-              validate: false,
-              controller: controller.vin.value,
-              onChanged: (_) {
-                controller.carModified.value = true;
-              },
+            Row(
+              spacing: 10,
+              children: [
+                myTextFormFieldWithBorder(
+                  labelText: 'VIN',
+                  width: 330,
+                  validate: false,
+                  controller: controller.vin.value,
+                  onChanged: (_) {
+                    controller.carModified.value = true;
+                  },
+                ),
+                const IconButton(onPressed: null, icon: SizedBox()),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    CustomDropdown(
+                      width: 180,
+                      showedSelectedName: 'name',
+                      textcontroller: controller.consignmentFor.value.text,
+                      hintText: 'Consignment For',
+                      onChanged: (key, value) {
+                        controller.consignmentFor.value.text = value['name'];
+                        controller.consignmentForId.value = key;
+                        controller.carModified.value = true;
+                      },
+                      onDelete: () {
+                        controller.consignmentFor.value.clear();
+                        controller.consignmentForId.value = '';
+                        controller.carModified.value = true;
+                      },
+                      onOpen: () {
+                        return controller.getConsignmentsFor();
+                      },
+                    ),
+                    valSectionInTheTable(
+                      controller.listOfValuesController,
+                      constraints,
+                      'CONSIGNMENT_FOR',
+                      'New Consignment For',
+                      'Consignment For',
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),

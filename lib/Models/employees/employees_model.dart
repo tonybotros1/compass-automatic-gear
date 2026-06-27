@@ -18,7 +18,6 @@ class EmployeesModel {
   String? gender;
   String? martialStatus;
   String? personType;
-  String? status;
   String? employer;
   String? department;
   String? jobTitle;
@@ -114,9 +113,6 @@ class EmployeesModel {
     }
     if (json.containsKey('legislation')) {
       model.legislation = _stringFromJson(json['legislation']);
-    }
-    if (json.containsKey('status')) {
-      model.status = _stringFromJson(json['status']);
     }
     if (json.containsKey('employer')) {
       model.employer = _stringFromJson(json['employer']);

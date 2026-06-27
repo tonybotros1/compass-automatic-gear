@@ -399,6 +399,7 @@ class PayrollRunsController extends GetxController {
           decoded['added_run'],
         );
         allPayrollRuns.insert(0, addedRun);
+        Get.back();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {

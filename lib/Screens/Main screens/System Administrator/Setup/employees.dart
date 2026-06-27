@@ -168,15 +168,7 @@ class Employees extends StatelessWidget {
                                   context,
                                   constraints,
                                   controller,
-                                  true,
-                                  'New Employee',
-                                ),
-                                newEmployeeButton(
-                                  context,
-                                  constraints,
-                                  controller,
-                                  false,
-                                  'New Applicant',
+                                  'New Record',
                                 ),
                               ],
                             ),
@@ -192,6 +184,7 @@ class Employees extends StatelessWidget {
                                     2: Text('EMPLOYEE'),
                                     3: Text('APPLICANT'),
                                     4: Text('EX-EMPLOYEE'),
+                                    5: Text('EX-APPLICANT'),
                                   },
                                   decoration: BoxDecoration(
                                     color: CupertinoColors.lightBackgroundGray,
@@ -308,10 +301,6 @@ Widget tableOfScreens({
       ),
       DataColumn2(
         size: ColumnSize.M,
-        label: AutoSizedText(constraints: constraints, text: 'Status'),
-      ),
-      DataColumn2(
-        size: ColumnSize.M,
         label: AutoSizedText(constraints: constraints, text: 'Employer'),
       ),
       DataColumn2(
@@ -364,8 +353,20 @@ DataRow dataRowForTheTable(
           maxWidth: null,
         ),
       ),
-      DataCell(_employeeBadge(data.personType ?? '')),
-      DataCell(_employeeBadge(data.status ?? '')),
+      // controller.getPersonType(
+      //                                     controller.hireDate.text,
+      //                                     controller.endDate.text,
+      //                                   ),
+
+      // DataCell(_employeeBadge(data.personType ?? '')),
+      DataCell(
+        _employeeBadge(
+          controller.getPersonType(
+            data.hireDate != null ? data.hireDate.toString() : '',
+            data.endDate != null ? data.toString() : '',
+          ),
+        ),
+      ),
       DataCell(
         textForDataRowInTable(text: data.employerName ?? '', maxWidth: null),
       ),
@@ -442,10 +443,6 @@ Color _employeeBadgeColor(String value) {
       return const Color(0xFF64748B);
     case 'Applicant':
       return const Color(0xFFF59E0B);
-    case 'Active':
-      return const Color(0xFF16A34A);
-    case 'Inactive':
-      return const Color(0xFFDC2626);
     default:
       return const Color(0xFF7C3AED);
   }
@@ -579,26 +576,6 @@ Widget editSection(
                 if (!loaded) return;
 
                 employeeDialog(
-                  onPressedForApplicantType: () {
-                    controller.personType.value = 'Applicant';
-                    controller.addNewEmployee();
-                  },
-                  onPressedForEXEmployeeType: () {
-                    controller.personType.value = 'Ex-Employee';
-                    controller.addNewEmployee();
-                  },
-                  onPressedForEmployeeType: () {
-                    controller.personType.value = 'Employee';
-                    controller.addNewEmployee();
-                  },
-                  onPressedForActiveEmployeeStatus: () {
-                    controller.employeeStatus.value = 'Active';
-                    controller.addNewEmployee();
-                  },
-                  onPressedForInActiveEmployeeStatus: () {
-                    controller.employeeStatus.value = 'Inactive';
-                    controller.addNewEmployee();
-                  },
                   onPressedForLeaves: () async {
                     controller.leavesSearch.value.clear();
                     controller.filteredLeavesList.clear();
@@ -652,19 +629,13 @@ ElevatedButton newEmployeeButton(
   BuildContext context,
   BoxConstraints constraints,
   EmployeesController controller,
-  bool isEmployee,
   String buttonName,
 ) {
   return ElevatedButton(
     onPressed: () {
-      controller.clearValues(isEmployee);
+      controller.clearValues();
 
       employeeDialog(
-        onPressedForApplicantType: null,
-        onPressedForEXEmployeeType: null,
-        onPressedForEmployeeType: null,
-        onPressedForActiveEmployeeStatus: null,
-        onPressedForInActiveEmployeeStatus: null,
         onPressedForLeaves: () async {
           if (controller.currentEmployeeId.value.isEmpty) {
             alertMessage(context: context, content: "Please save doc first");
@@ -715,7 +686,7 @@ ElevatedButton newEmployeeButton(
               },
       );
     },
-    style: isEmployee == true ? newButtonStyle : newApplicantButtonStyle,
+    style: newButtonStyle,
     child: Text(buttonName),
   );
 }

@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../consts.dart';
 import '../../menu_dialog.dart';
@@ -16,8 +15,6 @@ const _cardHeaderColor = Color(0xfff4f7f9);
 const _titleColor = Color(0xff51616b);
 const _mutedTextColor = Color(0xff7b8991);
 const _accentBlueColor = Color(0xff06699a);
-const _positiveColor = Color(0xff35a853);
-const _negativeColor = Color(0xffff4d4f);
 const _desktopTopGridHeight = 265.0;
 
 Container assignmentInformation(
@@ -142,12 +139,6 @@ class _EmploymentDetailsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return _AssignmentCard(
       title: 'Employment Details',
-      trailing: Obx(
-        () => _StatusBadge(
-          label: _assignmentBadgeLabel(controller.employeeStatus.value),
-          color: _statusColor(controller.employeeStatus.value),
-        ),
-      ),
       child: _ResponsiveFieldGrid(
         minSingleColumnWidth: 650,
         children: [
@@ -426,13 +417,10 @@ class _ServiceSummary extends StatelessWidget {
               controller.endDate.text,
             );
 
-            return Obx(
-              () => _ServiceBox(
-                months: duration.months,
-                days: duration.days,
-                status: _displayOrDash(controller.employeeStatus.value),
-                stacked: stacked,
-              ),
+            return _ServiceBox(
+              months: duration.months,
+              days: duration.days,
+              stacked: stacked,
             );
           },
         );
@@ -474,15 +462,10 @@ class _ServiceSummary extends StatelessWidget {
 // }
 
 class _AssignmentCard extends StatelessWidget {
-  const _AssignmentCard({
-    required this.title,
-    required this.child,
-    this.trailing,
-  });
+  const _AssignmentCard({required this.title, required this.child});
 
   final String title;
   final Widget child;
-  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -516,7 +499,6 @@ class _AssignmentCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (trailing != null) ...[const SizedBox(width: 12), trailing!],
               ],
             ),
           ),
@@ -562,13 +544,11 @@ class _ServiceBox extends StatelessWidget {
   const _ServiceBox({
     required this.months,
     required this.days,
-    required this.status,
     required this.stacked,
   });
 
   final int? months;
   final int? days;
-  final String status;
   final bool stacked;
 
   @override
@@ -586,7 +566,7 @@ class _ServiceBox extends StatelessWidget {
         ),
         child: LayoutBuilder(
           builder: (context, box) {
-            final columns = stacked ? 1 : 3;
+            final columns = stacked ? 1 : 2;
             const gap = 10.0;
             final width = columns == 1
                 ? box.maxWidth
@@ -599,7 +579,6 @@ class _ServiceBox extends StatelessWidget {
               children: [
                 _ServiceItem(value: months?.toString() ?? '--', label: 'MONTH'),
                 _ServiceItem(value: days?.toString() ?? '--', label: 'DAYS'),
-                _ServiceItem(value: status, label: 'STATUS'),
               ].map((child) => SizedBox(width: width, child: child)).toList(),
             );
           },
@@ -758,34 +737,6 @@ class _ServiceItem extends StatelessWidget {
 //   }
 // }
 
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: _monoStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-}
-
 class _ServiceDuration {
   const _ServiceDuration({required this.months, required this.days});
 
@@ -842,31 +793,6 @@ DateTime? _parseDate(String value) {
   }
 
   return DateTime.tryParse(trimmed);
-}
-
-String _assignmentBadgeLabel(String status) {
-  final clean = status.trim();
-  if (clean.isEmpty) return 'Active Assignment';
-  if (clean.toLowerCase().contains('assignment')) return clean;
-  return '$clean Assignment';
-}
-
-String _displayOrDash(String value) {
-  final clean = value.trim();
-  return clean.isEmpty ? '-' : clean;
-}
-
-Color _statusColor(String status) {
-  final normalized = status.trim().toLowerCase();
-  if (normalized.contains('inactive') ||
-      normalized.contains('ended') ||
-      normalized.contains('cancel')) {
-    return _negativeColor;
-  }
-  if (normalized.contains('active') || normalized.isEmpty) {
-    return _positiveColor;
-  }
-  return Colors.blueGrey;
 }
 
 TextStyle _monoStyle({

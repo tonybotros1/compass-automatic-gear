@@ -16,8 +16,8 @@ Future<dynamic> payrollElementsDialog({
     Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
-        height: 400,
-        width: 400,
+        height: 600,
+        width: 600,
         child: Column(
           children: [
             Container(

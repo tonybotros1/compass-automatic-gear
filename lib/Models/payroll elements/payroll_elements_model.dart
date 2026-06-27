@@ -6,6 +6,7 @@ class PayrollElementsModel {
   String? name;
   String? type;
   String? priority;
+  String? entryValueName;
   String? comments;
   bool? isAllowOverride;
   bool? isRecurring;
@@ -29,6 +30,7 @@ class PayrollElementsModel {
     this.function,
     this.isIndirect,
     this.elementDetails,
+    this.entryValueName,
   });
 
   factory PayrollElementsModel.fromJson(Map<String, dynamic> json) {
@@ -61,6 +63,9 @@ class PayrollElementsModel {
       isIndirect: json.containsKey('is_indirect')
           ? json['is_indirect'] == true
           : null,
+      entryValueName: json.containsKey('entry_value_name')
+          ? json['entry_value_name'] ?? ''
+          : '',
       elementDetails:
           json.containsKey('element_details') && json['element_details'] is List
           ? (json['element_details'] as List)

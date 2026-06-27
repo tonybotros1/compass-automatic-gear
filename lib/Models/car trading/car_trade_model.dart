@@ -32,6 +32,10 @@ class CarTradeModel {
   String? soldTo;
   String? soldBy;
   String? soldById;
+  String? investedBy;
+  String? investedById;
+  String? consignmentFor;
+  String? consignmentForId;
   String? note;
   DateTime? date;
   double? net;
@@ -72,6 +76,10 @@ class CarTradeModel {
     this.boughtById,
     this.soldBy,
     this.soldById,
+    this.investedBy,
+    this.investedById,
+    this.consignmentFor,
+    this.consignmentForId,
     this.warrantyEndDate,
     this.serviceContractEndDate,
     this.vin,
@@ -142,6 +150,18 @@ class CarTradeModel {
         : '';
     boughtById = json.containsKey('bought_by_id')
         ? json['bought_by_id']?.toString() ?? ''
+        : '';
+    investedBy = json.containsKey('invested_by')
+        ? json['invested_by']?.toString() ?? ''
+        : '';
+    investedById = json.containsKey('invested_by_id')
+        ? json['invested_by_id']?.toString() ?? ''
+        : '';
+    consignmentFor = json.containsKey('consignment_for')
+        ? json['consignment_for']?.toString() ?? ''
+        : '';
+    consignmentForId = json.containsKey('consignment_for_id')
+        ? json['consignment_for_id']?.toString() ?? ''
         : '';
     totalPay = _toDouble(json['total_pay']);
     totalReceive = _toDouble(json['total_receive']);

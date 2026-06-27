@@ -248,6 +248,77 @@ class CarTradingDashboard extends StatelessWidget {
                                                   value['_id'];
                                             },
                                           ),
+                                          MenuWithValues(
+                                            labelText: 'Invested By',
+                                            headerLqabel: 'Invested By',
+                                            dialogWidth: 600,
+                                            width: 200,
+                                            controller: controller
+                                                .carInvestedByFilter
+                                                .value,
+                                            displayKeys: const ['name'],
+                                            displaySelectedKeys: const ['name'],
+                                            onOpen: () {
+                                              return controller.getInvestedBy();
+                                            },
+                                            onDelete: () {
+                                              controller
+                                                  .carInvestedByFilter
+                                                  .value
+                                                  .clear();
+                                              controller
+                                                      .carInvestedByFilterId
+                                                      .value =
+                                                  '';
+                                            },
+                                            onSelected: (value) {
+                                              controller
+                                                      .carInvestedByFilter
+                                                      .value
+                                                      .text =
+                                                  value['name'];
+                                              controller
+                                                      .carInvestedByFilterId
+                                                      .value =
+                                                  value['_id'];
+                                            },
+                                          ),
+                                          MenuWithValues(
+                                            labelText: 'Consignment For',
+                                            headerLqabel: 'Consignment For',
+                                            dialogWidth: 600,
+                                            width: 200,
+                                            controller: controller
+                                                .carConsignmentForFilter
+                                                .value,
+                                            displayKeys: const ['name'],
+                                            displaySelectedKeys: const ['name'],
+                                            onOpen: () {
+                                              return controller
+                                                  .getConsignmentsFor();
+                                            },
+                                            onDelete: () {
+                                              controller
+                                                  .carConsignmentForFilter
+                                                  .value
+                                                  .clear();
+                                              controller
+                                                      .carConsignmentForFilterId
+                                                      .value =
+                                                  '';
+                                            },
+                                            onSelected: (value) {
+                                              controller
+                                                      .carConsignmentForFilter
+                                                      .value
+                                                      .text =
+                                                  value['name'];
+                                              controller
+                                                      .carConsignmentForFilterId
+                                                      .value =
+                                                  value['_id'];
+                                            },
+                                          ),
                                         ],
                                       ),
                                       Row(

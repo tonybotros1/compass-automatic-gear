@@ -61,38 +61,18 @@ Widget addNewEmployeeOrEdit({
                                     style: fontStyle1,
                                   ),
                                   const Spacer(),
-                                  GetX<EmployeesController>(
+                                  GetBuilder<EmployeesController>(
                                     builder: (controller) {
-                                      if (controller
-                                          .personType
-                                          .value
-                                          .isNotEmpty) {
-                                        return statusBox(
-                                          controller.personType.value,
-                                          hieght: 35,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 5,
-                                          ),
-                                        );
-                                      }
-                                      return const SizedBox();
-                                    },
-                                  ),
-                                  GetX<EmployeesController>(
-                                    builder: (controller) {
-                                      if (controller
-                                          .employeeStatus
-                                          .value
-                                          .isNotEmpty) {
-                                        return statusBox(
-                                          controller.employeeStatus.value,
-                                          hieght: 35,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 5,
-                                          ),
-                                        );
-                                      }
-                                      return const SizedBox();
+                                      return statusBox(
+                                        controller.getPersonType(
+                                          controller.hireDate.text,
+                                          controller.endDate.text,
+                                        ),
+                                        hieght: 35,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 5,
+                                        ),
+                                      );
                                     },
                                   ),
                                 ],
