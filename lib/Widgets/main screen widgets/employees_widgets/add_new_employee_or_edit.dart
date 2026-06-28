@@ -1,6 +1,5 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import '../../../consts.dart';
 import 'bank_accounts/bank_accounts_section.dart';
 import 'emails/email_section.dart';
@@ -61,17 +60,23 @@ Widget addNewEmployeeOrEdit({
                                     style: fontStyle1,
                                   ),
                                   const Spacer(),
-                                  GetBuilder<EmployeesController>(
-                                    builder: (controller) {
-                                      return statusBox(
-                                        controller.getPersonType(
-                                          controller.hireDate.text,
-                                          controller.endDate.text,
-                                        ),
-                                        hieght: 35,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 5,
-                                        ),
+                                  AnimatedBuilder(
+                                    animation: controller.hireDate,
+                                    builder: (context, _) {
+                                      return AnimatedBuilder(
+                                        animation: controller.endDate,
+                                        builder: (context, _) {
+                                          return statusBox(
+                                            controller.getPersonType(
+                                              controller.hireDate.text,
+                                              controller.endDate.text,
+                                            ),
+                                            hieght: 35,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 5,
+                                            ),
+                                          );
+                                        },
                                       );
                                     },
                                   ),
