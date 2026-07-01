@@ -15,7 +15,7 @@ Future<dynamic> emailDialog({
     Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: SizedBox(
-        height: 250,
+        height: 330,
         width: 400,
         child: Column(
           children: [

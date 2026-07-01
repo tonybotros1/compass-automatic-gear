@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
+import '../../../../consts.dart';
 import '../../../menu_dialog.dart';
 import '../../../my_text_field.dart';
 
@@ -34,8 +36,43 @@ Widget addNewEmailOrEdit({
         myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.emailAddress,
-          labelText: 'Contact Details',
+          labelText: 'Email Address',
+          keyboardType: TextInputType.emailAddress,
           validate: true,
+        ),
+        Obx(
+          () => Container(
+            decoration: BoxDecoration(
+              color: controller.emailUseForPayslips.value
+                  ? mainColor.withValues(alpha: 0.07)
+                  : Colors.blueGrey.withValues(alpha: 0.04),
+              border: Border.all(
+                color: controller.emailUseForPayslips.value
+                    ? mainColor.withValues(alpha: 0.4)
+                    : Colors.blueGrey.shade200,
+              ),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: CheckboxListTile(
+              value: controller.emailUseForPayslips.value,
+              activeColor: mainColor,
+              controlAffinity: ListTileControlAffinity.leading,
+              dense: true,
+              title: const Text(
+                'Use for Payslips',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text(
+                'Payslips will be sent to this email address',
+                style: TextStyle(fontSize: 11),
+              ),
+              onChanged: canEdit
+                  ? (value) {
+                      controller.emailUseForPayslips.value = value ?? false;
+                    }
+                  : null,
+            ),
+          ),
         ),
       ],
     ),

@@ -57,6 +57,8 @@ class PayrollRunsEmployeeModel {
   List<PayrollRunsEmployeeElementsModel>? runEmployeeInformation;
 
   String? employeeName;
+  String? employeeId;
+  String? employeeEmail;
   String? employeeNumber;
   String? bankName;
   String? accountNumber;
@@ -70,6 +72,8 @@ class PayrollRunsEmployeeModel {
   PayrollRunsEmployeeModel({
     this.runEmployeeDetails,
     this.employeeName,
+    this.employeeId,
+    this.employeeEmail,
     this.employeeNumber,
     this.bankName,
     this.accountNumber,
@@ -99,6 +103,8 @@ class PayrollRunsEmployeeModel {
               .toList() ??
           [],
       employeeName: _toStr(json['employee_name']),
+      employeeId: _toStr(json['employee_id']),
+      employeeEmail: _toStr(json['employee_email']),
       employeeNumber: _toStr(json['employee_number']),
       bankName: _toStr(json['bank_name']),
       accountNumber: _toStr(json['account_number']),

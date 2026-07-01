@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:datahubai/consts.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_html/html.dart' as html;
 import '../../Models/company variables/company_variables_model.dart';
 import '../../helpers.dart';
 
@@ -19,6 +21,10 @@ class CompanyVariablesController extends GetxController {
   RxBool updatingTermsAndConditions = RxBool(false);
   RxBool updatingHeader = RxBool(false);
   RxBool updatingFooter = RxBool(false);
+  RxBool googleMailConnected = RxBool(false);
+  RxBool googleMailBusy = RxBool(false);
+  RxString googleMailEmail = RxString('');
+  RxString companyMailEmail = RxString('');
   double logoSize = 150;
   RxList<String> userRoles = RxList([]);
   RxBool isBreakeAndTireSelected = RxBool(false);
@@ -61,8 +67,184 @@ class CompanyVariablesController extends GetxController {
 
   @override
   void onInit() async {
-    getCompanyVariables();
     super.onInit();
+    await Future.wait([getCompanyVariables(), getGoogleMailStatus()]);
+  }
+
+  String _responseMessage(http.Response response, String fallback) {
+    try {
+      final decoded = jsonDecode(response.body);
+      final detail = decoded['detail'];
+      if (detail is String && detail.isNotEmpty) return detail;
+    } catch (_) {}
+    return fallback;
+  }
+
+  Future<bool> getGoogleMailStatus({bool showErrors = false}) async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final response = await http.get(
+        Uri.parse('$backendUrl/company_variables/google_mail/status'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        googleMailConnected.value = decoded['connected'] == true;
+        googleMailEmail.value = decoded['email']?.toString() ?? '';
+        companyMailEmail.value = decoded['company_email']?.toString() ?? '';
+        return googleMailConnected.value;
+      }
+      if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getGoogleMailStatus(showErrors: showErrors);
+        }
+        if (refreshed == RefreshResult.invalidToken) logout();
+      } else if (response.statusCode == 401) {
+        logout();
+      } else if (showErrors) {
+        alertMessage(
+          context: Get.context!,
+          content: _responseMessage(
+            response,
+            'Could not load Google Mail status',
+          ),
+        );
+      }
+      return false;
+    } catch (_) {
+      if (showErrors) {
+        alertMessage(
+          context: Get.context!,
+          content: 'Could not load Google Mail status',
+        );
+      }
+      return false;
+    }
+  }
+
+  Future<void> connectGoogleMail() async {
+    if (googleMailBusy.isTrue) return;
+    html.WindowBase? popup;
+    try {
+      googleMailBusy.value = true;
+      popup = html.window.open(
+        'about:blank',
+        'datahubGoogleMail',
+        'width=560,height=720,menubar=no,toolbar=no',
+      );
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final response = await http.post(
+        Uri.parse('$backendUrl/company_variables/google_mail/connect'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final authorizationUrl = decoded['authorization_url']?.toString() ?? '';
+        if (authorizationUrl.isEmpty) {
+          throw Exception('Google authorization URL was not returned');
+        }
+        popup.location.href = authorizationUrl;
+
+        for (var attempt = 0; attempt < 90; attempt++) {
+          await Future<void>.delayed(const Duration(seconds: 2));
+          if (await getGoogleMailStatus()) {
+            showSnackBar(
+              'Google Mail',
+              '${googleMailEmail.value} connected successfully',
+            );
+            return;
+          }
+        }
+        alertMessage(
+          context: Get.context!,
+          content:
+              'Google Mail connection is still pending. '
+              'Complete the Google window and press Find again.',
+        );
+        return;
+      }
+
+      popup.close();
+      if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          googleMailBusy.value = false;
+          await connectGoogleMail();
+          return;
+        }
+        if (refreshed == RefreshResult.invalidToken) logout();
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        alertMessage(
+          context: Get.context!,
+          content: _responseMessage(
+            response,
+            'Could not start Google Mail connection',
+          ),
+        );
+      }
+    } catch (error) {
+      popup?.close();
+      alertMessage(
+        context: Get.context!,
+        content: error.toString().replaceFirst('Exception: ', ''),
+      );
+    } finally {
+      googleMailBusy.value = false;
+    }
+  }
+
+  Future<void> disconnectGoogleMail() async {
+    if (googleMailBusy.isTrue) return;
+    try {
+      googleMailBusy.value = true;
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      final response = await http.delete(
+        Uri.parse('$backendUrl/company_variables/google_mail/disconnect'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        googleMailConnected.value = false;
+        googleMailEmail.value = '';
+        showSnackBar('Google Mail', 'Disconnected');
+        return;
+      }
+      if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          googleMailBusy.value = false;
+          await disconnectGoogleMail();
+          return;
+        }
+        if (refreshed == RefreshResult.invalidToken) logout();
+      } else if (response.statusCode == 401) {
+        logout();
+      } else {
+        alertMessage(
+          context: Get.context!,
+          content: _responseMessage(
+            response,
+            'Could not disconnect Google Mail',
+          ),
+        );
+      }
+    } catch (_) {
+      alertMessage(
+        context: Get.context!,
+        content: 'Could not disconnect Google Mail',
+      );
+    } finally {
+      googleMailBusy.value = false;
+    }
   }
 
   Future<void> pickImage(String type) async {

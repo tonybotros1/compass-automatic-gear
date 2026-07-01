@@ -58,10 +58,11 @@ Widget tableOfScreens({
         ),
         DataColumn2(
           size: ColumnSize.L,
-          label: AutoSizedText(
-            constraints: constraints,
-            text: 'Contact Details',
-          ),
+          label: AutoSizedText(constraints: constraints, text: 'Email Address'),
+        ),
+        DataColumn2(
+          size: ColumnSize.M,
+          label: AutoSizedText(constraints: constraints, text: 'Payslips'),
         ),
       ],
       rows: controller.emailsList.map<DataRow>((invoiceItems) {
@@ -110,6 +111,18 @@ DataRow dataRowForTheTable(
           formatDouble: false,
         ),
       ),
+      DataCell(
+        data.useForPayslips
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle_rounded, color: mainColor, size: 18),
+                  const SizedBox(width: 5),
+                  const Text('Selected'),
+                ],
+              )
+            : const Text(''),
+      ),
     ],
   );
 }
@@ -124,6 +137,7 @@ ElevatedButton newEmailButton({required EmployeesController controller}) {
       controller.emailType.clear();
       controller.emailTypeId.value = '';
       controller.emailAddress.clear();
+      controller.emailUseForPayslips.value = false;
       emailDialog(
         controller: controller,
         canEdit: true,
@@ -167,6 +181,7 @@ IconButton updateEmailButton({
       controller.emailType.text = data.type ?? '';
       controller.emailTypeId.value = data.typeId ?? '';
       controller.emailAddress.text = data.email ?? '';
+      controller.emailUseForPayslips.value = data.useForPayslips;
       emailDialog(
         controller: controller,
         canEdit: true,

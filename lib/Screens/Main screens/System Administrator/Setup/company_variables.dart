@@ -96,6 +96,8 @@ class CompanyVariables extends StatelessWidget {
                                     },
                                   ),
                                 ),
+                                const SizedBox(height: 8),
+                                googleMailConnectionCard(controller),
                               ],
                             ),
                           ),
@@ -613,6 +615,163 @@ class CompanyVariables extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget googleMailConnectionCard(CompanyVariablesController controller) {
+    final connected = controller.googleMailConnected.value;
+    final displayEmail = connected
+        ? controller.googleMailEmail.value
+        : controller.companyMailEmail.value;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: connected
+            ? Colors.green.withValues(alpha: 0.06)
+            : Colors.blueGrey.withValues(alpha: 0.05),
+        border: Border.all(
+          color: connected
+              ? Colors.green.withValues(alpha: 0.35)
+              : Colors.blueGrey.shade200,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: connected
+                      ? Colors.green.withValues(alpha: 0.12)
+                      : mainColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  connected
+                      ? Icons.mark_email_read_rounded
+                      : Icons.attach_email_rounded,
+                  color: connected ? Colors.green.shade700 : mainColor,
+                  size: 21,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Payslip Email Sender',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      connected ? 'Google Mail connected' : 'Not connected',
+                      style: TextStyle(
+                        color: connected
+                            ? Colors.green.shade700
+                            : Colors.blueGrey.shade600,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: connected
+                      ? Colors.green.withValues(alpha: 0.12)
+                      : Colors.orange.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  connected ? 'Ready' : 'Setup required',
+                  style: TextStyle(
+                    color: connected
+                        ? Colors.green.shade800
+                        : Colors.orange.shade800,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (displayEmail.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(
+                  Icons.alternate_email_rounded,
+                  size: 16,
+                  color: Colors.blueGrey,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    displayEmail,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.blueGrey.shade700,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (connected)
+                TextButton(
+                  onPressed: controller.googleMailBusy.isFalse
+                      ? () {
+                          alertDialog(
+                            context: Get.context!,
+                            content: 'Disconnect Google Mail for this company?',
+                            onPressed: () {
+                              Get.back();
+                              controller.disconnectGoogleMail();
+                            },
+                          );
+                        }
+                      : null,
+                  child: const Text('Disconnect'),
+                ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: mainColor,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: controller.googleMailBusy.isFalse
+                    ? controller.connectGoogleMail
+                    : null,
+                icon: controller.googleMailBusy.isTrue
+                    ? const SizedBox(
+                        width: 15,
+                        height: 15,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.login_rounded, size: 17),
+                label: Text(connected ? 'Reconnect Gmail' : 'Connect Gmail'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

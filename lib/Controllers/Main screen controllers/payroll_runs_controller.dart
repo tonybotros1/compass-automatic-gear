@@ -23,6 +23,7 @@ class PayrollRunsController extends GetxController {
   RxBool addingNewValue = RxBool(false);
   RxBool rollingBack = RxBool(false);
   RxBool printingPayslip = RxBool(false);
+  RxString emailingPayslipsRunId = RxString('');
   RxBool exportingBankFile = RxBool(false);
   RxMap companyDetails = RxMap({});
   TextEditingController payrollName = TextEditingController();
@@ -546,6 +547,129 @@ class PayrollRunsController extends GetxController {
         content: 'Could not export bank payment file please try again later',
       );
     }
+  }
+
+  Future<void> emailPayslips(
+    String runId, {
+    List<PayrollRunsEmployeeModel>? selectedEmployees,
+  }) async {
+    if (runId.isEmpty || emailingPayslipsRunId.isNotEmpty) return;
+
+    emailingPayslipsRunId.value = runId;
+    try {
+      var loaded = selectedPayrollRunDetails.value?.id == runId;
+      if (!loaded) loaded = await getPayrollRunsDetails(runId);
+      if (!loaded || selectedPayrollRunDetails.value == null) {
+        throw Exception('Could not load this payroll run');
+      }
+
+      final employees =
+          selectedEmployees ??
+          selectedPayrollRunDetails.value!.employeesDetails ??
+          [];
+      if (employees.isEmpty) {
+        alertMessage(
+          context: Get.context!,
+          title: 'Payslip Mail Merge',
+          content: 'There are no employees in this payroll run',
+        );
+        return;
+      }
+      if (employees.any(
+        (employee) => employee.employeeId?.trim().isEmpty ?? true,
+      )) {
+        throw Exception('One or more employee IDs are missing');
+      }
+
+      if (companyDetails.isEmpty) await getCompanyDetails();
+      await _sendPayslipEmailRequest(runId, employees);
+    } catch (error) {
+      alertMessage(
+        context: Get.context!,
+        title: 'Payslip Mail Merge',
+        content: error.toString().replaceFirst('Exception: ', ''),
+      );
+    } finally {
+      emailingPayslipsRunId.value = '';
+    }
+  }
+
+  Future<void> _sendPayslipEmailRequest(
+    String runId,
+    List<PayrollRunsEmployeeModel> employees, {
+    bool canRefreshToken = true,
+  }) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final accessToken = prefs.getString('accessToken') ?? '';
+    final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$backendTestURI/payroll_runs/email_payslips/$runId'),
+    );
+    request.headers['Authorization'] = 'Bearer $accessToken';
+
+    for (final employee in employees) {
+      final pdfData = await generatePayslipPdf(employee);
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'payslips',
+          pdfData,
+          filename: '${employee.employeeId}.pdf',
+        ),
+      );
+    }
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      final sent = decoded['sent'] ?? 0;
+      final skipped = decoded['skipped'] ?? 0;
+      final failed = decoded['failed'] ?? 0;
+      final results = (decoded['results'] as List<dynamic>? ?? []);
+      final issues = results
+          .where((item) => item['status'] != 'sent')
+          .take(5)
+          .map(
+            (item) =>
+                '${item['employee_name'] ?? 'Employee'}: '
+                '${item['reason'] ?? item['status']}',
+          )
+          .join('\n');
+
+      alertMessage(
+        context: Get.context!,
+        title: 'Payslip Mail Merge',
+        content:
+            'Sent: $sent   Skipped: $skipped   Failed: $failed'
+            '${issues.isEmpty ? '' : '\n\n$issues'}',
+      );
+      return;
+    }
+
+    if (response.statusCode == 401 &&
+        refreshToken.isNotEmpty &&
+        canRefreshToken) {
+      final refreshed = await helper.refreshAccessToken(refreshToken);
+      if (refreshed == RefreshResult.success) {
+        await _sendPayslipEmailRequest(
+          runId,
+          employees,
+          canRefreshToken: false,
+        );
+        return;
+      }
+      if (refreshed == RefreshResult.invalidToken) logout();
+    } else if (response.statusCode == 401) {
+      logout();
+    }
+
+    String message = 'Could not send payslips. Please try again later';
+    try {
+      final decoded = jsonDecode(response.body);
+      message = decoded['detail']?.toString() ?? message;
+    } catch (_) {}
+    throw Exception(message);
   }
 
   Future<void> printPayslip(PayrollRunsEmployeeModel employee) async {

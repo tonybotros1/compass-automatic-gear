@@ -128,6 +128,7 @@ class EmployeesController extends GetxController {
   RxString nationalityId = RxString('');
   RxString phoneTypeId = RxString('');
   RxString emailTypeId = RxString('');
+  RxBool emailUseForPayslips = RxBool(false);
   TextEditingController nationalityStartDate = TextEditingController();
   TextEditingController nationalityEndDate = TextEditingController();
   RxString countryId = RxString('');
@@ -1801,10 +1802,22 @@ class EmployeesController extends GetxController {
   }
 
   // ======================== email section ========================
+  bool _isValidEmployeeEmail(String value) {
+    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value.trim());
+  }
+
   Future<void> addNewEmail() async {
     try {
       if (currentEmployeeId.value.isEmpty) {
         alertMessage(context: Get.context!, content: "Save doc first please");
+        return;
+      }
+      final cleanEmail = emailAddress.text.trim();
+      if (!_isValidEmployeeEmail(cleanEmail)) {
+        alertMessage(
+          context: Get.context!,
+          content: 'Please enter a valid email address',
+        );
         return;
       }
       addingNewEmployeeEmailValue.value = true;
@@ -1822,13 +1835,20 @@ class EmployeesController extends GetxController {
         },
         body: jsonEncode({
           "type": emailTypeId.value,
-          "email": emailAddress.text,
+          "email": cleanEmail,
+          "use_for_payslips": emailUseForPayslips.value,
         }),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         EmailModel newEmail = EmailModel.fromJson(decoded['new_email']);
+        if (newEmail.useForPayslips) {
+          for (final email in emailsList) {
+            email.useForPayslips = false;
+          }
+        }
         emailsList.insert(0, newEmail);
+        emailsList.refresh();
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -1856,6 +1876,14 @@ class EmployeesController extends GetxController {
         alertMessage(context: Get.context!, content: "Save doc first please");
         return;
       }
+      final cleanEmail = emailAddress.text.trim();
+      if (!_isValidEmployeeEmail(cleanEmail)) {
+        alertMessage(
+          context: Get.context!,
+          content: 'Please enter a valid email address',
+        );
+        return;
+      }
       addingNewEmployeeEmailValue.value = true;
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       var accessToken = '${prefs.getString('accessToken')}';
@@ -1869,12 +1897,18 @@ class EmployeesController extends GetxController {
         },
         body: jsonEncode({
           "type": emailTypeId.value,
-          "email": emailAddress.text,
+          "email": cleanEmail,
+          "use_for_payslips": emailUseForPayslips.value,
         }),
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         EmailModel updatedEmail = EmailModel.fromJson(decoded['updated_email']);
+        if (updatedEmail.useForPayslips) {
+          for (final email in emailsList) {
+            email.useForPayslips = false;
+          }
+        }
         int index = emailsList.indexWhere((ph) => ph.id == id);
         if (index != -1) {
           emailsList[index] = updatedEmail;

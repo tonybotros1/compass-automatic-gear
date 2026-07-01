@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/payroll_runs_controller.dart';
 import '../../../consts.dart';
 import 'payroll_runs_details_screen.dart';
+import 'payslip_recipients_dialog.dart';
 
 Future<dynamic> payrollRunsDetails({
   required BoxConstraints constraints,
@@ -47,6 +48,19 @@ Future<dynamic> payrollRunsDetails({
                               : "•••",
                           onTap: controller.exportingBankFile.isFalse
                               ? controller.exportBankPaymentFile
+                              : null,
+                        ),
+                        separator(),
+                        ClickableHoverText(
+                          text: controller.emailingPayslipsRunId.isEmpty
+                              ? 'Email Payslips'
+                              : "•••",
+                          onTap: controller.emailingPayslipsRunId.isEmpty
+                              ? () {
+                                  payslipRecipientsDialog(
+                                    controller: controller,
+                                  );
+                                }
                               : null,
                         ),
                         separator(),
