@@ -38,32 +38,32 @@ Widget tableOfSummaryDetails() {
             columns: const [
               DataColumn(
                 label: Text('CATEGORY'),
-                columnWidth: IntrinsicColumnWidth(flex: 3),
+                columnWidth: FlexColumnWidth(3),
               ),
               DataColumn(
                 numeric: true,
                 label: Text('COUNT'),
-                columnWidth: IntrinsicColumnWidth(flex: 1),
+                columnWidth: FlexColumnWidth(),
               ),
               DataColumn(
                 numeric: true,
                 label: Text('PAID'),
-                columnWidth: IntrinsicColumnWidth(flex: 1),
+                columnWidth: FlexColumnWidth(),
               ),
               DataColumn(
                 numeric: true,
                 label: Text('RECEIVED'),
-                columnWidth: IntrinsicColumnWidth(flex: 1),
+                columnWidth: FlexColumnWidth(),
               ),
               DataColumn(
                 numeric: true,
                 label: Text('NET'),
-                columnWidth: IntrinsicColumnWidth(flex: 1),
+                columnWidth: FlexColumnWidth(),
               ),
               DataColumn(
                 label: Text('ACTION'),
                 numeric: true,
-                columnWidth: IntrinsicColumnWidth(flex: .4),
+                columnWidth: FixedColumnWidth(90),
               ),
             ],
             rows: controller.summaryData.map((data) {

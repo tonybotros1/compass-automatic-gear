@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Models/dynamic_boxes_line_model.dart';
-import '../Screens/Dashboard/car_trading_dashboard.dart';
+import 'Dashboard Widgets/car trading widgets/summary_box.dart';
 
 Widget dynamicBoxesLine({required List<DynamicBoxesLineModel> dynamicConfigs}) {
   return Row(

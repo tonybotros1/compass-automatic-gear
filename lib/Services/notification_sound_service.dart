@@ -14,7 +14,9 @@ class NotificationSoundService extends GetxService {
     _lastPlayedAt = now;
 
     try {
-      final audio = html.AudioElement(_notificationSoundDataUri)..volume = 0.35;
+      final audio = html.AudioElement()
+        ..src = _notificationSoundDataUri
+        ..volume = 0.35;
       audio.play().catchError((_) {});
     } catch (_) {
       // Browsers can block sounds before the first user interaction.

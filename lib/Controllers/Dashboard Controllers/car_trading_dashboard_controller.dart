@@ -237,10 +237,10 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> transferComments = TextEditingController().obs;
 
   RxList<Map<String, dynamic>> summaryData = RxList<Map<String, dynamic>>([
-    {"category": "🚘  Cars"},
-    {"category": "🏷️  Capital Docs"},
-    {"category": "⚠️  Outstanding"},
-    {"category": "📜  Expenses"},
+    {"category": "Cars"},
+    {"category": "Capital Docs"},
+    {"category": "Outstanding"},
+    {"category": "Expenses"},
   ]);
 
   RxList<AccountSummaryModel> accountsSummary = RxList<AccountSummaryModel>([]);
@@ -259,6 +259,11 @@ class CarTradingDashboardController extends GetxController {
 
   RxInt initValueForDatePicker = RxInt(1);
   RxInt initValueForStatusPicker = RxInt(1);
+
+  List<Widget> carTradingTabs = const [
+    Tab(text: 'Cars Information'),
+    Tab(text: 'Financial Information'),
+  ];
 
   void selectRow(int index) {
     selectedRowIndex.value = index;
