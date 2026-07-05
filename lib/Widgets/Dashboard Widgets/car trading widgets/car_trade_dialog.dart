@@ -5,12 +5,14 @@ import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_control
 import '../../../consts.dart';
 import '../../text_button.dart';
 import 'add_or_edit_car_trade.dart';
+import 'add_or_edit_car_trade_items.dart';
 
 Future<dynamic> carTradesDialog({
   required CarTradingDashboardController controller,
   required bool canEdit,
   required String tradeID,
   required void Function()? onPressed,
+  required String screen,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -21,7 +23,7 @@ Future<dynamic> carTradesDialog({
         builder: (context, constraints) {
           return SizedBox(
             height: constraints.maxHeight,
-            width: constraints.maxWidth,
+            width: constraints.maxWidth - 40,
             child: Column(
               children: [
                 Container(
@@ -125,12 +127,19 @@ Future<dynamic> carTradesDialog({
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: addNewCarTradeOrEdit(
-                      constraints: constraints,
-                      context: context,
-                      controller: controller,
-                      canEdit: canEdit,
-                    ),
+                    child: screen == 'car_trading'
+                        ? addNewCarTradeOrEdit(
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
+                            canEdit: canEdit,
+                          )
+                        : addNewCarTradeItemsOrEdit(
+                            constraints: constraints,
+                            context: context,
+                            controller: controller,
+                            canEdit: canEdit,
+                          ),
                   ),
                 ),
               ],

@@ -7,6 +7,7 @@ import 'add_new_sales_agreement_item_or_edit.dart';
 
 Future<dynamic> salesAgreementItemDialog({
   required CarTradingDashboardController controller,
+  required BoxConstraints constraints,
   required bool canEdit,
   required void Function()? onPressed,
 }) {
@@ -18,7 +19,7 @@ Future<dynamic> salesAgreementItemDialog({
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SizedBox(
-            height: 850,
+            height: constraints.maxHeight,
             width: 1000,
             child: Column(
               children: [

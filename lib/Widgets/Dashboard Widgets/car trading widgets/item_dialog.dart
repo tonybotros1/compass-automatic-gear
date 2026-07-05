@@ -21,7 +21,7 @@ Future<dynamic> itemDialog({
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SizedBox(
-            height: 600,
+            height: 700,
             width: 500,
             child: Column(
               children: [

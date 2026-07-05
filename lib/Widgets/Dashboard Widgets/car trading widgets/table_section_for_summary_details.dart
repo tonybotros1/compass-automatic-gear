@@ -143,6 +143,7 @@ DataRow dataRowForTheTable(
             if (data['category'].contains('Cars')) {
               controller.clearValues();
               carTradesDialog(
+                screen: 'car_trading',
                 tradeID: '',
                 controller: controller,
                 canEdit: true,
