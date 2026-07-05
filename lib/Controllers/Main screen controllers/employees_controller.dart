@@ -1972,7 +1972,7 @@ class EmployeesController extends GetxController {
   Future<void> pickImage() async {
     try {
       // Use file_picker to pick an image file
-      final result = await FilePicker.platform.pickFiles(type: FileType.image);
+      final result = await FilePicker.pickFiles(type: FileType.image);
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;

@@ -413,7 +413,7 @@ class CompanyController extends GetxController {
   Future<void> pickImage() async {
     try {
       // Use file_picker to pick an image file
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.image, // Filter by image file types
       );
 

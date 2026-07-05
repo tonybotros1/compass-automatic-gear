@@ -13,7 +13,7 @@ class ImagePickerService {
   ) async {
     try {
       flagSelectedError.value = false;
-      final result = await FilePicker.platform.pickFiles(type: FileType.image);
+      final result = await FilePicker.pickFiles(type: FileType.image);
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
@@ -37,7 +37,7 @@ class FilePickerService {
     // if (kIsWeb) return; // Ensure it does not run on web
 
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: isExcel ? FileType.custom : FileType.any,
         allowedExtensions: isExcel ? ['xls', 'xlsx'] : null,
         withData: true,

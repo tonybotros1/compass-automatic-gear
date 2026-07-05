@@ -249,7 +249,7 @@ class CompanyVariablesController extends GetxController {
 
   Future<void> pickImage(String type) async {
     try {
-      final result = await FilePicker.platform.pickFiles(type: FileType.image);
+      final result = await FilePicker.pickFiles(type: FileType.image);
 
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;

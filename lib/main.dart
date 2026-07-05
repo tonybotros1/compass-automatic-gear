@@ -48,7 +48,7 @@ Future<void> _startApp() async {
   };
 
   kIsWeb
-      ? await Firebase.initializeApp(options: options)
+      ? await Firebase.initializeApp(options: webFirebaseOptions)
       : Platform.isAndroid
       ? await Firebase.initializeApp()
       : const SizedBox();
