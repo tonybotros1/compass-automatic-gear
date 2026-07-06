@@ -17,215 +17,213 @@ Widget addNewCarTradeItemsOrEdit({
 }) {
   return Form(
     key: controller.carTradeFormKey,
-    child: Column(
-      children: [
-        Expanded(
-          child: CustomScrollView(
-            physics: const NeverScrollableScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(
-                child: GetX<CarTradingDashboardController>(
-                  builder: (controller) {
-                    final isItems =
-                        controller.itemsPageName.value.toLowerCase() == 'items';
+    child: ColoredBox(
+      color: Colors.white,
+      child: Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              slivers: [
+                const SliverToBoxAdapter(child: SizedBox.shrink()),
+                SliverFillRemaining(
+                  hasScrollBody: true,
+                  child: ColoredBox(
+                    color: Colors.white,
+                    child: DefaultTabController(
+                      length: controller.carsTabs.length,
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            color: Colors.white,
+                            child: TabBar(
+                              onTap: (i) {
+                                if (i == 1) {
+                                  controller.itemsPageName.value = 'items';
+                                } else {
+                                  controller.itemsPageName.value =
+                                      'purchase agreement items';
+                                }
+                              },
+                              unselectedLabelColor: Colors.grey,
+                              tabAlignment: TabAlignment.start,
+                              isScrollable: true,
+                              indicatorColor: mainColor,
+                              labelColor: mainColor,
+                              splashBorderRadius: BorderRadius.circular(5),
+                              dividerColor: Colors.transparent,
 
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 300),
-                            switchInCurve: Curves.easeOutCubic,
-                            switchOutCurve: Curves.easeInCubic,
-                            transitionBuilder: (child, animation) {
-                              final slide = Tween<Offset>(
-                                begin: const Offset(0, 0.08),
-                                end: Offset.zero,
-                              ).animate(animation);
-                              return FadeTransition(
-                                opacity: animation,
-                                child: SlideTransition(
-                                  position: slide,
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: Wrap(
-                              key: ValueKey(isItems),
-                              alignment: WrapAlignment.center,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              spacing: 10,
-                              runSpacing: 8,
-                              children: isItems
-                                  ? [
-                                      _SummaryMetricBox(
-                                        label: 'TOTAL PAID',
-                                        value: '${controller.totalPays.value}',
-                                        icon: Icons.arrow_upward_rounded,
-                                        color: const Color(0xFFDC2626),
-                                      ),
-                                      _SummaryMetricBox(
-                                        label: 'TOTAL RECEIVED',
-                                        value:
-                                            '${controller.totalReceives.value}',
-                                        icon: Icons.arrow_downward_rounded,
-                                        color: const Color(0xFF16A34A),
-                                      ),
-                                      _SummaryMetricBox(
-                                        label: 'NET',
-                                        value: '${controller.totalNETs.value}',
-                                        icon: Icons
-                                            .account_balance_wallet_outlined,
-                                        color: const Color(0xFF475569),
-                                      ),
-                                    ]
-                                  : [
-                                      _SummaryMetricBox(
-                                        label: 'TOTAL AMOUNT',
-                                        value:
-                                            '${controller.totalPurchaseAgreementAmount.value}',
-                                        icon: Icons.payments_outlined,
-                                        color: const Color(0xFF0F766E),
-                                      ),
-                                      _SummaryMetricBox(
-                                        label: 'TOTAL DOWN PAYMENT',
-                                        value:
-                                            '${controller.totalPurchaseAgreementDownPayment.value}',
-                                        icon: Icons.pie_chart_outline_rounded,
-                                        color: const Color(0xFFEA580C),
-                                      ),
-                                    ],
+                              tabs: controller.carsTabs,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                      ],
+                          const SizedBox(height: 12),
+                          _TradeTotals(constraints: constraints),
+
+                          Expanded(
+                            child: TabBarView(
+                              children: [
+                                Column(
+                                  children: [
+                                    Expanded(
+                                      child: GetX<CarTradingDashboardController>(
+                                        builder: (controller) {
+                                          return SingleChildScrollView(
+                                            scrollDirection: Axis.vertical,
+                                            child: SizedBox(
+                                              width: constraints.maxWidth,
+                                              child:
+                                                  tableOfScreensForSalesAgreement(
+                                                    constraints: constraints,
+                                                    context: context,
+                                                    controller: controller,
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    Expanded(
+                                      child:
+                                          GetX<CarTradingDashboardController>(
+                                            builder: (controller) {
+                                              return SingleChildScrollView(
+                                                scrollDirection: Axis.vertical,
+                                                child: SizedBox(
+                                                  width: constraints.maxWidth,
+                                                  child: tableOfScreens(
+                                                    constraints: constraints,
+                                                    context: context,
+                                                    controller: controller,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _TradeTotals extends StatelessWidget {
+  const _TradeTotals({required this.constraints});
+
+  final BoxConstraints constraints;
+
+  @override
+  Widget build(BuildContext context) {
+    return GetX<CarTradingDashboardController>(
+      builder: (controller) {
+        final isItems = controller.itemsPageName.value.toLowerCase() == 'items';
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) {
+                    final slide = Tween<Offset>(
+                      begin: const Offset(0, 0.06),
+                      end: Offset.zero,
+                    ).animate(animation);
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(position: slide, child: child),
                     );
                   },
-                ),
-              ),
-              SliverFillRemaining(
-                hasScrollBody: true,
-                child: Container(
-                  decoration: containerDecor,
-                  child: DefaultTabController(
-                    length: controller.carsTabs.length,
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: BoxBorder.fromLTRB(
-                              top: const BorderSide(color: Colors.grey),
-                              bottom: const BorderSide(color: Colors.grey),
-                            ),
-                          ),
-                          child: TabBar(
-                            onTap: (i) {
-                              if (i == 1) {
-                                controller.itemsPageName.value = 'items';
-                              } else {
-                                controller.itemsPageName.value =
-                                    'purchase agreement items';
-                              }
-                            },
-                            unselectedLabelColor: Colors.grey,
-                            tabAlignment: TabAlignment.start,
-                            isScrollable: true,
-                            indicatorColor: mainColor,
-                            labelColor: mainColor,
-                            splashBorderRadius: BorderRadius.circular(5),
-                            dividerColor: Colors.transparent,
-
-                            tabs: controller.carsTabs,
-                          ),
-                        ),
-
-                        Expanded(
-                          child: TabBarView(
-                            children: [
-                              Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    color: Colors.white,
-                                    child: Row(
-                                      children: [
-                                        const Spacer(),
-                                        newItemButtonForSalesAgreement(
-                                          context,
-                                          controller,
-                                          constraints,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: GetX<CarTradingDashboardController>(
-                                      builder: (controller) {
-                                        return SingleChildScrollView(
-                                          scrollDirection: Axis.vertical,
-                                          child: SizedBox(
-                                            width: constraints.maxWidth,
-                                            child:
-                                                tableOfScreensForSalesAgreement(
-                                                  constraints: constraints,
-                                                  context: context,
-                                                  controller: controller,
-                                                ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
+                  child: Align(
+                    key: ValueKey(isItems),
+                    alignment: Alignment.centerLeft,
+                    child: Wrap(
+                      alignment: WrapAlignment.start,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: isItems
+                          ? [
+                              _SummaryMetricBox(
+                                label: 'TOTAL PAID',
+                                value: '${controller.totalPays.value}',
+                                icon: Icons.arrow_upward_rounded,
+                                color: const Color(0xFFDC2626),
                               ),
-                              Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    color: Colors.white,
-                                    child: Row(
-                                      children: [
-                                        const Spacer(),
-                                        newItemButton(context, controller),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: GetX<CarTradingDashboardController>(
-                                      builder: (controller) {
-                                        return SingleChildScrollView(
-                                          scrollDirection: Axis.vertical,
-                                          child: SizedBox(
-                                            width: constraints.maxWidth,
-                                            child: tableOfScreens(
-                                              constraints: constraints,
-                                              context: context,
-                                              controller: controller,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
+                              _SummaryMetricBox(
+                                label: 'TOTAL RECEIVED',
+                                value: '${controller.totalReceives.value}',
+                                icon: Icons.arrow_downward_rounded,
+                                color: const Color(0xFF16A34A),
+                              ),
+                              _SummaryMetricBox(
+                                label: 'NET',
+                                value: '${controller.totalNETs.value}',
+                                icon: Icons.account_balance_wallet_outlined,
+                                color: const Color(0xFF475569),
+                              ),
+                            ]
+                          : [
+                              _SummaryMetricBox(
+                                label: 'TOTAL AMOUNT',
+                                value:
+                                    '${controller.totalPurchaseAgreementAmount.value}',
+                                icon: Icons.payments_outlined,
+                                color: const Color(0xFF0F766E),
+                              ),
+                              _SummaryMetricBox(
+                                label: 'TOTAL DOWN PAYMENT',
+                                value:
+                                    '${controller.totalPurchaseAgreementDownPayment.value}',
+                                icon: Icons.pie_chart_outline_rounded,
+                                color: const Color(0xFFEA580C),
                               ),
                             ],
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ),
               ),
+              const SizedBox(width: 14),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: KeyedSubtree(
+                  key: ValueKey('new-button-$isItems'),
+                  child: isItems
+                      ? newItemButton(context, controller)
+                      : newItemButtonForSalesAgreement(
+                          context,
+                          controller,
+                          constraints,
+                        ),
+                ),
+              ),
             ],
           ),
-        ),
-      ],
-    ),
-  );
+        );
+      },
+    );
+  }
 }
 
 class _SummaryMetricBox extends StatelessWidget {
@@ -249,26 +247,19 @@ class _SummaryMetricBox extends StatelessWidget {
         : priceFormat.format(numericValue);
 
     return Container(
-      width: 220,
-      height: 78,
-      padding: const EdgeInsets.all(12),
+      width: 200,
+      height: 66,
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x080F172A),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE7EDF3)),
       ),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
@@ -317,22 +308,7 @@ class _SummaryMetricBox extends StatelessWidget {
 }
 
 Widget _modernTableSurface({required Widget child}) {
-  return Container(
-    margin: const EdgeInsets.fromLTRB(8, 2, 8, 8),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: const Color(0xFFE3E8EF)),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x0A0F172A),
-          blurRadius: 12,
-          offset: Offset(0, 4),
-        ),
-      ],
-    ),
-    child: ClipRRect(borderRadius: BorderRadius.circular(12), child: child),
-  );
+  return Padding(padding: const EdgeInsets.fromLTRB(8, 2, 8, 8), child: child);
 }
 
 WidgetStateProperty<Color?> _tableRowColor(int index) {

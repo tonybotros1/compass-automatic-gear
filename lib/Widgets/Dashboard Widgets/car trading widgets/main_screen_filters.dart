@@ -16,7 +16,7 @@ class MainScreenFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
+    return SizedBox(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 10,

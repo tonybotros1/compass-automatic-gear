@@ -51,75 +51,91 @@ Future<dynamic> carTradesDialog({
                       ),
                       const Spacer(),
 
-                      GetX<CarTradingDashboardController>(
-                        builder: (controller) {
-                          return controller.currentTradId.value != ''
-                              ? Row(
-                                  spacing: 10,
-                                  children: [
-                                    separator(),
+                      screen == 'car_trading'
+                          ? Row(
+                              spacing: 10,
+                              children: [
+                                GetX<CarTradingDashboardController>(
+                                  builder: (controller) {
+                                    return controller.currentTradId.value != ''
+                                        ? Row(
+                                            spacing: 10,
+                                            children: [
+                                              separator(),
 
-                                    ClickableHoverText(
-                                      onTap: () {
-                                        controller.status.value = 'Sold';
-                                        controller.carModified.value = true;
-                                      },
-                                      text: 'Sold',
-                                    ),
-                                    point(),
-                                    ClickableHoverText(
-                                      onTap: () {
-                                        controller.status.value = 'New';
-                                        controller.carModified.value = true;
-                                      },
-                                      text: 'New',
-                                    ),
-                                  ],
-                                )
-                              : const SizedBox();
-                        },
-                      ),
-                      separator(),
-                      Row(
-                        spacing: tradeID != '' ? 10 : 0,
-                        children: [
-                          GetX<CarTradingDashboardController>(
-                            builder: (controller) {
-                              return ClickableHoverText(
-                                onTap: controller.addingNewValue.isFalse
-                                    ? onPressed
-                                    : null,
-                                text: controller.addingNewValue.value == false
-                                    ? 'Save'
-                                    : "...",
-                              );
-                            },
-                          ),
-                          tradeID != ''
-                              ? Row(
-                                  spacing: 10,
+                                              ClickableHoverText(
+                                                onTap: () {
+                                                  controller.status.value =
+                                                      'Sold';
+                                                  controller.carModified.value =
+                                                      true;
+                                                },
+                                                text: 'Sold',
+                                              ),
+                                              point(),
+                                              ClickableHoverText(
+                                                onTap: () {
+                                                  controller.status.value =
+                                                      'New';
+                                                  controller.carModified.value =
+                                                      true;
+                                                },
+                                                text: 'New',
+                                              ),
+                                            ],
+                                          )
+                                        : const SizedBox();
+                                  },
+                                ),
+                                separator(),
+                                Row(
+                                  spacing: tradeID != '' ? 10 : 0,
                                   children: [
-                                    point(),
-
-                                    ClickableHoverText(
-                                      onTap: () {
-                                        alertDialog(
-                                          context: context,
-                                          content:
-                                              "The trade will be deleted permanently",
-                                          onPressed: () {
-                                            controller.deleteTrade(tradeID);
-                                          },
+                                    GetX<CarTradingDashboardController>(
+                                      builder: (controller) {
+                                        return ClickableHoverText(
+                                          onTap:
+                                              controller.addingNewValue.isFalse
+                                              ? onPressed
+                                              : null,
+                                          text:
+                                              controller.addingNewValue.value ==
+                                                  false
+                                              ? 'Save'
+                                              : "...",
                                         );
                                       },
-                                      text: "Delete",
                                     ),
+                                    tradeID != ''
+                                        ? Row(
+                                            spacing: 10,
+                                            children: [
+                                              point(),
+
+                                              ClickableHoverText(
+                                                onTap: () {
+                                                  alertDialog(
+                                                    context: context,
+                                                    content:
+                                                        "The trade will be deleted permanently",
+                                                    onPressed: () {
+                                                      controller.deleteTrade(
+                                                        tradeID,
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                                text: "Delete",
+                                              ),
+                                            ],
+                                          )
+                                        : const SizedBox(),
                                   ],
-                                )
-                              : const SizedBox(),
-                        ],
-                      ),
-                      separator(),
+                                ),
+                                separator(),
+                              ],
+                            )
+                          : const SizedBox(),
                       closeIcon(),
                     ],
                   ),

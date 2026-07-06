@@ -1,10 +1,21 @@
-import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:get/get.dart';
+
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../Models/car trading/car_trade_model.dart';
 import '../../../consts.dart';
 import 'car_trade_dialog.dart';
+
+const _pageBackground = Colors.white;
+const _surface = Colors.white;
+const _line = Color(0xFFDCE6E8);
+const _text = Color(0xFF26343A);
+const _muted = Color(0xFF6F8088);
+const _primary = Color.fromARGB(255, 1, 42, 40);
+const _orange = Color(0xFFF26D32);
+const _red = Color(0xFFED554E);
+const _green = Color(0xFF2DA85A);
 
 Widget tableOfCarTrades({
   required BoxConstraints constraints,
@@ -12,301 +23,122 @@ Widget tableOfCarTrades({
 }) {
   return GetX<CarTradingDashboardController>(
     builder: (controller) {
-      bool istradingLoading = controller.filteredTrades.isEmpty;
-      return DataTableTheme(
-        data: DataTableThemeData(
-          dataRowColor: WidgetStateProperty.resolveWith<Color?>((states) {
-            if (states.contains(WidgetState.selected)) {
-              return Colors.grey.shade400;
-            }
-            return Colors.white;
-          }),
-          headingTextStyle: TextStyle(
-            color: Colors.grey[700],
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
-          dataTextStyle: TextStyle(
-            color: Colors.grey.shade800,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
-        ),
-        child: PaginatedDataTable2(
-          border: TableBorder.symmetric(
-            inside: BorderSide(color: Colors.grey.shade200, width: 0.5),
-          ),
-          // controller: controller.scrollControllerForTable,
-          headingRowHeight: 45,
-          dataRowHeight: 82,
-          minWidth: 1450,
-          // showEmptyRows: true,
-          autoRowsToHeight: true,
-          dividerThickness: .3,
-          showFirstLastButtons: true,
-          rowsPerPage: controller.numberOfCars.value <= 8
-              ? 8
-              : controller.numberOfCars.value >= 30
-              ? 30
-              : controller.numberOfCars.value,
-          showCheckboxColumn: false,
-          horizontalMargin: horizontalMarginForTable,
-          // dataRowMaxHeight: 40,
-          // dataRowMinHeight: 30,
-          columnSpacing: 5,
-          // headingRowColor: const WidgetStatePropertyAll(Color(0xffF4F5F8)),
-          columns: const [
-            DataColumn2(label: SizedBox.shrink(), fixedWidth: 88),
-            DataColumn2(label: Text('VEHICLE'), fixedWidth: 360),
-            DataColumn2(label: Text('VIN'), fixedWidth: 180),
-            DataColumn2(label: Text('BOUGHT BY'), fixedWidth: 180),
-            DataColumn2(label: Text('SOLD BY'), fixedWidth: 180),
-            DataColumn2(numeric: true, label: Text('PAID')),
-            DataColumn2(numeric: true, label: Text('RECEIVED')),
-            DataColumn2(numeric: true, label: Text('NET')),
-          ],
-          source: TradeDataSource(
-            trades: istradingLoading ? [] : controller.filteredTrades,
-            context: context,
-            constraints: constraints,
-            controller: controller,
-          ),
-        ),
-      );
+      final trades = controller.filteredTrades.toList(growable: false);
+      final isSearching = controller.searching.value;
+
+      return _CarTradeCardsView(trades: trades, isSearching: isSearching);
     },
   );
 }
 
-DataRow dataRowForTheTable(
-  CarTradeModel tradeData,
-  BuildContext context,
-  BoxConstraints constraints,
-  String tradeId,
-  CarTradingDashboardController controller,
-  int index,
-) {
-  final isEvenRow = index % 2 == 0;
-  return DataRow(
-    color: WidgetStateProperty.resolveWith<Color?>((states) {
-      if (states.contains(WidgetState.selected)) {
-        return Colors.grey.shade400;
-      }
-      return isEvenRow ? Colors.white : Colors.grey.shade100;
-    }),
-    cells: [
-      DataCell(editSection(tradeData: tradeData, id: tradeId)),
-      DataCell(_VehicleSummary(trade: tradeData)),
-      DataCell(_VinCell(vin: tradeData.vin)),
-      DataCell(
-        _PartyDateSummary(
-          name: tradeData.boughtBy,
-          date: textToDate(tradeData.buyDate ?? ''),
-          accentColor: Colors.purple,
-        ),
-      ),
-      DataCell(
-        _PartyDateSummary(
-          name: tradeData.soldBy,
-          date: textToDate(tradeData.sellDate ?? ''),
-          accentColor: Colors.blue,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: tradeData.totalPay.toString(),
-          color: Colors.red,
-          isBold: true,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: tradeData.totalReceive.toString(),
-          color: Colors.green,
-          isBold: true,
-        ),
-      ),
-      DataCell(
-        textForDataRowInTable(
-          text: tradeData.net.toString(),
-          color: Colors.blueGrey,
-          isBold: true,
-        ),
-      ),
-    ],
-  );
-}
+class _CarTradeCardsView extends StatelessWidget {
+  const _CarTradeCardsView({required this.trades, required this.isSearching});
 
-class _VinCell extends StatelessWidget {
-  const _VinCell({required this.vin});
-
-  final String? vin;
+  final List<CarTradeModel> trades;
+  final bool isSearching;
 
   @override
   Widget build(BuildContext context) {
-    final value = vin?.trim() ?? '';
-    if (value.isEmpty) {
-      return Text(
-        ' - ',
-        style: TextStyle(
-          color: Colors.blueGrey.shade300,
-          fontWeight: FontWeight.w700,
+    if (isSearching && trades.isEmpty) {
+      return const ColoredBox(
+        color: _pageBackground,
+        child: Center(
+          child: CircularProgressIndicator(color: _primary, strokeWidth: 2.5),
         ),
       );
     }
 
-    return Tooltip(
-      message: value,
-      child: Row(
-        children: [
-          Icon(
-            Icons.fingerprint_rounded,
-            size: 14,
-            color: Colors.blueGrey.shade300,
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: Colors.blueGrey.shade700,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.6,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PartyDateSummary extends StatelessWidget {
-  const _PartyDateSummary({
-    required this.name,
-    required this.date,
-    required this.accentColor,
-  });
-
-  final String? name;
-  final String date;
-  final Color accentColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final normalizedName = name?.trim() ?? '';
-    final normalizedDate = date.trim();
-    if (normalizedName.isEmpty && normalizedDate.isEmpty) {
-      return const SizedBox.shrink();
+    if (trades.isEmpty) {
+      return const ColoredBox(
+        color: _pageBackground,
+        child: _EmptyTradesState(),
+      );
     }
 
-    return SizedBox(
-      width: 160,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (normalizedName.isNotEmpty)
-            Row(
-              children: [
-                Icon(
-                  Icons.person_outline_rounded,
-                  size: 14,
-                  color: Colors.blueGrey.shade400,
-                ),
-                const SizedBox(width: 5),
-                Expanded(
-                  child: Text(
-                    normalizedName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.blueGrey.shade800,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
+    return ColoredBox(
+      color: _pageBackground,
+      child: LayoutBuilder(
+        builder: (context, gridConstraints) {
+          final horizontalPadding = gridConstraints.maxWidth < 600 ? 8.0 : 12.0;
+          final availableWidth =
+              gridConstraints.maxWidth - (horizontalPadding * 2);
+          final naturalColumnCount = (availableWidth / 460).ceil();
+          final columnCount = gridConstraints.maxWidth < 600
+              ? 1
+              : naturalColumnCount > 1
+              ? naturalColumnCount - 1
+              : 1;
+
+          return GridView.builder(
+            key: const PageStorageKey<String>('car-trade-cards'),
+            scrollCacheExtent: const ScrollCacheExtent.pixels(160),
+            addAutomaticKeepAlives: false,
+            addSemanticIndexes: false,
+            addRepaintBoundaries: true,
+            physics: const ClampingScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              horizontalPadding,
+              10,
+              horizontalPadding,
+              10,
             ),
-          if (normalizedName.isNotEmpty && normalizedDate.isNotEmpty)
-            const SizedBox(height: 5),
-          if (normalizedDate.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-              decoration: BoxDecoration(
-                color: accentColor.withValues(alpha: 0.07),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: accentColor.withValues(alpha: 0.18)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.calendar_month_outlined,
-                    size: 11,
-                    color: accentColor.withValues(alpha: 0.75),
-                  ),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      normalizedDate,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: accentColor.withValues(alpha: 0.85),
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            itemCount: trades.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columnCount,
+              mainAxisExtent: 380,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
             ),
-        ],
+            itemBuilder: (context, index) {
+              final trade = trades[index];
+              return _CarTradeCard(
+                key: ValueKey(trade.id ?? 'trade-$index'),
+                trade: trade,
+              );
+            },
+          );
+        },
       ),
     );
   }
 }
 
-class _VehicleSummary extends StatelessWidget {
-  const _VehicleSummary({required this.trade});
+class _CarTradeCard extends StatelessWidget {
+  const _CarTradeCard({super.key, required this.trade});
 
   final CarTradeModel trade;
 
-  String _value(String? value) {
+  String _display(String? value) {
     final normalized = value?.trim() ?? '';
     return normalized.isEmpty ? '—' : normalized;
   }
 
-  String _formatMileage(int mileage) {
-    return mileage.toString().replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-      (match) => '${match[1]},',
-    );
+  String _mileage(int? value) {
+    if (value == null) return '';
+    return '${qtyFormat.format(value)} km';
   }
+
+  String _money(double? value) => priceFormat.format(value ?? 0);
 
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
       case 'new':
       case 'open':
       case 'active':
-        return Colors.green.shade600;
+        return _green;
       case 'sold':
       case 'posted':
-        return Colors.teal.shade600;
+        return _primary;
       case 'cancelled':
       case 'inactive':
       case 'returned':
-        return Colors.red.shade600;
-      case 'draft':
-        return Colors.blueGrey.shade600;
+        return _red;
       case 'approved':
-        return Colors.indigo.shade500;
+        return const Color(0xFF5667B3);
+      case 'draft':
+        return const Color(0xFF70828B);
       default:
-        return Colors.orange.shade700;
+        return const Color(0xFFB87524);
     }
   }
 
@@ -314,182 +146,221 @@ class _VehicleSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final brand = trade.carBrand?.trim() ?? '';
     final model = trade.carModel?.trim() ?? '';
-    final year = trade.year?.trim() ?? '';
+    final vehicleName = [
+      brand,
+      model,
+    ].where((value) => value.isNotEmpty).join(' ');
+    final details = [
+      _display(trade.colorOut),
+      _display(trade.colorIn),
+      _display(trade.specification),
+      _display(trade.engineSize),
+    ].join('  ·  ');
     final status = trade.status?.trim() ?? '';
+    final year = trade.year?.trim() ?? '';
+    final vin = trade.vin?.trim() ?? '';
     final statusColor = _statusColor(status);
 
-    return SizedBox(
-      width: 340,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+    return Container(
+      decoration: BoxDecoration(
+        color: _surface,
+        border: Border.all(color: _line),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
         children: [
           Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: brand.isEmpty ? 'Unknown vehicle' : brand,
-                        style: TextStyle(color: Colors.blueGrey.shade900),
-                      ),
-                      if (model.isNotEmpty)
-                        TextSpan(
-                          text: '  $model',
-                          style: TextStyle(color: Colors.blueGrey.shade700),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          vehicleName.isEmpty ? 'Unknown vehicle' : vehicleName,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: _text,
+                            fontSize: 17,
+                            height: 1.25,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
-                    ],
+                        const SizedBox(height: 6),
+                        Text(
+                          details,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: _muted,
+                            fontSize: 12.5,
+                            height: 1.45,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        if (year.isNotEmpty || trade.mileage != null) ...[
+                          const SizedBox(height: 9),
+                          Wrap(
+                            spacing: 7,
+                            runSpacing: 6,
+                            children: [
+                              if (year.isNotEmpty)
+                                _InlineVehicleMetric(
+                                  label: year,
+                                  icon: Icons.calendar_today_outlined,
+                                  color: const Color(0xFF2F7EA1),
+                                ),
+                              if (trade.mileage != null)
+                                _InlineVehicleMetric(
+                                  label: _mileage(trade.mileage),
+                                  icon: Icons.speed_outlined,
+                                  color: _orange,
+                                ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
+                  if (status.isNotEmpty) ...[
+                    const SizedBox(width: 10),
+                    SizedBox(
+                      width: 86,
+                      child: _CardTag(
+                        label: status,
+                        color: statusColor,
+                        background: statusColor.withValues(alpha: 0.10),
+                        border: statusColor.withValues(alpha: 0.35),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          const Divider(height: 1, thickness: 1, color: _line),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _PersonSummary(
+                    label: 'Bought By',
+                    name: trade.boughtBy,
+                    date: textToDate(trade.buyDate),
+                    dateColor: const Color(0xFFAD47C2),
+                    dateBackground: const Color(0xFFF6E9FF),
                   ),
                 ),
-                const SizedBox(height: 4),
-                _detailLine(
-                  icon: Icons.palette_outlined,
-                  firstLabel: 'Exterior',
-                  firstValue: _value(trade.colorOut),
-                  secondLabel: 'Interior',
-                  secondValue: _value(trade.colorIn),
-                ),
-                const SizedBox(height: 3),
-                _detailLine(
-                  icon: Icons.settings_outlined,
-                  firstLabel: 'Spec',
-                  firstValue: _value(trade.specification),
-                  secondLabel: 'Engine',
-                  secondValue: _value(trade.engineSize),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _PersonSummary(
+                    label: 'Sold By',
+                    name: trade.soldBy,
+                    date: textToDate(trade.sellDate),
+                    dateColor: const Color(0xFF1682C2),
+                    dateBackground: const Color(0xFFE8F5FF),
+                  ),
                 ),
               ],
             ),
           ),
-          if (year.isNotEmpty ||
-              status.isNotEmpty ||
-              trade.mileage != null) ...[
-            const SizedBox(width: 10),
-            SizedBox(
-              width: 88,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (year.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.blueGrey.withValues(alpha: 0.07),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.blueGrey.shade100),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.calendar_today_outlined,
-                              size: 10,
-                              color: Colors.blueGrey.shade500,
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                year,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: Colors.blueGrey.shade700,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (year.isNotEmpty && status.isNotEmpty)
-                      const SizedBox(height: 5),
-                    if (status.isNotEmpty)
-                      _StatusPill(status: status, color: statusColor),
-                    if ((year.isNotEmpty || status.isNotEmpty) &&
-                        trade.mileage != null)
-                      const SizedBox(height: 5),
-                    if (trade.mileage != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.deepOrange.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.deepOrange.shade100),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.speed_outlined,
-                              size: 11,
-                              color: Colors.deepOrange.shade500,
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                '${_formatMileage(trade.mileage!)} km',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: Colors.deepOrange.shade700,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
+          const Divider(height: 1, thickness: 1, color: _line),
+          SizedBox(
+            height: 55,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _MoneyCell(
+                    label: 'Paid',
+                    value: _money(trade.totalPay),
+                    color: _red,
+                  ),
                 ),
-              ),
+                const VerticalDivider(width: 1, thickness: 1, color: _line),
+                Expanded(
+                  child: _MoneyCell(
+                    label: 'Received',
+                    value: _money(trade.totalReceive),
+                    color: _green,
+                  ),
+                ),
+                const VerticalDivider(width: 1, thickness: 1, color: _line),
+                Expanded(
+                  child: _MoneyCell(
+                    label: 'Net',
+                    value: _money(trade.net),
+                    color: trade.net != null && trade.net! < 0
+                        ? const Color(0xFF657F91)
+                        : const Color(0xFF638095),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
+          const Divider(height: 1, thickness: 1, color: _line),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            child: Row(
+              children: [
+                editSection(tradeData: trade, id: trade.id?.toString() ?? ''),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    vin.isEmpty ? '-' : vin,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      color: Color(0xFF73858D),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.25,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _detailLine({
-    required IconData icon,
-    required String firstLabel,
-    required String firstValue,
-    required String secondLabel,
-    required String secondValue,
-  }) {
+class _InlineVehicleMetric extends StatelessWidget {
+  const _InlineVehicleMetric({
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 12, color: Colors.blueGrey.shade300),
+        Icon(icon, size: 17, color: color),
         const SizedBox(width: 5),
-        Expanded(
-          child: Text.rich(
-            TextSpan(
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 10.5),
-              children: [
-                TextSpan(
-                  text: '$firstLabel: ',
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                TextSpan(text: firstValue),
-                TextSpan(text: '  •  $secondLabel: '),
-                TextSpan(text: secondValue),
-              ],
-            ),
+        Flexible(
+          child: Text(
+            label.toUpperCase(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: color,
+              fontSize: 17,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.2,
+            ),
           ),
         ),
       ],
@@ -497,44 +368,223 @@ class _VehicleSummary extends StatelessWidget {
   }
 }
 
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({required this.status, required this.color});
+class _CardTag extends StatelessWidget {
+  const _CardTag({
+    required this.label,
+    required this.color,
+    required this.background,
+    required this.border,
+  });
 
-  final String status;
+  final String label;
   final Color color;
+  final Color background;
+  final Color border;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      height: 25,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
+        color: background,
+        border: Border.all(color: border),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Text(
+        label.toUpperCase(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: color,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.25,
+        ),
+      ),
+    );
+  }
+}
+
+class _PersonSummary extends StatelessWidget {
+  const _PersonSummary({
+    required this.label,
+    required this.name,
+    required this.date,
+    required this.dateColor,
+    required this.dateBackground,
+  });
+
+  final String label;
+  final String? name;
+  final String date;
+  final Color dateColor;
+  final Color dateBackground;
+
+  @override
+  Widget build(BuildContext context) {
+    final normalizedName = name?.trim() ?? '';
+    final normalizedDate = date.trim();
+
+    return Container(
+      height: 78,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FBFB),
+        border: Border.all(color: const Color(0xFFE7EEEE)),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              status.toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: color,
-                fontSize: 9,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 0.3,
-              ),
+          Text(
+            label.toUpperCase(),
+            maxLines: 1,
+            style: const TextStyle(
+              color: Color(0xFF7A8990),
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.55,
             ),
           ),
+          const SizedBox(height: 3),
+          Text(
+            normalizedName.isEmpty ? '—' : normalizedName,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF33444C),
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const Spacer(),
+          if (normalizedDate.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: dateBackground,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Text(
+                normalizedDate,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: dateColor,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+}
+
+class _MoneyCell extends StatelessWidget {
+  const _MoneyCell({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: const Color(0xFFFBFCFC),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label.toUpperCase(),
+              maxLines: 1,
+              style: const TextStyle(
+                color: Color(0xFF75848A),
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.45,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyTradesState extends StatelessWidget {
+  const _EmptyTradesState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: _primary.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.directions_car_outlined,
+                color: _primary,
+                size: 27,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'No vehicles found',
+              style: TextStyle(
+                color: _text,
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Try changing the filters or clearing the search.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: _muted,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -572,21 +622,21 @@ Widget editSection({required CarTradeModel tradeData, required String id}) {
         );
       }
 
-      return Column(
+      return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           _TradeActionButton(
             label: 'INFOS',
-            color: Colors.blueGrey.shade600,
+            color: const Color(0xFF456B79),
             isLoading: infosLoading,
             onPressed: rowIsLoading
                 ? null
                 : () => openScreen('car_trading', infosLoadingKey),
           ),
-          const SizedBox(height: 5),
+          const SizedBox(width: 6),
           _TradeActionButton(
             label: 'ITEMS',
-            color: Colors.teal.shade600,
+            color: _primary,
             isLoading: itemsLoading,
             onPressed: rowIsLoading
                 ? null
@@ -614,75 +664,35 @@ class _TradeActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 68,
+      width: 62,
       height: 29,
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
           foregroundColor: color,
-          backgroundColor: color.withValues(alpha: 0.06),
-          disabledForegroundColor: color.withValues(alpha: 0.45),
-          disabledBackgroundColor: color.withValues(alpha: 0.03),
+          backgroundColor: color.withValues(alpha: 0.035),
+          disabledForegroundColor: color.withValues(alpha: 0.42),
+          disabledBackgroundColor: color.withValues(alpha: 0.02),
           padding: EdgeInsets.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          side: BorderSide(color: color.withValues(alpha: 0.35)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          side: BorderSide(color: color.withValues(alpha: 0.38)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         ),
         child: isLoading
             ? SizedBox(
-                width: 14,
-                height: 14,
+                width: 13,
+                height: 13,
                 child: CircularProgressIndicator(strokeWidth: 2, color: color),
               )
             : Text(
                 label,
                 style: const TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: FontWeight.w900,
-                  letterSpacing: 0.3,
+                  letterSpacing: 0.2,
                 ),
               ),
       ),
     );
   }
-}
-
-class TradeDataSource extends DataTableSource {
-  final List<CarTradeModel> trades;
-  final BuildContext context;
-  final BoxConstraints constraints;
-  final CarTradingDashboardController controller;
-
-  TradeDataSource({
-    required this.trades,
-    required this.context,
-    required this.constraints,
-    required this.controller,
-  });
-
-  @override
-  DataRow? getRow(int index) {
-    if (index >= trades.length) return null;
-
-    final trade = trades[index];
-    final tradeId = trade.id.toString();
-
-    return dataRowForTheTable(
-      trade,
-      context,
-      constraints,
-      tradeId,
-      controller,
-      index,
-    );
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => trades.length;
-
-  @override
-  int get selectedRowCount => 0;
 }
