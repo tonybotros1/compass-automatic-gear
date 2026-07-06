@@ -356,6 +356,7 @@ class MainScreenFilters extends StatelessWidget {
                       Row(
                         spacing: 10,
                         children: [
+                          _FinancialPrivacyButton(controller: controller),
                           ElevatedButton(
                             style: findButtonStyle,
                             onPressed: controller.searching.isFalse
@@ -391,5 +392,74 @@ class MainScreenFilters extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _FinancialPrivacyButton extends StatelessWidget {
+  const _FinancialPrivacyButton({required this.controller});
+
+  final CarTradingDashboardController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final isHidden = controller.hideCarTradeFinancialValues.value;
+
+      return Tooltip(
+        message: isHidden ? 'Show financial values' : 'Hide financial values',
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: controller.hideCarTradeFinancialValues.toggle,
+            borderRadius: BorderRadius.circular(9),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isHidden
+                      ? const [Color(0xFF0F766E), Color(0xFF2563EB)]
+                      : const [Color(0xFFE6FFFB), Color(0xFFEFF6FF)],
+                ),
+                borderRadius: BorderRadius.circular(9),
+                border: Border.all(
+                  color: isHidden
+                      ? const Color(0xFF5EEAD4).withValues(alpha: 0.45)
+                      : const Color(0xFF99F6E4),
+                ),
+                boxShadow: isHidden
+                    ? const [
+                        BoxShadow(
+                          color: Color(0x220F766E),
+                          blurRadius: 10,
+                          offset: Offset(0, 3),
+                        ),
+                      ]
+                    : const [],
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                transitionBuilder: (child, animation) => ScaleTransition(
+                  scale: animation,
+                  child: FadeTransition(opacity: animation, child: child),
+                ),
+                child: Icon(
+                  isHidden
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  key: ValueKey(isHidden),
+                  size: 19,
+                  color: isHidden ? Colors.white : const Color(0xFF0F766E),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    });
   }
 }

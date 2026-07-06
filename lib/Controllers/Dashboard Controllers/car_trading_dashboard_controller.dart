@@ -183,6 +183,7 @@ class CarTradingDashboardController extends GetxController {
   // RxBool itemsModified = RxBool(false);
   RxBool purchasedItemsModified = RxBool(false);
   RxBool searching = RxBool(false);
+  RxBool hideCarTradeFinancialValues = RxBool(true);
   RxBool changesSearching = RxBool(false);
   final ScrollController scrollControllerForTable = ScrollController();
   var buttonLoadingStates = <String, bool>{}.obs;

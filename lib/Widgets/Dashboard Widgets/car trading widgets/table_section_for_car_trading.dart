@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:get/get.dart';
@@ -270,38 +272,47 @@ class _CarTradeCard extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, thickness: 1, color: _line),
-          SizedBox(
-            height: 55,
-            child: Row(
-              children: [
-                Expanded(
-                  child: _MoneyCell(
-                    label: 'Paid',
-                    value: _money(trade.totalPay),
-                    color: _red,
+          Obx(() {
+            final isHidden = Get.find<CarTradingDashboardController>()
+                .hideCarTradeFinancialValues
+                .value;
+
+            return SizedBox(
+              height: 55,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _MoneyCell(
+                      label: 'Paid',
+                      value: _money(trade.totalPay),
+                      color: _red,
+                      isHidden: isHidden,
+                    ),
                   ),
-                ),
-                const VerticalDivider(width: 1, thickness: 1, color: _line),
-                Expanded(
-                  child: _MoneyCell(
-                    label: 'Received',
-                    value: _money(trade.totalReceive),
-                    color: _green,
+                  const VerticalDivider(width: 1, thickness: 1, color: _line),
+                  Expanded(
+                    child: _MoneyCell(
+                      label: 'Received',
+                      value: _money(trade.totalReceive),
+                      color: _green,
+                      isHidden: isHidden,
+                    ),
                   ),
-                ),
-                const VerticalDivider(width: 1, thickness: 1, color: _line),
-                Expanded(
-                  child: _MoneyCell(
-                    label: 'Net',
-                    value: _money(trade.net),
-                    color: trade.net != null && trade.net! < 0
-                        ? const Color(0xFF657F91)
-                        : const Color(0xFF638095),
+                  const VerticalDivider(width: 1, thickness: 1, color: _line),
+                  Expanded(
+                    child: _MoneyCell(
+                      label: 'Net',
+                      value: _money(trade.net),
+                      color: trade.net != null && trade.net! < 0
+                          ? const Color(0xFF657F91)
+                          : const Color(0xFF638095),
+                      isHidden: isHidden,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          }),
           const Divider(height: 1, thickness: 1, color: _line),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
@@ -490,11 +501,13 @@ class _MoneyCell extends StatelessWidget {
     required this.label,
     required this.value,
     required this.color,
+    required this.isHidden,
   });
 
   final String label;
   final String value;
   final Color color;
+  final bool isHidden;
 
   @override
   Widget build(BuildContext context) {
@@ -519,21 +532,80 @@ class _MoneyCell extends StatelessWidget {
             Expanded(
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
+                child: isHidden
+                    ? _BlurredFinancialValue(color: color)
+                    : FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          value,
+                          style: TextStyle(
+                            color: color,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BlurredFinancialValue extends StatelessWidget {
+  const _BlurredFinancialValue({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(5),
+        child: SizedBox(
+          width: 88,
+          height: 20,
+          child: Stack(
+            alignment: Alignment.centerLeft,
+            children: [
+              ImageFiltered(
+                imageFilter: ui.ImageFilter.blur(sigmaX: 4.5, sigmaY: 4.5),
+                child: Text(
+                  '88,888.88',
+                  style: TextStyle(
+                    color: color.withValues(alpha: 0.72),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.white.withValues(alpha: 0.12),
+                        color.withValues(alpha: 0.07),
+                        Colors.white.withValues(alpha: 0.20),
+                      ],
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+              Positioned(
+                right: 4,
+                child: Icon(
+                  Icons.lock_outline_rounded,
+                  size: 10,
+                  color: color.withValues(alpha: 0.70),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
