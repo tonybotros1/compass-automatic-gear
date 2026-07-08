@@ -2888,6 +2888,7 @@ class CarTradingDashboardController extends GetxController {
             : decoded;
         if (data is! Map) return;
         List trades = data["trades"] ?? [];
+        print(trades[0]);
         totalPaysForAllTrades.value = _toDouble(data['grand_total_pay']);
         totalReceivesForAllTrades.value = _toDouble(
           data['grand_total_receive'],

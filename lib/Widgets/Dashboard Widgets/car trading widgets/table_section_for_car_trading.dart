@@ -1,4 +1,4 @@
-import 'dart:ui' as ui;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
@@ -18,6 +18,11 @@ const _primary = Color.fromARGB(255, 1, 42, 40);
 const _orange = Color(0xFFF26D32);
 const _red = Color(0xFFED554E);
 const _green = Color(0xFF2DA85A);
+const _cardsPerPage = 30;
+const _paginationGrey = Color(0xFF6B7280);
+const _paginationMutedGrey = Color(0xFF94A3B8);
+const _paginationLine = Color(0xFFD1D5DB);
+const _paginationSurface = Color(0xFFF8FAFC);
 
 Widget tableOfCarTrades({
   required BoxConstraints constraints,
@@ -33,15 +38,49 @@ Widget tableOfCarTrades({
   );
 }
 
-class _CarTradeCardsView extends StatelessWidget {
+class _CarTradeCardsView extends StatefulWidget {
   const _CarTradeCardsView({required this.trades, required this.isSearching});
 
   final List<CarTradeModel> trades;
   final bool isSearching;
 
   @override
+  State<_CarTradeCardsView> createState() => _CarTradeCardsViewState();
+}
+
+class _CarTradeCardsViewState extends State<_CarTradeCardsView> {
+  final ScrollController _scrollController = ScrollController();
+  int _currentPage = 0;
+  late String _lastTradesSignature;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastTradesSignature = _tradesSignature(widget.trades);
+  }
+
+  @override
+  void didUpdateWidget(covariant _CarTradeCardsView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final signature = _tradesSignature(widget.trades);
+
+    if (signature != _lastTradesSignature) {
+      _currentPage = 0;
+      _lastTradesSignature = signature;
+      _scrollToTop();
+      return;
+    }
+
+    final pageCount = _pageCount(widget.trades.length);
+    if (_currentPage >= pageCount) {
+      _currentPage = pageCount - 1;
+      _scrollToTop();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (isSearching && trades.isEmpty) {
+    if (widget.isSearching && widget.trades.isEmpty) {
       return const ColoredBox(
         color: _pageBackground,
         child: Center(
@@ -50,7 +89,7 @@ class _CarTradeCardsView extends StatelessWidget {
       );
     }
 
-    if (trades.isEmpty) {
+    if (widget.trades.isEmpty) {
       return const ColoredBox(
         color: _pageBackground,
         child: _EmptyTradesState(),
@@ -70,45 +109,342 @@ class _CarTradeCardsView extends StatelessWidget {
               : naturalColumnCount > 1
               ? naturalColumnCount - 1
               : 1;
+          final pageCount = _pageCount(widget.trades.length);
+          final currentPage = _currentPage.clamp(0, pageCount - 1).toInt();
+          final startIndex = currentPage * _cardsPerPage;
+          final endIndex = math.min(
+            startIndex + _cardsPerPage,
+            widget.trades.length,
+          );
+          final pageTrades = widget.trades.sublist(startIndex, endIndex);
 
-          return GridView.builder(
-            key: const PageStorageKey<String>('car-trade-cards'),
-            scrollCacheExtent: const ScrollCacheExtent.pixels(160),
-            addAutomaticKeepAlives: false,
-            addSemanticIndexes: false,
-            addRepaintBoundaries: true,
-            physics: const ClampingScrollPhysics(),
-            padding: EdgeInsets.fromLTRB(
-              horizontalPadding,
-              10,
-              horizontalPadding,
-              10,
-            ),
-            itemCount: trades.length,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: columnCount,
-              mainAxisExtent: 380,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-            ),
-            itemBuilder: (context, index) {
-              final trade = trades[index];
-              return _CarTradeCard(
-                key: ValueKey(trade.id ?? 'trade-$index'),
-                trade: trade,
-              );
-            },
+          return Column(
+            children: [
+              _CarTradePaginationBar(
+                start: startIndex + 1,
+                end: endIndex,
+                total: widget.trades.length,
+                currentPage: currentPage,
+                pageCount: pageCount,
+                onFirst: currentPage == 0 ? null : () => _goToPage(0),
+                onPrevious: currentPage == 0
+                    ? null
+                    : () => _goToPage(currentPage - 1),
+                onNext: currentPage >= pageCount - 1
+                    ? null
+                    : () => _goToPage(currentPage + 1),
+                onLast: currentPage >= pageCount - 1
+                    ? null
+                    : () => _goToPage(pageCount - 1),
+              ),
+              Expanded(
+                child: Obx(() {
+                  final isFinancialsHidden =
+                      Get.find<CarTradingDashboardController>()
+                          .hideCarTradeFinancialValues
+                          .value;
+
+                  return GridView.builder(
+                    controller: _scrollController,
+                    scrollCacheExtent: const ScrollCacheExtent.pixels(420),
+                    addAutomaticKeepAlives: false,
+                    addSemanticIndexes: false,
+                    addRepaintBoundaries: true,
+                    physics: const ClampingScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      8,
+                      horizontalPadding,
+                      10,
+                    ),
+                    itemCount: pageTrades.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: columnCount,
+                      mainAxisExtent: 382,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                    ),
+                    itemBuilder: (context, index) {
+                      final trade = pageTrades[index];
+                      return _CarTradeCard(
+                        key: ValueKey(
+                          trade.id ?? 'trade-${startIndex + index}',
+                        ),
+                        trade: trade,
+                        isFinancialsHidden: isFinancialsHidden,
+                      );
+                    },
+                  );
+                }),
+              ),
+            ],
           );
         },
+      ),
+    );
+  }
+
+  int _pageCount(int total) => math.max(1, (total / _cardsPerPage).ceil());
+
+  String _tradesSignature(List<CarTradeModel> trades) {
+    if (trades.isEmpty) return 'empty';
+    return '${trades.length}:${trades.first.id}:${trades.last.id}';
+  }
+
+  void _goToPage(int page) {
+    final pageCount = _pageCount(widget.trades.length);
+    final nextPage = page.clamp(0, pageCount - 1).toInt();
+    if (nextPage == _currentPage) return;
+
+    _jumpToTopNow();
+    setState(() {
+      _currentPage = nextPage;
+    });
+  }
+
+  void _jumpToTopNow() {
+    if (!_scrollController.hasClients) return;
+    _scrollController.jumpTo(_scrollController.position.minScrollExtent);
+  }
+
+  void _scrollToTop() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      _scrollController.jumpTo(_scrollController.position.minScrollExtent);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+}
+
+class _CarTradePaginationBar extends StatelessWidget {
+  const _CarTradePaginationBar({
+    required this.start,
+    required this.end,
+    required this.total,
+    required this.currentPage,
+    required this.pageCount,
+    required this.onFirst,
+    required this.onPrevious,
+    required this.onNext,
+    required this.onLast,
+  });
+
+  final int start;
+  final int end;
+  final int total;
+  final int currentPage;
+  final int pageCount;
+  final VoidCallback? onFirst;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
+  final VoidCallback? onLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 650;
+        final info = _PaginationInfo(
+          start: start,
+          end: end,
+          total: total,
+          currentPage: currentPage,
+          pageCount: pageCount,
+        );
+        final controls = _PaginationControls(
+          onFirst: onFirst,
+          onPrevious: onPrevious,
+          onNext: onNext,
+          onLast: onLast,
+        );
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
+          child: isCompact
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    info,
+                    const SizedBox(height: 7),
+                    Align(alignment: Alignment.centerRight, child: controls),
+                  ],
+                )
+              : Row(children: [info, const Spacer(), controls]),
+        );
+      },
+    );
+  }
+}
+
+class _PaginationInfo extends StatelessWidget {
+  const _PaginationInfo({
+    required this.start,
+    required this.end,
+    required this.total,
+    required this.currentPage,
+    required this.pageCount,
+  });
+
+  final int start;
+  final int end;
+  final int total;
+  final int currentPage;
+  final int pageCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 6,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        _PaginationPill(
+          icon: Icons.directions_car_outlined,
+          text: 'Showing $start-$end of $total cars',
+        ),
+        _PaginationPill(
+          icon: Icons.layers_outlined,
+          text: 'Page ${currentPage + 1} of $pageCount',
+        ),
+      ],
+    );
+  }
+}
+
+class _PaginationPill extends StatelessWidget {
+  const _PaginationPill({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 30,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: _paginationSurface,
+        border: Border.all(color: _paginationLine),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: _paginationGrey),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: const TextStyle(
+              color: _paginationGrey,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaginationControls extends StatelessWidget {
+  const _PaginationControls({
+    required this.onFirst,
+    required this.onPrevious,
+    required this.onNext,
+    required this.onLast,
+  });
+
+  final VoidCallback? onFirst;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
+  final VoidCallback? onLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _PaginationArrowButton(
+          tooltip: 'First page',
+          icon: Icons.first_page_rounded,
+          onPressed: onFirst,
+        ),
+        const SizedBox(width: 6),
+        _PaginationArrowButton(
+          tooltip: 'Previous page',
+          icon: Icons.chevron_left_rounded,
+          onPressed: onPrevious,
+        ),
+        const SizedBox(width: 6),
+        _PaginationArrowButton(
+          tooltip: 'Next page',
+          icon: Icons.chevron_right_rounded,
+          onPressed: onNext,
+        ),
+        const SizedBox(width: 6),
+        _PaginationArrowButton(
+          tooltip: 'Last page',
+          icon: Icons.last_page_rounded,
+          onPressed: onLast,
+        ),
+      ],
+    );
+  }
+}
+
+class _PaginationArrowButton extends StatelessWidget {
+  const _PaginationArrowButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: SizedBox(
+        width: 34,
+        height: 30,
+        child: OutlinedButton(
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: _paginationGrey,
+            disabledForegroundColor: _paginationMutedGrey,
+            backgroundColor: _paginationSurface,
+            disabledBackgroundColor: _paginationSurface,
+            padding: EdgeInsets.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            side: const BorderSide(color: _paginationLine),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Icon(icon, size: 18),
+        ),
       ),
     );
   }
 }
 
 class _CarTradeCard extends StatelessWidget {
-  const _CarTradeCard({super.key, required this.trade});
+  const _CarTradeCard({
+    super.key,
+    required this.trade,
+    required this.isFinancialsHidden,
+  });
 
   final CarTradeModel trade;
+  final bool isFinancialsHidden;
 
   String _display(String? value) {
     final normalized = value?.trim() ?? '';
@@ -121,6 +457,26 @@ class _CarTradeCard extends StatelessWidget {
   }
 
   String _money(double? value) => priceFormat.format(value ?? 0);
+
+  double? _itemAmount(String itemName, {required bool preferReceive}) {
+    final items = trade.tradeItems ?? const [];
+    var found = false;
+    var total = 0.0;
+
+    for (final item in items) {
+      final normalizedItem = item.item?.trim().toUpperCase() ?? '';
+      if (normalizedItem != itemName) continue;
+
+      found = true;
+      final primaryAmount = preferReceive ? item.receive : item.pay;
+      final fallbackAmount = preferReceive ? item.pay : item.receive;
+      total += primaryAmount != null && primaryAmount != 0
+          ? primaryAmount
+          : fallbackAmount ?? 0;
+    }
+
+    return found ? total : null;
+  }
 
   Color _statusColor(String status) {
     switch (status.toLowerCase()) {
@@ -162,179 +518,169 @@ class _CarTradeCard extends StatelessWidget {
     final year = trade.year?.trim() ?? '';
     final vin = trade.vin?.trim() ?? '';
     final statusColor = _statusColor(status);
+    final buyPrice = _itemAmount('BUY', preferReceive: false);
+    final sellPrice = _itemAmount('SELL', preferReceive: true);
 
     return Container(
       decoration: BoxDecoration(
         color: _surface,
-        border: Border.all(color: _line),
+        border: Border.all(color: _line, width: 1.45),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          vehicleName.isEmpty ? 'Unknown vehicle' : vehicleName,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: _text,
-                            fontSize: 17,
-                            height: 1.25,
-                            fontWeight: FontWeight.w900,
-                          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        vehicleName.isEmpty ? 'Unknown vehicle' : vehicleName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: _text,
+                          fontSize: 17,
+                          height: 1.25,
+                          fontWeight: FontWeight.w900,
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          details,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: _muted,
-                            fontSize: 12.5,
-                            height: 1.45,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        details,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: _muted,
+                          fontSize: 12.5,
+                          height: 1.45,
+                          fontWeight: FontWeight.w700,
                         ),
-                        if (year.isNotEmpty || trade.mileage != null) ...[
-                          const SizedBox(height: 9),
-                          Wrap(
-                            spacing: 7,
-                            runSpacing: 6,
-                            children: [
-                              if (year.isNotEmpty)
-                                _InlineVehicleMetric(
-                                  label: year,
-                                  icon: Icons.calendar_today_outlined,
-                                  color: const Color(0xFF2F7EA1),
-                                ),
-                              if (trade.mileage != null)
-                                _InlineVehicleMetric(
-                                  label: _mileage(trade.mileage),
-                                  icon: Icons.speed_outlined,
-                                  color: _orange,
-                                ),
-                            ],
-                          ),
-                        ],
+                      ),
+                      if (year.isNotEmpty || trade.mileage != null) ...[
+                        const SizedBox(height: 9),
+                        Wrap(
+                          spacing: 7,
+                          runSpacing: 6,
+                          children: [
+                            if (year.isNotEmpty)
+                              _InlineVehicleMetric(
+                                label: year,
+                                icon: Icons.calendar_today_outlined,
+                                color: const Color(0xFF2F7EA1),
+                              ),
+                            if (trade.mileage != null)
+                              _InlineVehicleMetric(
+                                label: _mileage(trade.mileage),
+                                icon: Icons.speed_outlined,
+                                color: _orange,
+                              ),
+                          ],
+                        ),
                       ],
+                      const SizedBox(height: 7),
+                      _VehicleVinLine(vin: vin.isEmpty ? '-' : vin),
+                    ],
+                  ),
+                ),
+                if (status.isNotEmpty) ...[
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 86,
+                    child: _CardTag(
+                      label: status,
+                      color: statusColor,
+                      background: statusColor.withValues(alpha: 0.10),
+                      border: statusColor.withValues(alpha: 0.35),
                     ),
                   ),
-                  if (status.isNotEmpty) ...[
-                    const SizedBox(width: 10),
-                    SizedBox(
-                      width: 86,
-                      child: _CardTag(
-                        label: status,
-                        color: statusColor,
-                        background: statusColor.withValues(alpha: 0.10),
-                        border: statusColor.withValues(alpha: 0.35),
-                      ),
+                ],
+              ],
+            ),
+          ),
+          const Divider(height: 1, thickness: 1, color: _line),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: _PersonSummary(
+                      label: 'Bought By',
+                      name: trade.boughtBy,
+                      date: textToDate(trade.buyDate),
+                      dateColor: const Color(0xFFAD47C2),
+                      dateBackground: const Color(0xFFF6E9FF),
+                      price: buyPrice == null ? '' : _money(buyPrice),
+                      priceColor: _red,
+                      isPriceHidden: isFinancialsHidden,
                     ),
-                  ],
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _PersonSummary(
+                      label: 'Sold By',
+                      name: trade.soldBy,
+                      date: textToDate(trade.sellDate),
+                      dateColor: const Color(0xFF1682C2),
+                      dateBackground: const Color(0xFFE8F5FF),
+                      price: sellPrice == null ? '' : _money(sellPrice),
+                      priceColor: _green,
+                      isPriceHidden: isFinancialsHidden,
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
           const Divider(height: 1, thickness: 1, color: _line),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          SizedBox(
+            height: 55,
             child: Row(
               children: [
                 Expanded(
-                  child: _PersonSummary(
-                    label: 'Bought By',
-                    name: trade.boughtBy,
-                    date: textToDate(trade.buyDate),
-                    dateColor: const Color(0xFFAD47C2),
-                    dateBackground: const Color(0xFFF6E9FF),
+                  child: _MoneyCell(
+                    label: 'Paid',
+                    value: _money(trade.totalPay),
+                    color: _red,
+                    isHidden: isFinancialsHidden,
                   ),
                 ),
-                const SizedBox(width: 8),
+                const VerticalDivider(width: 1, thickness: 1, color: _line),
                 Expanded(
-                  child: _PersonSummary(
-                    label: 'Sold By',
-                    name: trade.soldBy,
-                    date: textToDate(trade.sellDate),
-                    dateColor: const Color(0xFF1682C2),
-                    dateBackground: const Color(0xFFE8F5FF),
+                  child: _MoneyCell(
+                    label: 'Received',
+                    value: _money(trade.totalReceive),
+                    color: _green,
+                    isHidden: isFinancialsHidden,
+                  ),
+                ),
+                const VerticalDivider(width: 1, thickness: 1, color: _line),
+                Expanded(
+                  child: _MoneyCell(
+                    label: 'Net',
+                    value: _money(trade.net),
+                    color: trade.net != null && trade.net! < 0
+                        ? const Color(0xFF657F91)
+                        : const Color(0xFF638095),
+                    isHidden: isFinancialsHidden,
                   ),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1, thickness: 1, color: _line),
-          Obx(() {
-            final isHidden = Get.find<CarTradingDashboardController>()
-                .hideCarTradeFinancialValues
-                .value;
-
-            return SizedBox(
-              height: 55,
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _MoneyCell(
-                      label: 'Paid',
-                      value: _money(trade.totalPay),
-                      color: _red,
-                      isHidden: isHidden,
-                    ),
-                  ),
-                  const VerticalDivider(width: 1, thickness: 1, color: _line),
-                  Expanded(
-                    child: _MoneyCell(
-                      label: 'Received',
-                      value: _money(trade.totalReceive),
-                      color: _green,
-                      isHidden: isHidden,
-                    ),
-                  ),
-                  const VerticalDivider(width: 1, thickness: 1, color: _line),
-                  Expanded(
-                    child: _MoneyCell(
-                      label: 'Net',
-                      value: _money(trade.net),
-                      color: trade.net != null && trade.net! < 0
-                          ? const Color(0xFF657F91)
-                          : const Color(0xFF638095),
-                      isHidden: isHidden,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
           const Divider(height: 1, thickness: 1, color: _line),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            child: Row(
-              children: [
-                editSection(tradeData: trade, id: trade.id?.toString() ?? ''),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    vin.isEmpty ? '-' : vin,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: const TextStyle(
-                      color: Color(0xFF73858D),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.25,
-                    ),
-                  ),
-                ),
-              ],
+            child: editSection(
+              tradeData: trade,
+              id: trade.id?.toString() ?? '',
             ),
           ),
         ],
@@ -369,6 +715,39 @@ class _InlineVehicleMetric extends StatelessWidget {
             style: TextStyle(
               color: color,
               fontSize: 17,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _VehicleVinLine extends StatelessWidget {
+  const _VehicleVinLine({required this.vin});
+
+  final String vin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(
+          Icons.confirmation_number_outlined,
+          size: 15,
+          color: Color(0xFF647780),
+        ),
+        const SizedBox(width: 5),
+        Flexible(
+          child: Text(
+            'VIN: $vin',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF647780),
+              fontSize: 12.5,
               fontWeight: FontWeight.w900,
               letterSpacing: 0.2,
             ),
@@ -426,6 +805,9 @@ class _PersonSummary extends StatelessWidget {
     required this.date,
     required this.dateColor,
     required this.dateBackground,
+    required this.price,
+    required this.priceColor,
+    required this.isPriceHidden,
   });
 
   final String label;
@@ -433,6 +815,9 @@ class _PersonSummary extends StatelessWidget {
   final String date;
   final Color dateColor;
   final Color dateBackground;
+  final String price;
+  final Color priceColor;
+  final bool isPriceHidden;
 
   @override
   Widget build(BuildContext context) {
@@ -440,7 +825,6 @@ class _PersonSummary extends StatelessWidget {
     final normalizedDate = date.trim();
 
     return Container(
-      height: 78,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: const Color(0xFFF8FBFB),
@@ -471,25 +855,89 @@ class _PersonSummary extends StatelessWidget {
               fontWeight: FontWeight.w900,
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: 5),
           if (normalizedDate.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              decoration: BoxDecoration(
-                color: dateBackground,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Text(
-                normalizedDate,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: dateColor,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: dateBackground,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  normalizedDate,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: dateColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ),
+          if (price.isNotEmpty) ...[
+            const SizedBox(height: 5),
+            _PersonPriceLine(
+              price: price,
+              color: priceColor,
+              isHidden: isPriceHidden,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _PersonPriceLine extends StatelessWidget {
+  const _PersonPriceLine({
+    required this.price,
+    required this.color,
+    required this.isHidden,
+  });
+
+  final String price;
+  final Color color;
+  final bool isHidden;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 21,
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.075),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.payments_outlined, size: 13, color: color),
+          const SizedBox(width: 5),
+          Flexible(
+            child: isHidden
+                ? _BlurredFinancialValue(
+                    color: color,
+                    width: 72,
+                    height: 17,
+                    fontSize: 12,
+                    iconSize: 8,
+                  )
+                : Text(
+                    price,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.1,
+                    ),
+                  ),
+          ),
         ],
       ),
     );
@@ -556,55 +1004,103 @@ class _MoneyCell extends StatelessWidget {
 }
 
 class _BlurredFinancialValue extends StatelessWidget {
-  const _BlurredFinancialValue({required this.color});
+  const _BlurredFinancialValue({
+    required this.color,
+    this.width = 88,
+    this.height = 20,
+    this.fontSize = 14,
+    this.iconSize = 10,
+  });
 
   final Color color;
+  final double width;
+  final double height;
+  final double fontSize;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(5),
-        child: SizedBox(
-          width: 88,
-          height: 20,
-          child: Stack(
-            alignment: Alignment.centerLeft,
-            children: [
-              ImageFiltered(
-                imageFilter: ui.ImageFilter.blur(sigmaX: 4.5, sigmaY: 4.5),
-                child: Text(
-                  '88,888.88',
-                  style: TextStyle(
-                    color: color.withValues(alpha: 0.72),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.white.withValues(alpha: 0.12),
-                        color.withValues(alpha: 0.07),
-                        Colors.white.withValues(alpha: 0.20),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 4,
-                child: Icon(
-                  Icons.lock_outline_rounded,
-                  size: 10,
-                  color: color.withValues(alpha: 0.70),
-                ),
-              ),
+      child: Container(
+        width: width,
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(color: color.withValues(alpha: 0.08)),
+          gradient: LinearGradient(
+            colors: [
+              color.withValues(alpha: 0.09),
+              color.withValues(alpha: 0.17),
+              Colors.white.withValues(alpha: 0.34),
+              color.withValues(alpha: 0.11),
             ],
+            stops: const [0, 0.42, 0.64, 1],
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  _PrivacyMaskBar(
+                    flex: 7,
+                    height: fontSize >= 14 ? 6 : 5,
+                    color: color,
+                  ),
+                  const SizedBox(width: 4),
+                  _PrivacyMaskBar(
+                    flex: 4,
+                    height: fontSize >= 14 ? 6 : 5,
+                    color: color,
+                    opacity: 0.18,
+                  ),
+                  const SizedBox(width: 4),
+                  _PrivacyMaskBar(
+                    flex: 5,
+                    height: fontSize >= 14 ? 6 : 5,
+                    color: color,
+                    opacity: 0.14,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 5),
+            Icon(
+              Icons.lock_outline_rounded,
+              size: iconSize,
+              color: color.withValues(alpha: 0.72),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PrivacyMaskBar extends StatelessWidget {
+  const _PrivacyMaskBar({
+    required this.flex,
+    required this.height,
+    required this.color,
+    this.opacity = 0.24,
+  });
+
+  final int flex;
+  final double height;
+  final Color color;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      flex: flex,
+      child: SizedBox(
+        height: height,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: opacity),
+            borderRadius: BorderRadius.circular(99),
           ),
         ),
       ),
@@ -663,61 +1159,106 @@ class _EmptyTradesState extends StatelessWidget {
 }
 
 Widget editSection({required CarTradeModel tradeData, required String id}) {
-  return GetX<CarTradingDashboardController>(
-    builder: (controller) {
-      final infosLoadingKey = '$id:infos';
-      final itemsLoadingKey = '$id:items';
-      final infosLoading =
-          controller.buttonLoadingStates[infosLoadingKey] ?? false;
-      final itemsLoading =
-          controller.buttonLoadingStates[itemsLoadingKey] ?? false;
-      final rowIsLoading = infosLoading || itemsLoading;
+  return _TradeActions(tradeData: tradeData, id: id);
+}
 
-      Future<void> openScreen(String screen, String loadingKey) async {
-        controller.setButtonLoading(loadingKey, true);
-        try {
-          await controller.loadValues(tradeData);
-        } finally {
-          controller.setButtonLoading(loadingKey, false);
-        }
+class _TradeActions extends StatefulWidget {
+  const _TradeActions({required this.tradeData, required this.id});
 
-        await carTradesDialog(
-          screen: screen,
-          tradeID: tradeData.id ?? '',
-          controller: controller,
-          canEdit: true,
-          onPressed: controller.addingNewValue.value
+  final CarTradeModel tradeData;
+  final String id;
+
+  @override
+  State<_TradeActions> createState() => _TradeActionsState();
+}
+
+class _TradeActionsState extends State<_TradeActions> {
+  late final CarTradingDashboardController _controller;
+  String? _loadingKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = Get.find<CarTradingDashboardController>();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final infosLoadingKey = '${widget.id}:infos';
+    final itemsLoadingKey = '${widget.id}:items';
+    final salesAgreementLoadingKey = '${widget.id}:sales-agreement';
+    final infosLoading = _loadingKey == infosLoadingKey;
+    final itemsLoading = _loadingKey == itemsLoadingKey;
+    final salesAgreementLoading = _loadingKey == salesAgreementLoadingKey;
+    final rowIsLoading = _loadingKey != null;
+    const actionButtonColor = Color(0xFF456B79);
+
+    return Row(
+      children: [
+        _TradeActionButton(
+          label: 'Car Information',
+          width: 118,
+          color: actionButtonColor,
+          isLoading: infosLoading,
+          onPressed: rowIsLoading
               ? null
-              : () async {
-                  controller.addNewTrade();
-                },
-        );
-      }
+              : () => _openScreen('car_trading', infosLoadingKey),
+        ),
+        const Spacer(),
+        const SizedBox(width: 6),
+        _TradeActionButton(
+          label: 'ITEMS',
+          color: actionButtonColor,
+          isLoading: itemsLoading,
+          onPressed: rowIsLoading
+              ? null
+              : () => _openScreen('items', itemsLoadingKey),
+        ),
+        const SizedBox(width: 6),
+        _TradeActionButton(
+          label: 'Sales Agreement',
+          width: 126,
+          color: actionButtonColor,
+          isLoading: salesAgreementLoading,
+          onPressed: rowIsLoading
+              ? null
+              : () => _openScreen('sales_agreement', salesAgreementLoadingKey),
+        ),
+      ],
+    );
+  }
 
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _TradeActionButton(
-            label: 'INFOS',
-            color: const Color(0xFF456B79),
-            isLoading: infosLoading,
-            onPressed: rowIsLoading
-                ? null
-                : () => openScreen('car_trading', infosLoadingKey),
-          ),
-          const SizedBox(width: 6),
-          _TradeActionButton(
-            label: 'ITEMS',
-            color: _primary,
-            isLoading: itemsLoading,
-            onPressed: rowIsLoading
-                ? null
-                : () => openScreen('items', itemsLoadingKey),
-          ),
-        ],
-      );
-    },
-  );
+  Future<void> _openScreen(String screen, String loadingKey) async {
+    if (_loadingKey != null) return;
+
+    setState(() {
+      _loadingKey = loadingKey;
+    });
+
+    try {
+      await _controller.loadValues(widget.tradeData);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingKey = null;
+        });
+      }
+    }
+
+    if (!mounted) return;
+
+    await carTradesDialog(
+      screen: screen,
+      tradeID: widget.tradeData.id ?? '',
+      controller: _controller,
+      canEdit: true,
+      onPressed: _controller.addingNewValue.value
+          ? null
+          : () async {
+              _controller.addNewTrade();
+            },
+    );
+  }
 }
 
 class _TradeActionButton extends StatelessWidget {
@@ -726,17 +1267,19 @@ class _TradeActionButton extends StatelessWidget {
     required this.color,
     required this.onPressed,
     required this.isLoading,
+    this.width = 62,
   });
 
   final String label;
   final Color color;
   final VoidCallback? onPressed;
   final bool isLoading;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 62,
+      width: width,
       height: 29,
       child: OutlinedButton(
         onPressed: onPressed,

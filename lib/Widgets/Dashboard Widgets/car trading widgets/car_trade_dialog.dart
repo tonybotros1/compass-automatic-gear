@@ -14,6 +14,12 @@ Future<dynamic> carTradesDialog({
   required void Function()? onPressed,
   required String screen,
 }) {
+  if (screen == 'items') {
+    controller.itemsPageName.value = 'items';
+  } else if (screen == 'sales_agreement') {
+    controller.itemsPageName.value = 'sales agreement';
+  }
+
   return Get.dialog(
     barrierDismissible: false,
     Dialog(
@@ -155,6 +161,7 @@ Future<dynamic> carTradesDialog({
                             context: context,
                             controller: controller,
                             canEdit: canEdit,
+                            screen: screen,
                           ),
                   ),
                 ),

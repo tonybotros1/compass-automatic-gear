@@ -14,108 +14,53 @@ Widget addNewCarTradeItemsOrEdit({
   required CarTradingDashboardController controller,
   required bool canEdit,
   required BoxConstraints constraints,
+  required String screen,
 }) {
+  final isItemsScreen = screen == 'items';
+
   return Form(
     key: controller.carTradeFormKey,
     child: ColoredBox(
       color: Colors.white,
-      child: Column(
-        children: [
-          Expanded(
-            child: CustomScrollView(
-              physics: const NeverScrollableScrollPhysics(),
-              slivers: [
-                const SliverToBoxAdapter(child: SizedBox.shrink()),
-                SliverFillRemaining(
-                  hasScrollBody: true,
-                  child: ColoredBox(
-                    color: Colors.white,
-                    child: DefaultTabController(
-                      length: controller.carsTabs.length,
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            color: Colors.white,
-                            child: TabBar(
-                              onTap: (i) {
-                                if (i == 1) {
-                                  controller.itemsPageName.value = 'items';
-                                } else {
-                                  controller.itemsPageName.value =
-                                      'purchase agreement items';
-                                }
-                              },
-                              unselectedLabelColor: Colors.grey,
-                              tabAlignment: TabAlignment.start,
-                              isScrollable: true,
-                              indicatorColor: mainColor,
-                              labelColor: mainColor,
-                              splashBorderRadius: BorderRadius.circular(5),
-                              dividerColor: Colors.transparent,
-
-                              tabs: controller.carsTabs,
-                            ),
+      child: CustomScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: true,
+            child: ColoredBox(
+              color: Colors.white,
+              child: Column(
+                children: [
+                  const SizedBox(height: 8),
+                  _TradeTotals(
+                    constraints: constraints,
+                    isItems: isItemsScreen,
+                  ),
+                  Expanded(
+                    child: GetX<CarTradingDashboardController>(
+                      builder: (controller) {
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.vertical,
+                          child: SizedBox(
+                            width: constraints.maxWidth,
+                            child: isItemsScreen
+                                ? tableOfScreens(
+                                    constraints: constraints,
+                                    context: context,
+                                    controller: controller,
+                                  )
+                                : tableOfScreensForSalesAgreement(
+                                    constraints: constraints,
+                                    context: context,
+                                    controller: controller,
+                                  ),
                           ),
-                          const SizedBox(height: 12),
-                          _TradeTotals(constraints: constraints),
-
-                          Expanded(
-                            child: TabBarView(
-                              children: [
-                                Column(
-                                  children: [
-                                    Expanded(
-                                      child: GetX<CarTradingDashboardController>(
-                                        builder: (controller) {
-                                          return SingleChildScrollView(
-                                            scrollDirection: Axis.vertical,
-                                            child: SizedBox(
-                                              width: constraints.maxWidth,
-                                              child:
-                                                  tableOfScreensForSalesAgreement(
-                                                    constraints: constraints,
-                                                    context: context,
-                                                    controller: controller,
-                                                  ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Expanded(
-                                      child:
-                                          GetX<CarTradingDashboardController>(
-                                            builder: (controller) {
-                                              return SingleChildScrollView(
-                                                scrollDirection: Axis.vertical,
-                                                child: SizedBox(
-                                                  width: constraints.maxWidth,
-                                                  child: tableOfScreens(
-                                                    constraints: constraints,
-                                                    context: context,
-                                                    controller: controller,
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -125,16 +70,15 @@ Widget addNewCarTradeItemsOrEdit({
 }
 
 class _TradeTotals extends StatelessWidget {
-  const _TradeTotals({required this.constraints});
+  const _TradeTotals({required this.constraints, required this.isItems});
 
   final BoxConstraints constraints;
+  final bool isItems;
 
   @override
   Widget build(BuildContext context) {
     return GetX<CarTradingDashboardController>(
       builder: (controller) {
-        final isItems = controller.itemsPageName.value.toLowerCase() == 'items';
-
         return Padding(
           padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
           child: Row(
