@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../../consts.dart';
 import '../../main screen widgets/add_new_values_button.dart';
+import '../../menu_dialog.dart';
 
 const _itemFormSlate = Color(0xFF334155);
 const _itemFormMuted = Color(0xFF64748B);
@@ -130,6 +131,7 @@ Widget addNewItemOrEdit({
                         ),
                       ),
                     const SizedBox(height: 11),
+
                     _SelectionField(
                       dropdown: CustomDropdown(
                         validator: true,
@@ -156,6 +158,48 @@ Widget addNewItemOrEdit({
                         isEnabled: canEdit,
                       ),
                     ),
+                    const SizedBox(height: 11),
+                    if (isGeneralExpenses)
+                      _SelectionField(
+                        dropdown: MenuWithValues(
+                          labelText: 'Car',
+                          headerLqabel: 'Cars',
+                          dialogWidth: constraints.maxWidth / 2,
+                          width: 170,
+                          controller: controller.tradingCar,
+                          headerKeys: const [
+                            'BRAND',
+                            "MODEL",
+                            'TRIM',
+                            'YEAR',
+                            "SPECIFICATION",
+                            "MILEAGE",
+                            "ENGINE SIZE",
+                          ],
+                          displayKeys: const [
+                            'brand',
+                            'model',
+                            'trim',
+                            'year',
+                            'specification',
+                            'mileage',
+                            'engine_size',
+                          ],
+                          displaySelectedKeys: const ['car'],
+                          onOpen: () {
+                            return controller.getAllCars();
+                          },
+                          onDelete: () {
+                            controller.tradingCarId.value = '';
+                            controller.tradingCar.clear();
+                          },
+                          onSelected: (value) {
+                            controller.tradingCarId.value = value['_id'];
+                            controller.tradingCar.text = '${value['car']}';
+                          },
+                        ),
+                        action: null,
+                      ),
                   ],
                 ),
               ),
@@ -293,10 +337,10 @@ class _ItemFormSection extends StatelessWidget {
 }
 
 class _SelectionField extends StatelessWidget {
-  const _SelectionField({required this.dropdown, required this.action});
+  const _SelectionField({required this.dropdown, this.action});
 
   final Widget dropdown;
-  final Widget action;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -304,14 +348,19 @@ class _SelectionField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Expanded(child: dropdown),
-        const SizedBox(width: 6),
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(8),
+        if (action != null)
+          Row(
+            children: [
+              const SizedBox(width: 6),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: action,
+              ),
+            ],
           ),
-          child: action,
-        ),
       ],
     );
   }

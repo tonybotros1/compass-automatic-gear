@@ -11,6 +11,9 @@ class GeneralExpensesModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime date;
+  final String car;
+  final String trim;
+  final String tradeId;
 
   GeneralExpensesModel({
     required this.id,
@@ -25,6 +28,9 @@ class GeneralExpensesModel {
     required this.companyId,
     required this.createdAt,
     required this.updatedAt,
+    required this.car,
+    required this.trim,
+    required this.tradeId,
   });
 
   static double _toDouble(dynamic value) {
@@ -43,6 +49,9 @@ class GeneralExpensesModel {
       item: json['item']?.toString() ?? '',
       itemId: json['item_id']?.toString() ?? '',
       pay: _toDouble(json['pay']),
+      car: json.containsKey('car') ? json['car'] ?? '' : '',
+      trim: json['trim']?.toString() ?? '',
+      tradeId: json['trade_id']?.toString() ?? '',
       receive: _toDouble(json['receive']),
       accountName: json.containsKey('account_name')
           ? json['account_name']?.toString() ?? ''

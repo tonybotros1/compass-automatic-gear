@@ -27,9 +27,19 @@ Future<dynamic> carTradesDialog({
       insetPadding: const EdgeInsets.all(8),
       child: LayoutBuilder(
         builder: (context, constraints) {
+          final availableWidth =
+              (screen == 'car_trading'
+                      ? constraints.maxWidth
+                      : constraints.maxWidth - 40)
+                  .clamp(0.0, double.infinity)
+                  .toDouble();
+          final dialogWidth = screen == 'car_trading' && availableWidth > 800
+              ? 800.0
+              : availableWidth;
+
           return SizedBox(
             height: constraints.maxHeight,
-            width: constraints.maxWidth - 40,
+            width: dialogWidth,
             child: Column(
               children: [
                 Container(
@@ -148,7 +158,9 @@ Future<dynamic> carTradesDialog({
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: screen == 'car_trading'
+                        ? EdgeInsets.zero
+                        : const EdgeInsets.all(16),
                     child: screen == 'car_trading'
                         ? addNewCarTradeOrEdit(
                             constraints: constraints,

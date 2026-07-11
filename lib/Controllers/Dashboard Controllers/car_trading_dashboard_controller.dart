@@ -112,14 +112,17 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> carSpecification = TextEditingController().obs;
   Rx<TextEditingController> carBrand = TextEditingController().obs;
   Rx<TextEditingController> carModel = TextEditingController().obs;
+  Rx<TextEditingController> carTrim = TextEditingController().obs;
   Rx<TextEditingController> engineSize = TextEditingController().obs;
   Rx<TextEditingController> boughtFrom = TextEditingController().obs;
   Rx<TextEditingController> boughtBy = TextEditingController().obs;
+  Rx<TextEditingController> buyDate = TextEditingController().obs;
   Rx<TextEditingController> year = TextEditingController().obs;
   Rx<TextEditingController> consignmentFor = TextEditingController().obs;
   Rx<TextEditingController> vin = TextEditingController().obs;
   Rx<TextEditingController> soldTo = TextEditingController().obs;
   Rx<TextEditingController> soldBy = TextEditingController().obs;
+  Rx<TextEditingController> sellDate = TextEditingController().obs;
   Rx<TextEditingController> investedBy = TextEditingController().obs;
   Rx<TextEditingController> serviceContractEndDate =
       TextEditingController().obs;
@@ -130,6 +133,8 @@ class CarTradingDashboardController extends GetxController {
   TextEditingController note = TextEditingController();
   TextEditingController item = TextEditingController();
   TextEditingController name = TextEditingController();
+  TextEditingController tradingCar = TextEditingController();
+  RxString tradingCarId = RxString('');
   TextEditingController accountName = TextEditingController();
   RxString accountNameId = RxString('');
   Rx<TextEditingController> itemDate = TextEditingController().obs;
@@ -260,6 +265,7 @@ class CarTradingDashboardController extends GetxController {
 
   RxInt initValueForDatePicker = RxInt(1);
   RxInt initValueForStatusPicker = RxInt(1);
+  RxInt initValueForExpensesTypePicker = RxInt(1);
 
   List<Widget> carTradingTabs = const [
     Tab(text: 'Cars Information'),
@@ -307,14 +313,17 @@ class CarTradingDashboardController extends GetxController {
     carSpecification.value.dispose();
     carBrand.value.dispose();
     carModel.value.dispose();
+    carTrim.value.dispose();
     engineSize.value.dispose();
     boughtFrom.value.dispose();
     boughtBy.value.dispose();
+    buyDate.value.dispose();
     year.value.dispose();
     consignmentFor.value.dispose();
     vin.value.dispose();
     soldTo.value.dispose();
     soldBy.value.dispose();
+    sellDate.value.dispose();
     investedBy.value.dispose();
     serviceContractEndDate.value.dispose();
     warrantyEndDate.value.dispose();
@@ -420,6 +429,16 @@ class CarTradingDashboardController extends GetxController {
         break;
       default:
     }
+  }
+
+  void onChooseForExpensesTypes(int i) {
+    initValueForExpensesTypePicker.value = i;
+    filterCapitalsOrOutstandingOrGeneralExpenses(
+      searchForCapitalsOrOutstandingOrGeneralExpenses,
+      allGeneralExpenses,
+      filteredGeneralExpenses,
+      true,
+    );
   }
 
   void onChooseForDatePickerForChanges(int i) {
@@ -893,6 +912,10 @@ class CarTradingDashboardController extends GetxController {
 
   Future<Map<String, dynamic>> getNamesOfAccount() async {
     return await helper.getAllListValues('CAR_TRADING_CASH_BANK');
+  }
+
+  Future<Map<String, dynamic>> getAllCars() async {
+    return await helper.getAllTradingCars();
   }
 
   Future<Map<String, dynamic>> getListDetils(String code) async {
@@ -1917,6 +1940,18 @@ class CarTradingDashboardController extends GetxController {
           ),
         );
 
+        if (initValueForExpensesTypePicker.value != 1 ||
+            searchForCapitalsOrOutstandingOrGeneralExpenses.value.text
+                .trim()
+                .isNotEmpty) {
+          filterCapitalsOrOutstandingOrGeneralExpenses(
+            searchForCapitalsOrOutstandingOrGeneralExpenses,
+            allGeneralExpenses,
+            filteredGeneralExpenses,
+            true,
+          );
+        }
+
         isCapitalLoading.value = false;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
@@ -2044,6 +2079,7 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode({
           "date": isoDate,
           "item": itemId.value,
+          "trade_id": tradingCarId.value,
           "account_name": accountNameId.value,
           "pay": double.tryParse(pay.text) ?? 0.0,
           "receive": double.tryParse(receive.text) ?? 0.0,
@@ -2140,6 +2176,7 @@ class CarTradingDashboardController extends GetxController {
         body: jsonEncode({
           "date": isoDate,
           "item": itemId.value,
+          "trade_id": tradingCarId.value,
           "pay": double.tryParse(pay.text) ?? 0.0,
           "account_name": accountNameId.value,
           "receive": double.tryParse(receive.text) ?? 0.0,
@@ -2667,6 +2704,7 @@ class CarTradingDashboardController extends GetxController {
         'date': isoDate,
         'car_brand': carBrandId.value,
         'car_model': carModelId.value,
+        'trim': carTrim.value.text.trim(),
         'mileage': double.tryParse(mileage.value.text) ?? 0,
         'specification': carSpecificationId.value,
         'engine_size': engineSizeId.value,
@@ -2888,7 +2926,6 @@ class CarTradingDashboardController extends GetxController {
             : decoded;
         if (data is! Map) return;
         List trades = data["trades"] ?? [];
-        print(trades[0]);
         totalPaysForAllTrades.value = _toDouble(data['grand_total_pay']);
         totalReceivesForAllTrades.value = _toDouble(
           data['grand_total_receive'],
@@ -3010,7 +3047,7 @@ class CarTradingDashboardController extends GetxController {
 
   // =======================================================================================================
 
-  void calculateTotalsForCapitals(RxList allMap) {
+  void calculateTotalsForCapitals(Iterable allMap) {
     totalPays.value = 0;
     totalReceives.value = 0;
     totalNETs.value = 0;
@@ -3021,6 +3058,23 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
+  List<GeneralExpensesModel> _filterGeneralExpensesByType(
+    Iterable<GeneralExpensesModel> expenses,
+  ) {
+    switch (initValueForExpensesTypePicker.value) {
+      case 2:
+        return expenses
+            .where((expense) => expense.tradeId.trim().isNotEmpty)
+            .toList();
+      case 3:
+        return expenses
+            .where((expense) => expense.tradeId.trim().isEmpty)
+            .toList();
+      default:
+        return expenses.toList();
+    }
+  }
+
   // this function is to filter the search results for web
   void filterCapitalsOrOutstandingOrGeneralExpenses(
     Rx<TextEditingController> mapQuery,
@@ -3028,21 +3082,40 @@ class CarTradingDashboardController extends GetxController {
     RxList filteredMap,
     bool isGeneral,
   ) {
-    query.value = mapQuery.value.text.toLowerCase();
+    query.value = mapQuery.value.text.trim().toLowerCase();
+
+    final hasTypeFilter =
+        isGeneral && initValueForExpensesTypePicker.value != 1;
+    final source = isGeneral
+        ? _filterGeneralExpensesByType(allMap.cast<GeneralExpensesModel>())
+        : allMap.toList(growable: false);
+
     if (query.value.isEmpty) {
+      if (hasTypeFilter) {
+        filteredMap.assignAll(source);
+        calculateTotalsForCapitals(source);
+        return;
+      }
       filteredMap.clear();
       calculateTotalsForCapitals(allMap);
     } else {
       filteredMap.assignAll(
-        allMap.where((cap) {
-          return cap.pay.toString().toLowerCase().contains(query) ||
-              cap.receive.toString().toLowerCase().contains(query) ||
-              cap.comment.toString().toLowerCase().contains(query) ||
-              (isGeneral == false ? cap.name : cap.item)
-                  .toString()
-                  .toLowerCase()
-                  .contains(query) ||
-              textToDate(cap.date).toLowerCase().contains(query);
+        source.where((cap) {
+          final primaryText = (isGeneral == false ? cap.name : cap.item)
+              .toString()
+              .toLowerCase();
+          final carText = isGeneral ? cap.car.toString().toLowerCase() : '';
+          final trimText = isGeneral ? cap.trim.toString().toLowerCase() : '';
+          final accountText = cap.accountName.toString().toLowerCase();
+
+          return cap.pay.toString().toLowerCase().contains(query.value) ||
+              cap.receive.toString().toLowerCase().contains(query.value) ||
+              cap.comment.toString().toLowerCase().contains(query.value) ||
+              accountText.contains(query.value) ||
+              carText.contains(query.value) ||
+              trimText.contains(query.value) ||
+              primaryText.contains(query.value) ||
+              textToDate(cap.date).toLowerCase().contains(query.value);
         }).toList(),
       );
       calculateTotalsForCapitals(filteredMap);
@@ -3099,9 +3172,11 @@ class CarTradingDashboardController extends GetxController {
     boughtFromId.value = data.boughtFromId ?? '';
     boughtById.value = data.boughtById ?? '';
     boughtBy.value.text = data.boughtBy ?? '';
+    buyDate.value.text = textToDate(data.buyDate);
     vin.value.text = data.vin ?? '';
     soldById.value = data.soldById ?? '';
     soldBy.value.text = data.soldBy ?? '';
+    sellDate.value.text = textToDate(data.sellDate);
     investedById.value = data.investedById ?? '';
     investedBy.value.text = data.investedBy ?? '';
     consignmentForId.value = data.consignmentForId ?? '';
@@ -3125,6 +3200,7 @@ class CarTradingDashboardController extends GetxController {
     carBrandId.value = data.carBrandId ?? '';
     carModel.value.text = data.carModel ?? '';
     carModelId.value = data.carModelId ?? '';
+    carTrim.value.text = data.trim ?? '';
     carSpecification.value.text = data.specification ?? '';
     carSpecificationId.value = data.specificationId ?? '';
     engineSize.value.text = data.engineSize ?? '';
@@ -3149,7 +3225,9 @@ class CarTradingDashboardController extends GetxController {
     serviceContractEndDate.value.clear();
     boughtFrom.value.clear();
     boughtBy.value.clear();
+    buyDate.value.clear();
     soldBy.value.clear();
+    sellDate.value.clear();
     investedBy.value.clear();
     consignmentFor.value.clear();
     boughtFromId.value = '';
@@ -3176,6 +3254,7 @@ class CarTradingDashboardController extends GetxController {
     carBrandId.value = '';
     carModel.value.clear();
     carModelId.value = '';
+    carTrim.value.clear();
     carSpecification.value.clear();
     carSpecificationId.value = '';
     engineSize.value.clear();
@@ -3192,6 +3271,7 @@ class CarTradingDashboardController extends GetxController {
   void clearFilters() {
     initValueForDatePicker.value = 1;
     initValueForStatusPicker.value = 1;
+    initValueForExpensesTypePicker.value = 1;
     carSoldByFilter.value.clear();
     carBoughtByFilter.value.clear();
     carInvestedByFilter.value.clear();

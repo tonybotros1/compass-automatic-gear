@@ -12,6 +12,7 @@ import 'car_trade_dialog.dart';
 const _pageBackground = Colors.white;
 const _surface = Colors.white;
 const _line = Color(0xFFDCE6E8);
+const _cardBorder = Color(0xFFB8C8CF);
 const _text = Color(0xFF26343A);
 const _muted = Color(0xFF6F8088);
 const _primary = Color.fromARGB(255, 1, 42, 40);
@@ -144,36 +145,47 @@ class _CarTradeCardsViewState extends State<_CarTradeCardsView> {
                           .hideCarTradeFinancialValues
                           .value;
 
-                  return GridView.builder(
+                  return Scrollbar(
                     controller: _scrollController,
-                    scrollCacheExtent: const ScrollCacheExtent.pixels(420),
-                    addAutomaticKeepAlives: false,
-                    addSemanticIndexes: false,
-                    addRepaintBoundaries: true,
-                    physics: const ClampingScrollPhysics(),
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      8,
-                      horizontalPadding,
-                      10,
+                    thumbVisibility: true,
+                    interactive: true,
+                    radius: const Radius.circular(99),
+                    thickness: 5,
+                    child: GridView.builder(
+                      controller: _scrollController,
+                      scrollCacheExtent: const ScrollCacheExtent.pixels(900),
+                      addAutomaticKeepAlives: false,
+                      addSemanticIndexes: false,
+                      addRepaintBoundaries: true,
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      padding: EdgeInsets.fromLTRB(
+                        horizontalPadding,
+                        8,
+                        horizontalPadding + 10,
+                        10,
+                      ),
+                      itemCount: pageTrades.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: columnCount,
+                        mainAxisExtent: 382,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemBuilder: (context, index) {
+                        final trade = pageTrades[index];
+                        return _CarTradeCard(
+                          key: ValueKey(
+                            trade.id ?? 'trade-${startIndex + index}',
+                          ),
+                          trade: trade,
+                          isFinancialsHidden: isFinancialsHidden,
+                        );
+                      },
                     ),
-                    itemCount: pageTrades.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columnCount,
-                      mainAxisExtent: 382,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
-                    itemBuilder: (context, index) {
-                      final trade = pageTrades[index];
-                      return _CarTradeCard(
-                        key: ValueKey(
-                          trade.id ?? 'trade-${startIndex + index}',
-                        ),
-                        trade: trade,
-                        isFinancialsHidden: isFinancialsHidden,
-                      );
-                    },
                   );
                 }),
               ),
@@ -504,9 +516,11 @@ class _CarTradeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final brand = trade.carBrand?.trim() ?? '';
     final model = trade.carModel?.trim() ?? '';
+    final trim = trade.trim?.trim() ?? '';
     final vehicleName = [
       brand,
       model,
+      trim,
     ].where((value) => value.isNotEmpty).join(' ');
     final details = [
       _display(trade.colorOut),
@@ -524,8 +538,15 @@ class _CarTradeCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: _surface,
-        border: Border.all(color: _line, width: 1.45),
+        border: Border.all(color: _cardBorder, width: 1.55),
         borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.028),
+            blurRadius: 3,
+            offset: const Offset(0, 1.5),
+          ),
+        ],
       ),
       child: Column(
         children: [

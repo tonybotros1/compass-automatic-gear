@@ -13,6 +13,7 @@ class CarTradeModel {
   String? carBrand;
   String? carModelId;
   String? carModel;
+  String? trim;
   String? yearId;
   String? year;
   String? vin;
@@ -49,6 +50,7 @@ class CarTradeModel {
     this.date,
     this.carBrand,
     this.carModel,
+    this.trim,
     this.mileage,
     this.specification,
     this.engineSize,
@@ -125,6 +127,7 @@ class CarTradeModel {
     carBrandId = json['car_brand_id']?.toString() ?? '';
     carModel = json['car_model']?.toString() ?? '';
     carModelId = json['car_model_id']?.toString() ?? '';
+    trim = json['trim']?.toString() ?? '';
     mileage = _toInt(json['mileage']);
     specification = json['specification']?.toString() ?? '';
     specificationId = json['specification_id']?.toString() ?? '';

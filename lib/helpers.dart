@@ -292,6 +292,45 @@ class Helpers {
     }
   }
 
+  // this function is to get all cars from car trading dashboard by code for drop down menu
+  Future<Map<String, dynamic>> getAllTradingCars() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken') ?? '';
+      final refreshToken = await secureStorage.read(key: "refreshToken") ?? '';
+      var url = Uri.parse('$backendUrl/car_trading/get_all_cars');
+      final response = await http.get(
+        url,
+        headers: {"Authorization": "Bearer $accessToken"},
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        List<dynamic> jsonData = decoded["cars"];
+        print(jsonData);
+        Map<String, dynamic> map = {
+          for (var role in jsonData) role['_id']: role,
+        };
+        return map;
+      } else if (response.statusCode == 401 && _hasRefreshToken(refreshToken)) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getAllTradingCars();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+        return {};
+      } else if (response.statusCode == 401) {
+        logout();
+        return {};
+      } else {
+        return {};
+      }
+    } catch (e) {
+      return {};
+    }
+  }
+
+
   Future<Map<String, dynamic>> getAllLeaveTypes() async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
