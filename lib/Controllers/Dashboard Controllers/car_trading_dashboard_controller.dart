@@ -20,6 +20,7 @@ import '../../Models/car trading/car_trading_purchase_agreement_model.dart';
 import '../../Models/car trading/general_expenses_model.dart';
 import '../../Models/car trading/last_changes_model.dart';
 import '../../Models/car trading/transfer_model.dart';
+import '../../Models/car trading/vehicle_analysis_model.dart';
 import '../../Widgets/main screen widgets/job_cards_widgets/print_delivery_note.dart';
 import '../../Widgets/main screen widgets/job_cards_widgets/print_invoice_pdf.dart';
 import '../../consts.dart';
@@ -171,6 +172,7 @@ class CarTradingDashboardController extends GetxController {
       RxList<CarTradingPurchaseAgreementModel>([]);
   RxBool isCapitalLoading = RxBool(false);
   RxBool isTransfersLoading = RxBool(false);
+  RxBool isVehicleAnalysisLoading = RxBool(false);
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
   StreamSubscription? _carTradingEventsSubscription;
@@ -253,6 +255,9 @@ class CarTradingDashboardController extends GetxController {
   RxList<TransferModel> alltransfers = RxList<TransferModel>([]);
   RxList<TransferModel> filteredTransfers = RxList<TransferModel>([]);
 
+  RxList<VehicleAnalysisModel> allVehicleAnalysis =
+      RxList<VehicleAnalysisModel>([]);
+
   List<Widget> carsTabs = const [
     Tab(text: 'Sales Agreement'), // note previous name was purchase agreement
     Tab(text: 'Items'),
@@ -270,6 +275,7 @@ class CarTradingDashboardController extends GetxController {
   List<Widget> carTradingTabs = const [
     Tab(text: 'Cars Information'),
     Tab(text: 'Financial Information'),
+    Tab(text: 'Vehicle Analysis'),
   ];
 
   void selectRow(int index) {
@@ -387,6 +393,7 @@ class CarTradingDashboardController extends GetxController {
   Future<void> allSearches() async {
     await filterSearch();
     await filterGeneralExpensesSearch();
+    await getAllVehcileAnalysis();
     await getCashOnHandOrBankBalance();
     await getCapitalsOROutstandingSummary('capitals');
     await getCapitalsOROutstandingSummary('outstanding');
@@ -984,6 +991,46 @@ class CarTradingDashboardController extends GetxController {
       default:
     }
   }
+
+  // VEHICLE ANALYSIS SECTION
+  // ===========================================================================
+  Future<void> getAllVehcileAnalysis() async {
+    try {
+      isVehicleAnalysisLoading.value = true;
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
+      Uri url = Uri.parse(
+        '$backendUrl/car_trading/get_vehicle_analysis_details',
+      );
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        final decoded = _jsonObject(response.body);
+        List analysis = decoded['vehicle_analysis'] ?? [];
+        allVehicleAnalysis.assignAll(
+          analysis.whereType<Map>().map(
+            (tr) =>
+                VehicleAnalysisModel.fromJson(Map<String, dynamic>.from(tr)),
+          ),
+        );
+      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getAllVehcileAnalysis();
+        } else if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      isVehicleAnalysisLoading.value = false;
+    } catch (e) {
+      isVehicleAnalysisLoading.value = false;
+    }
+  }
+  // ===========================================================================
 
   // PRINT SECTION
   // ===========================================================================

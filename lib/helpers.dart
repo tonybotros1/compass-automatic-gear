@@ -306,7 +306,6 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         List<dynamic> jsonData = decoded["cars"];
-        print(jsonData);
         Map<String, dynamic> map = {
           for (var role in jsonData) role['_id']: role,
         };

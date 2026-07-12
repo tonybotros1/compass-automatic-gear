@@ -162,12 +162,7 @@ class _CarTradeCardsViewState extends State<_CarTradeCardsView> {
                       physics: const BouncingScrollPhysics(
                         parent: AlwaysScrollableScrollPhysics(),
                       ),
-                      padding: EdgeInsets.fromLTRB(
-                        horizontalPadding,
-                        8,
-                        horizontalPadding + 10,
-                        10,
-                      ),
+                      padding:const EdgeInsets.only(top: 5),
                       itemCount: pageTrades.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: columnCount,
@@ -276,7 +271,7 @@ class _CarTradePaginationBar extends StatelessWidget {
         );
 
         return Padding(
-          padding: const EdgeInsets.fromLTRB(12, 2, 12, 6),
+          padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
           child: isCompact
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,

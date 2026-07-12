@@ -24,7 +24,6 @@ class MainScreenFilters extends StatelessWidget {
         spacing: 10,
         children: [
           GetX<CarTradingDashboardController>(
-            init: CarTradingDashboardController(),
             builder: (controller) {
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
