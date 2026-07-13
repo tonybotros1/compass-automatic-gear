@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
+import '../../Widgets/Dashboard Widgets/car trading widgets/bank_accounts_section.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/vehicle_analysis.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/main_screen_filters.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/summary_box.dart';
@@ -128,6 +129,12 @@ class CarTradingDashboard extends StatelessWidget {
                               child: Padding(
                                 padding: EdgeInsets.all(5),
                                 child: VehicleAnalysis(),
+                              ),
+                            ),
+                            const _KeepAliveTab(
+                              child: Padding(
+                                padding: EdgeInsets.all(5),
+                                child: BankAccountsSection(),
                               ),
                             ),
                           ],

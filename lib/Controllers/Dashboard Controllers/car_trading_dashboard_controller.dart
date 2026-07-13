@@ -276,6 +276,7 @@ class CarTradingDashboardController extends GetxController {
     Tab(text: 'Cars Information'),
     Tab(text: 'Financial Information'),
     Tab(text: 'Vehicle Analysis'),
+    Tab(text: 'Bank Accounts'),
   ];
 
   void selectRow(int index) {
