@@ -130,6 +130,7 @@ class Cars {
   String? modelId;
   String? modelName;
   String? trim;
+  String? status;
   double? buyPrice;
   double? sellPrice;
   double? buySellNet;
@@ -147,6 +148,7 @@ class Cars {
     this.modelId,
     this.modelName,
     this.trim,
+    this.status,
     this.buyPrice,
     this.sellPrice,
     this.buySellNet,
@@ -166,6 +168,7 @@ class Cars {
       modelId: _readString(json, 'model_id'),
       modelName: _readString(json, 'model_name'),
       trim: _readString(json, 'trim'),
+      status: _readString(json, 'status'),
       buyPrice: _readDouble(json, 'buy_price'),
       sellPrice: _readDouble(json, 'sell_price'),
       buySellNet: _readDouble(json, 'buy_sell_net'),
@@ -203,6 +206,10 @@ class Cars {
 
     if (trim != null) {
       data['trim'] = trim;
+    }
+
+    if (status != null) {
+      data['status'] = status;
     }
 
     if (buyPrice != null) {

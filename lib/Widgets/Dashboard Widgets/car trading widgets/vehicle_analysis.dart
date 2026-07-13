@@ -69,6 +69,7 @@ class _VehicleAnalysisState extends State<VehicleAnalysis>
     with AutomaticKeepAliveClientMixin {
   final ScrollController _scrollController = ScrollController();
   String? _expandedBrandKey;
+  _VehicleStatusFilter _statusFilter = _VehicleStatusFilter.all;
   DateTime? _lastVehicleAnalysisRequestAt;
 
   @override
@@ -93,9 +94,16 @@ class _VehicleAnalysisState extends State<VehicleAnalysis>
         _loadVehicleAnalysisIfNeeded(controller, needsInitialLoad);
 
         final analysis = controller.allVehicleAnalysis.toList(growable: false);
-        final brands = _buildBrandAnalysis(analysis);
+        final brands = _buildBrandAnalysis(
+          analysis,
+          statusFilter: _statusFilter,
+        );
         final isSearching =
             controller.isVehicleAnalysisLoading.value || needsInitialLoad;
+        final visibleCarCount = brands.fold<int>(
+          0,
+          (total, brand) => total + brand.safeCarCount,
+        );
         const hideFinancials = false;
 
         if (_expandedBrandKey != null &&
@@ -112,6 +120,18 @@ class _VehicleAnalysisState extends State<VehicleAnalysis>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  _VehicleStatusFilterBar(
+                    selectedFilter: _statusFilter,
+                    visibleCarCount: visibleCarCount,
+                    onChanged: (filter) {
+                      if (_statusFilter == filter) return;
+                      setState(() {
+                        _statusFilter = filter;
+                        _expandedBrandKey = null;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 10),
                   Expanded(
                     child: _AnalysisPanel(
                       brands: brands,
@@ -164,6 +184,218 @@ class _VehicleAnalysisState extends State<VehicleAnalysis>
     final lastRequest = _lastVehicleAnalysisRequestAt;
     if (lastRequest == null) return true;
     return DateTime.now().difference(lastRequest) > const Duration(seconds: 5);
+  }
+}
+
+enum _VehicleStatusFilter { all, newCars, sold }
+
+extension _VehicleStatusFilterView on _VehicleStatusFilter {
+  String get label {
+    switch (this) {
+      case _VehicleStatusFilter.all:
+        return 'ALL';
+      case _VehicleStatusFilter.newCars:
+        return 'NEW';
+      case _VehicleStatusFilter.sold:
+        return 'SOLD';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case _VehicleStatusFilter.all:
+        return Icons.all_inclusive_rounded;
+      case _VehicleStatusFilter.newCars:
+        return Icons.fiber_new_rounded;
+      case _VehicleStatusFilter.sold:
+        return Icons.sell_outlined;
+    }
+  }
+
+  bool matches(String status) {
+    final normalized = status.trim().toLowerCase();
+    switch (this) {
+      case _VehicleStatusFilter.all:
+        return true;
+      case _VehicleStatusFilter.newCars:
+        return normalized == 'new';
+      case _VehicleStatusFilter.sold:
+        return normalized == 'sold';
+    }
+  }
+}
+
+class _VehicleStatusFilterBar extends StatelessWidget {
+  const _VehicleStatusFilterBar({
+    required this.selectedFilter,
+    required this.visibleCarCount,
+    required this.onChanged,
+  });
+
+  final _VehicleStatusFilter selectedFilter;
+  final int visibleCarCount;
+  final ValueChanged<_VehicleStatusFilter> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 620;
+        final filter = _VehicleStatusSegmentedControl(
+          selectedFilter: selectedFilter,
+          onChanged: onChanged,
+        );
+        final count = _VehicleStatusCountPill(
+          count: visibleCarCount,
+          label: selectedFilter.label,
+        );
+
+        if (isCompact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [filter, const SizedBox(height: 8), count],
+          );
+        }
+
+        return Row(children: [filter, const Spacer(), count]);
+      },
+    );
+  }
+}
+
+class _VehicleStatusSegmentedControl extends StatelessWidget {
+  const _VehicleStatusSegmentedControl({
+    required this.selectedFilter,
+    required this.onChanged,
+  });
+
+  final _VehicleStatusFilter selectedFilter;
+  final ValueChanged<_VehicleStatusFilter> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 38,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: _surfaceSoft,
+        border: Border.all(color: _line),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: _VehicleStatusFilter.values.map((filter) {
+          return _VehicleStatusOption(
+            filter: filter,
+            isSelected: selectedFilter == filter,
+            onTap: () => onChanged(filter),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class _VehicleStatusOption extends StatelessWidget {
+  const _VehicleStatusOption({
+    required this.filter,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final _VehicleStatusFilter filter;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutCubic,
+      margin: const EdgeInsets.symmetric(horizontal: 1),
+      decoration: BoxDecoration(
+        color: isSelected ? _surface : Colors.transparent,
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(
+          color: isSelected ? _lineStrong : Colors.transparent,
+        ),
+        boxShadow: isSelected
+            ? const [
+                BoxShadow(color: _shadow, blurRadius: 12, offset: Offset(0, 5)),
+              ]
+            : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(9),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  filter.icon,
+                  size: 15,
+                  color: isSelected ? _primaryDark : _muted,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  filter.label,
+                  style: TextStyle(
+                    color: isSelected ? _primaryDark : _muted,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VehicleStatusCountPill extends StatelessWidget {
+  const _VehicleStatusCountPill({required this.count, required this.label});
+
+  final int count;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 11),
+      decoration: BoxDecoration(
+        color: _primarySoft,
+        border: Border.all(color: _primary.withValues(alpha: 0.16)),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.directions_car_outlined,
+            size: 15,
+            color: _primaryDark,
+          ),
+          const SizedBox(width: 7),
+          Text(
+            '$count ${label == 'ALL' ? 'CARS' : '$label CARS'}',
+            style: const TextStyle(
+              color: _primaryDark,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.15,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -1563,7 +1795,7 @@ class _VehicleInlineName extends StatelessWidget {
   Widget build(BuildContext context) {
     final meta = [
       if (car.year.isNotEmpty) car.year,
-      if (car.status.isNotEmpty) car.status,
+      if (car.safeStatus.isNotEmpty) car.safeStatus,
     ].join('  ·  ');
 
     return Row(
@@ -1829,9 +2061,119 @@ class _CarMetricColumn {
 }
 
 List<_BrandAnalysis> _buildBrandAnalysis(
-  List<vehicle_analysis_model.VehicleAnalysisModel> analysis,
-) {
-  return analysis.toList(growable: false);
+  List<vehicle_analysis_model.VehicleAnalysisModel> analysis, {
+  _VehicleStatusFilter statusFilter = _VehicleStatusFilter.all,
+}) {
+  if (statusFilter == _VehicleStatusFilter.all) {
+    return analysis.toList(growable: false);
+  }
+
+  final accumulators = <String, _BrandAnalysisAccumulator>{};
+
+  for (final brand in analysis) {
+    for (final car in brand.cars ?? const <vehicle_analysis_model.Cars>[]) {
+      if (!statusFilter.matches(car.safeStatus)) continue;
+
+      final brandName = _displayText(
+        car.brandName ?? brand.brandName,
+        fallback: 'Unknown Brand',
+      );
+      final brandId = (car.brandId ?? brand.brandId ?? '').trim();
+      final key = brandId.isNotEmpty ? brandId : brandName.toLowerCase();
+
+      accumulators
+          .putIfAbsent(
+            key,
+            () => _BrandAnalysisAccumulator(
+              brandId: brandId,
+              brandName: brandName,
+            ),
+          )
+          .add(car);
+    }
+  }
+
+  if (accumulators.isEmpty) return const [];
+
+  final sortedAccumulators = accumulators.values.toList()
+    ..sort((a, b) => b.buyPrice.compareTo(a.buyPrice));
+
+  final result = <_BrandAnalysis>[];
+  _BrandAnalysisAccumulator? others;
+
+  for (var index = 0; index < sortedAccumulators.length; index++) {
+    final accumulator = sortedAccumulators[index];
+    if (index < 10) {
+      result.add(accumulator.toModel());
+    } else {
+      others ??= _BrandAnalysisAccumulator(
+        brandId: 'others',
+        brandName: 'Others',
+      );
+      others.addAccumulator(accumulator);
+    }
+  }
+
+  if (others != null && others.carCount > 0) {
+    result.add(others.toModel());
+  }
+
+  return result;
+}
+
+class _BrandAnalysisAccumulator {
+  _BrandAnalysisAccumulator({required this.brandId, required this.brandName});
+
+  final String brandId;
+  final String brandName;
+  final List<_CarAnalysis> cars = [];
+  int carCount = 0;
+  double buyPrice = 0;
+  double sellPrice = 0;
+  double totalPaid = 0;
+  double totalReceived = 0;
+  double expenses = 0;
+  double revenue = 0;
+
+  void add(_CarAnalysis car) {
+    cars.add(car);
+    carCount += 1;
+    buyPrice += car.safeBuyPrice;
+    sellPrice += car.safeSellPrice;
+    totalPaid += car.safeTotalPaid;
+    totalReceived += car.safeTotalReceived;
+    expenses += car.safeExpenses;
+    revenue += car.safeRevenue;
+  }
+
+  void addAccumulator(_BrandAnalysisAccumulator accumulator) {
+    cars.addAll(accumulator.cars);
+    carCount += accumulator.carCount;
+    buyPrice += accumulator.buyPrice;
+    sellPrice += accumulator.sellPrice;
+    totalPaid += accumulator.totalPaid;
+    totalReceived += accumulator.totalReceived;
+    expenses += accumulator.expenses;
+    revenue += accumulator.revenue;
+  }
+
+  _BrandAnalysis toModel() {
+    return vehicle_analysis_model.VehicleAnalysisModel(
+      brandId: brandId,
+      brandName: brandName,
+      carCount: carCount,
+      buyPrice: buyPrice,
+      sellPrice: sellPrice,
+      buySellNet: sellPrice - buyPrice,
+      totalPaid: totalPaid,
+      totalReceived: totalReceived,
+      expenses: expenses,
+      revenue: revenue,
+      expensesRevenueNet: revenue - expenses,
+      totalNet: totalReceived - totalPaid,
+      cars: cars,
+    );
+  }
 }
 
 extension _VehicleAnalysisBrandModelView on _BrandAnalysis {
@@ -1884,7 +2226,7 @@ extension _VehicleAnalysisCarModelView on _CarAnalysis {
 
   String get year => '';
 
-  String get status => '';
+  String get safeStatus => status?.trim() ?? '';
 
   double get safeBuyPrice => buyPrice ?? 0;
 
