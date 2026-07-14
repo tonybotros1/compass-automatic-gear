@@ -83,17 +83,14 @@ class _BankAccountsSectionState extends State<BankAccountsSection> {
   String _accountQuery = '';
   String _transferQuery = '';
   double? _leftPanelWidth;
+  bool _isRefreshing = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final controller = Get.find<CarTradingDashboardController>();
-      Future.wait([
-        controller.getCashOnHandOrBankBalance(),
-        controller.getAllTransferes(),
-      ]);
+      _refreshData(Get.find<CarTradingDashboardController>());
     });
   }
 
@@ -153,6 +150,7 @@ class _BankAccountsSectionState extends State<BankAccountsSection> {
                       : selectedAccount?.accountName?.trim().isNotEmpty == true
                       ? selectedAccount!.accountName!.trim()
                       : _selectedAccountName ?? 'All Accounts',
+                  isRefreshing: _isRefreshing,
                   total: filteredTotal,
                   searchController: _transferSearch,
                   onSearchChanged: (query) {
@@ -164,6 +162,7 @@ class _BankAccountsSectionState extends State<BankAccountsSection> {
                       _selectedAccountName = null;
                     });
                   },
+                  onRefresh: () => _refreshData(controller),
                   onNewTransfer: () => _openNewTransfer(controller),
                   onEditTransfer: (transfer) =>
                       _openEditTransfer(controller, transfer),
@@ -232,6 +231,19 @@ class _BankAccountsSectionState extends State<BankAccountsSection> {
           ].join(' ').toLowerCase().contains(query);
         })
         .toList(growable: false);
+  }
+
+  Future<void> _refreshData(CarTradingDashboardController controller) async {
+    if (_isRefreshing) return;
+    if (mounted) setState(() => _isRefreshing = true);
+    try {
+      await Future.wait([
+        controller.getCashOnHandOrBankBalance(),
+        controller.getAllTransferes(),
+      ]);
+    } finally {
+      if (mounted) setState(() => _isRefreshing = false);
+    }
   }
 
   AccountSummaryModel? _selectedAccount(
@@ -431,10 +443,12 @@ class _TransfersPanel extends StatelessWidget {
     required this.allTransfersCount,
     required this.selectedAccountId,
     required this.selectedAccountName,
+    required this.isRefreshing,
     required this.total,
     required this.searchController,
     required this.onSearchChanged,
     required this.onClearAccount,
+    required this.onRefresh,
     required this.onNewTransfer,
     required this.onEditTransfer,
     required this.onDeleteTransfer,
@@ -445,10 +459,12 @@ class _TransfersPanel extends StatelessWidget {
   final int allTransfersCount;
   final String? selectedAccountId;
   final String selectedAccountName;
+  final bool isRefreshing;
   final double total;
   final TextEditingController searchController;
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClearAccount;
+  final VoidCallback onRefresh;
   final VoidCallback onNewTransfer;
   final ValueChanged<TransferModel> onEditTransfer;
   final ValueChanged<TransferModel> onDeleteTransfer;
@@ -499,6 +515,11 @@ class _TransfersPanel extends StatelessWidget {
                       canClear: _hasAccountFilter,
                       onClear: onClearAccount,
                     ),
+                  ),
+                  const SizedBox(width: 9),
+                  _BankRefreshButton(
+                    isRefreshing: isRefreshing,
+                    onPressed: onRefresh,
                   ),
                   const SizedBox(width: 9),
                   _NewTransferButton(onPressed: onNewTransfer),
@@ -1112,6 +1133,51 @@ class _SelectedAccountPill extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _BankRefreshButton extends StatelessWidget {
+  const _BankRefreshButton({
+    required this.isRefreshing,
+    required this.onPressed,
+  });
+
+  final bool isRefreshing;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Refresh accounts and transfers',
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: OutlinedButton(
+          onPressed: isRefreshing ? null : onPressed,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: _primaryDark,
+            disabledForegroundColor: _primary,
+            backgroundColor: _surface,
+            disabledBackgroundColor: _surfaceSoft,
+            padding: EdgeInsets.zero,
+            side: const BorderSide(color: _lineStrong),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+          ),
+          child: SizedBox(
+            width: 17,
+            height: 17,
+            child: isRefreshing
+                ? const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: _primary,
+                  )
+                : const Icon(Icons.refresh_rounded, size: 18),
+          ),
+        ),
       ),
     );
   }

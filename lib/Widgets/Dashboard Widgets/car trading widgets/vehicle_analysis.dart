@@ -123,6 +123,8 @@ class _VehicleAnalysisState extends State<VehicleAnalysis>
                   _VehicleStatusFilterBar(
                     selectedFilter: _statusFilter,
                     visibleCarCount: visibleCarCount,
+                    isRefreshing: controller.isVehicleAnalysisLoading.value,
+                    onRefresh: () => _refreshVehicleAnalysis(controller),
                     onChanged: (filter) {
                       if (_statusFilter == filter) return;
                       setState(() {
@@ -185,6 +187,14 @@ class _VehicleAnalysisState extends State<VehicleAnalysis>
     if (lastRequest == null) return true;
     return DateTime.now().difference(lastRequest) > const Duration(seconds: 5);
   }
+
+  Future<void> _refreshVehicleAnalysis(
+    CarTradingDashboardController controller,
+  ) async {
+    if (controller.isVehicleAnalysisLoading.value) return;
+    _lastVehicleAnalysisRequestAt = DateTime.now();
+    await controller.getAllVehcileAnalysis();
+  }
 }
 
 enum _VehicleStatusFilter { all, newCars, sold }
@@ -229,11 +239,15 @@ class _VehicleStatusFilterBar extends StatelessWidget {
   const _VehicleStatusFilterBar({
     required this.selectedFilter,
     required this.visibleCarCount,
+    required this.isRefreshing,
+    required this.onRefresh,
     required this.onChanged,
   });
 
   final _VehicleStatusFilter selectedFilter;
   final int visibleCarCount;
+  final bool isRefreshing;
+  final VoidCallback onRefresh;
   final ValueChanged<_VehicleStatusFilter> onChanged;
 
   @override
@@ -249,16 +263,82 @@ class _VehicleStatusFilterBar extends StatelessWidget {
           count: visibleCarCount,
           label: selectedFilter.label,
         );
+        final refresh = _VehicleRefreshButton(
+          isRefreshing: isRefreshing,
+          onPressed: onRefresh,
+        );
 
         if (isCompact) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [filter, const SizedBox(height: 8), count],
+            children: [
+              filter,
+              const SizedBox(height: 8),
+              Row(children: [count, const Spacer(), refresh]),
+            ],
           );
         }
 
-        return Row(children: [filter, const Spacer(), count]);
+        return Row(
+          children: [
+            filter,
+            const Spacer(),
+            count,
+            const SizedBox(width: 8),
+            refresh,
+          ],
+        );
       },
+    );
+  }
+}
+
+class _VehicleRefreshButton extends StatelessWidget {
+  const _VehicleRefreshButton({
+    required this.isRefreshing,
+    required this.onPressed,
+  });
+
+  final bool isRefreshing;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Refresh vehicle analysis',
+      child: SizedBox(
+        height: 34,
+        child: OutlinedButton.icon(
+          onPressed: isRefreshing ? null : onPressed,
+          icon: SizedBox(
+            width: 15,
+            height: 15,
+            child: isRefreshing
+                ? const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: _primary,
+                  )
+                : const Icon(Icons.refresh_rounded, size: 17),
+          ),
+          label: Text(isRefreshing ? 'REFRESHING' : 'REFRESH'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: _primaryDark,
+            disabledForegroundColor: _primaryDark,
+            backgroundColor: _surface,
+            disabledBackgroundColor: _surfaceSoft,
+            side: const BorderSide(color: _lineStrong),
+            padding: const EdgeInsets.symmetric(horizontal: 11),
+            textStyle: const TextStyle(
+              fontSize: 10.5,
+              fontWeight: FontWeight.w900,
+              letterSpacing: .15,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
