@@ -163,6 +163,7 @@ Widget addNewItemOrEdit({
                       _SelectionField(
                         dropdown: MenuWithValues(
                           labelText: 'Car',
+                          validate: false,
                           headerLqabel: 'Cars',
                           dialogWidth: constraints.maxWidth / 2,
                           width: 170,
