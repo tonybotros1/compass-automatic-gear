@@ -63,6 +63,7 @@ Widget additionalInformation({
                     _ActionField(
                       field: CustomDropdown(
                         width: 300,
+                        showedSelectedName: 'name',
                         textcontroller: controller.investedBy.value.text,
                         hintText: 'Capital By', // old name was (invested By)
                         onChanged: (key, value) {
