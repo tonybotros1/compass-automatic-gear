@@ -355,6 +355,8 @@ class _SummarySectionState extends State<SummarySection>
     final expenses = _list(summary['expense_breakdown']);
     final accounts = _list(summary['accounts']);
     final capitalByRows = controller.dashboardSummaryCapitalByRows;
+    final boughtByRows = _list(summary['bought_by_summary']);
+    final soldByRows = _list(summary['sold_by_summary']);
     final inventoryAging = _list(summary['inventory_aging']);
     final outstandingAging = _list(summary['outstanding_aging']);
     final topVehicles = _list(summary['top_vehicles']);
@@ -506,6 +508,12 @@ class _SummarySectionState extends State<SummarySection>
                   onChanged: controller.selectDashboardSummaryCapitalBy,
                   onStatusChanged:
                       controller.selectDashboardSummaryCapitalByStatus,
+                ),
+                const SizedBox(height: 18),
+                _PeopleFinancialGrid(
+                  boughtRows: boughtByRows,
+                  soldRows: soldByRows,
+                  hidden: !showFinancials,
                 ),
                 const SizedBox(height: 18),
                 _ChartGrid(
@@ -1605,6 +1613,528 @@ class _CapitalByStatusFilter extends StatelessWidget {
           );
         }).toList(),
       ),
+    );
+  }
+}
+
+class _PeopleFinancialGrid extends StatelessWidget {
+  const _PeopleFinancialGrid({
+    required this.boughtRows,
+    required this.soldRows,
+    required this.hidden,
+  });
+
+  final List<Map<String, dynamic>> boughtRows;
+  final List<Map<String, dynamic>> soldRows;
+  final bool hidden;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 1050 ? 2 : 1;
+        const gap = 12.0;
+        final width = columns == 2
+            ? (constraints.maxWidth - gap) / 2
+            : constraints.maxWidth;
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          crossAxisAlignment: WrapCrossAlignment.start,
+          children: [
+            SizedBox(
+              width: width,
+              child: _PeopleFinancialTable(
+                title: 'Bought By',
+                subtitle: 'Car-trade items grouped by purchasing person',
+                icon: Icons.shopping_cart_checkout_rounded,
+                accent: _blue,
+                softColor: _blueSoft,
+                rows: boughtRows,
+                hidden: hidden,
+              ),
+            ),
+            SizedBox(
+              width: width,
+              child: _PeopleFinancialTable(
+                title: 'Sold By',
+                subtitle: 'Car-trade items grouped by selling person',
+                icon: Icons.handshake_rounded,
+                accent: _green,
+                softColor: _greenSoft,
+                rows: soldRows,
+                hidden: hidden,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _PeopleFinancialTable extends StatelessWidget {
+  const _PeopleFinancialTable({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.accent,
+    required this.softColor,
+    required this.rows,
+    required this.hidden,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color accent;
+  final Color softColor;
+  final List<Map<String, dynamic>> rows;
+  final bool hidden;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalPaid = rows.fold<double>(
+      0,
+      (total, row) => total + _double(row['paid']),
+    );
+    final totalReceived = rows.fold<double>(
+      0,
+      (total, row) => total + _double(row['received']),
+    );
+    final totalNet = totalReceived - totalPaid;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: _surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFD8E3EA)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A17283E),
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(13, 11, 11, 10),
+            child: Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: softColor,
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Icon(icon, color: accent, size: 18),
+                ),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: _text,
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        subtitle,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: _muted,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: softColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${rows.length} ${rows.length == 1 ? 'person' : 'people'}',
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: _line),
+          if (rows.isEmpty)
+            SizedBox(
+              height: 105,
+              child: _EmptyPanel(
+                message: 'No $title items in the selected period',
+              ),
+            )
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxWidth < 560;
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!compact) const _PeopleFinancialTableHeader(),
+                    for (var index = 0; index < rows.length; index++)
+                      _PeopleFinancialRow(
+                        row: rows[index],
+                        index: index,
+                        accent: accent,
+                        softColor: softColor,
+                        hidden: hidden,
+                        compact: compact,
+                      ),
+                    _PeopleFinancialTotalRow(
+                      people: rows.length,
+                      paid: totalPaid,
+                      received: totalReceived,
+                      net: totalNet,
+                      hidden: hidden,
+                      compact: compact,
+                    ),
+                  ],
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PeopleFinancialTableHeader extends StatelessWidget {
+  const _PeopleFinancialTableHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    const style = TextStyle(
+      color: _muted,
+      fontSize: 8.5,
+      fontWeight: FontWeight.w900,
+      letterSpacing: .35,
+    );
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      color: const Color(0xFFF7F9FB),
+      child: const Row(
+        children: [
+          Expanded(flex: 17, child: Text('PERSON', style: style)),
+          Expanded(
+            flex: 13,
+            child: Text('PAID', textAlign: TextAlign.right, style: style),
+          ),
+          Expanded(
+            flex: 13,
+            child: Text('RECEIVED', textAlign: TextAlign.right, style: style),
+          ),
+          Expanded(
+            flex: 13,
+            child: Text('NET', textAlign: TextAlign.right, style: style),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PeopleFinancialRow extends StatelessWidget {
+  const _PeopleFinancialRow({
+    required this.row,
+    required this.index,
+    required this.accent,
+    required this.softColor,
+    required this.hidden,
+    required this.compact,
+  });
+
+  final Map<String, dynamic> row;
+  final int index;
+  final Color accent;
+  final Color softColor;
+  final bool hidden;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final rawName = row['name']?.toString().trim() ?? '';
+    final name = rawName.isEmpty ? 'Unknown person' : rawName;
+    final words = name.split(RegExp(r'\s+')).where((word) => word.isNotEmpty);
+    final initials = words
+        .take(2)
+        .map((word) => word.characters.first.toUpperCase())
+        .join();
+    final identity = Row(
+      children: [
+        Container(
+          width: 27,
+          height: 27,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: softColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            initials,
+            style: TextStyle(
+              color: accent,
+              fontSize: 8.5,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+        const SizedBox(width: 7),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: _text,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 1),
+              Text(
+                '${_int(row['car_count'])} cars · ${_int(row['items'])} items',
+                style: const TextStyle(
+                  color: _muted,
+                  fontSize: 8,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    final net = _double(row['net']);
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(12, compact ? 10 : 8, 12, compact ? 10 : 8),
+      decoration: BoxDecoration(
+        color: index.isEven ? _surface : const Color(0xFFFBFCFD),
+        border: const Border(bottom: BorderSide(color: _line)),
+      ),
+      child: compact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                identity,
+                const SizedBox(height: 9),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _PeopleAmount(
+                        label: 'PAID',
+                        value: row['paid'],
+                        color: _red,
+                        hidden: hidden,
+                      ),
+                    ),
+                    Expanded(
+                      child: _PeopleAmount(
+                        label: 'RECEIVED',
+                        value: row['received'],
+                        color: _green,
+                        hidden: hidden,
+                      ),
+                    ),
+                    Expanded(
+                      child: _PeopleAmount(
+                        label: 'NET',
+                        value: net,
+                        color: net >= 0 ? _primary : _red,
+                        hidden: hidden,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(flex: 17, child: identity),
+                Expanded(
+                  flex: 13,
+                  child: _PeopleAmount(
+                    value: row['paid'],
+                    color: _red,
+                    hidden: hidden,
+                  ),
+                ),
+                Expanded(
+                  flex: 13,
+                  child: _PeopleAmount(
+                    value: row['received'],
+                    color: _green,
+                    hidden: hidden,
+                  ),
+                ),
+                Expanded(
+                  flex: 13,
+                  child: _PeopleAmount(
+                    value: net,
+                    color: net >= 0 ? _primary : _red,
+                    hidden: hidden,
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+class _PeopleFinancialTotalRow extends StatelessWidget {
+  const _PeopleFinancialTotalRow({
+    required this.people,
+    required this.paid,
+    required this.received,
+    required this.net,
+    required this.hidden,
+    required this.compact,
+  });
+
+  final int people;
+  final double paid;
+  final double received;
+  final double net;
+  final bool hidden;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final amounts = [
+      _PeopleAmount(label: 'PAID', value: paid, color: _red, hidden: hidden),
+      _PeopleAmount(
+        label: 'RECEIVED',
+        value: received,
+        color: _green,
+        hidden: hidden,
+      ),
+      _PeopleAmount(
+        label: 'NET',
+        value: net,
+        color: net >= 0 ? _primary : _red,
+        hidden: hidden,
+      ),
+    ];
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      color: const Color(0xFFF1F6F8),
+      child: compact
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'TOTAL · $people ${people == 1 ? 'PERSON' : 'PEOPLE'}',
+                  style: const TextStyle(
+                    color: _text,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: amounts
+                      .map((amount) => Expanded(child: amount))
+                      .toList(),
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  flex: 17,
+                  child: Text(
+                    'TOTAL · $people ${people == 1 ? 'PERSON' : 'PEOPLE'}',
+                    style: const TextStyle(
+                      color: _text,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+                for (final amount in amounts) Expanded(flex: 13, child: amount),
+              ],
+            ),
+    );
+  }
+}
+
+class _PeopleAmount extends StatelessWidget {
+  const _PeopleAmount({
+    required this.value,
+    required this.color,
+    required this.hidden,
+    this.label,
+  });
+
+  final String? label;
+  final dynamic value;
+  final Color color;
+  final bool hidden;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (label != null) ...[
+          Text(
+            label!,
+            style: const TextStyle(
+              color: _muted,
+              fontSize: 7.5,
+              fontWeight: FontWeight.w900,
+              letterSpacing: .25,
+            ),
+          ),
+          const SizedBox(height: 2),
+        ],
+        SizedBox(
+          height: 16,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerRight,
+            child: Text(
+              hidden ? '••••••' : _money(value),
+              maxLines: 1,
+              style: TextStyle(
+                color: hidden ? _muted : color,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w900,
+                letterSpacing: hidden ? 1.1 : -.15,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
