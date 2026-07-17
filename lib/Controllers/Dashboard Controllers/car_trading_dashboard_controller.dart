@@ -183,6 +183,7 @@ class CarTradingDashboardController extends GetxController {
   );
   final Rx<String?> dashboardSummaryError = Rx<String?>(null);
   final RxString dashboardSummaryCapitalById = ''.obs;
+  final RxString dashboardSummaryCapitalByStatus = 'all'.obs;
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
   StreamSubscription? _carTradingEventsSubscription;
@@ -489,18 +490,7 @@ class CarTradingDashboardController extends GetxController {
       final decoded = _jsonObject(response.body);
       if (response.statusCode == 200) {
         dashboardExecutiveSummary.assignAll(decoded);
-        final rows = decoded['capital_by_summary'];
-        if (rows is List && rows.isNotEmpty) {
-          final ids = rows
-              .whereType<Map>()
-              .map((row) => row['id']?.toString() ?? '')
-              .toSet();
-          if (!ids.contains(dashboardSummaryCapitalById.value)) {
-            dashboardSummaryCapitalById.value = ids.first;
-          }
-        } else {
-          dashboardSummaryCapitalById.value = '';
-        }
+        _syncDashboardSummaryCapitalBySelection();
       } else {
         dashboardSummaryError.value =
             decoded['detail']?.toString() ??
@@ -527,12 +517,49 @@ class CarTradingDashboardController extends GetxController {
     await getDashboardSummary();
   }
 
+  List<Map<String, dynamic>> get dashboardSummaryCapitalByRows {
+    final statusGroups = dashboardExecutiveSummary['capital_by_status_summary'];
+    final dynamic rawRows = statusGroups is Map
+        ? statusGroups[dashboardSummaryCapitalByStatus.value]
+        : dashboardExecutiveSummary['capital_by_summary'];
+    if (rawRows is! List) return const [];
+    return rawRows
+        .whereType<Map>()
+        .map((row) => Map<String, dynamic>.from(row))
+        .toList();
+  }
+
+  void _syncDashboardSummaryCapitalBySelection() {
+    final rows = dashboardSummaryCapitalByRows;
+    if (rows.isEmpty) {
+      dashboardSummaryCapitalById.value = '';
+      return;
+    }
+    final ids = rows
+        .map((row) => row['id']?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
+        .toSet();
+    if (!ids.contains(dashboardSummaryCapitalById.value)) {
+      dashboardSummaryCapitalById.value = ids.first;
+    }
+  }
+
   void toggleDashboardSummaryFinancials() {
     showDashboardSummaryFinancials.toggle();
   }
 
   void selectDashboardSummaryCapitalBy(String? id) {
     dashboardSummaryCapitalById.value = id ?? '';
+  }
+
+  void selectDashboardSummaryCapitalByStatus(String status) {
+    final normalized = status.trim().toLowerCase();
+    if (!const {'all', 'new', 'sold'}.contains(normalized) ||
+        dashboardSummaryCapitalByStatus.value == normalized) {
+      return;
+    }
+    dashboardSummaryCapitalByStatus.value = normalized;
+    _syncDashboardSummaryCapitalBySelection();
   }
 
   final Set<int> _tabsBeingRefreshed = <int>{};

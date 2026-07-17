@@ -354,7 +354,7 @@ class _SummarySectionState extends State<SummarySection>
     final brandRows = _list(summary['brand_performance']);
     final expenses = _list(summary['expense_breakdown']);
     final accounts = _list(summary['accounts']);
-    final capitalByRows = _list(summary['capital_by_summary']);
+    final capitalByRows = controller.dashboardSummaryCapitalByRows;
     final inventoryAging = _list(summary['inventory_aging']);
     final outstandingAging = _list(summary['outstanding_aging']);
     final topVehicles = _list(summary['top_vehicles']);
@@ -499,9 +499,13 @@ class _SummarySectionState extends State<SummarySection>
                 const SizedBox(height: 18),
                 _CapitalBySummarySection(
                   rows: capitalByRows,
+                  selectedStatus:
+                      controller.dashboardSummaryCapitalByStatus.value,
                   selectedId: controller.dashboardSummaryCapitalById.value,
                   hidden: !showFinancials,
                   onChanged: controller.selectDashboardSummaryCapitalBy,
+                  onStatusChanged:
+                      controller.selectDashboardSummaryCapitalByStatus,
                 ),
                 const SizedBox(height: 18),
                 _ChartGrid(
@@ -1272,35 +1276,27 @@ class _CapitalBySummarySection extends StatelessWidget {
   const _CapitalBySummarySection({
     required this.rows,
     required this.selectedId,
+    required this.selectedStatus,
     required this.hidden,
     required this.onChanged,
+    required this.onStatusChanged,
   });
 
   final List<Map<String, dynamic>> rows;
   final String? selectedId;
+  final String selectedStatus;
   final bool hidden;
   final ValueChanged<String?> onChanged;
+  final ValueChanged<String> onStatusChanged;
 
   @override
   Widget build(BuildContext context) {
-    if (rows.isEmpty) {
-      return Container(
-        height: 132,
-        decoration: BoxDecoration(
-          color: _surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _line),
-        ),
-        child: const _EmptyPanel(
-          message: 'No Capital By vehicle items in this period',
-        ),
-      );
-    }
-
-    final selected = rows.firstWhere(
-      (row) => row['id']?.toString() == selectedId,
-      orElse: () => rows.first,
-    );
+    final selected = rows.isEmpty
+        ? <String, dynamic>{}
+        : rows.firstWhere(
+            (row) => row['id']?.toString() == selectedId,
+            orElse: () => rows.first,
+          );
     final effectiveId = selected['id']?.toString() ?? '';
     final net = _double(selected['net']);
 
@@ -1320,11 +1316,15 @@ class _CapitalBySummarySection extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final compact = constraints.maxWidth < 720;
+          final compact = constraints.maxWidth < 920;
           final selector = _CapitalBySelector(
             rows: rows,
             value: effectiveId,
             onChanged: onChanged,
+          );
+          final statusFilter = _CapitalByStatusFilter(
+            value: selectedStatus,
+            onChanged: onStatusChanged,
           );
           final heading = Row(
             children: [
@@ -1358,7 +1358,7 @@ class _CapitalBySummarySection extends StatelessWidget {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'Paid, received, and net from vehicle line items in the selected period',
+                      'Paid, received, and net by vehicle status in the selected period',
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: _muted,
@@ -1375,78 +1375,96 @@ class _CapitalBySummarySection extends StatelessWidget {
           final header = compact
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [heading, const SizedBox(height: 10), selector],
+                  children: [
+                    heading,
+                    const SizedBox(height: 10),
+                    statusFilter,
+                    const SizedBox(height: 8),
+                    selector,
+                  ],
                 )
               : Row(
                   children: [
                     Expanded(child: heading),
                     const SizedBox(width: 15),
-                    SizedBox(width: 270, child: selector),
+                    SizedBox(width: 205, child: statusFilter),
+                    const SizedBox(width: 8),
+                    SizedBox(width: 250, child: selector),
                   ],
                 );
 
           final cardWidth = compact
               ? constraints.maxWidth
               : (constraints.maxWidth - 20) / 3;
+          final content = rows.isEmpty
+              ? SizedBox(
+                  height: 78,
+                  child: _EmptyPanel(
+                    message:
+                        'No ${selectedStatus.toUpperCase()} Capital By vehicle items in this period',
+                  ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: [
+                        SizedBox(
+                          width: cardWidth,
+                          child: _CapitalByMetric(
+                            label: 'PAID',
+                            value: _money(selected['paid']),
+                            icon: Icons.north_east_rounded,
+                            color: _red,
+                            softColor: _redSoft,
+                            hidden: hidden,
+                          ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: _CapitalByMetric(
+                            label: 'RECEIVED',
+                            value: _money(selected['received']),
+                            icon: Icons.south_west_rounded,
+                            color: _green,
+                            softColor: _greenSoft,
+                            hidden: hidden,
+                          ),
+                        ),
+                        SizedBox(
+                          width: cardWidth,
+                          child: _CapitalByMetric(
+                            label: 'NET',
+                            value: _money(net),
+                            icon: Icons.account_balance_wallet_rounded,
+                            color: net >= 0 ? _primary : _red,
+                            softColor: net >= 0 ? _primarySoft : _redSoft,
+                            hidden: hidden,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 9),
+                    Row(
+                      children: [
+                        _SmallInfoChip(
+                          icon: Icons.directions_car_filled_rounded,
+                          label: '${_int(selected['car_count'])} cars',
+                        ),
+                        const SizedBox(width: 7),
+                        _SmallInfoChip(
+                          icon: Icons.format_list_bulleted_rounded,
+                          label: '${_int(selected['items'])} line items',
+                        ),
+                      ],
+                    ),
+                  ],
+                );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              header,
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 10,
-                runSpacing: 8,
-                children: [
-                  SizedBox(
-                    width: cardWidth,
-                    child: _CapitalByMetric(
-                      label: 'PAID',
-                      value: _money(selected['paid']),
-                      icon: Icons.north_east_rounded,
-                      color: _red,
-                      softColor: _redSoft,
-                      hidden: hidden,
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: _CapitalByMetric(
-                      label: 'RECEIVED',
-                      value: _money(selected['received']),
-                      icon: Icons.south_west_rounded,
-                      color: _green,
-                      softColor: _greenSoft,
-                      hidden: hidden,
-                    ),
-                  ),
-                  SizedBox(
-                    width: cardWidth,
-                    child: _CapitalByMetric(
-                      label: 'NET',
-                      value: _money(net),
-                      icon: Icons.account_balance_wallet_rounded,
-                      color: net >= 0 ? _primary : _red,
-                      softColor: net >= 0 ? _primarySoft : _redSoft,
-                      hidden: hidden,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 9),
-              Row(
-                children: [
-                  _SmallInfoChip(
-                    icon: Icons.directions_car_filled_rounded,
-                    label: '${_int(selected['car_count'])} cars',
-                  ),
-                  const SizedBox(width: 7),
-                  _SmallInfoChip(
-                    icon: Icons.format_list_bulleted_rounded,
-                    label: '${_int(selected['items'])} line items',
-                  ),
-                ],
-              ),
-            ],
+            children: [header, const SizedBox(height: 12), content],
           );
         },
       ),
@@ -1462,11 +1480,12 @@ class _CapitalBySelector extends StatelessWidget {
   });
 
   final List<Map<String, dynamic>> rows;
-  final String value;
+  final String? value;
   final ValueChanged<String?> onChanged;
 
   @override
   Widget build(BuildContext context) {
+    final hasValue = rows.any((row) => row['id']?.toString() == value);
     return Container(
       height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -1482,7 +1501,15 @@ class _CapitalBySelector extends StatelessWidget {
           Expanded(
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
-                value: value,
+                value: hasValue ? value : null,
+                hint: const Text(
+                  'No Capital By',
+                  style: TextStyle(
+                    color: _muted,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 isExpanded: true,
                 borderRadius: BorderRadius.circular(10),
                 icon: const Icon(
@@ -1505,11 +1532,78 @@ class _CapitalBySelector extends StatelessWidget {
                     ),
                   );
                 }).toList(),
-                onChanged: onChanged,
+                onChanged: rows.isEmpty ? null : onChanged,
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CapitalByStatusFilter extends StatelessWidget {
+  const _CapitalByStatusFilter({required this.value, required this.onChanged});
+
+  final String value;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 40,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F8),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(color: const Color(0xFFD5E0E8)),
+      ),
+      child: Row(
+        children: const [('all', 'ALL'), ('new', 'NEW'), ('sold', 'SOLD')].map((
+          item,
+        ) {
+          final selected = value == item.$1;
+          final selectedColor = switch (item.$1) {
+            'new' => _green,
+            'sold' => _blue,
+            _ => _primary,
+          };
+          return Expanded(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => onChanged(item.$1),
+                borderRadius: BorderRadius.circular(7),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOutCubic,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: selected ? selectedColor : Colors.transparent,
+                    borderRadius: BorderRadius.circular(7),
+                    boxShadow: selected
+                        ? const [
+                            BoxShadow(
+                              color: Color(0x1F17283E),
+                              blurRadius: 5,
+                              offset: Offset(0, 2),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Text(
+                    item.$2,
+                    style: TextStyle(
+                      color: selected ? Colors.white : _muted,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
