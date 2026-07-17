@@ -881,11 +881,7 @@ class _OutstandingGroupSection extends StatelessWidget {
                 count: _CountBadge(count: group.items.length),
                 paid: _MoneyText(value: group.paid, color: _red),
                 received: _MoneyText(value: group.received, color: _green),
-                net: _MoneyText(
-                  value: group.net,
-                  color: _netColor(group.net),
-                  strong: true,
-                ),
+                net: _MoneyText(value: group.net, color: _netColor(group.net)),
                 trailing: _ExpandButton(isExpanded: isExpanded),
               ),
             ),
@@ -926,18 +922,19 @@ class _OutstandingSummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tableTheme = Theme.of(context).dataTableTheme;
+
     Widget cell(Widget child, {Alignment alignment = Alignment.centerLeft}) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Align(
           alignment: alignment,
           child: DefaultTextStyle(
-            style: TextStyle(
-              color: isHeader ? _muted : _text,
-              fontSize: isHeader ? 10 : 12,
-              fontWeight: isHeader ? FontWeight.w900 : FontWeight.w800,
-              letterSpacing: isHeader ? .45 : 0,
-            ),
+            style:
+                (isHeader
+                    ? tableTheme.headingTextStyle
+                    : tableTheme.dataTextStyle) ??
+                DefaultTextStyle.of(context).style,
             child: child,
           ),
         ),
@@ -1001,11 +998,9 @@ class _OutstandingNameCell extends StatelessWidget {
                 group.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: _text,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w900,
-                ),
+                style: Theme.of(
+                  context,
+                ).dataTableTheme.dataTextStyle?.copyWith(color: _text),
               ),
               const SizedBox(height: 2),
               Text(
@@ -1053,15 +1048,10 @@ class _CountBadge extends StatelessWidget {
 }
 
 class _MoneyText extends StatelessWidget {
-  const _MoneyText({
-    required this.value,
-    required this.color,
-    this.strong = false,
-  });
+  const _MoneyText({required this.value, required this.color});
 
   final double value;
   final Color color;
-  final bool strong;
 
   @override
   Widget build(BuildContext context) {
@@ -1070,11 +1060,7 @@ class _MoneyText extends StatelessWidget {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.right,
-      style: TextStyle(
-        color: color,
-        fontSize: strong ? 12.5 : 12,
-        fontWeight: strong ? FontWeight.w900 : FontWeight.w800,
-      ),
+      style: TextStyle(color: color, fontWeight: FontWeight.w800),
     );
   }
 }
@@ -1395,18 +1381,19 @@ class _OutstandingDetailGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tableTheme = Theme.of(context).dataTableTheme;
+
     Widget cell(Widget child, {Alignment alignment = Alignment.centerLeft}) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 9),
         child: Align(
           alignment: alignment,
           child: DefaultTextStyle(
-            style: TextStyle(
-              color: isHeader ? _muted : _text,
-              fontSize: isHeader ? 9 : 10.5,
-              fontWeight: isHeader ? FontWeight.w900 : FontWeight.w700,
-              letterSpacing: isHeader ? .35 : 0,
-            ),
+            style:
+                (isHeader
+                    ? tableTheme.headingTextStyle
+                    : tableTheme.dataTextStyle) ??
+                DefaultTextStyle.of(context).style,
             child: child,
           ),
         ),

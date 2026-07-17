@@ -1198,13 +1198,13 @@ class _NewTransferButton extends StatelessWidget {
         label: const Text('New Transfer'),
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: const Color(0xFF47AD59),
+          backgroundColor: const Color(0xFF0C7C86),
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: const BorderSide(color: Color(0xFF3BA652)),
+            side: const BorderSide(color: Color(0xFF0C7C86)),
           ),
         ),
       ),

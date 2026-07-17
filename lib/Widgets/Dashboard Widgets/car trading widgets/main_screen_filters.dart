@@ -7,9 +7,7 @@ import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_control
 import '../../../consts.dart';
 import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
-import 'capital_dialog.dart';
 import 'car_trade_dialog.dart';
-import 'last_changes_dialog.dart';
 
 class MainScreenFilters extends StatelessWidget {
   const MainScreenFilters({super.key, required this.constraints});
@@ -156,8 +154,8 @@ class MainScreenFilters extends StatelessWidget {
                             },
                           ),
                           MenuWithValues(
-                            labelText: 'Invested By',
-                            headerLqabel: 'Invested By',
+                            labelText: 'Capital By',
+                            headerLqabel: 'Capital By',
                             dialogWidth: 600,
                             width: 200,
                             controller: controller.carInvestedByFilter.value,
@@ -293,40 +291,6 @@ class MainScreenFilters extends StatelessWidget {
                                         controller.addNewTrade();
                                       },
                               );
-                            },
-                          ),
-                          _DashboardFilterActionButton(
-                            label: 'Expenses',
-                            icon: Icons.receipt_long_outlined,
-                            accentColor: const Color(0xFFC0568A),
-                            onPressed: () {
-                              controller
-                                  .searchForCapitalsOrOutstandingOrGeneralExpenses
-                                  .value
-                                  .clear();
-                              controller.allGeneralExpenses.clear();
-                              controller.filteredGeneralExpenses.clear();
-                              controller.getAllGeneralExpenses();
-                              capitalOrOutstandingOrGeneralExpensesDialog(
-                                isGeneralExpenses: true,
-                                search: controller
-                                    .searchForCapitalsOrOutstandingOrGeneralExpenses,
-                                collection: 'general_expenses',
-                                filteredMap: controller.filteredGeneralExpenses,
-                                map: controller.allGeneralExpenses,
-                                screenName: 'General Expenses',
-                                controller: controller,
-                                canEdit: true,
-                              );
-                            },
-                          ),
-                          _DashboardFilterActionButton(
-                            label: 'Last Changes',
-                            icon: Icons.history_rounded,
-                            accentColor: const Color(0xFFF08A24),
-                            onPressed: () {
-                              controller.clearCangesVariables();
-                              lastChangesDialog();
                             },
                           ),
                         ],

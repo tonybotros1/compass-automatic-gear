@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/bank_accounts_section.dart';
+import '../../Widgets/Dashboard Widgets/car trading widgets/capital_section.dart';
+import '../../Widgets/Dashboard Widgets/car trading widgets/expenses_section.dart';
+import '../../Widgets/Dashboard Widgets/car trading widgets/last_changes_section.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/outstanding_section.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/vehicle_analysis.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/main_screen_filters.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/summary_box.dart';
+import '../../Widgets/Dashboard Widgets/car trading widgets/summary_section.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_accounts_details.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_summary_details.dart';
 import '../../Widgets/Dashboard Widgets/car trading widgets/table_section_for_car_trading.dart';
@@ -41,6 +45,9 @@ class CarTradingDashboard extends StatelessWidget {
                           labelColor: mainColor,
                           splashBorderRadius: BorderRadius.circular(5),
                           dividerColor: Colors.transparent,
+                          onTap: (index) {
+                            controller.refreshCarTradingTab(index);
+                          },
                           tabs: controller.carTradingTabs,
                         ),
                       ),
@@ -64,6 +71,20 @@ class CarTradingDashboard extends StatelessWidget {
                                     ),
                                   ],
                                 ),
+                              ),
+                            ),
+
+                            const _KeepAliveTab(
+                              child: Padding(
+                                padding: EdgeInsets.all(5),
+                                child: CapitalSection(),
+                              ),
+                            ),
+
+                            const _KeepAliveTab(
+                              child: Padding(
+                                padding: EdgeInsets.all(5),
+                                child: ExpensesSection(),
                               ),
                             ),
 
@@ -142,6 +163,18 @@ class CarTradingDashboard extends StatelessWidget {
                               child: Padding(
                                 padding: EdgeInsets.all(5),
                                 child: OutstandingSection(),
+                              ),
+                            ),
+                            const _KeepAliveTab(
+                              child: Padding(
+                                padding: EdgeInsets.all(5),
+                                child: SummarySection(),
+                              ),
+                            ),
+                            const _KeepAliveTab(
+                              child: Padding(
+                                padding: EdgeInsets.all(5),
+                                child: LastChangesSection(),
                               ),
                             ),
                           ],

@@ -173,6 +173,16 @@ class CarTradingDashboardController extends GetxController {
   RxBool isCapitalLoading = RxBool(false);
   RxBool isTransfersLoading = RxBool(false);
   RxBool isVehicleAnalysisLoading = RxBool(false);
+  final RxMap<String, dynamic> dashboardExecutiveSummary =
+      <String, dynamic>{}.obs;
+  final RxBool isDashboardSummaryLoading = false.obs;
+  final RxBool showDashboardSummaryFinancials = false.obs;
+  final RxString dashboardSummaryRange = 'month'.obs;
+  final Rx<DateTimeRange?> dashboardSummaryCustomRange = Rx<DateTimeRange?>(
+    null,
+  );
+  final Rx<String?> dashboardSummaryError = Rx<String?>(null);
+  final RxString dashboardSummaryCapitalById = ''.obs;
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
   StreamSubscription? _carTradingEventsSubscription;
@@ -274,10 +284,39 @@ class CarTradingDashboardController extends GetxController {
 
   List<Widget> carTradingTabs = const [
     Tab(text: 'Cars Information'),
+    Tab(text: 'Capital Docs'),
+    Tab(text: 'Expenses'),
     Tab(text: 'Financial Information'),
     Tab(text: 'Vehicle Analysis'),
     Tab(text: 'Bank Accounts'),
     Tab(text: 'Outstanding'),
+    Tab(text: 'Summary'),
+    Tab(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Color(0xFFFFF3E8),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          border: Border.fromBorderSide(BorderSide(color: Color(0xFFF08A24))),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.history_rounded, size: 15, color: Color(0xFFF08A24)),
+              SizedBox(width: 5),
+              Text(
+                'Last Changes',
+                style: TextStyle(
+                  color: Color(0xFFF08A24),
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
   ];
 
   void selectRow(int index) {
@@ -399,6 +438,152 @@ class CarTradingDashboardController extends GetxController {
     await getCashOnHandOrBankBalance();
     await getCapitalsOROutstandingSummary('capitals');
     await getCapitalsOROutstandingSummary('outstanding');
+  }
+
+  Future<http.Response> _requestDashboardSummary({
+    bool canRefresh = true,
+  }) async {
+    final accessToken = await _accessToken();
+    final customRange = dashboardSummaryCustomRange.value;
+    final body = <String, dynamic>{
+      'range': dashboardSummaryRange.value,
+      'compare_previous': true,
+      'timezone_offset_minutes': DateTime.now().timeZoneOffset.inMinutes,
+      if (dashboardSummaryRange.value == 'custom' && customRange != null)
+        'from_date': customRange.start.toIso8601String(),
+      if (dashboardSummaryRange.value == 'custom' && customRange != null)
+        'to_date': customRange.end.toIso8601String(),
+    };
+    final response = await http
+        .post(
+          Uri.parse('$backendUrl/car_trading/get_dashboard_summary'),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(body),
+        )
+        .timeout(const Duration(seconds: 45));
+
+    if (response.statusCode == 401 && canRefresh) {
+      final refreshToken = await _refreshToken();
+      if (refreshToken.isNotEmpty && refreshToken != 'null') {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return _requestDashboardSummary(canRefresh: false);
+        }
+        if (refreshed == RefreshResult.invalidToken) {
+          await logout();
+        }
+      }
+    }
+    return response;
+  }
+
+  Future<void> getDashboardSummary() async {
+    if (isDashboardSummaryLoading.value) return;
+    isDashboardSummaryLoading.value = true;
+    dashboardSummaryError.value = null;
+    try {
+      final response = await _requestDashboardSummary();
+      final decoded = _jsonObject(response.body);
+      if (response.statusCode == 200) {
+        dashboardExecutiveSummary.assignAll(decoded);
+        final rows = decoded['capital_by_summary'];
+        if (rows is List && rows.isNotEmpty) {
+          final ids = rows
+              .whereType<Map>()
+              .map((row) => row['id']?.toString() ?? '')
+              .toSet();
+          if (!ids.contains(dashboardSummaryCapitalById.value)) {
+            dashboardSummaryCapitalById.value = ids.first;
+          }
+        } else {
+          dashboardSummaryCapitalById.value = '';
+        }
+      } else {
+        dashboardSummaryError.value =
+            decoded['detail']?.toString() ??
+            'Unable to load the dashboard (${response.statusCode})';
+      }
+    } catch (error) {
+      dashboardSummaryError.value = error.toString().replaceFirst(
+        'Exception: ',
+        '',
+      );
+    } finally {
+      isDashboardSummaryLoading.value = false;
+    }
+  }
+
+  Future<void> changeDashboardSummaryRange(
+    String range, {
+    DateTimeRange? customRange,
+  }) async {
+    dashboardSummaryRange.value = range;
+    if (range == 'custom') {
+      dashboardSummaryCustomRange.value = customRange;
+    }
+    await getDashboardSummary();
+  }
+
+  void toggleDashboardSummaryFinancials() {
+    showDashboardSummaryFinancials.toggle();
+  }
+
+  void selectDashboardSummaryCapitalBy(String? id) {
+    dashboardSummaryCapitalById.value = id ?? '';
+  }
+
+  final Set<int> _tabsBeingRefreshed = <int>{};
+
+  Future<void> refreshCarTradingTab(int index) async {
+    if (!_tabsBeingRefreshed.add(index)) return;
+    try {
+      switch (index) {
+        case 0:
+          await filterSearch();
+          break;
+        case 1:
+          await Future.wait([
+            getAllCapitalsOROutstanding('capitals'),
+            getCapitalsOROutstandingSummary('capitals'),
+          ]);
+          break;
+        case 2:
+          await getAllGeneralExpenses();
+          break;
+        case 3:
+          await Future.wait([
+            filterSearch(),
+            filterGeneralExpensesSearch(),
+            getCashOnHandOrBankBalance(),
+            getCapitalsOROutstandingSummary('capitals'),
+            getCapitalsOROutstandingSummary('outstanding'),
+          ]);
+          break;
+        case 4:
+          await getAllVehcileAnalysis();
+          break;
+        case 5:
+          await Future.wait([getCashOnHandOrBankBalance(), getAllTransferes()]);
+          break;
+        case 6:
+          await Future.wait([
+            getAllCapitalsOROutstanding('outstanding'),
+            getCapitalsOROutstandingSummary('outstanding'),
+          ]);
+          break;
+        case 7:
+          await getDashboardSummary();
+          break;
+        case 8:
+          await filterLastChangesSearch();
+          break;
+      }
+    } finally {
+      _tabsBeingRefreshed.remove(index);
+    }
   }
 
   void onChooseForDatePicker(int i) {
@@ -1609,7 +1794,7 @@ class CarTradingDashboardController extends GetxController {
 
   // ===========================================================================
 
-  void filterLastChangesSearch() async {
+  Future<void> filterLastChangesSearch() async {
     Map body = {};
     if (fromDateForChanges.value.text.isNotEmpty) {
       final fromIso = _isoDateFromText(fromDateForChanges.value, 'From Date');
