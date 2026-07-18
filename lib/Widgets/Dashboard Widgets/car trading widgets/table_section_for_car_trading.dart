@@ -1991,8 +1991,12 @@ class _TradeActionsState extends State<_TradeActions> {
       _loadingKey = loadingKey;
     });
 
+    var loaded = false;
     try {
-      await _controller.loadValues(widget.tradeData);
+      loaded = await _controller.refreshTradeScreen(
+        screen: screen,
+        cachedTrade: widget.tradeData,
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -2001,7 +2005,7 @@ class _TradeActionsState extends State<_TradeActions> {
       }
     }
 
-    if (!mounted) return;
+    if (!mounted || !loaded) return;
 
     await carTradesDialog(
       screen: screen,

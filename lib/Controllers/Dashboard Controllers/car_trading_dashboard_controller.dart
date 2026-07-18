@@ -931,6 +931,35 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
+  int _compareDatesNewestFirst(DateTime? left, DateTime? right) {
+    if (left == null && right == null) return 0;
+    if (left == null) return 1;
+    if (right == null) return -1;
+    return right.compareTo(left);
+  }
+
+  int _compareTradeItemsNewestFirst(
+    CarTradingItemsModel left,
+    CarTradingItemsModel right,
+  ) {
+    final dateComparison = _compareDatesNewestFirst(left.date, right.date);
+    if (dateComparison != 0) return dateComparison;
+
+    final createdComparison = _compareDatesNewestFirst(
+      left.createdAt,
+      right.createdAt,
+    );
+    if (createdComparison != 0) return createdComparison;
+
+    return (right.id ?? '').compareTo(left.id ?? '');
+  }
+
+  void _sortTradeItemsNewestFirst() {
+    final sortedItems = addedItems.toList()
+      ..sort(_compareTradeItemsNewestFirst);
+    addedItems.assignAll(sortedItems);
+  }
+
   void _upsertTradeItem(CarTradingItemsModel model) {
     final id = model.id;
     if (id == null || id.isEmpty) return;
@@ -940,6 +969,7 @@ class CarTradingDashboardController extends GetxController {
     } else {
       addedItems[index] = model;
     }
+    _sortTradeItemsNewestFirst();
   }
 
   void _upsertPurchaseAgreement(CarTradingPurchaseAgreementModel model) {
@@ -2686,7 +2716,8 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future<void> getPurchaseAgreementForCurrentTrade(String tradeId) async {
+  Future<bool> getPurchaseAgreementForCurrentTrade(String tradeId) async {
+    if (tradeId.isEmpty) return false;
     try {
       final accessToken = await _accessToken();
       final refreshToken = await _refreshToken();
@@ -2708,6 +2739,8 @@ class CarTradingDashboardController extends GetxController {
             ),
           ),
         );
+        calculatePurchaseAgreementTotals();
+        return true;
       } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
         final refreshed = await helper.refreshAccessToken(refreshToken);
         if (refreshed == RefreshResult.success) {
@@ -2717,10 +2750,11 @@ class CarTradingDashboardController extends GetxController {
         }
       } else if (response.statusCode == 401) {
         logout();
-      } else {}
+      }
     } catch (e) {
       //
     }
+    return false;
   }
 
   Future<bool> addNewPurchaseAgreementItem() async {
@@ -3432,8 +3466,96 @@ class CarTradingDashboardController extends GetxController {
     }
   }
 
-  Future loadValues(CarTradeModel data) async {
-    itemsPageName.value = 'sales agreement';
+  Future<CarTradeModel?> _fetchTradeById(
+    String tradeId, {
+    bool canRefresh = true,
+  }) async {
+    if (tradeId.isEmpty) return null;
+    try {
+      final accessToken = await _accessToken();
+      final response = await http.post(
+        Uri.parse('$backendUrl/car_trading/search_engine_for_car_trading'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'trade_id': tradeId}),
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final result = decoded is List && decoded.isNotEmpty
+            ? decoded.first
+            : decoded;
+        if (result is Map && result['trades'] is List) {
+          final trades = result['trades'] as List;
+          if (trades.isNotEmpty && trades.first is Map) {
+            return CarTradeModel.fromJson(
+              Map<String, dynamic>.from(trades.first as Map),
+            );
+          }
+        }
+        return null;
+      }
+      if (response.statusCode == 401 && canRefresh) {
+        final refreshToken = await _refreshToken();
+        if (refreshToken.isNotEmpty && refreshToken != 'null') {
+          final refreshed = await helper.refreshAccessToken(refreshToken);
+          if (refreshed == RefreshResult.success) {
+            return _fetchTradeById(tradeId, canRefresh: false);
+          }
+          if (refreshed == RefreshResult.invalidToken) {
+            await logout();
+          }
+        }
+      } else if (response.statusCode == 401) {
+        await logout();
+      }
+    } catch (e) {
+      // The caller shows one consistent refresh message.
+    }
+    return null;
+  }
+
+  Future<bool> refreshTradeScreen({
+    required String screen,
+    required CarTradeModel cachedTrade,
+  }) async {
+    final tradeId = cachedTrade.id ?? '';
+    if (tradeId.isEmpty) {
+      _showError('Could not identify this car. Please refresh the cars list.');
+      return false;
+    }
+
+    currentTradId.value = tradeId;
+    queryForItems.value = '';
+    searchForItems.value.clear();
+
+    if (screen == 'sales_agreement') {
+      itemsPageName.value = 'sales agreement';
+      filteredPurchaseAgreementAddedItems.clear();
+      final loaded = await getPurchaseAgreementForCurrentTrade(tradeId);
+      if (!loaded) {
+        _showError('Could not refresh the sales agreements. Please try again.');
+      }
+      return loaded;
+    }
+
+    final latestTrade = await _fetchTradeById(tradeId);
+    if (latestTrade == null) {
+      _showError('Could not refresh the car data. Please try again.');
+      return false;
+    }
+
+    if (screen == 'items') {
+      itemsPageName.value = 'items';
+      _loadTradeItemsValues(latestTrade);
+    } else {
+      await _loadCarInformationValues(latestTrade);
+    }
+    return true;
+  }
+
+  Future<void> _loadCarInformationValues(CarTradeModel data) async {
     boughtFrom.value.text = data.boughtFrom ?? '';
     boughtFromId.value = data.boughtFromId ?? '';
     boughtById.value = data.boughtById ?? '';
@@ -3449,12 +3571,7 @@ class CarTradingDashboardController extends GetxController {
     consignmentFor.value.text = data.consignmentFor ?? '';
     soldTo.value.text = data.soldTo ?? '';
     soldToId.value = data.soldToId ?? '';
-    totalPays.value = data.totalPay ?? 0.0;
-    totalNETs.value = data.net ?? 0.0;
-    totalReceives.value = data.totalReceive ?? 0.0;
     query.value = '';
-    queryForItems.value = '';
-    searchForItems.value.clear();
     await getModelsByCarBrand(data.carBrandId ?? '');
     date.value.text = textToDate(data.date);
     mileage.value.text = data.mileage.toString();
@@ -3474,14 +3591,34 @@ class CarTradingDashboardController extends GetxController {
     year.value.text = data.year ?? '';
     yearId.value = data.yearId ?? '';
     note.text = data.note ?? '';
-    addedItems.assignAll(data.tradeItems ?? []);
     status.value = data.status ?? '';
     currentTradId.value = data.id ?? '';
     carModified.value = false;
     warrantyEndDate.value.text = textToDate(data.warrantyEndDate);
     serviceContractEndDate.value.text = textToDate(data.serviceContractEndDate);
+    totalPays.value = data.totalPay ?? 0.0;
+    totalReceives.value = data.totalReceive ?? 0.0;
+    totalNETs.value = data.net ?? 0.0;
+  }
+
+  void _loadTradeItemsValues(CarTradeModel data) {
+    currentTradId.value = data.id ?? '';
+    status.value = data.status ?? '';
+    filteredAddedItems.clear();
+    addedItems.assignAll(data.tradeItems ?? []);
+    _sortTradeItemsNewestFirst();
+    calculateTotals();
+  }
+
+  Future<void> loadValues(CarTradeModel data) async {
+    itemsPageName.value = 'sales agreement';
+    queryForItems.value = '';
+    searchForItems.value.clear();
+    filteredAddedItems.clear();
+    filteredPurchaseAgreementAddedItems.clear();
+    await _loadCarInformationValues(data);
+    _loadTradeItemsValues(data);
     await getPurchaseAgreementForCurrentTrade(data.id ?? '');
-    calculatePurchaseAgreementTotals();
   }
 
   void clearValues() {
