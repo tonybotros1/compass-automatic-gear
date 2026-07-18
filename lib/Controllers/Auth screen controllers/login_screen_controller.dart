@@ -36,12 +36,14 @@ class LoginScreenController extends GetxController {
     String userEmail,
     String accessToken,
     String refreshToken,
+    String sessionId,
   ) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', userId);
     await prefs.setString('companyId', companyId);
     await prefs.setString('userEmail', userEmail);
     await prefs.setString('accessToken', accessToken);
+    await prefs.setString('sessionId', sessionId);
     await secureStorage.write(key: "refreshToken", value: refreshToken);
   }
 
@@ -71,6 +73,7 @@ class LoginScreenController extends GetxController {
         String companyId = responseData['company_id'];
         String accessToken = responseData['access_token'];
         String refreshToken = responseData['refresh_token'];
+        String sessionId = responseData['session_id']?.toString() ?? '';
 
         await saveInformation(
           userId,
@@ -78,6 +81,7 @@ class LoginScreenController extends GetxController {
           userEmail,
           accessToken,
           refreshToken,
+          sessionId,
         );
         sigingInProcess.value = false;
         showSnackBar('Login Success', 'Welcome');

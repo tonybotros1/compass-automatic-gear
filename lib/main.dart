@@ -14,6 +14,7 @@ import 'Controllers/Main screen controllers/websocket_controller.dart';
 import 'Middleware/auth_middleware.dart';
 import 'Screens/Auth Screens/loading_screen.dart';
 import 'Screens/Auth Screens/login_screen.dart';
+import 'Screens/Auth Screens/admin_screen.dart';
 import 'Screens/Main screens/main_screen.dart';
 import 'Screens/mobile Screens/main_screen_fro_mobile.dart';
 import 'Services/notification_sound_service.dart';
@@ -135,6 +136,11 @@ class MyApp extends StatelessWidget {
           middlewares: [InitialRedirectMiddleware()],
         ),
         GetPage(name: '/loginScreen', page: () => LoginScreen()),
+        GetPage(
+          name: '/adminScreen',
+          page: () => const AdminScreen(),
+          middlewares: [AuthMiddleware(), InitialRedirectMiddleware()],
+        ),
         // GetPage(name: '/registerScreen', page: () => const RegisterScreen()),
         GetPage(
           name: '/imageViewer',

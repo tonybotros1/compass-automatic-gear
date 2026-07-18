@@ -46,9 +46,13 @@ class Helpers {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         final newAccessToken = decoded['access_token'];
+        final sessionId = decoded['session_id']?.toString() ?? '';
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', newAccessToken);
+        if (sessionId.isNotEmpty) {
+          await prefs.setString('sessionId', sessionId);
+        }
 
         _refreshCompleter!.complete(RefreshResult.success);
       } else if (response.statusCode == 401 || response.statusCode == 403) {
@@ -328,7 +332,6 @@ class Helpers {
       return {};
     }
   }
-
 
   Future<Map<String, dynamic>> getAllLeaveTypes() async {
     try {

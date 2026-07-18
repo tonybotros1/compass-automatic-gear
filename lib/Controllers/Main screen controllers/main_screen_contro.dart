@@ -27,6 +27,7 @@ import '../../Models/screen_tree_model.dart';
 import '../../Screens/Dashboard/car_trading_dashboard.dart';
 import '../../Screens/Dashboard/job_cards_dashboard.dart';
 import '../../Screens/Dashboard/trading_dashboard.dart';
+import '../../Screens/Auth Screens/admin_screen.dart';
 import '../../Screens/Main screens/System Administrator/Setup/AP_payment_type.dart';
 import '../../Screens/Main screens/System Administrator/Setup/account_transfers.dart';
 import '../../Screens/Main screens/System Administrator/Setup/ap_invoices.dart';
@@ -353,6 +354,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: Balances());
       case '/loanAndAdvancesTypes':
         return const SizedBox(child: LoanAndAdvancesTypes());
+      case '/adminScreen':
+        return const SizedBox(child: AdminScreen());
       default:
         return const SizedBox(child: Center(child: Text('Screen not found')));
     }
