@@ -368,6 +368,7 @@ class MainScreenFilters extends StatelessWidget {
                         spacing: 10,
                         children: [
                           _FinancialPrivacyButton(controller: controller),
+                          _CarTradeViewToggleButton(controller: controller),
                           _DashboardFilterActionButton(
                             label: 'Find',
                             icon: Icons.search_rounded,
@@ -577,6 +578,84 @@ class _FinancialPrivacyButton extends StatelessWidget {
                       color: isHidden
                           ? const Color(0xFF0C7C86)
                           : const Color(0xFF6C798A),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class _CarTradeViewToggleButton extends StatelessWidget {
+  const _CarTradeViewToggleButton({required this.controller});
+
+  final CarTradingDashboardController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final isTableView = controller.showCarTradeTableView.value;
+      const accent = Color(0xFF3978C5);
+
+      return Tooltip(
+        message: isTableView
+            ? 'Show vehicles as cards'
+            : 'Show vehicles as table',
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: controller.toggleCarTradeViewMode,
+            borderRadius: BorderRadius.circular(11),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(11),
+                border: Border.all(
+                  color: isTableView
+                      ? accent.withValues(alpha: 0.48)
+                      : const Color(0xFFDDE7EF),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF1B2C45).withValues(alpha: 0.045),
+                    blurRadius: 14,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  width: 24,
+                  height: 24,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: (isTableView ? accent : const Color(0xFF6C798A))
+                        .withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    transitionBuilder: (child, animation) => ScaleTransition(
+                      scale: animation,
+                      child: FadeTransition(opacity: animation, child: child),
+                    ),
+                    child: Icon(
+                      isTableView
+                          ? Icons.grid_view_rounded
+                          : Icons.table_rows_rounded,
+                      key: ValueKey(isTableView),
+                      size: 16,
+                      color: isTableView ? accent : const Color(0xFF6C798A),
                     ),
                   ),
                 ),

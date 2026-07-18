@@ -202,6 +202,7 @@ class CarTradingDashboardController extends GetxController {
   RxBool purchasedItemsModified = RxBool(false);
   RxBool searching = RxBool(false);
   RxBool hideCarTradeFinancialValues = RxBool(true);
+  RxBool showCarTradeTableView = RxBool(false);
   RxBool changesSearching = RxBool(false);
   final ScrollController scrollControllerForTable = ScrollController();
   var buttonLoadingStates = <String, bool>{}.obs;
@@ -611,6 +612,10 @@ class CarTradingDashboardController extends GetxController {
     } finally {
       _tabsBeingRefreshed.remove(index);
     }
+  }
+
+  void toggleCarTradeViewMode() {
+    showCarTradeTableView.toggle();
   }
 
   void onChooseForDatePicker(int i) {
