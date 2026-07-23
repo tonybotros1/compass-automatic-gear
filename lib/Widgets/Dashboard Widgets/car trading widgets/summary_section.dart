@@ -355,6 +355,10 @@ class _SummarySectionState extends State<SummarySection>
     final expenses = _list(summary['expense_breakdown']);
     final accounts = _list(summary['accounts']);
     final capitalByRows = controller.dashboardSummaryCapitalByRows;
+    final capitalDocsNameRows = controller.dashboardSummaryCapitalDocsNameRows;
+    final newCarCapitalByRows = controller.dashboardSummaryNewCarCapitalByRows;
+    final capitalReconciliation =
+        controller.dashboardSummaryCapitalReconciliation;
     final boughtByRows = _list(summary['bought_by_summary']);
     final soldByRows = _list(summary['sold_by_summary']);
     final inventoryAging = _list(summary['inventory_aging']);
@@ -485,16 +489,10 @@ class _SummarySectionState extends State<SummarySection>
                       _orange,
                     ),
                     _PositionItem(
-                      'To Receive (Outstanding)',
-                      _money(position['outstanding_receive']),
-                      Icons.south_west_rounded,
-                      _green,
-                    ),
-                    _PositionItem(
-                      'To Pay (Outstanding)',
-                      _money(position['outstanding_pay']),
-                      Icons.north_east_rounded,
-                      _red,
+                      'Outstanding Net',
+                      _money(position['outstanding_net']),
+                      Icons.account_balance_wallet_rounded,
+                      _financialNetColor(position['outstanding_net']),
                     ),
                   ],
                 ),
@@ -508,6 +506,21 @@ class _SummarySectionState extends State<SummarySection>
                   onChanged: controller.selectDashboardSummaryCapitalBy,
                   onStatusChanged:
                       controller.selectDashboardSummaryCapitalByStatus,
+                ),
+                const SizedBox(height: 18),
+                _CapitalReconciliationSection(
+                  capitalDocsRows: capitalDocsNameRows,
+                  newCarCapitalByRows: newCarCapitalByRows,
+                  selectedCapitalDocsId:
+                      controller.dashboardSummaryCapitalDocsNameId.value,
+                  selectedCapitalById:
+                      controller.dashboardSummaryNewCarCapitalById.value,
+                  calculation: capitalReconciliation,
+                  hidden: !showFinancials,
+                  onCapitalDocsChanged:
+                      controller.selectDashboardSummaryCapitalDocsName,
+                  onCapitalByChanged:
+                      controller.selectDashboardSummaryNewCarCapitalBy,
                 ),
                 const SizedBox(height: 18),
                 _PeopleFinancialGrid(
@@ -1493,59 +1506,167 @@ class _CapitalBySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasValue = rows.any((row) => row['id']?.toString() == value);
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF7FAFC),
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: const Color(0xFFD5E0E8)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.person_outline_rounded, color: _primary, size: 16),
-          const SizedBox(width: 7),
-          Expanded(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: hasValue ? value : null,
-                hint: const Text(
-                  'No Capital By',
-                  style: TextStyle(
-                    color: _muted,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
+    return _SummaryPopupSelector(
+      hint: 'No Capital By',
+      fallbackName: 'Capital By',
+      icon: Icons.person_outline_rounded,
+      rows: rows,
+      value: value,
+      onChanged: onChanged,
+    );
+  }
+}
+
+class _SummaryPopupSelector extends StatelessWidget {
+  const _SummaryPopupSelector({
+    required this.hint,
+    required this.fallbackName,
+    required this.icon,
+    required this.rows,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String hint;
+  final String fallbackName;
+  final IconData icon;
+  final List<Map<String, dynamic>> rows;
+  final String? value;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    Map<String, dynamic>? selectedRow;
+    for (final row in rows) {
+      if (row['id']?.toString() == value) {
+        selectedRow = row;
+        break;
+      }
+    }
+    final selectedName = selectedRow?['name']?.toString().trim();
+    final displayName = selectedRow == null
+        ? hint
+        : selectedName == null || selectedName.isEmpty
+        ? fallbackName
+        : selectedName;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return PopupMenuButton<String>(
+          enabled: rows.isNotEmpty,
+          tooltip: '',
+          position: PopupMenuPosition.under,
+          offset: const Offset(0, 5),
+          color: Colors.white,
+          elevation: 10,
+          shadowColor: const Color(0x2817283E),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: Color(0xFFD8E3EA)),
+          ),
+          constraints: BoxConstraints(
+            minWidth: constraints.maxWidth,
+            maxWidth: constraints.maxWidth,
+            maxHeight: 290,
+          ),
+          onSelected: (selected) => onChanged(selected),
+          itemBuilder: (context) => rows.map((row) {
+            final id = row['id']?.toString() ?? '';
+            final name = row['name']?.toString().trim();
+            final selected = id == value;
+            return PopupMenuItem<String>(
+              value: id,
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Container(
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 9),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  border: selected
+                      ? Border.all(color: const Color(0xFFD9D0FA))
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 25,
+                      height: 25,
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? const Color(0xFFE0D8FA)
+                            : const Color(0xFFF1F5F8),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: Icon(
+                        icon,
+                        size: 14,
+                        color: selected ? _purple : _muted,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        name == null || name.isEmpty ? fallbackName : name,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: selected ? _purple : _text,
+                          fontSize: 10.5,
+                          fontWeight: selected
+                              ? FontWeight.w900
+                              : FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    if (selected) ...[
+                      const SizedBox(width: 7),
+                      const Icon(
+                        Icons.check_circle_rounded,
+                        size: 16,
+                        color: _purple,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+          child: Container(
+            height: 40,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7FAFC),
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(color: const Color(0xFFD5E0E8)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: rows.isEmpty ? _muted : _primary, size: 16),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: Text(
+                    displayName,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: selectedRow == null ? _muted : _text,
+                      fontSize: 10.5,
+                      fontWeight: selectedRow == null
+                          ? FontWeight.w700
+                          : FontWeight.w900,
+                    ),
                   ),
                 ),
-                isExpanded: true,
-                borderRadius: BorderRadius.circular(10),
-                icon: const Icon(
+                const Icon(
                   Icons.keyboard_arrow_down_rounded,
                   color: _muted,
+                  size: 20,
                 ),
-                style: const TextStyle(
-                  color: _text,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w900,
-                ),
-                items: rows.map((row) {
-                  final id = row['id']?.toString() ?? '';
-                  final name = row['name']?.toString().trim();
-                  return DropdownMenuItem<String>(
-                    value: id,
-                    child: Text(
-                      name == null || name.isEmpty ? 'Capital By' : name,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }).toList(),
-                onChanged: rows.isEmpty ? null : onChanged,
-              ),
+              ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -1612,6 +1733,441 @@ class _CapitalByStatusFilter extends StatelessWidget {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+}
+
+class _CapitalReconciliationSection extends StatelessWidget {
+  const _CapitalReconciliationSection({
+    required this.capitalDocsRows,
+    required this.newCarCapitalByRows,
+    required this.selectedCapitalDocsId,
+    required this.selectedCapitalById,
+    required this.calculation,
+    required this.hidden,
+    required this.onCapitalDocsChanged,
+    required this.onCapitalByChanged,
+  });
+
+  final List<Map<String, dynamic>> capitalDocsRows;
+  final List<Map<String, dynamic>> newCarCapitalByRows;
+  final String selectedCapitalDocsId;
+  final String selectedCapitalById;
+  final Map<String, dynamic> calculation;
+  final bool hidden;
+  final ValueChanged<String?> onCapitalDocsChanged;
+  final ValueChanged<String?> onCapitalByChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final capitalDocs = _map(calculation['capital_docs']);
+    final capitalBy = _map(calculation['capital_by']);
+    final ready = calculation['ready'] == true;
+
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: _surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFD8E3EA)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A17283E),
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final compact = constraints.maxWidth < 850;
+          final heading = Row(
+            children: [
+              Container(
+                width: 35,
+                height: 35,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF6B4FC4), Color(0xFF967BE7)],
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.balance_rounded,
+                  color: Colors.white,
+                  size: 19,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Capital Reconciliation',
+                      style: TextStyle(
+                        color: _text,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Compare one Capital Docs owner with one New-car Capital By owner',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: _muted,
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const _SmallInfoChip(
+                icon: Icons.update_rounded,
+                label: 'Current snapshot',
+              ),
+            ],
+          );
+          final selectors = compact
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _ReconciliationSelector(
+                      label: 'CAPITAL DOCS NAME',
+                      hint: 'No Capital Docs names',
+                      icon: Icons.account_balance_wallet_outlined,
+                      rows: capitalDocsRows,
+                      value: selectedCapitalDocsId,
+                      onChanged: onCapitalDocsChanged,
+                    ),
+                    const SizedBox(height: 8),
+                    _ReconciliationSelector(
+                      label: 'CAPITAL BY — NEW CARS',
+                      hint: 'No New-car Capital By',
+                      icon: Icons.directions_car_filled_outlined,
+                      rows: newCarCapitalByRows,
+                      value: selectedCapitalById,
+                      onChanged: onCapitalByChanged,
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(
+                      child: _ReconciliationSelector(
+                        label: 'CAPITAL DOCS NAME',
+                        hint: 'No Capital Docs names',
+                        icon: Icons.account_balance_wallet_outlined,
+                        rows: capitalDocsRows,
+                        value: selectedCapitalDocsId,
+                        onChanged: onCapitalDocsChanged,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _ReconciliationSelector(
+                        label: 'CAPITAL BY — NEW CARS',
+                        hint: 'No New-car Capital By',
+                        icon: Icons.directions_car_filled_outlined,
+                        rows: newCarCapitalByRows,
+                        value: selectedCapitalById,
+                        onChanged: onCapitalByChanged,
+                      ),
+                    ),
+                  ],
+                );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              heading,
+              const SizedBox(height: 12),
+              selectors,
+              const SizedBox(height: 12),
+              if (!ready)
+                const SizedBox(
+                  height: 78,
+                  child: _EmptyPanel(
+                    message:
+                        'Capital Docs and New-car Capital By data are required for this calculation',
+                  ),
+                )
+              else ...[
+                _CapitalFormulaLine(
+                  first: _FormulaAmountCard(
+                    label: 'CAPITAL DOCS NET',
+                    owner: capitalDocs['name']?.toString() ?? '',
+                    value: _double(calculation['capital_docs_net']),
+                    color: _green,
+                    softColor: _greenSoft,
+                    hidden: hidden,
+                  ),
+                  operator: '−',
+                  second: _FormulaAmountCard(
+                    label: 'NEW CARS INVESTED',
+                    owner: capitalBy['name']?.toString() ?? '',
+                    value: _double(calculation['new_cars_invested']),
+                    color: _blue,
+                    softColor: _blueSoft,
+                    hidden: hidden,
+                  ),
+                  result: _FormulaAmountCard(
+                    label: 'REMAINING SELECTED CAPITAL',
+                    owner: 'Capital Docs net − New cars invested',
+                    value: _double(calculation['remaining_capital']),
+                    color: _orange,
+                    softColor: _orangeSoft,
+                    hidden: hidden,
+                    emphasized: true,
+                  ),
+                ),
+                const SizedBox(height: 9),
+                _CapitalFormulaLine(
+                  first: _FormulaAmountCard(
+                    label: 'ALL ACCOUNTS',
+                    owner: 'Bank Accounts total',
+                    value: _double(calculation['all_accounts']),
+                    color: _primary,
+                    softColor: _primarySoft,
+                    hidden: hidden,
+                  ),
+                  operator: '−',
+                  second: _FormulaAmountCard(
+                    label: 'REMAINING SELECTED CAPITAL',
+                    owner: capitalDocs['name']?.toString() ?? '',
+                    value: _double(calculation['remaining_capital']),
+                    color: _orange,
+                    softColor: _orangeSoft,
+                    hidden: hidden,
+                  ),
+                  result: _FormulaAmountCard(
+                    label: 'EXTERNAL CAPITAL',
+                    owner: 'All Accounts − Remaining selected capital',
+                    value: _double(calculation['external_capital']),
+                    color: _purple,
+                    softColor: _purpleSoft,
+                    hidden: hidden,
+                    emphasized: true,
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ReconciliationSelector extends StatelessWidget {
+  const _ReconciliationSelector({
+    required this.label,
+    required this.hint,
+    required this.icon,
+    required this.rows,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String hint;
+  final IconData icon;
+  final List<Map<String, dynamic>> rows;
+  final String value;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: _muted,
+            fontSize: 8.5,
+            fontWeight: FontWeight.w900,
+            letterSpacing: .4,
+          ),
+        ),
+        const SizedBox(height: 4),
+        _SummaryPopupSelector(
+          hint: hint,
+          fallbackName: 'Unnamed',
+          icon: icon,
+          rows: rows,
+          value: value,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+}
+
+class _CapitalFormulaLine extends StatelessWidget {
+  const _CapitalFormulaLine({
+    required this.first,
+    required this.operator,
+    required this.second,
+    required this.result,
+  });
+
+  final Widget first;
+  final String operator;
+  final Widget second;
+  final Widget result;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 760;
+        final operatorWidget = _FormulaOperator(value: operator);
+        const equalsWidget = _FormulaOperator(value: '=');
+        if (compact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              first,
+              const SizedBox(height: 5),
+              Center(child: operatorWidget),
+              const SizedBox(height: 5),
+              second,
+              const SizedBox(height: 5),
+              const Center(child: equalsWidget),
+              const SizedBox(height: 5),
+              result,
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: first),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 7),
+              child: operatorWidget,
+            ),
+            Expanded(child: second),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 7),
+              child: equalsWidget,
+            ),
+            Expanded(child: result),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _FormulaOperator extends StatelessWidget {
+  const _FormulaOperator({required this.value});
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 27,
+      height: 27,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F8),
+        border: Border.all(color: const Color(0xFFD8E3EA)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        value,
+        style: const TextStyle(
+          color: _muted,
+          fontSize: 15,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _FormulaAmountCard extends StatelessWidget {
+  const _FormulaAmountCard({
+    required this.label,
+    required this.owner,
+    required this.value,
+    required this.color,
+    required this.softColor,
+    required this.hidden,
+    this.emphasized = false,
+  });
+
+  final String label;
+  final String owner;
+  final double value;
+  final Color color;
+  final Color softColor;
+  final bool hidden;
+  final bool emphasized;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 76,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: emphasized ? softColor : const Color(0xFFFBFCFE),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: emphasized ? color.withValues(alpha: .28) : _line,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: emphasized ? color : _muted,
+              fontSize: 8.5,
+              fontWeight: FontWeight.w900,
+              letterSpacing: .35,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  hidden ? '••••••' : _money(value),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              if (hidden)
+                const Icon(Icons.lock_rounded, size: 11, color: _muted),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            owner,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: _muted,
+              fontSize: 8.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -3314,6 +3870,13 @@ double? _nullableDouble(dynamic value) {
 int _int(dynamic value) => _double(value).round();
 
 String _money(dynamic value) => 'AED ${priceFormat.format(_double(value))}';
+
+Color _financialNetColor(dynamic value) {
+  final amount = _double(value);
+  if (amount > 0) return _green;
+  if (amount < 0) return _red;
+  return _blue;
+}
 
 String _shortLabel(dynamic value) {
   final text = value?.toString() ?? '';

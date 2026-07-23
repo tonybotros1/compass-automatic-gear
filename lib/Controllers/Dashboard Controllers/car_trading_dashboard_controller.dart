@@ -184,6 +184,8 @@ class CarTradingDashboardController extends GetxController {
   final Rx<String?> dashboardSummaryError = Rx<String?>(null);
   final RxString dashboardSummaryCapitalById = ''.obs;
   final RxString dashboardSummaryCapitalByStatus = 'all'.obs;
+  final RxString dashboardSummaryCapitalDocsNameId = ''.obs;
+  final RxString dashboardSummaryNewCarCapitalById = ''.obs;
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
   StreamSubscription? _carTradingEventsSubscription;
@@ -492,6 +494,7 @@ class CarTradingDashboardController extends GetxController {
       if (response.statusCode == 200) {
         dashboardExecutiveSummary.assignAll(decoded);
         _syncDashboardSummaryCapitalBySelection();
+        _syncDashboardSummaryCapitalReconciliationSelections();
       } else {
         dashboardSummaryError.value =
             decoded['detail']?.toString() ??
@@ -561,6 +564,93 @@ class CarTradingDashboardController extends GetxController {
     }
     dashboardSummaryCapitalByStatus.value = normalized;
     _syncDashboardSummaryCapitalBySelection();
+  }
+
+  Map<String, dynamic> get _dashboardSummaryCapitalReconciliationSource {
+    final source = dashboardExecutiveSummary['capital_reconciliation'];
+    return source is Map
+        ? Map<String, dynamic>.from(source)
+        : <String, dynamic>{};
+  }
+
+  List<Map<String, dynamic>> get dashboardSummaryCapitalDocsNameRows {
+    final rows = _dashboardSummaryCapitalReconciliationSource['capital_docs'];
+    if (rows is! List) return const [];
+    return rows
+        .whereType<Map>()
+        .map((row) => Map<String, dynamic>.from(row))
+        .toList(growable: false);
+  }
+
+  List<Map<String, dynamic>> get dashboardSummaryNewCarCapitalByRows {
+    final rows =
+        _dashboardSummaryCapitalReconciliationSource['new_car_capital_by'];
+    if (rows is! List) return const [];
+    return rows
+        .whereType<Map>()
+        .map((row) => Map<String, dynamic>.from(row))
+        .toList(growable: false);
+  }
+
+  Map<String, dynamic> get dashboardSummaryCapitalReconciliation {
+    final capitalDocsRows = dashboardSummaryCapitalDocsNameRows;
+    final capitalByRows = dashboardSummaryNewCarCapitalByRows;
+    final capitalDocs = capitalDocsRows.firstWhere(
+      (row) => row['id']?.toString() == dashboardSummaryCapitalDocsNameId.value,
+      orElse: () => <String, dynamic>{},
+    );
+    final capitalBy = capitalByRows.firstWhere(
+      (row) => row['id']?.toString() == dashboardSummaryNewCarCapitalById.value,
+      orElse: () => <String, dynamic>{},
+    );
+    final capitalDocsNet = _toDouble(capitalDocs['net']);
+    final newCarsInvested = _toDouble(capitalBy['invested']);
+    final remainingCapital = capitalDocsNet - newCarsInvested;
+    final allAccounts = _toDouble(
+      _dashboardSummaryCapitalReconciliationSource['all_accounts'],
+    );
+
+    return {
+      'ready': capitalDocs.isNotEmpty && capitalBy.isNotEmpty,
+      'capital_docs': capitalDocs,
+      'capital_by': capitalBy,
+      'capital_docs_net': capitalDocsNet,
+      'new_cars_invested': newCarsInvested,
+      'remaining_capital': remainingCapital,
+      'all_accounts': allAccounts,
+      'external_capital': allAccounts - remainingCapital,
+    };
+  }
+
+  void _syncDashboardSummaryCapitalReconciliationSelections() {
+    void syncSelection(List<Map<String, dynamic>> rows, RxString selection) {
+      final ids = rows
+          .map((row) => row['id']?.toString() ?? '')
+          .where((id) => id.isNotEmpty)
+          .toList(growable: false);
+      if (ids.isEmpty) {
+        selection.value = '';
+      } else if (!ids.contains(selection.value)) {
+        selection.value = ids.first;
+      }
+    }
+
+    syncSelection(
+      dashboardSummaryCapitalDocsNameRows,
+      dashboardSummaryCapitalDocsNameId,
+    );
+    syncSelection(
+      dashboardSummaryNewCarCapitalByRows,
+      dashboardSummaryNewCarCapitalById,
+    );
+  }
+
+  void selectDashboardSummaryCapitalDocsName(String? id) {
+    dashboardSummaryCapitalDocsNameId.value = id ?? '';
+  }
+
+  void selectDashboardSummaryNewCarCapitalBy(String? id) {
+    dashboardSummaryNewCarCapitalById.value = id ?? '';
   }
 
   final Set<int> _tabsBeingRefreshed = <int>{};

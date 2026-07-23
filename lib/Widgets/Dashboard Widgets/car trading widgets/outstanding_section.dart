@@ -45,6 +45,7 @@ class _OutstandingSectionState extends State<OutstandingSection> {
   String _query = '';
   String? _expandedGroupKey;
   int _groupPageStart = 0;
+  bool _hideSettled = true;
 
   @override
   void initState() {
@@ -67,10 +68,21 @@ class _OutstandingSectionState extends State<OutstandingSection> {
   Widget build(BuildContext context) {
     return GetX<CarTradingDashboardController>(
       builder: (controller) {
-        final items = _filterItems(controller.allOutstanding);
-        final groups = _groupItems(items);
-        final totalPaid = items.fold<double>(0, (sum, item) => sum + item.pay);
-        final totalReceived = items.fold<double>(
+        final searchedItems = _filterItems(controller.allOutstanding);
+        final allGroups = _groupItems(searchedItems);
+        final groups = _hideSettled
+            ? allGroups
+                  .where((group) => !_isSettled(group.net))
+                  .toList(growable: false)
+            : allGroups;
+        final visibleItems = groups
+            .expand((group) => group.items)
+            .toList(growable: false);
+        final totalPaid = visibleItems.fold<double>(
+          0,
+          (sum, item) => sum + item.pay,
+        );
+        final totalReceived = visibleItems.fold<double>(
           0,
           (sum, item) => sum + item.receive,
         );
@@ -84,11 +96,20 @@ class _OutstandingSectionState extends State<OutstandingSection> {
             children: [
               _OutstandingToolbar(
                 searchController: _searchController,
-                entryCount: items.length,
+                entryCount: visibleItems.length,
                 isRefreshing: isLoading,
+                hideSettled: _hideSettled,
                 onSearchChanged: (value) {
                   setState(() {
                     _query = value;
+                    _expandedGroupKey = null;
+                    _groupPageStart = 0;
+                    _detailPages.clear();
+                  });
+                },
+                onHideSettledChanged: (value) {
+                  setState(() {
+                    _hideSettled = value;
                     _expandedGroupKey = null;
                     _groupPageStart = 0;
                     _detailPages.clear();
@@ -108,6 +129,8 @@ class _OutstandingSectionState extends State<OutstandingSection> {
                 child: _OutstandingPanel(
                   groups: groups,
                   isLoading: isLoading,
+                  emptyBecauseSettled:
+                      _hideSettled && allGroups.isNotEmpty && groups.isEmpty,
                   expandedGroupKey: _expandedGroupKey,
                   requestedStartIndex: _groupPageStart,
                   detailPages: _detailPages,
@@ -245,7 +268,9 @@ class _OutstandingToolbar extends StatelessWidget {
     required this.searchController,
     required this.entryCount,
     required this.isRefreshing,
+    required this.hideSettled,
     required this.onSearchChanged,
+    required this.onHideSettledChanged,
     required this.onRefresh,
     required this.onNew,
   });
@@ -253,7 +278,9 @@ class _OutstandingToolbar extends StatelessWidget {
   final TextEditingController searchController;
   final int entryCount;
   final bool isRefreshing;
+  final bool hideSettled;
   final ValueChanged<String> onSearchChanged;
+  final ValueChanged<bool> onHideSettledChanged;
   final VoidCallback onRefresh;
   final VoidCallback onNew;
 
@@ -266,16 +293,21 @@ class _OutstandingToolbar extends StatelessWidget {
           controller: searchController,
           onChanged: onSearchChanged,
         );
-        final actions = Row(
-          mainAxisSize: MainAxisSize.min,
+        final actions = Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.end,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
+            _HideSettledToggle(
+              value: hideSettled,
+              onChanged: onHideSettledChanged,
+            ),
             _EntriesPill(count: entryCount),
-            const SizedBox(width: 8),
             _OutstandingRefreshButton(
               isRefreshing: isRefreshing,
               onPressed: onRefresh,
             ),
-            const SizedBox(width: 8),
             _NewOutstandingButton(isLoading: isRefreshing, onPressed: onNew),
           ],
         );
@@ -398,6 +430,70 @@ class _EntriesPill extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HideSettledToggle extends StatelessWidget {
+  const _HideSettledToggle({required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: value
+          ? 'Settled rows with zero net are hidden'
+          : 'Show or hide rows with zero net',
+      child: InkWell(
+        onTap: () => onChanged(!value),
+        borderRadius: BorderRadius.circular(10),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: value ? _primarySoft : _surface,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: value ? _primary : _lineStrong),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: value ? _primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(
+                    color: value ? _primary : _lineStrong,
+                    width: 1.4,
+                  ),
+                ),
+                child: value
+                    ? const Icon(
+                        Icons.check_rounded,
+                        color: Colors.white,
+                        size: 13,
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 7),
+              Text(
+                'HIDE SETTLED',
+                style: TextStyle(
+                  color: value ? _primaryDark : _muted,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -635,6 +731,7 @@ class _OutstandingPanel extends StatelessWidget {
   const _OutstandingPanel({
     required this.groups,
     required this.isLoading,
+    required this.emptyBecauseSettled,
     required this.expandedGroupKey,
     required this.requestedStartIndex,
     required this.detailPages,
@@ -650,6 +747,7 @@ class _OutstandingPanel extends StatelessWidget {
 
   final List<_OutstandingGroup> groups;
   final bool isLoading;
+  final bool emptyBecauseSettled;
   final String? expandedGroupKey;
   final int requestedStartIndex;
   final Map<String, int> detailPages;
@@ -684,7 +782,9 @@ class _OutstandingPanel extends StatelessWidget {
               ),
             );
           }
-          if (groups.isEmpty) return const _OutstandingEmptyState();
+          if (groups.isEmpty) {
+            return _OutstandingEmptyState(settledOnly: emptyBecauseSettled);
+          }
 
           final tableWidth = math.max(_minimumTableWidth, constraints.maxWidth);
           return Scrollbar(
@@ -1601,7 +1701,9 @@ class _PageButton extends StatelessWidget {
 }
 
 class _OutstandingEmptyState extends StatelessWidget {
-  const _OutstandingEmptyState();
+  const _OutstandingEmptyState({required this.settledOnly});
+
+  final bool settledOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -1626,19 +1728,23 @@ class _OutstandingEmptyState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'No outstanding entries found',
-              style: TextStyle(
+            Text(
+              settledOnly
+                  ? 'All matching rows are settled'
+                  : 'No outstanding entries found',
+              style: const TextStyle(
                 color: _text,
                 fontSize: 14,
                 fontWeight: FontWeight.w900,
               ),
             ),
             const SizedBox(height: 5),
-            const Text(
-              'Try changing the search or add a new outstanding entry.',
+            Text(
+              settledOnly
+                  ? 'Turn off Hide Settled to show rows with a zero net.'
+                  : 'Try changing the search or add a new outstanding entry.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: _muted, fontSize: 11),
+              style: const TextStyle(color: _muted, fontSize: 11),
             ),
           ],
         ),
@@ -1697,7 +1803,11 @@ List<_OutstandingGroup> _groupItems(List<CapitalsAndOutstandingModel> items) {
       })
       .toList(growable: false);
 
-  result.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+  result.sort((a, b) {
+    final netComparison = a.net.compareTo(b.net);
+    if (netComparison != 0) return netComparison;
+    return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+  });
   return result;
 }
 
@@ -1706,3 +1816,5 @@ Color _netColor(double value) {
   if (value < 0) return _red;
   return _blue;
 }
+
+bool _isSettled(double value) => value.abs() < 0.005;

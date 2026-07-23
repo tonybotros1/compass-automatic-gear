@@ -27,6 +27,7 @@ const _blueSoft = Color(0xFFEDF5FD);
 const _purple = Color(0xFF7C3AED);
 const _purpleSoft = Color(0xFFF2EDFF);
 const _shadow = Color(0x141B2C45);
+const _detailsRowsPerPage = 4;
 const _minimumTableWidth = 1040.0;
 
 class CapitalSection extends StatefulWidget {
@@ -39,9 +40,12 @@ class CapitalSection extends StatefulWidget {
 class _CapitalSectionState extends State<CapitalSection> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _horizontalController = ScrollController();
+  final ScrollController _expandedTableController = ScrollController();
+  final Map<String, int> _detailPages = <String, int>{};
 
   String _query = '';
-  int _page = 0;
+  String? _expandedGroupKey;
+  int _groupPageStart = 0;
 
   @override
   void initState() {
@@ -56,6 +60,7 @@ class _CapitalSectionState extends State<CapitalSection> {
   void dispose() {
     _searchController.dispose();
     _horizontalController.dispose();
+    _expandedTableController.dispose();
     super.dispose();
   }
 
@@ -64,6 +69,7 @@ class _CapitalSectionState extends State<CapitalSection> {
     return GetX<CarTradingDashboardController>(
       builder: (controller) {
         final items = _visibleItems(controller.allCapitals);
+        final groups = _groupCapitalItems(items);
         final totalPaid = items.fold<double>(0, (sum, item) => sum + item.pay);
         final totalReceived = items.fold<double>(
           0,
@@ -82,7 +88,9 @@ class _CapitalSectionState extends State<CapitalSection> {
                 onSearchChanged: (value) {
                   setState(() {
                     _query = value;
-                    _page = 0;
+                    _expandedGroupKey = null;
+                    _groupPageStart = 0;
+                    _detailPages.clear();
                   });
                 },
                 onRefresh: () => _refresh(controller),
@@ -97,11 +105,34 @@ class _CapitalSectionState extends State<CapitalSection> {
               const SizedBox(height: 10),
               Expanded(
                 child: _CapitalPanel(
-                  items: items,
+                  groups: groups,
                   isLoading: controller.isCapitalLoading.value,
-                  requestedPage: _page,
+                  expandedGroupKey: _expandedGroupKey,
+                  requestedStartIndex: _groupPageStart,
+                  detailPages: _detailPages,
                   horizontalController: _horizontalController,
-                  onPageChanged: (page) => setState(() => _page = page),
+                  expandedTableController: _expandedTableController,
+                  onCollapseAll: () {
+                    if (_expandedGroupKey == null) return;
+                    setState(() => _expandedGroupKey = null);
+                  },
+                  onToggleGroup: (group) {
+                    setState(() {
+                      _expandedGroupKey = _expandedGroupKey == group.key
+                          ? null
+                          : group.key;
+                      _detailPages.putIfAbsent(group.key, () => 0);
+                    });
+                  },
+                  onGroupPageChanged: (startIndex) {
+                    setState(() {
+                      _groupPageStart = startIndex;
+                      _expandedGroupKey = null;
+                    });
+                  },
+                  onDetailPageChanged: (groupKey, page) {
+                    setState(() => _detailPages[groupKey] = page);
+                  },
                   onEdit: (item) => _openEditCapital(controller, item),
                   onDelete: (item) => _deleteCapital(controller, item),
                 ),
@@ -605,20 +636,32 @@ class _TotalCard extends StatelessWidget {
 
 class _CapitalPanel extends StatelessWidget {
   const _CapitalPanel({
-    required this.items,
+    required this.groups,
     required this.isLoading,
-    required this.requestedPage,
+    required this.expandedGroupKey,
+    required this.requestedStartIndex,
+    required this.detailPages,
     required this.horizontalController,
-    required this.onPageChanged,
+    required this.expandedTableController,
+    required this.onCollapseAll,
+    required this.onToggleGroup,
+    required this.onGroupPageChanged,
+    required this.onDetailPageChanged,
     required this.onEdit,
     required this.onDelete,
   });
 
-  final List<CapitalsAndOutstandingModel> items;
+  final List<_CapitalGroup> groups;
   final bool isLoading;
-  final int requestedPage;
+  final String? expandedGroupKey;
+  final int requestedStartIndex;
+  final Map<String, int> detailPages;
   final ScrollController horizontalController;
-  final ValueChanged<int> onPageChanged;
+  final ScrollController expandedTableController;
+  final VoidCallback onCollapseAll;
+  final ValueChanged<_CapitalGroup> onToggleGroup;
+  final ValueChanged<int> onGroupPageChanged;
+  final void Function(String groupKey, int page) onDetailPageChanged;
   final ValueChanged<CapitalsAndOutstandingModel> onEdit;
   final ValueChanged<CapitalsAndOutstandingModel> onDelete;
 
@@ -636,7 +679,7 @@ class _CapitalPanel extends StatelessWidget {
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (isLoading && items.isEmpty) {
+          if (isLoading && groups.isEmpty) {
             return const Center(
               child: CircularProgressIndicator(
                 color: _primary,
@@ -644,12 +687,13 @@ class _CapitalPanel extends StatelessWidget {
               ),
             );
           }
-          if (items.isEmpty) return const _CapitalEmptyState();
+          if (groups.isEmpty) return const _CapitalEmptyState();
 
           final tableWidth = math.max(_minimumTableWidth, constraints.maxWidth);
           return Scrollbar(
             controller: horizontalController,
             thumbVisibility: constraints.maxWidth < _minimumTableWidth,
+            notificationPredicate: (notification) => notification.depth == 1,
             child: SingleChildScrollView(
               controller: horizontalController,
               scrollDirection: Axis.horizontal,
@@ -658,54 +702,101 @@ class _CapitalPanel extends StatelessWidget {
                 height: constraints.maxHeight,
                 child: Column(
                   children: [
-                    const _CapitalTableHeader(),
+                    _CapitalTableHeader(
+                      canCollapse: expandedGroupKey != null,
+                      onCollapseAll: onCollapseAll,
+                    ),
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, bodyConstraints) {
-                          const rowHeight = 58.0;
-                          const footerHeight = 48.0;
-                          final availableHeight = math.max(
-                            rowHeight,
-                            bodyConstraints.maxHeight - footerHeight - 1,
+                          const groupRowHeight = 62.0;
+                          const pageFooterHeight = 48.0;
+                          final expandedIndex = groups.indexWhere(
+                            (group) => group.key == expandedGroupKey,
+                          );
+                          final availableRowsHeight = math.max(
+                            groupRowHeight,
+                            bodyConstraints.maxHeight - pageFooterHeight - 1,
                           );
                           final rowsPerPage = math.max(
                             1,
-                            availableHeight ~/ rowHeight,
+                            availableRowsHeight ~/ groupRowHeight,
                           );
                           final pageCount = math.max(
                             1,
-                            (items.length / rowsPerPage).ceil(),
+                            (groups.length / rowsPerPage).ceil(),
                           );
-                          final page = requestedPage.clamp(0, pageCount - 1);
-                          final start = page * rowsPerPage;
+                          final maxStart = math.max(
+                            0,
+                            groups.length - rowsPerPage,
+                          );
+                          var start = requestedStartIndex.clamp(0, maxStart);
+                          if (expandedIndex != -1) {
+                            if (expandedIndex < start) {
+                              start = expandedIndex;
+                            } else if (expandedIndex >= start + rowsPerPage) {
+                              start = math.max(
+                                0,
+                                expandedIndex - rowsPerPage + 1,
+                              );
+                            }
+                          }
                           final end = math.min(
                             start + rowsPerPage,
-                            items.length,
+                            groups.length,
                           );
+                          final page = (start ~/ rowsPerPage).clamp(
+                            0,
+                            pageCount - 1,
+                          );
+                          final pageGroups = groups.sublist(start, end);
+                          final groupSections = pageGroups
+                              .map(
+                                (group) => _CapitalGroupSection(
+                                  group: group,
+                                  isExpanded: group.key == expandedGroupKey,
+                                  page: detailPages[group.key] ?? 0,
+                                  onToggle: () => onToggleGroup(group),
+                                  onPageChanged: (detailPage) =>
+                                      onDetailPageChanged(
+                                        group.key,
+                                        detailPage,
+                                      ),
+                                  onEdit: onEdit,
+                                  onDelete: onDelete,
+                                ),
+                              )
+                              .toList(growable: false);
+                          final footer = _CapitalGroupPaginationFooter(
+                            start: start,
+                            end: end,
+                            total: groups.length,
+                            page: page,
+                            pageCount: pageCount,
+                            rowsPerPage: rowsPerPage,
+                            onPageChanged: onGroupPageChanged,
+                          );
+
+                          if (expandedIndex != -1) {
+                            return Scrollbar(
+                              controller: expandedTableController,
+                              thumbVisibility: true,
+                              interactive: true,
+                              child: SingleChildScrollView(
+                                controller: expandedTableController,
+                                physics: const ClampingScrollPhysics(),
+                                child: Column(
+                                  children: [...groupSections, footer],
+                                ),
+                              ),
+                            );
+                          }
 
                           return Column(
                             children: [
-                              ...items
-                                  .sublist(start, end)
-                                  .asMap()
-                                  .entries
-                                  .map(
-                                    (entry) => _CapitalRow(
-                                      item: entry.value,
-                                      shaded: entry.key.isOdd,
-                                      onEdit: () => onEdit(entry.value),
-                                      onDelete: () => onDelete(entry.value),
-                                    ),
-                                  ),
+                              ...groupSections,
                               const Spacer(),
-                              _CapitalPaginationFooter(
-                                start: start,
-                                end: end,
-                                total: items.length,
-                                page: page,
-                                pageCount: pageCount,
-                                onPageChanged: onPageChanged,
-                              ),
+                              footer,
                             ],
                           );
                         },
@@ -723,22 +814,290 @@ class _CapitalPanel extends StatelessWidget {
 }
 
 class _CapitalTableHeader extends StatelessWidget {
-  const _CapitalTableHeader();
+  const _CapitalTableHeader({
+    required this.canCollapse,
+    required this.onCollapseAll,
+  });
+
+  final bool canCollapse;
+  final VoidCallback onCollapseAll;
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 44,
-      child: _CapitalGrid(
+      child: _CapitalSummaryGrid(
         isHeader: true,
-        action: Text('ACTION'),
-        date: Text('DATE'),
-        name: Text('NAME'),
-        account: Text('ACCOUNT'),
-        comment: Text('COMMENT'),
-        paid: Text('PAID'),
-        received: Text('RECEIVED'),
-        net: Text('NET'),
+        name: const Text('NAME'),
+        count: const Text('COUNT'),
+        paid: const Text('PAID'),
+        received: const Text('RECEIVED'),
+        net: const Text('NET'),
+        trailing: _CollapseButton(
+          enabled: canCollapse,
+          onPressed: onCollapseAll,
+        ),
+      ),
+    );
+  }
+}
+
+class _CapitalGroupSection extends StatelessWidget {
+  const _CapitalGroupSection({
+    required this.group,
+    required this.isExpanded,
+    required this.page,
+    required this.onToggle,
+    required this.onPageChanged,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final _CapitalGroup group;
+  final bool isExpanded;
+  final int page;
+  final VoidCallback onToggle;
+  final ValueChanged<int> onPageChanged;
+  final ValueChanged<CapitalsAndOutstandingModel> onEdit;
+  final ValueChanged<CapitalsAndOutstandingModel> onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Material(
+          color: isExpanded ? const Color(0xFFF7FBFC) : _surface,
+          child: InkWell(
+            onTap: onToggle,
+            hoverColor: _surfaceSoft,
+            child: SizedBox(
+              height: 62,
+              child: _CapitalSummaryGrid(
+                name: _CapitalGroupNameCell(group: group),
+                count: _CountBadge(count: group.items.length),
+                paid: _MoneyText(value: group.paid, color: _red),
+                received: _MoneyText(value: group.received, color: _green),
+                net: _MoneyText(value: group.net, color: _netColor(group.net)),
+                trailing: _ExpandButton(isExpanded: isExpanded),
+              ),
+            ),
+          ),
+        ),
+        if (isExpanded)
+          _CapitalDetailsPanel(
+            group: group,
+            requestedPage: page,
+            onPageChanged: onPageChanged,
+            onEdit: onEdit,
+            onDelete: onDelete,
+          ),
+      ],
+    );
+  }
+}
+
+class _CapitalSummaryGrid extends StatelessWidget {
+  const _CapitalSummaryGrid({
+    required this.name,
+    required this.count,
+    required this.paid,
+    required this.received,
+    required this.net,
+    required this.trailing,
+    this.isHeader = false,
+  });
+
+  final Widget name;
+  final Widget count;
+  final Widget paid;
+  final Widget received;
+  final Widget net;
+  final Widget trailing;
+  final bool isHeader;
+
+  @override
+  Widget build(BuildContext context) {
+    final tableTheme = Theme.of(context).dataTableTheme;
+
+    Widget cell(Widget child, {Alignment alignment = Alignment.centerLeft}) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Align(
+          alignment: alignment,
+          child: DefaultTextStyle(
+            style:
+                (isHeader
+                    ? tableTheme.headingTextStyle
+                    : tableTheme.dataTextStyle) ??
+                DefaultTextStyle.of(context).style,
+            child: child,
+          ),
+        ),
+      );
+    }
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: isHeader ? _surfaceSoft : Colors.transparent,
+        border: const Border(bottom: BorderSide(color: _line)),
+      ),
+      child: Row(
+        children: [
+          Expanded(flex: 4, child: cell(name)),
+          Expanded(flex: 1, child: cell(count, alignment: Alignment.center)),
+          Expanded(
+            flex: 2,
+            child: cell(paid, alignment: Alignment.centerRight),
+          ),
+          Expanded(
+            flex: 2,
+            child: cell(received, alignment: Alignment.centerRight),
+          ),
+          Expanded(flex: 2, child: cell(net, alignment: Alignment.centerRight)),
+          SizedBox(width: 52, child: Center(child: trailing)),
+        ],
+      ),
+    );
+  }
+}
+
+class _CapitalGroupNameCell extends StatelessWidget {
+  const _CapitalGroupNameCell({required this.group});
+
+  final _CapitalGroup group;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: _primarySoft,
+            border: Border.all(color: _primary.withValues(alpha: .14)),
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: const Icon(
+            Icons.person_outline_rounded,
+            size: 18,
+            color: _primary,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                group.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).dataTableTheme.dataTextStyle?.copyWith(color: _text),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${group.items.length} capital ${group.items.length == 1 ? 'entry' : 'entries'}',
+                style: const TextStyle(
+                  color: _muted,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(
+        color: _primarySoft,
+        border: Border.all(color: _primary.withValues(alpha: .14)),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        '$count',
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: _primaryDark,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w900,
+        ),
+      ),
+    );
+  }
+}
+
+class _CollapseButton extends StatelessWidget {
+  const _CollapseButton({required this.enabled, required this.onPressed});
+
+  final bool enabled;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Collapse details',
+      child: InkWell(
+        onTap: enabled ? onPressed : null,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            color: enabled ? _primarySoft : Colors.transparent,
+            border: Border.all(color: enabled ? _lineStrong : _line),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            Icons.keyboard_arrow_up_rounded,
+            size: 18,
+            color: enabled ? _primaryDark : _lineStrong,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ExpandButton extends StatelessWidget {
+  const _ExpandButton({required this.isExpanded});
+
+  final bool isExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 170),
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: isExpanded ? _primarySoft : _surfaceSoft,
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: AnimatedRotation(
+        duration: const Duration(milliseconds: 170),
+        turns: isExpanded ? .5 : 0,
+        child: Icon(
+          Icons.keyboard_arrow_down_rounded,
+          size: 19,
+          color: isExpanded ? _primaryDark : _muted,
+        ),
       ),
     );
   }
@@ -886,6 +1245,153 @@ class _CapitalGrid extends StatelessWidget {
   }
 }
 
+class _CapitalDetailsPanel extends StatelessWidget {
+  const _CapitalDetailsPanel({
+    required this.group,
+    required this.requestedPage,
+    required this.onPageChanged,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  final _CapitalGroup group;
+  final int requestedPage;
+  final ValueChanged<int> onPageChanged;
+  final ValueChanged<CapitalsAndOutstandingModel> onEdit;
+  final ValueChanged<CapitalsAndOutstandingModel> onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final pageCount = math.max(
+      1,
+      (group.items.length / _detailsRowsPerPage).ceil(),
+    );
+    final page = requestedPage.clamp(0, pageCount - 1);
+    final start = page * _detailsRowsPerPage;
+    final end = math.min(start + _detailsRowsPerPage, group.items.length);
+    final pageItems = group.items.sublist(start, end);
+
+    return Container(
+      color: _surfaceStrong,
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: _surface,
+          border: Border.all(color: _lineStrong),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            const _CapitalDetailsHeader(),
+            ...pageItems.asMap().entries.map(
+              (entry) => _CapitalRow(
+                item: entry.value,
+                shaded: entry.key.isOdd,
+                onEdit: () => onEdit(entry.value),
+                onDelete: () => onDelete(entry.value),
+              ),
+            ),
+            _CapitalDetailsFooter(
+              start: start,
+              end: end,
+              total: group.items.length,
+              page: page,
+              pageCount: pageCount,
+              onPageChanged: onPageChanged,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CapitalDetailsHeader extends StatelessWidget {
+  const _CapitalDetailsHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 38,
+      child: _CapitalGrid(
+        isHeader: true,
+        action: Text('ACTION'),
+        date: Text('DATE'),
+        name: Text('NAME'),
+        account: Text('ACCOUNT'),
+        comment: Text('COMMENT'),
+        paid: Text('PAID'),
+        received: Text('RECEIVED'),
+        net: Text('NET'),
+      ),
+    );
+  }
+}
+
+class _CapitalDetailsFooter extends StatelessWidget {
+  const _CapitalDetailsFooter({
+    required this.start,
+    required this.end,
+    required this.total,
+    required this.page,
+    required this.pageCount,
+    required this.onPageChanged,
+  });
+
+  final int start;
+  final int end;
+  final int total;
+  final int page;
+  final int pageCount;
+  final ValueChanged<int> onPageChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 11),
+      color: const Color(0xFFFBFCFE),
+      child: Row(
+        children: [
+          Text(
+            'Showing ${total == 0 ? 0 : start + 1}–$end of $total entries',
+            style: const TextStyle(
+              color: _muted,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const Spacer(),
+          _PageButton(
+            tooltip: 'Previous page',
+            icon: Icons.chevron_left_rounded,
+            enabled: page > 0,
+            onPressed: () => onPageChanged(page - 1),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              '${page + 1} / $pageCount',
+              style: const TextStyle(
+                color: _text,
+                fontSize: 9.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          _PageButton(
+            tooltip: 'Next page',
+            icon: Icons.chevron_right_rounded,
+            enabled: page < pageCount - 1,
+            onPressed: () => onPageChanged(page + 1),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DateCell extends StatelessWidget {
   const _DateCell({required this.value});
 
@@ -1005,13 +1511,14 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-class _CapitalPaginationFooter extends StatelessWidget {
-  const _CapitalPaginationFooter({
+class _CapitalGroupPaginationFooter extends StatelessWidget {
+  const _CapitalGroupPaginationFooter({
     required this.start,
     required this.end,
     required this.total,
     required this.page,
     required this.pageCount,
+    required this.rowsPerPage,
     required this.onPageChanged,
   });
 
@@ -1020,6 +1527,7 @@ class _CapitalPaginationFooter extends StatelessWidget {
   final int total;
   final int page;
   final int pageCount;
+  final int rowsPerPage;
   final ValueChanged<int> onPageChanged;
 
   @override
@@ -1034,7 +1542,7 @@ class _CapitalPaginationFooter extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            'Showing ${total == 0 ? 0 : start + 1}–$end of $total capital entries',
+            'Showing ${total == 0 ? 0 : start + 1}–$end of $total people',
             style: const TextStyle(
               color: _muted,
               fontSize: 10,
@@ -1045,15 +1553,15 @@ class _CapitalPaginationFooter extends StatelessWidget {
           _PageButton(
             tooltip: 'First page',
             icon: Icons.first_page_rounded,
-            enabled: page > 0,
+            enabled: start > 0,
             onPressed: () => onPageChanged(0),
           ),
           const SizedBox(width: 5),
           _PageButton(
             tooltip: 'Previous page',
             icon: Icons.chevron_left_rounded,
-            enabled: page > 0,
-            onPressed: () => onPageChanged(page - 1),
+            enabled: start > 0,
+            onPressed: () => onPageChanged(math.max(0, start - rowsPerPage)),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 9),
@@ -1069,15 +1577,15 @@ class _CapitalPaginationFooter extends StatelessWidget {
           _PageButton(
             tooltip: 'Next page',
             icon: Icons.chevron_right_rounded,
-            enabled: page < pageCount - 1,
-            onPressed: () => onPageChanged(page + 1),
+            enabled: end < total,
+            onPressed: () => onPageChanged(end),
           ),
           const SizedBox(width: 5),
           _PageButton(
             tooltip: 'Last page',
             icon: Icons.last_page_rounded,
-            enabled: page < pageCount - 1,
-            onPressed: () => onPageChanged(pageCount - 1),
+            enabled: end < total,
+            onPressed: () => onPageChanged(math.max(0, total - rowsPerPage)),
           ),
         ],
       ),
@@ -1169,6 +1677,62 @@ class _CapitalEmptyState extends StatelessWidget {
       ),
     );
   }
+}
+
+class _CapitalGroup {
+  const _CapitalGroup({
+    required this.key,
+    required this.name,
+    required this.items,
+    required this.paid,
+    required this.received,
+  });
+
+  final String key;
+  final String name;
+  final List<CapitalsAndOutstandingModel> items;
+  final double paid;
+  final double received;
+
+  double get net => received - paid;
+}
+
+List<_CapitalGroup> _groupCapitalItems(
+  List<CapitalsAndOutstandingModel> items,
+) {
+  final grouped = <String, List<CapitalsAndOutstandingModel>>{};
+  final names = <String, String>{};
+
+  for (final item in items) {
+    final normalizedName = item.name.trim();
+    final key = item.nameId.trim().isNotEmpty
+        ? item.nameId.trim()
+        : normalizedName.toLowerCase();
+    grouped.putIfAbsent(key, () => <CapitalsAndOutstandingModel>[]).add(item);
+    names[key] = normalizedName.isEmpty ? 'Unnamed' : normalizedName;
+  }
+
+  final result = grouped.entries
+      .map((entry) {
+        final groupItems = entry.value
+          ..sort((a, b) => b.date.compareTo(a.date));
+        final paid = groupItems.fold<double>(0, (sum, item) => sum + item.pay);
+        final received = groupItems.fold<double>(
+          0,
+          (sum, item) => sum + item.receive,
+        );
+        return _CapitalGroup(
+          key: entry.key,
+          name: names[entry.key] ?? 'Unnamed',
+          items: groupItems,
+          paid: paid,
+          received: received,
+        );
+      })
+      .toList(growable: false);
+
+  result.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+  return result;
 }
 
 Color _netColor(double value) {

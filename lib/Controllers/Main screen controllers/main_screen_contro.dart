@@ -8,6 +8,7 @@ import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/co
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/currency.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/employee_performance.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/employees.dart';
+import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/employees_redesigned.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/inventory_items.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/invoice_items.dart';
 import 'package:datahubai/Screens/Main%20screens/System%20Administrator/Setup/job_card.dart';
@@ -326,6 +327,8 @@ class MainScreenController extends GetxController {
         return const SizedBox(child: CarTradingDashboard());
       case '/employees':
         return const SizedBox(child: Employees());
+      case '/employeesRedesigned':
+        return const SizedBox(child: EmployeesRedesigned());
       case '/converters':
         return const SizedBox(child: Converters());
       case '/dataMigration':
