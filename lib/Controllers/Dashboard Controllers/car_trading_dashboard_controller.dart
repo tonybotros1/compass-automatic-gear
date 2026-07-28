@@ -1153,15 +1153,19 @@ class CarTradingDashboardController extends GetxController {
             final newModel = CarTradingPurchaseAgreementModel.fromJson(
               Map<String, dynamic>.from(message["data"]),
             );
-            _upsertPurchaseAgreement(newModel);
-            calculatePurchaseAgreementTotals();
+            if (newModel.tradeId == currentTradId.value) {
+              _upsertPurchaseAgreement(newModel);
+              calculatePurchaseAgreementTotals();
+            }
             break;
           case "purchase_agreement_item_updated":
             final updated = CarTradingPurchaseAgreementModel.fromJson(
               Map<String, dynamic>.from(message["data"]),
             );
-            _upsertPurchaseAgreement(updated);
-            calculatePurchaseAgreementTotals();
+            if (updated.tradeId == currentTradId.value) {
+              _upsertPurchaseAgreement(updated);
+              calculatePurchaseAgreementTotals();
+            }
             break;
 
           case "purchase_agreement_item_deleted":
@@ -1373,17 +1377,43 @@ class CarTradingDashboardController extends GetxController {
 
   // PRINT SECTION
   // ===========================================================================
-  void printPurchaseAgreementOrQuotation(
+  Future<void> printPurchaseAgreementOrQuotation(
     CarTradingPurchaseAgreementModel data,
     String type,
   ) async {
-    final pdfData = await generatePurchaseAgreementOrQuotationPdf(data, type);
+    try {
+      final tradeId = data.tradeId?.trim() ?? '';
+      if (tradeId.isEmpty) {
+        _showError(
+          'Could not identify the car for this sales agreement. Please refresh the screen.',
+        );
+        return;
+      }
 
-    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfData);
+      final vehicle = await _fetchTradeById(tradeId);
+      if (vehicle == null || vehicle.id != tradeId) {
+        _showError(
+          'Could not load the car for this sales agreement. Please try again.',
+        );
+        return;
+      }
+
+      final pdfData = await generatePurchaseAgreementOrQuotationPdf(
+        data,
+        vehicle,
+        type,
+      );
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdfData,
+      );
+    } catch (_) {
+      _showError('Could not prepare the sales agreement. Please try again.');
+    }
   }
 
   Future<Uint8List> generatePurchaseAgreementOrQuotationPdf(
     CarTradingPurchaseAgreementModel data,
+    CarTradeModel vehicle,
     String type,
   ) async {
     // final Font robotoMono = pw.Font.ttf(
@@ -1536,24 +1566,26 @@ class CarTradingDashboardController extends GetxController {
                                             infoRow(
                                               title: 'Car Brand/Model:',
                                               value:
-                                                  "${carBrand.value.text} ${carModel.value.text} ${year.value.text}",
+                                                  "${vehicle.carBrand ?? ''} ${vehicle.carModel ?? ''} ${vehicle.year ?? ''}",
                                             ),
                                             infoRow(
                                               title: 'Car Year:',
-                                              value: year.value.text,
+                                              value: vehicle.year ?? '',
                                             ),
                                             infoRow(
                                               title: 'Color out/in:',
                                               value:
-                                                  "${colorOut.value.text} / ${colorIn.value.text} ",
+                                                  "${vehicle.colorOut ?? ''} / ${vehicle.colorIn ?? ''} ",
                                             ),
                                             infoRow(
                                               title: 'VIN:',
-                                              value: vin.value.text,
+                                              value: vehicle.vin ?? '',
                                             ),
                                             infoRow(
                                               title: 'Mileage:',
-                                              value: mileage.value.text,
+                                              value:
+                                                  vehicle.mileage?.toString() ??
+                                                  '',
                                             ),
                                           ],
                                         ),
@@ -2820,14 +2852,18 @@ class CarTradingDashboardController extends GetxController {
         headers: {'Authorization': 'Bearer $accessToken'},
       );
       if (response.statusCode == 200) {
+        if (currentTradId.value != tradeId) return false;
         final decoded = _jsonObject(response.body);
         List purchase = decoded['purchase_agreement_items'] ?? [];
         purchaseAgreementAddedItems.assignAll(
-          purchase.whereType<Map>().map(
-            (item) => CarTradingPurchaseAgreementModel.fromJson(
-              Map<String, dynamic>.from(item),
-            ),
-          ),
+          purchase
+              .whereType<Map>()
+              .map(
+                (item) => CarTradingPurchaseAgreementModel.fromJson(
+                  Map<String, dynamic>.from(item),
+                ),
+              )
+              .where((item) => item.tradeId == tradeId),
         );
         calculatePurchaseAgreementTotals();
         return true;
@@ -3624,7 +3660,7 @@ class CarTradingDashboardController extends GetxController {
       itemsPageName.value = 'sales agreement';
       filteredPurchaseAgreementAddedItems.clear();
       final loaded = await getPurchaseAgreementForCurrentTrade(tradeId);
-      if (!loaded) {
+      if (!loaded && currentTradId.value == tradeId) {
         _showError('Could not refresh the sales agreements. Please try again.');
       }
       return loaded;

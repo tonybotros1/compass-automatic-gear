@@ -1,5 +1,6 @@
 class CarTradingPurchaseAgreementModel {
   String? id;
+  final String? tradeId;
   final String? agreementNumber;
   final DateTime? agreementDate;
   final String? sellerName;
@@ -21,6 +22,7 @@ class CarTradingPurchaseAgreementModel {
 
   CarTradingPurchaseAgreementModel({
     this.id,
+    this.tradeId,
     this.agreementNumber,
     this.agreementDate,
     this.sellerName,
@@ -44,6 +46,7 @@ class CarTradingPurchaseAgreementModel {
   Map<String, dynamic> toJson() {
     return {
       if (id != null) "_id": id,
+      if (tradeId != null) "trade_id": tradeId,
       "agreement_number": agreementNumber,
       "agreement_date": agreementDate,
       "seller_name": sellerName,
@@ -75,6 +78,7 @@ class CarTradingPurchaseAgreementModel {
   factory CarTradingPurchaseAgreementModel.fromJson(Map<String, dynamic> json) {
     return CarTradingPurchaseAgreementModel(
       id: json['_id']?.toString() ?? '',
+      tradeId: json['trade_id']?.toString() ?? '',
       agreementNumber: json['agreement_number']?.toString() ?? '',
       agreementDate:
           json['agreement_date'] != null && json['agreement_date'] != ''
