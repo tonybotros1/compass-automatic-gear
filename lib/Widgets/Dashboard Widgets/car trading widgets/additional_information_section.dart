@@ -77,15 +77,8 @@ Widget additionalInformation({
                           controller.carModified.value = true;
                         },
                         onOpen: () {
-                          return controller.getInvestedBy();
+                          return controller.getUsedCapitalBy();
                         },
-                      ),
-                      action: valSectionInTheTable(
-                        controller.listOfValuesController,
-                        constraints,
-                        'INVESTED_BY',
-                        'New Investor',
-                        'Investors',
                       ),
                     ),
                   ],
@@ -100,10 +93,10 @@ Widget additionalInformation({
 }
 
 class _ActionField extends StatelessWidget {
-  const _ActionField({required this.field, required this.action});
+  const _ActionField({required this.field, this.action});
 
   final Widget field;
-  final Widget action;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -111,8 +104,10 @@ class _ActionField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         field,
-        const SizedBox(width: 6),
-        SizedBox(width: 34, height: 38, child: action),
+        if (action != null) ...[
+          const SizedBox(width: 6),
+          SizedBox(width: 34, height: 38, child: action),
+        ],
       ],
     );
   }

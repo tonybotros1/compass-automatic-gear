@@ -355,8 +355,8 @@ class _SummarySectionState extends State<SummarySection>
     final expenses = _list(summary['expense_breakdown']);
     final accounts = _list(summary['accounts']);
     final capitalByRows = controller.dashboardSummaryCapitalByRows;
-    final capitalDocsNameRows = controller.dashboardSummaryCapitalDocsNameRows;
-    final newCarCapitalByRows = controller.dashboardSummaryNewCarCapitalByRows;
+    final reconciliationCapitalRows =
+        controller.dashboardSummaryCapitalDocsNameRows;
     final capitalReconciliation =
         controller.dashboardSummaryCapitalReconciliation;
     final boughtByRows = _list(summary['bought_by_summary']);
@@ -509,18 +509,13 @@ class _SummarySectionState extends State<SummarySection>
                 ),
                 const SizedBox(height: 18),
                 _CapitalReconciliationSection(
-                  capitalDocsRows: capitalDocsNameRows,
-                  newCarCapitalByRows: newCarCapitalByRows,
-                  selectedCapitalDocsId:
-                      controller.dashboardSummaryCapitalDocsNameId.value,
+                  capitalRows: reconciliationCapitalRows,
                   selectedCapitalById:
-                      controller.dashboardSummaryNewCarCapitalById.value,
+                      controller.dashboardSummaryCapitalReconciliationId.value,
                   calculation: capitalReconciliation,
                   hidden: !showFinancials,
-                  onCapitalDocsChanged:
-                      controller.selectDashboardSummaryCapitalDocsName,
                   onCapitalByChanged:
-                      controller.selectDashboardSummaryNewCarCapitalBy,
+                      controller.selectDashboardSummaryCapitalReconciliation,
                 ),
                 const SizedBox(height: 18),
                 _PeopleFinancialGrid(
@@ -1740,23 +1735,17 @@ class _CapitalByStatusFilter extends StatelessWidget {
 
 class _CapitalReconciliationSection extends StatelessWidget {
   const _CapitalReconciliationSection({
-    required this.capitalDocsRows,
-    required this.newCarCapitalByRows,
-    required this.selectedCapitalDocsId,
+    required this.capitalRows,
     required this.selectedCapitalById,
     required this.calculation,
     required this.hidden,
-    required this.onCapitalDocsChanged,
     required this.onCapitalByChanged,
   });
 
-  final List<Map<String, dynamic>> capitalDocsRows;
-  final List<Map<String, dynamic>> newCarCapitalByRows;
-  final String selectedCapitalDocsId;
+  final List<Map<String, dynamic>> capitalRows;
   final String selectedCapitalById;
   final Map<String, dynamic> calculation;
   final bool hidden;
-  final ValueChanged<String?> onCapitalDocsChanged;
   final ValueChanged<String?> onCapitalByChanged;
 
   @override
@@ -1814,7 +1803,7 @@ class _CapitalReconciliationSection extends StatelessWidget {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'Compare one Capital Docs owner with one New-car Capital By owner',
+                      'Compare one Capital By owner’s documents with their New-car BUY investment',
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: _muted,
@@ -1831,68 +1820,33 @@ class _CapitalReconciliationSection extends StatelessWidget {
               ),
             ],
           );
-          final selectors = compact
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _ReconciliationSelector(
-                      label: 'CAPITAL DOCS NAME',
-                      hint: 'No Capital Docs names',
-                      icon: Icons.account_balance_wallet_outlined,
-                      rows: capitalDocsRows,
-                      value: selectedCapitalDocsId,
-                      onChanged: onCapitalDocsChanged,
-                    ),
-                    const SizedBox(height: 8),
-                    _ReconciliationSelector(
-                      label: 'CAPITAL BY — NEW CARS',
-                      hint: 'No New-car Capital By',
-                      icon: Icons.directions_car_filled_outlined,
-                      rows: newCarCapitalByRows,
-                      value: selectedCapitalById,
-                      onChanged: onCapitalByChanged,
-                    ),
-                  ],
-                )
-              : Row(
-                  children: [
-                    Expanded(
-                      child: _ReconciliationSelector(
-                        label: 'CAPITAL DOCS NAME',
-                        hint: 'No Capital Docs names',
-                        icon: Icons.account_balance_wallet_outlined,
-                        rows: capitalDocsRows,
-                        value: selectedCapitalDocsId,
-                        onChanged: onCapitalDocsChanged,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _ReconciliationSelector(
-                        label: 'CAPITAL BY — NEW CARS',
-                        hint: 'No New-car Capital By',
-                        icon: Icons.directions_car_filled_outlined,
-                        rows: newCarCapitalByRows,
-                        value: selectedCapitalById,
-                        onChanged: onCapitalByChanged,
-                      ),
-                    ),
-                  ],
-                );
+          final selector = _ReconciliationSelector(
+            label: 'CAPITAL BY',
+            hint: 'No used Capital By names',
+            icon: Icons.account_balance_wallet_outlined,
+            rows: capitalRows,
+            value: selectedCapitalById,
+            onChanged: onCapitalByChanged,
+          );
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               heading,
               const SizedBox(height: 12),
-              selectors,
+              compact
+                  ? selector
+                  : Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(width: 520, child: selector),
+                    ),
               const SizedBox(height: 12),
               if (!ready)
                 const SizedBox(
                   height: 78,
                   child: _EmptyPanel(
                     message:
-                        'Capital Docs and New-car Capital By data are required for this calculation',
+                        'A used Capital By name is required for this calculation',
                   ),
                 )
               else ...[

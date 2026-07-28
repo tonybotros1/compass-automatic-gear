@@ -184,8 +184,7 @@ class CarTradingDashboardController extends GetxController {
   final Rx<String?> dashboardSummaryError = Rx<String?>(null);
   final RxString dashboardSummaryCapitalById = ''.obs;
   final RxString dashboardSummaryCapitalByStatus = 'all'.obs;
-  final RxString dashboardSummaryCapitalDocsNameId = ''.obs;
-  final RxString dashboardSummaryNewCarCapitalById = ''.obs;
+  final RxString dashboardSummaryCapitalReconciliationId = ''.obs;
   String backendUrl = backendTestURI;
   WebSocketService ws = Get.find<WebSocketService>();
   StreamSubscription? _carTradingEventsSubscription;
@@ -494,7 +493,7 @@ class CarTradingDashboardController extends GetxController {
       if (response.statusCode == 200) {
         dashboardExecutiveSummary.assignAll(decoded);
         _syncDashboardSummaryCapitalBySelection();
-        _syncDashboardSummaryCapitalReconciliationSelections();
+        _syncDashboardSummaryCapitalReconciliationSelection();
       } else {
         dashboardSummaryError.value =
             decoded['detail']?.toString() ??
@@ -595,14 +594,27 @@ class CarTradingDashboardController extends GetxController {
   Map<String, dynamic> get dashboardSummaryCapitalReconciliation {
     final capitalDocsRows = dashboardSummaryCapitalDocsNameRows;
     final capitalByRows = dashboardSummaryNewCarCapitalByRows;
+    final selectedId = dashboardSummaryCapitalReconciliationId.value;
     final capitalDocs = capitalDocsRows.firstWhere(
-      (row) => row['id']?.toString() == dashboardSummaryCapitalDocsNameId.value,
+      (row) => row['id']?.toString() == selectedId,
       orElse: () => <String, dynamic>{},
     );
-    final capitalBy = capitalByRows.firstWhere(
-      (row) => row['id']?.toString() == dashboardSummaryNewCarCapitalById.value,
+    final matchingCapitalBy = capitalByRows.firstWhere(
+      (row) => row['id']?.toString() == selectedId,
       orElse: () => <String, dynamic>{},
     );
+    final capitalBy = matchingCapitalBy.isNotEmpty
+        ? matchingCapitalBy
+        : <String, dynamic>{
+            'id': selectedId,
+            'name': capitalDocs['name']?.toString() ?? '',
+            'paid': 0.0,
+            'received': 0.0,
+            'net': 0.0,
+            'invested': 0.0,
+            'items': 0,
+            'car_count': 0,
+          };
     final capitalDocsNet = _toDouble(capitalDocs['net']);
     final newCarsInvested = _toDouble(capitalBy['invested']);
     final remainingCapital = capitalDocsNet - newCarsInvested;
@@ -611,7 +623,7 @@ class CarTradingDashboardController extends GetxController {
     );
 
     return {
-      'ready': capitalDocs.isNotEmpty && capitalBy.isNotEmpty,
+      'ready': capitalDocs.isNotEmpty,
       'capital_docs': capitalDocs,
       'capital_by': capitalBy,
       'capital_docs_net': capitalDocsNet,
@@ -622,35 +634,20 @@ class CarTradingDashboardController extends GetxController {
     };
   }
 
-  void _syncDashboardSummaryCapitalReconciliationSelections() {
-    void syncSelection(List<Map<String, dynamic>> rows, RxString selection) {
-      final ids = rows
-          .map((row) => row['id']?.toString() ?? '')
-          .where((id) => id.isNotEmpty)
-          .toList(growable: false);
-      if (ids.isEmpty) {
-        selection.value = '';
-      } else if (!ids.contains(selection.value)) {
-        selection.value = ids.first;
-      }
+  void _syncDashboardSummaryCapitalReconciliationSelection() {
+    final ids = dashboardSummaryCapitalDocsNameRows
+        .map((row) => row['id']?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
+        .toList(growable: false);
+    if (ids.isEmpty) {
+      dashboardSummaryCapitalReconciliationId.value = '';
+    } else if (!ids.contains(dashboardSummaryCapitalReconciliationId.value)) {
+      dashboardSummaryCapitalReconciliationId.value = ids.first;
     }
-
-    syncSelection(
-      dashboardSummaryCapitalDocsNameRows,
-      dashboardSummaryCapitalDocsNameId,
-    );
-    syncSelection(
-      dashboardSummaryNewCarCapitalByRows,
-      dashboardSummaryNewCarCapitalById,
-    );
   }
 
-  void selectDashboardSummaryCapitalDocsName(String? id) {
-    dashboardSummaryCapitalDocsNameId.value = id ?? '';
-  }
-
-  void selectDashboardSummaryNewCarCapitalBy(String? id) {
-    dashboardSummaryNewCarCapitalById.value = id ?? '';
+  void selectDashboardSummaryCapitalReconciliation(String? id) {
+    dashboardSummaryCapitalReconciliationId.value = id ?? '';
   }
 
   final Set<int> _tabsBeingRefreshed = <int>{};
@@ -1252,8 +1249,40 @@ class CarTradingDashboardController extends GetxController {
     return await helper.getAllListValues('BOUGHT_SOLD_BY');
   }
 
-  Future<Map<String, dynamic>> getInvestedBy() async {
-    return await helper.getAllListValues('INVESTED_BY');
+  Future<Map<String, dynamic>> getUsedCapitalBy() async {
+    try {
+      final accessToken = await _accessToken();
+      final refreshToken = await _refreshToken();
+      final response = await http.get(
+        Uri.parse('$backendUrl/car_trading/get_used_capital_names'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = _jsonObject(response.body);
+        final values = decoded['values'];
+        if (values is! List) return {};
+        return {
+          for (final rawValue in values.whereType<Map>())
+            if ((rawValue['_id']?.toString() ?? '').isNotEmpty)
+              rawValue['_id'].toString(): Map<String, dynamic>.from(rawValue),
+        };
+      }
+      if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+        final refreshed = await helper.refreshAccessToken(refreshToken);
+        if (refreshed == RefreshResult.success) {
+          return await getUsedCapitalBy();
+        }
+        if (refreshed == RefreshResult.invalidToken) {
+          logout();
+        }
+      } else if (response.statusCode == 401) {
+        logout();
+      }
+      return {};
+    } catch (_) {
+      return {};
+    }
   }
 
   Future<Map<String, dynamic>> getNamesOfPeople() async {

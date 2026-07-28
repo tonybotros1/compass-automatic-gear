@@ -162,7 +162,7 @@ class MainScreenFilters extends StatelessWidget {
                             displayKeys: const ['name'],
                             displaySelectedKeys: const ['name'],
                             onOpen: () {
-                              return controller.getInvestedBy();
+                              return controller.getUsedCapitalBy();
                             },
                             onDelete: () {
                               controller.carInvestedByFilter.value.clear();
