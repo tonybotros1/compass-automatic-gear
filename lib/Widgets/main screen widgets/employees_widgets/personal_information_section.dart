@@ -77,6 +77,12 @@ Container personalInformation(
                         controller.employeeDateOfBirth,
                       );
                     },
+                    onTapOutside: (_) async {
+                      normalizeDate(
+                        controller.employeeDateOfBirth.text,
+                        controller.employeeDateOfBirth,
+                      );
+                    },
                   ),
                 ],
               ),
