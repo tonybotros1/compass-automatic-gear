@@ -173,6 +173,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
                 'EMPLOYERS',
                 'New Employer',
                 'Employers',
+                showMasteredBy: false,
               ),
             ],
           ),
@@ -207,6 +208,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
                 'DEPARTMENTS',
                 'New Department',
                 'Departments',
+                showMasteredBy: false,
               ),
             ],
           ),
@@ -241,6 +243,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
                 'JOBS',
                 'New Job',
                 'Jobs',
+                showMasteredBy: false,
               ),
             ],
           ),
@@ -275,51 +278,66 @@ class _EmploymentDetailsCard extends StatelessWidget {
                 'LOCATIONS',
                 'New Location',
                 'Locations',
+                showMasteredBy: false,
               ),
             ],
           ),
-          MenuWithValues(
-            labelText: 'Reporting Manager',
-            headerLqabel: 'Reporting Managers',
-            dialogWidth: 600,
-            width: double.infinity,
-            controller: controller.reportingManager,
-            displayKeys: const ['full_name'],
-            displaySelectedKeys: const ['full_name'],
-            onOpen: () {
-              return controller.getAllReporingManagers(
-                controller.currentEmployeeId.value,
-                controller.jobEmployerId.value,
-              );
-            },
-            onDelete: () {
-              controller.reportingManager.clear();
-              controller.reportingManagerId.value = '';
-            },
-            onSelected: (value) {
-              controller.reportingManager.text = value['full_name'];
-              controller.reportingManagerId.value = value['_id'];
-            },
+          Row(
+            children: [
+              Expanded(
+                child: MenuWithValues(
+                  labelText: 'Reporting Manager',
+                  headerLqabel: 'Reporting Managers',
+                  dialogWidth: 600,
+                  width: double.infinity,
+                  controller: controller.reportingManager,
+                  displayKeys: const ['full_name'],
+                  displaySelectedKeys: const ['full_name'],
+                  onOpen: () {
+                    return controller.getAllReporingManagers(
+                      controller.currentEmployeeId.value,
+                      controller.jobEmployerId.value,
+                    );
+                  },
+                  onDelete: () {
+                    controller.reportingManager.clear();
+                    controller.reportingManagerId.value = '';
+                  },
+                  onSelected: (value) {
+                    controller.reportingManager.text = value['full_name'];
+                    controller.reportingManagerId.value = value['_id'];
+                  },
+                ),
+              ),
+              const IconButton(onPressed: null, icon: SizedBox()),
+            ],
           ),
-          MenuWithValues(
-            labelText: 'Payroll *',
-            headerLqabel: 'Payrolls',
-            dialogWidth: 600,
-            width: double.infinity,
-            controller: controller.payroll,
-            displayKeys: const ['name'],
-            displaySelectedKeys: const ['name'],
-            onOpen: () {
-              return controller.getAllPayrolls();
-            },
-            onDelete: () {
-              controller.payroll.clear();
-              controller.payrollId.value = '';
-            },
-            onSelected: (value) {
-              controller.payroll.text = value['name'];
-              controller.payrollId.value = value['_id'];
-            },
+          Row(
+            children: [
+              Expanded(
+                child: MenuWithValues(
+                  labelText: 'Payroll *',
+                  headerLqabel: 'Payrolls',
+                  dialogWidth: 600,
+                  width: double.infinity,
+                  controller: controller.payroll,
+                  displayKeys: const ['name'],
+                  displaySelectedKeys: const ['name'],
+                  onOpen: () {
+                    return controller.getAllPayrolls();
+                  },
+                  onDelete: () {
+                    controller.payroll.clear();
+                    controller.payrollId.value = '';
+                  },
+                  onSelected: (value) {
+                    controller.payroll.text = value['name'];
+                    controller.payrollId.value = value['_id'];
+                  },
+                ),
+              ),
+              const IconButton(onPressed: null, icon: SizedBox()),
+            ],
           ),
         ],
       ),

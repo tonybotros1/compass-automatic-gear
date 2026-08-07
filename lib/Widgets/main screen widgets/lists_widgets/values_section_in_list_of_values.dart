@@ -10,6 +10,7 @@ import 'values_dialog.dart';
 
 Widget valuesSection({
   required BuildContext context,
+  bool showMasteredBy = true,
 }) {
   return LayoutBuilder(
     builder: (context, constraints) {
@@ -31,7 +32,12 @@ Widget valuesSection({
                 constraints: constraints,
                 context: context,
                 title: 'Search for values',
-                button: newValueButton(context, constraints, controller),
+                button: newValueButton(
+                  context,
+                  constraints,
+                  controller,
+                  showMasteredBy: showMasteredBy,
+                ),
               );
             },
           ),
@@ -122,8 +128,9 @@ DataRow dataRowForTheTable(
   BuildContext context,
   BoxConstraints constraints,
   String valueId,
-  ListOfValuesController controller,
-) {
+  ListOfValuesController controller, {
+  bool showMasteredBy = true,
+}) {
   return DataRow(
     cells: [
       DataCell(
@@ -134,7 +141,14 @@ DataRow dataRowForTheTable(
             deleteSection(context, controller, valueId),
 
             // activeInActiveSection(valueData, controller, valueId),
-            editSection(controller, valueData, context, constraints, valueId),
+            editSection(
+              controller,
+              valueData,
+              context,
+              constraints,
+              valueId,
+              showMasteredBy: showMasteredBy,
+            ),
           ],
         ),
       ),
@@ -168,14 +182,16 @@ IconButton editSection(
   ValueModel valueData,
   BuildContext context,
   BoxConstraints constraints,
-  String valueId,
-) {
+  String valueId, {
+  bool showMasteredBy = true,
+}) {
   return IconButton(
     onPressed: () {
       controller.valueName.text = valueData.name;
       controller.masteredBy.text = valueData.masteredBy;
       controller.masteredByIdForValues.value = '';
       valuesDialog(
+        showMasteredBy: showMasteredBy,
         constraints: constraints,
         controller: controller,
         onPressed: controller.addingNewListValue.value
@@ -222,13 +238,15 @@ IconButton editSection(
 ElevatedButton newValueButton(
   BuildContext context,
   BoxConstraints constraints,
-  ListOfValuesController controller,
-) {
+  ListOfValuesController controller, {
+  bool showMasteredBy = true,
+}) {
   return ElevatedButton(
     onPressed: () {
       controller.valueName.clear();
       controller.masteredBy.clear();
       valuesDialog(
+        showMasteredBy: showMasteredBy,
         constraints: constraints,
         controller: controller,
         onPressed: controller.addingNewListValue.value

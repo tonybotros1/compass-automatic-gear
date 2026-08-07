@@ -16,8 +16,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/text_button.dart';
 
 // ======== testing urls for web ========
-String backendTestURI = 'http://192.168.1.14:8000';
-String webSocketURL = "ws://192.168.1.14:8000/ws"; // mobile : 192.168.43.58
+String backendTestURI = 'http://192.168.1.13:8000';
+String webSocketURL = "ws://192.168.1.13:8000/ws"; // mobile : 192.168.43.58
 
 // ======== testing urls for mobile ========
 // String backendTestURI = "http://10.0.2.2:8000";
@@ -1677,7 +1677,7 @@ Future<void> selectDateContext(
   final DateTime? picked = await showDatePicker(
     context: context,
     initialDate: DateTime.now(),
-    firstDate: DateTime(2000),
+    firstDate: DateTime(1900),
     lastDate: DateTime(2101),
   );
 

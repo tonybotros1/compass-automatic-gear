@@ -17,6 +17,7 @@ Widget valSectionInTheTable(
 
   String screenName, {
   bool isEnabled = true,
+  bool showMasteredBy = true,
 }) {
   return IconButton(
     tooltip: tooltip,
@@ -62,7 +63,12 @@ Widget valSectionInTheTable(
                           ],
                         ),
                       ),
-                      Expanded(child: valuesSection(context: Get.context!)),
+                      Expanded(
+                        child: valuesSection(
+                          context: Get.context!,
+                          showMasteredBy: showMasteredBy,
+                        ),
+                      ),
                     ],
                   ),
                 ),

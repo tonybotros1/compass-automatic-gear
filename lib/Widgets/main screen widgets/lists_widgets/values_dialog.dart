@@ -10,6 +10,7 @@ Future<dynamic> valuesDialog({
   required BoxConstraints constraints,
   required ListOfValuesController controller,
   required void Function()? onPressed,
+  bool showMasteredBy = true,
 }) {
   return Get.dialog(
     barrierDismissible: false,
@@ -50,7 +51,10 @@ Future<dynamic> valuesDialog({
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: addNewValueOrEdit(controller: controller),
+                child: addNewValueOrEdit(
+                  controller: controller,
+                  showMasteredBy: showMasteredBy,
+                ),
               ),
             ),
           ],
