@@ -444,6 +444,10 @@ class EmployeesController extends GetxController {
     return await helper.getAllListValues('LOCATIONS');
   }
 
+  Future<Map<String, dynamic>> getReportingManagers() async {
+    return await helper.getAllListValues('REPORTING_MANAGER');
+  }
+
   Future<Map<String, dynamic>> getAllPayrolls() async {
     return await helper.getPayrolls();
   }
@@ -542,50 +546,49 @@ class EmployeesController extends GetxController {
     return periods.reversed.toList();
   }
 
-  // this function is to get all list values by code for drop down menu
-  Future<Map<String, dynamic>> getAllReporingManagers(
-    String employeeId,
-    String employerId,
-  ) async {
-    try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      var accessToken = '${prefs.getString('accessToken')}';
-      final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
-      var url = Uri.parse('$backendUrl/employees/get_all_reporting_managers');
-      final response = await http.post(
-        url,
-        headers: {
-          "Authorization": "Bearer $accessToken",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "employer_id": employerId,
-          "current_employee_id": employeeId,
-        }),
-      );
-      if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        List<dynamic> jsonData = decoded["result"];
-        Map<String, dynamic> map = {for (var rep in jsonData) rep['_id']: rep};
-        return map;
-      } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
-        final refreshed = await helper.refreshAccessToken(refreshToken);
-        if (refreshed == RefreshResult.success) {
-          return await getAllReporingManagers(employeeId, employerId);
-        } else if (refreshed == RefreshResult.invalidToken) {
-          logout();
-        }
-        return {};
-      } else if (response.statusCode == 401) {
-        logout();
-        return {};
-      } else {
-        return {};
-      }
-    } catch (e) {
-      return {};
-    }
-  }
+  // Future<Map<String, dynamic>> getAllReporingManagers(
+  //   String employeeId,
+  //   String employerId,
+  // ) async {
+  //   try {
+  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //     var accessToken = '${prefs.getString('accessToken')}';
+  //     final refreshToken = '${await secureStorage.read(key: "refreshToken")}';
+  //     var url = Uri.parse('$backendUrl/employees/get_all_reporting_managers');
+  //     final response = await http.post(
+  //       url,
+  //       headers: {
+  //         "Authorization": "Bearer $accessToken",
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: jsonEncode({
+  //         "employer_id": employerId,
+  //         "current_employee_id": employeeId,
+  //       }),
+  //     );
+  //     if (response.statusCode == 200) {
+  //       final decoded = jsonDecode(response.body);
+  //       List<dynamic> jsonData = decoded["result"];
+  //       Map<String, dynamic> map = {for (var rep in jsonData) rep['_id']: rep};
+  //       return map;
+  //     } else if (response.statusCode == 401 && refreshToken.isNotEmpty) {
+  //       final refreshed = await helper.refreshAccessToken(refreshToken);
+  //       if (refreshed == RefreshResult.success) {
+  //         return await getAllReporingManagers(employeeId, employerId);
+  //       } else if (refreshed == RefreshResult.invalidToken) {
+  //         logout();
+  //       }
+  //       return {};
+  //     } else if (response.statusCode == 401) {
+  //       logout();
+  //       return {};
+  //     } else {
+  //       return {};
+  //     }
+  //   } catch (e) {
+  //     return {};
+  //   }
+  // }
 
   void _upsertEmployee(EmployeesModel employee, {bool insertAtStart = false}) {
     final id = employee.id;

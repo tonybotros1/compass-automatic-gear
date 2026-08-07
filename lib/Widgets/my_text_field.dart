@@ -515,13 +515,19 @@ class _BrowserEnglishSpellChecker implements SpellCheckService {
 
 typedef _SpellCheckFieldBuilder = Widget Function(
   SpellCheckConfiguration configuration,
+  TapRegionCallback? onTapOutside,
 );
 
 class _FocusedSpellCheck extends StatefulWidget {
-  const _FocusedSpellCheck({required this.enabled, required this.builder});
+  const _FocusedSpellCheck({
+    required this.enabled,
+    required this.builder,
+    this.onTapOutside,
+  });
 
   final bool enabled;
   final _SpellCheckFieldBuilder builder;
+  final TapRegionCallback? onTapOutside;
 
   @override
   State<_FocusedSpellCheck> createState() => _FocusedSpellCheckState();
@@ -531,6 +537,8 @@ class _FocusedSpellCheckState extends State<_FocusedSpellCheck> {
   final _fieldKey = GlobalKey();
   _FocusAwareSpellCheckService? _service;
   bool _hasFocus = false;
+  bool _outsideTapHandled = false;
+  bool _outsideTapResetScheduled = false;
   int _focusGeneration = 0;
 
   @override
@@ -565,10 +573,27 @@ class _FocusedSpellCheckState extends State<_FocusedSpellCheck> {
     _hasFocus = hasFocus;
     _service?.focused = hasFocus;
     final generation = ++_focusGeneration;
+    final outsideTapWasAlreadyHandled = _outsideTapHandled;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && generation == _focusGeneration) {
         _updateUnderline(hasFocus, generation);
+        if (!hasFocus &&
+            !outsideTapWasAlreadyHandled &&
+            !_outsideTapHandled) {
+          widget.onTapOutside?.call(const PointerDownEvent());
+        }
       }
+    });
+  }
+
+  void _handleTapOutside(PointerDownEvent event) {
+    _outsideTapHandled = true;
+    widget.onTapOutside?.call(event);
+    if (_outsideTapResetScheduled) return;
+    _outsideTapResetScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _outsideTapHandled = false;
+      _outsideTapResetScheduled = false;
     });
   }
 
@@ -642,7 +667,10 @@ class _FocusedSpellCheckState extends State<_FocusedSpellCheck> {
       onFocusChange: _handleFocusChange,
       child: KeyedSubtree(
         key: _fieldKey,
-        child: widget.builder(configuration),
+        child: widget.builder(
+          configuration,
+          widget.onTapOutside == null ? null : _handleTapOutside,
+        ),
       ),
     );
   }
@@ -756,12 +784,13 @@ Widget myTextFormFieldWithBorder({
                 keyboardType != TextInputType.emailAddress &&
                 keyboardType != TextInputType.url &&
                 keyboardType != TextInputType.phone,
-            builder: (spellCheckConfiguration) => TextFormField(
+            onTapOutside: onTapOutside,
+            builder: (spellCheckConfiguration, effectiveOnTapOutside) => TextFormField(
               spellCheckConfiguration: spellCheckConfiguration,
               initialValue: initialValue,
               canRequestFocus: true,
               readOnly: readOnly ?? false,
-              onTapOutside: onTapOutside,
+              onTapOutside: effectiveOnTapOutside,
               onEditingComplete: onEditingComplete,
               textInputAction: textInputAction,
               focusNode: focusNode,

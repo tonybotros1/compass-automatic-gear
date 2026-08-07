@@ -283,6 +283,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
             ],
           ),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: MenuWithValues(
@@ -291,25 +292,29 @@ class _EmploymentDetailsCard extends StatelessWidget {
                   dialogWidth: 600,
                   width: double.infinity,
                   controller: controller.reportingManager,
-                  displayKeys: const ['full_name'],
-                  displaySelectedKeys: const ['full_name'],
+                  displayKeys: const ['name'],
+                  displaySelectedKeys: const ['name'],
                   onOpen: () {
-                    return controller.getAllReporingManagers(
-                      controller.currentEmployeeId.value,
-                      controller.jobEmployerId.value,
-                    );
+                    return controller.getReportingManagers();
                   },
                   onDelete: () {
                     controller.reportingManager.clear();
                     controller.reportingManagerId.value = '';
                   },
                   onSelected: (value) {
-                    controller.reportingManager.text = value['full_name'];
+                    controller.reportingManager.text = value['name'];
                     controller.reportingManagerId.value = value['_id'];
                   },
                 ),
               ),
-              const IconButton(onPressed: null, icon: SizedBox()),
+              valSectionInTheTable(
+                controller.listOfValuesController,
+                constraints,
+                'REPORTING_MANAGER',
+                'New Reporting Manager',
+                'Reporting Managers',
+                showMasteredBy: false,
+              ),
             ],
           ),
           Row(
@@ -386,6 +391,9 @@ class _ContractDatesCard extends StatelessWidget {
                 onFieldSubmitted: (_) async {
                   normalizeDate(controller.hireDate.text, controller.hireDate);
                 },
+                onTapOutside: (_) async {
+                  normalizeDate(controller.hireDate.text, controller.hireDate);
+                },
               ),
               myTextFormFieldWithBorder(
                 labelText: 'End Date',
@@ -404,6 +412,9 @@ class _ContractDatesCard extends StatelessWidget {
                 ),
                 onFieldSubmitted: (_) async {
                   normalizeDate(controller.endDate.text, controller.endDate);
+                },
+                onTapOutside: (_) async {
+                  normalizeDate(controller.hireDate.text, controller.hireDate);
                 },
               ),
             ],

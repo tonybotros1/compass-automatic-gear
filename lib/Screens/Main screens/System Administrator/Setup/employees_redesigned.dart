@@ -2349,27 +2349,27 @@ class _EmploymentFields extends StatelessWidget {
             },
           ),
         ),
-        MenuWithValues(
-          labelText: 'Reporting Manager',
-          headerLqabel: 'Reporting Managers',
-          dialogWidth: 620,
-          width: double.infinity,
-          controller: controller.reportingManager,
-          displayKeys: const ['full_name'],
-          displaySelectedKeys: const ['full_name'],
-          onOpen: () => controller.getAllReporingManagers(
-            controller.currentEmployeeId.value,
-            controller.jobEmployerId.value,
-          ),
-          onDelete: () {
-            controller.reportingManager.clear();
-            controller.reportingManagerId.value = '';
-          },
-          onSelected: (value) {
-            controller.reportingManager.text = value['full_name'];
-            controller.reportingManagerId.value = value['_id'];
-          },
-        ),
+        // MenuWithValues(
+        //   labelText: 'Reporting Manager',
+        //   headerLqabel: 'Reporting Managers',
+        //   dialogWidth: 620,
+        //   width: double.infinity,
+        //   controller: controller.reportingManager,
+        //   displayKeys: const ['full_name'],
+        //   displaySelectedKeys: const ['full_name'],
+        //   onOpen: () => controller.getAllReporingManagers(
+        //     controller.currentEmployeeId.value,
+        //     controller.jobEmployerId.value,
+        //   ),
+        //   onDelete: () {
+        //     controller.reportingManager.clear();
+        //     controller.reportingManagerId.value = '';
+        //   },
+        //   onSelected: (value) {
+        //     controller.reportingManager.text = value['full_name'];
+        //     controller.reportingManagerId.value = value['_id'];
+        //   },
+        // ),
         _LookupWithAdd(
           tooltip: 'Manage payrolls',
           onAdd: () =>
