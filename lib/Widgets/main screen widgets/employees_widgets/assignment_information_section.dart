@@ -414,7 +414,7 @@ class _ContractDatesCard extends StatelessWidget {
                   normalizeDate(controller.endDate.text, controller.endDate);
                 },
                 onTapOutside: (_) async {
-                  normalizeDate(controller.hireDate.text, controller.hireDate);
+                  normalizeDate(controller.endDate.text, controller.endDate);
                 },
               ),
             ],
