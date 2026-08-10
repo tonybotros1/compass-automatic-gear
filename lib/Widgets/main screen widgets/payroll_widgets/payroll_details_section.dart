@@ -35,6 +35,7 @@ Container parollDetails(PayrollController controller) {
                     labelText: 'Payment Type',
                     headerLqabel: 'payment Types',
                     dialogWidth: 600,
+                    validate: false,
                     width: 600,
                     controller: controller.paymentType,
                     displayKeys: const ['type'],

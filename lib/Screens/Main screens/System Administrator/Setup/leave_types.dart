@@ -60,7 +60,7 @@ class LeaveTypes extends StatelessWidget {
                                   displayKeys: const ['name'],
                                   displaySelectedKeys: const ['name'],
                                   onOpen: () {
-                                    return controller.getAllPayrollElements();
+                                    return controller.getAllLeavePayrollElements();
                                   },
                                   onDelete: () {
                                     controller.basedElementFilterId.value = "";

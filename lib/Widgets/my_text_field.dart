@@ -602,8 +602,11 @@ class _FocusedSpellCheckState extends State<_FocusedSpellCheck> {
     if (editable == null) return;
 
     if (!show) {
-      editable.spellCheckResults = null;
-      editable.renderEditable.text = editable.buildTextSpan();
+      _scheduleUnderlineUpdate(
+        editable: editable,
+        generation: generation,
+        show: false,
+      );
       return;
     }
 
@@ -622,11 +625,35 @@ class _FocusedSpellCheckState extends State<_FocusedSpellCheck> {
       return;
     }
 
-    editable.spellCheckResults = SpellCheckResults(
-      text,
-      results ?? const <SuggestionSpan>[],
+    _scheduleUnderlineUpdate(
+      editable: editable,
+      generation: generation,
+      show: true,
+      text: text,
+      suggestions: results ?? const <SuggestionSpan>[],
     );
-    editable.renderEditable.text = editable.buildTextSpan();
+  }
+
+  void _scheduleUnderlineUpdate({
+    required EditableTextState editable,
+    required int generation,
+    required bool show,
+    String text = '',
+    List<SuggestionSpan> suggestions = const <SuggestionSpan>[],
+  }) {
+    WidgetsBinding.instance.scheduleFrameCallback((_) {
+      if (!mounted ||
+          !editable.mounted ||
+          generation != _focusGeneration ||
+          (show && (!_hasFocus || editable.textEditingValue.text != text))) {
+        return;
+      }
+
+      editable.spellCheckResults = show
+          ? SpellCheckResults(text, suggestions)
+          : null;
+      editable.renderEditable.text = editable.buildTextSpan();
+    });
   }
 
   EditableTextState? _findEditableTextState() {

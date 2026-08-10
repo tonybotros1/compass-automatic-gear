@@ -134,13 +134,13 @@ class PayrollController extends GetxController {
       alertMessage(context: Get.context!, content: 'Please enter payroll name');
       return false;
     }
-    if (paymentTypeId.value.trim().isEmpty) {
-      alertMessage(
-        context: Get.context!,
-        content: 'Please select payment type',
-      );
-      return false;
-    }
+    // if (paymentTypeId.value.trim().isEmpty) {
+    //   alertMessage(
+    //     context: Get.context!,
+    //     content: 'Please select payment type',
+    //   );
+    //   return false;
+    // }
     return true;
   }
 
