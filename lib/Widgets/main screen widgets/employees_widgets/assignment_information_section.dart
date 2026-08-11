@@ -4,6 +4,7 @@ import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_cont
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../consts.dart';
+import '../../form_focus_traversal.dart';
 import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 import '../add_new_values_button.dart';
@@ -149,7 +150,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
                 child: MenuWithValues(
                   labelText: 'Employer',
                   headerLqabel: 'Employers',
-                  dialogWidth: 600,
+                  dialogWidth: 900,
                   width: double.infinity,
                   controller: controller.jobEmployer,
                   displayKeys: const ['name'],
@@ -165,7 +166,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
                     controller.jobEmployer.text = value['name'];
                     controller.jobEmployerId.value = value['_id'];
                   },
-                ),
+                ).withFormFocusOrder(8),
               ),
               valSectionInTheTable(
                 controller.listOfValuesController,
@@ -200,7 +201,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
                     controller.jobDepartment.text = value['name'];
                     controller.jobDepartmentId.value = value['_id'];
                   },
-                ),
+                ).withFormFocusOrder(9),
               ),
               valSectionInTheTable(
                 controller.listOfValuesController,
@@ -235,7 +236,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
                     controller.jobTitle.text = value['name'];
                     controller.jobTitleId.value = value['_id'];
                   },
-                ),
+                ).withFormFocusOrder(10),
               ),
               valSectionInTheTable(
                 controller.listOfValuesController,
@@ -270,7 +271,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
                     controller.jobLocation.text = value['name'];
                     controller.jobLocationId.value = value['_id'];
                   },
-                ),
+                ).withFormFocusOrder(11),
               ),
               valSectionInTheTable(
                 controller.listOfValuesController,
@@ -305,7 +306,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
                     controller.reportingManager.text = value['name'];
                     controller.reportingManagerId.value = value['_id'];
                   },
-                ),
+                ).withFormFocusOrder(12),
               ),
               valSectionInTheTable(
                 controller.listOfValuesController,
@@ -339,7 +340,7 @@ class _EmploymentDetailsCard extends StatelessWidget {
                     controller.payroll.text = value['name'];
                     controller.payrollId.value = value['_id'];
                   },
-                ),
+                ).withFormFocusOrder(13),
               ),
               const IconButton(onPressed: null, icon: SizedBox()),
             ],
@@ -394,7 +395,7 @@ class _ContractDatesCard extends StatelessWidget {
                 onTapOutside: (_) async {
                   normalizeDate(controller.hireDate.text, controller.hireDate);
                 },
-              ),
+              ).withFormFocusOrder(14),
               myTextFormFieldWithBorder(
                 labelText: 'End Date',
                 width: double.infinity,
@@ -416,7 +417,7 @@ class _ContractDatesCard extends StatelessWidget {
                 onTapOutside: (_) async {
                   normalizeDate(controller.endDate.text, controller.endDate);
                 },
-              ),
+              ).withFormFocusOrder(15),
             ],
           ),
           _ServiceSummary(controller: controller, stacked: stackService),

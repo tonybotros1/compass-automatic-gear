@@ -289,6 +289,8 @@ Widget tableOfScreens({
     sortAscending: controller.isAscending.value,
     autoRowsToHeight: true,
     renderEmptyRowsInTheEnd: true,
+    smRatio: 0.67,
+    lmRatio: 3,
     columns: [
       const DataColumn2(label: Text(''), size: ColumnSize.S),
       DataColumn2(
@@ -300,7 +302,7 @@ Widget tableOfScreens({
         label: AutoSizedText(constraints: constraints, text: 'Type'),
       ),
       DataColumn2(
-        size: ColumnSize.M,
+        size: ColumnSize.L,
         label: AutoSizedText(constraints: constraints, text: 'Employer'),
       ),
       DataColumn2(

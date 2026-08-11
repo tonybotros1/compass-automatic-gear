@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
 import '../../../../consts.dart';
+import '../../../form_focus_traversal.dart';
 import '../../../menu_dialog.dart';
 import '../../../my_text_field.dart';
 
@@ -32,14 +33,14 @@ Widget addNewEmailOrEdit({
           onOpen: () {
             return controller.getTypeOfSocial();
           },
-        ),
+        ).withFormFocusOrder(1),
         myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.emailAddress,
           labelText: 'Email Address',
           keyboardType: TextInputType.emailAddress,
           validate: true,
-        ),
+        ).withFormFocusOrder(2),
         Obx(
           () => Container(
             decoration: BoxDecoration(
@@ -73,8 +74,8 @@ Widget addNewEmailOrEdit({
                   : null,
             ),
           ),
-        ),
+        ).withFormFocusOrder(3),
       ],
     ),
-  );
+  ).withFormFocusTraversal();
 }

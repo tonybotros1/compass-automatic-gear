@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
 import '../../../../consts.dart';
+import '../../../form_focus_traversal.dart';
 import '../../../menu_dialog.dart';
 
 Widget addNewLeaveOrEdit({
@@ -54,7 +55,7 @@ Widget addNewLeaveOrEdit({
             controller.employeeLeaveEndTime.clear();
             controller.employeeLeaveNumberOfDays.clear();
           },
-        ),
+        ).withFormFocusOrder(1),
         myTextFormFieldWithBorder(
           labelText: 'Start Date',
           controller: controller.employeeLeaveStartTime,
@@ -82,7 +83,7 @@ Widget addNewLeaveOrEdit({
               controller.employeeLeaveStartTime,
             );
           },
-        ),
+        ).withFormFocusOrder(2),
         myTextFormFieldWithBorder(
           labelText: 'End Date',
           controller: controller.employeeLeaveEndTime,
@@ -130,7 +131,7 @@ Widget addNewLeaveOrEdit({
             );
             await controller.onSelectLeaveEndDate();
           },
-        ),
+        ).withFormFocusOrder(3),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -184,8 +185,8 @@ Widget addNewLeaveOrEdit({
           labelText: 'Notes',
           maxLines: 7,
           controller: controller.employeeLeaveNote,
-        ),
+        ).withFormFocusOrder(4),
       ],
     ),
-  );
+  ).withFormFocusTraversal();
 }

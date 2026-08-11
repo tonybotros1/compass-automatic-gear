@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
+import '../../../form_focus_traversal.dart';
 import '../../../menu_dialog.dart';
 import '../../../my_text_field.dart';
 
@@ -18,7 +19,7 @@ Widget addNewAddressOrEdit({
           controller: controller.line,
           labelText: 'Line',
           validate: true,
-        ),
+        ).withFormFocusOrder(1),
         MenuWithValues(
           labelText: 'Country',
           headerLqabel: 'Countries',
@@ -43,7 +44,7 @@ Widget addNewAddressOrEdit({
           onOpen: () {
             return controller.getCountries();
           },
-        ),
+        ).withFormFocusOrder(2),
         MenuWithValues(
           labelText: 'City',
           headerLqabel: 'Cities',
@@ -63,8 +64,8 @@ Widget addNewAddressOrEdit({
           onOpen: () {
             return controller.getCitiesByCountryID(controller.countryId.value);
           },
-        ),
+        ).withFormFocusOrder(3),
       ],
     ),
-  );
+  ).withFormFocusTraversal();
 }

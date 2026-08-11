@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
 import '../../../../consts.dart';
+import '../../../form_focus_traversal.dart';
 import '../../../menu_dialog.dart';
 import '../../../my_text_field.dart';
 
@@ -31,21 +32,21 @@ Widget addNewLoanAndAdvancesOrEdit({
           onOpen: () {
             return controller.getAllLoanAndAdvancesTypes();
           },
-        ),
+        ).withFormFocusOrder(1),
         myTextFormFieldWithBorder(
           width: 200,
           obscureText: false,
           controller: controller.loanAndAdvancesTotalAmount,
           labelText: 'Total Amount',
           isDouble: true,
-        ),
+        ).withFormFocusOrder(2),
         myTextFormFieldWithBorder(
           width: 200,
           obscureText: false,
           controller: controller.loanAndAdvancesMonthlyInstallment,
           labelText: 'Monthly Installment',
           isDouble: true,
-        ),
+        ).withFormFocusOrder(3),
         myTextFormFieldWithBorder(
           labelText: 'Deduction Date',
           isDate: true,
@@ -72,14 +73,14 @@ Widget addNewLoanAndAdvancesOrEdit({
               controller.loanAndAdvancesDeductionDate,
             );
           },
-        ),
+        ).withFormFocusOrder(4),
 
         myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.loanAndAdvancesNote,
           labelText: 'Note',
-        ),
+        ).withFormFocusOrder(5),
       ],
     ),
-  );
+  ).withFormFocusTraversal();
 }

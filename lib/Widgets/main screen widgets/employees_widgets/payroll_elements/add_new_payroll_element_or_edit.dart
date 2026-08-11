@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
 import '../../../../consts.dart';
+import '../../../form_focus_traversal.dart';
 import '../../../menu_dialog.dart';
 import '../../../my_text_field.dart';
 
@@ -59,7 +60,7 @@ Widget addNewPayrollElementOrEdit({
                   onOpen: () {
                     return controller.getAllPayrollElements();
                   },
-                ),
+                ).withFormFocusOrder(1),
               ),
               GetX<EmployeesController>(
                 builder: (controller) {
@@ -71,7 +72,7 @@ Widget addNewPayrollElementOrEdit({
                 },
               ),
             ],
-          ),
+          ).withFormFocusOrder(2),
           Obx(
             () => myTextFormFieldWithBorder(
               width: 200,
@@ -81,7 +82,7 @@ Widget addNewPayrollElementOrEdit({
               isDouble: true,
               validate: controller.isIncomeTaxDeductionPayrollElement,
             ),
-          ),
+          ).withFormFocusOrder(3),
           myTextFormFieldWithBorder(
             labelText: 'Start Date',
             isDate: true,
@@ -109,7 +110,7 @@ Widget addNewPayrollElementOrEdit({
                 controller.employeePayrollElementStartDate,
               );
             },
-          ),
+          ).withFormFocusOrder(4),
           myTextFormFieldWithBorder(
             labelText: 'End Date',
             isDate: true,
@@ -137,7 +138,7 @@ Widget addNewPayrollElementOrEdit({
                 controller.employeePayrollElementEndDate,
               );
             },
-          ),
+          ).withFormFocusOrder(5),
           myTextFormFieldWithBorder(
             obscureText: false,
             controller: controller.employeePayrollElementNote,
@@ -148,5 +149,5 @@ Widget addNewPayrollElementOrEdit({
         ],
       ),
     ),
-  );
+  ).withFormFocusTraversal();
 }

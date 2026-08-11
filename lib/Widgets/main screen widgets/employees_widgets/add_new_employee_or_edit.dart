@@ -1,6 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_controller.dart';
 import 'package:flutter/material.dart';
 import '../../../consts.dart';
+import '../../form_focus_traversal.dart';
 import 'bank_accounts/bank_accounts_section.dart';
 import 'emails/email_section.dart';
 import 'health_card/health_card_section.dart';
@@ -248,5 +249,5 @@ Widget addNewEmployeeOrEdit({
         ),
       );
     },
-  );
+  ).withFormFocusTraversal();
 }

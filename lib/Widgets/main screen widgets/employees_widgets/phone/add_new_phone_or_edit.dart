@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
+import '../../../form_focus_traversal.dart';
 import '../../../menu_dialog.dart';
 import '../../../my_text_field.dart';
 
@@ -30,14 +31,14 @@ Widget addNewPhoneOrEdit({
           onOpen: () {
             return controller.getPhoneTypes();
           },
-        ),
+        ).withFormFocusOrder(1),
         myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.phoneNumber,
           labelText: 'Phone',
           validate: true,
-        ),
+        ).withFormFocusOrder(2),
       ],
     ),
-  );
+  ).withFormFocusTraversal();
 }

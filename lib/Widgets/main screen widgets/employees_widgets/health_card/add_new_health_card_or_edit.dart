@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
 import '../../../../consts.dart';
+import '../../../form_focus_traversal.dart';
 import '../../../menu_dialog.dart';
 import '../../../my_text_field.dart';
 
@@ -32,7 +33,7 @@ Widget addNewHealthCardOrEdit({
           onOpen: () {
             return controller.getHealthCardTypes();
           },
-        ),
+        ).withFormFocusOrder(1),
         MenuWithValues(
           labelText: 'Health Card Holder',
           headerLqabel: 'Health Card Holders',
@@ -52,14 +53,14 @@ Widget addNewHealthCardOrEdit({
           onOpen: () {
             return controller.getAllHealthCardHolders();
           },
-        ),
+        ).withFormFocusOrder(2),
         myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.healthCardNumber,
           labelText: 'Card Number',
           validate: true,
           isEnabled: canEdit,
-        ),
+        ).withFormFocusOrder(3),
         MenuWithValues(
           labelText: 'Insurance Company',
           headerLqabel: 'Insurance Companies',
@@ -78,7 +79,7 @@ Widget addNewHealthCardOrEdit({
           onOpen: () {
             return controller.getInsuranceCompanies();
           },
-        ),
+        ).withFormFocusOrder(4),
         myTextFormFieldWithBorder(
           labelText: 'Issue Date',
           isDate: true,
@@ -105,7 +106,7 @@ Widget addNewHealthCardOrEdit({
               controller.healthCardIssueDate,
             );
           },
-        ),
+        ).withFormFocusOrder(5),
         myTextFormFieldWithBorder(
           labelText: 'Expiry Date',
           isDate: true,
@@ -132,7 +133,7 @@ Widget addNewHealthCardOrEdit({
               controller.healthCardExpiryDate,
             );
           },
-        ),
+        ).withFormFocusOrder(6),
         myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.healthCardCost,
@@ -141,7 +142,7 @@ Widget addNewHealthCardOrEdit({
           isDouble: true,
           width: 200,
           isEnabled: canEdit,
-        ),
+        ).withFormFocusOrder(7),
         myTextFormFieldWithBorder(
           obscureText: false,
           controller: controller.healthCardEmployeeContribution,
@@ -150,8 +151,8 @@ Widget addNewHealthCardOrEdit({
           isDouble: true,
           width: 200,
           isEnabled: canEdit,
-        ),
+        ).withFormFocusOrder(8),
       ],
     ),
-  );
+  ).withFormFocusTraversal();
 }

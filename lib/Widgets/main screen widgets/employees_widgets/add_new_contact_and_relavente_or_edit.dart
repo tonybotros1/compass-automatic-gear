@@ -1,9 +1,11 @@
 import 'package:datahubai/Widgets/my_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:get/get.dart';
 import '../../../Controllers/Main screen controllers/employees_controller.dart';
 import '../../../consts.dart';
+import '../../form_focus_traversal.dart';
 import '../../menu_dialog.dart';
 
 Widget addNewContactAndRelativeOrEdit({
@@ -17,7 +19,7 @@ Widget addNewContactAndRelativeOrEdit({
         myTextFormFieldWithBorder(
           labelText: 'Full Name',
           controller: controller.contactAndRelativeFullName,
-        ),
+        ).withFormFocusOrder(1),
         Row(
           spacing: 15,
           children: [
@@ -42,13 +44,13 @@ Widget addNewContactAndRelativeOrEdit({
                   controller.contactAndRelativeRelationship.text =
                       value['name'];
                 },
-              ),
+              ).withFormFocusOrder(2),
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
                 labelText: 'Phone Number',
                 controller: controller.contactAndRelativePhoneNumber,
-              ),
+              ).withFormFocusOrder(3),
             ),
           ],
         ),
@@ -74,7 +76,7 @@ Widget addNewContactAndRelativeOrEdit({
                   controller.contactAndRelativeGenderId.value = value['_id'];
                   controller.contactAndRelativeGender.text = value['name'];
                 },
-              ),
+              ).withFormFocusOrder(4),
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
@@ -97,7 +99,7 @@ Widget addNewContactAndRelativeOrEdit({
                     controller.contactAndRelativeDateOfBirth,
                   );
                 },
-              ),
+              ).withFormFocusOrder(5),
             ),
           ],
         ),
@@ -124,13 +126,13 @@ Widget addNewContactAndRelativeOrEdit({
                       value['_id'];
                   controller.contactAndRelativeNationality.text = value['name'];
                 },
-              ),
+              ).withFormFocusOrder(6),
             ),
             Expanded(
               child: myTextFormFieldWithBorder(
                 labelText: 'Email Address',
                 controller: controller.contactAndRelativeEmailAddress,
-              ),
+              ).withFormFocusOrder(7),
             ),
           ],
         ),
@@ -171,21 +173,39 @@ Widget addNewContactAndRelativeOrEdit({
               ),
               GetX<EmployeesController>(
                 builder: (controller) {
-                  return FlutterSwitch(
-                    width: 70.0,
-                    height: 40.0,
-                    valueFontSize: 25.0,
-                    toggleSize: 25.0,
-                    value: controller.isThisContactAnEmergencyConact.value,
-                    borderRadius: 30.0,
-                    padding: 8.0,
-                    showOnOff: false,
-                    onToggle: (val) {
-                      controller.isThisContactAnEmergencyConact.value = val;
+                  void toggleEmergencyContact() {
+                    controller.isThisContactAnEmergencyConact.toggle();
+                  }
+
+                  return FocusableActionDetector(
+                    shortcuts: const <ShortcutActivator, Intent>{
+                      SingleActivator(LogicalKeyboardKey.space):
+                          ActivateIntent(),
+                      SingleActivator(LogicalKeyboardKey.enter):
+                          ActivateIntent(),
                     },
+                    actions: <Type, Action<Intent>>{
+                      ActivateIntent: CallbackAction<ActivateIntent>(
+                        onInvoke: (_) {
+                          toggleEmergencyContact();
+                          return null;
+                        },
+                      ),
+                    },
+                    child: FlutterSwitch(
+                      width: 70.0,
+                      height: 40.0,
+                      valueFontSize: 25.0,
+                      toggleSize: 25.0,
+                      value: controller.isThisContactAnEmergencyConact.value,
+                      borderRadius: 30.0,
+                      padding: 8.0,
+                      showOnOff: false,
+                      onToggle: (_) => toggleEmergencyContact(),
+                    ),
                   );
                 },
-              ),
+              ).withFormFocusOrder(8),
             ],
           ),
         ),
@@ -193,8 +213,8 @@ Widget addNewContactAndRelativeOrEdit({
           labelText: 'Notes',
           maxLines: 9,
           controller: controller.contactAndRelativeNotes,
-        ),
+        ).withFormFocusOrder(9),
       ],
     ),
-  );
+  ).withFormFocusTraversal();
 }

@@ -1,6 +1,7 @@
 import 'package:datahubai/Controllers/Main%20screen%20controllers/employees_controller.dart';
 import 'package:flutter/material.dart';
 import '../../../consts.dart';
+import '../../form_focus_traversal.dart';
 import '../../menu_dialog.dart';
 import '../../my_text_field.dart';
 import 'image_section.dart';
@@ -28,7 +29,7 @@ Container personalInformation(
                 labelText: 'Full Name',
                 controller: controller.employeeName,
                 width: 620,
-              ),
+              ).withFormFocusOrder(1),
               Row(
                 spacing: 10,
                 children: [
@@ -51,12 +52,12 @@ Container personalInformation(
                       controller.employeeCountryOfBirth.text = value['name'];
                       controller.employeeCountryOfBirthId.value = value['_id'];
                     },
-                  ),
+                  ).withFormFocusOrder(2),
                   myTextFormFieldWithBorder(
                     labelText: 'Place of Birth',
                     controller: controller.employeePlaceOfBirth,
                     width: 200,
-                  ),
+                  ).withFormFocusOrder(3),
                   myTextFormFieldWithBorder(
                     labelText: 'Date Of Birth',
                     isDate: true,
@@ -83,7 +84,7 @@ Container personalInformation(
                         controller.employeeDateOfBirth,
                       );
                     },
-                  ),
+                  ).withFormFocusOrder(4),
                 ],
               ),
               Row(
@@ -108,7 +109,7 @@ Container personalInformation(
                       controller.employeeGender.text = value['name'];
                       controller.employeeGenderId.value = value['_id'];
                     },
-                  ),
+                  ).withFormFocusOrder(5),
                   MenuWithValues(
                     labelText: 'Martial Status',
                     headerLqabel: 'Martial Status',
@@ -128,7 +129,7 @@ Container personalInformation(
                       controller.employeeMaritalStatus.text = value['name'];
                       controller.employeeMaritalStatusId.value = value['_id'];
                     },
-                  ),
+                  ).withFormFocusOrder(6),
                   MenuWithValues(
                     labelText: 'Legislation *',
                     headerLqabel: 'Legilations',
@@ -148,7 +149,7 @@ Container personalInformation(
                       controller.employeeLegislation.text = value['name'];
                       controller.employeeLegislationId.value = value['_id'];
                     },
-                  ),
+                  ).withFormFocusOrder(7),
                 ],
               ),
             ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../Controllers/Main screen controllers/employees_controller.dart';
 import '../../../../consts.dart';
+import '../../../form_focus_traversal.dart';
 import '../../../menu_dialog.dart';
 import '../../../my_text_field.dart';
 
@@ -32,7 +33,7 @@ Widget addNewNationalityOrEdit({
           onOpen: () {
             return controller.getNationalities();
           },
-        ),
+        ).withFormFocusOrder(1),
         myTextFormFieldWithBorder(
           labelText: 'Start Date',
           isDate: true,
@@ -56,7 +57,7 @@ Widget addNewNationalityOrEdit({
               controller.nationalityStartDate,
             );
           },
-        ),
+        ).withFormFocusOrder(2),
         myTextFormFieldWithBorder(
           labelText: 'End Date',
           isDate: true,
@@ -80,8 +81,8 @@ Widget addNewNationalityOrEdit({
               controller.nationalityEndDate,
             );
           },
-        ),
+        ).withFormFocusOrder(3),
       ],
     ),
-  );
+  ).withFormFocusTraversal();
 }
