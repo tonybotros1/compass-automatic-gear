@@ -210,6 +210,7 @@ ElevatedButton newButton(
       legislationDialog(
         constraints: constraints,
         controller: controller,
+        isEditing: false,
         onPressed: controller.addingNewValue.value
             ? null
             : () async {
@@ -263,6 +264,7 @@ IconButton editSection(
       legislationDialog(
         constraints: constraints,
         controller: controller,
+        isEditing: true,
         onPressed: controller.addingNewValue.value
             ? null
             : () async {
