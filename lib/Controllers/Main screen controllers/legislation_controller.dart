@@ -34,6 +34,46 @@ class IncomeTaxBracketController {
   }
 }
 
+class SocialSecurityCeilingController {
+  final TextEditingController employeePercentage = TextEditingController();
+  final TextEditingController employerPercentage = TextEditingController();
+  final TextEditingController ceiling = TextEditingController();
+  final TextEditingController startDate = TextEditingController();
+  final TextEditingController endDate = TextEditingController();
+
+  SocialSecurityCeilingController({
+    SocialSecurityCeilingModel? line,
+    double? initialEmployeePercentage,
+    double? initialEmployerPercentage,
+    double? initialCeiling,
+    DateTime? initialStartDate,
+    DateTime? initialEndDate,
+  }) {
+    final employeeValue = line?.employeePercentage ?? initialEmployeePercentage;
+    final employerValue = line?.employerPercentage ?? initialEmployerPercentage;
+    final ceilingValue = line?.ceiling ?? initialCeiling;
+    employeePercentage.text = employeeValue == null
+        ? ''
+        : employeeValue.toString();
+    employerPercentage.text = employerValue == null
+        ? ''
+        : employerValue.toString();
+    ceiling.text = ceilingValue == null ? '' : ceilingValue.toString();
+    final startValue = line?.startDate ?? initialStartDate;
+    final endValue = line?.endDate ?? initialEndDate;
+    startDate.text = startValue == null ? '' : textToDate(startValue);
+    endDate.text = endValue == null ? '' : textToDate(endValue);
+  }
+
+  void dispose() {
+    employeePercentage.dispose();
+    employerPercentage.dispose();
+    ceiling.dispose();
+    startDate.dispose();
+    endDate.dispose();
+  }
+}
+
 class LegislationController extends GetxController {
   final GlobalKey<FormState> legislationFormKey = GlobalKey<FormState>();
   RxBool isScreenLoding = RxBool(false);
@@ -68,7 +108,12 @@ class LegislationController extends GetxController {
   TextEditingController socialSecurityEmployee = TextEditingController();
   TextEditingController socialSecurityEmployer = TextEditingController();
   TextEditingController socialSecurityCeiling = TextEditingController();
+  TextEditingController socialSecurityCeilingStartDate =
+      TextEditingController();
+  TextEditingController socialSecurityCeilingEndDate = TextEditingController();
 
+  RxList<SocialSecurityCeilingController> socialSecurityCeilings =
+      RxList<SocialSecurityCeilingController>([]);
   // gratiuty accrual
   TextEditingController gratuityFirst5Years = TextEditingController();
   TextEditingController gratuityAfter5Years = TextEditingController();
@@ -117,6 +162,11 @@ class LegislationController extends GetxController {
     socialSecurityEmployee.dispose();
     socialSecurityEmployer.dispose();
     socialSecurityCeiling.dispose();
+    socialSecurityCeilingStartDate.dispose();
+    socialSecurityCeilingEndDate.dispose();
+    for (final line in socialSecurityCeilings) {
+      line.dispose();
+    }
     gratuityFirst5Years.dispose();
     gratuityAfter5Years.dispose();
     serviceTax.dispose();
@@ -210,11 +260,47 @@ class LegislationController extends GetxController {
     return double.tryParse(value) ?? 0;
   }
 
+  DateTime? _dateValue(TextEditingController controller) {
+    final value = convertDateToIson(controller.text.trim());
+    return value == null ? null : DateTime.tryParse(value);
+  }
+
   bool _validateLegislation() {
     if (!(legislationFormKey.currentState?.validate() ?? false)) return false;
     if (name.text.trim().isEmpty) {
       _showError('Please enter legislation name');
       return false;
+    }
+    if (socialSecurityCeilings.isEmpty) {
+      _showError('Add at least one social security ceiling line');
+      return false;
+    }
+    for (var index = 0; index < socialSecurityCeilings.length; index++) {
+      final line = socialSecurityCeilings[index];
+      final startDate = _dateValue(line.startDate);
+      final endDate = _dateValue(line.endDate);
+      if (line.employeePercentage.text.trim().isEmpty) {
+        _showError('Ceiling line ${index + 1} needs an employee percentage');
+        return false;
+      }
+      if (line.employerPercentage.text.trim().isEmpty) {
+        _showError('Ceiling line ${index + 1} needs an employer percentage');
+        return false;
+      }
+      if (_doubleValue(line.ceiling) <= 0) {
+        _showError('Ceiling line ${index + 1} must be greater than zero');
+        return false;
+      }
+      if (startDate == null) {
+        _showError('Ceiling line ${index + 1} needs a start date');
+        return false;
+      }
+      if (endDate != null && endDate.isBefore(startDate)) {
+        _showError(
+          'Ceiling line ${index + 1} end date cannot be before its start date',
+        );
+        return false;
+      }
     }
     return true;
   }
@@ -257,7 +343,40 @@ class LegislationController extends GetxController {
         .toList();
   }
 
+  List<Map<String, dynamic>> _socialSecurityCeilingsBody() {
+    return socialSecurityCeilings
+        .map(
+          (line) => {
+            'employee_percentage': _doubleValue(line.employeePercentage),
+            'employer_percentage': _doubleValue(line.employerPercentage),
+            'ceiling': _doubleValue(line.ceiling),
+            'start_date': convertDateToIson(line.startDate.text),
+            'end_date': convertDateToIson(line.endDate.text),
+          },
+        )
+        .toList();
+  }
+
+  List<SocialSecurityCeilingModel> _currentSocialSecurityCeilings() {
+    return socialSecurityCeilings
+        .map(
+          (line) => SocialSecurityCeilingModel(
+            employeePercentage: _doubleValue(line.employeePercentage),
+            employerPercentage: _doubleValue(line.employerPercentage),
+            ceiling: _doubleValue(line.ceiling),
+            startDate: _dateValue(line.startDate),
+            endDate: _dateValue(line.endDate),
+          ),
+        )
+        .toList();
+  }
+
+  SocialSecurityCeilingController? get _firstSocialSecurityCeiling {
+    return socialSecurityCeilings.isEmpty ? null : socialSecurityCeilings.first;
+  }
+
   Map<String, dynamic> _legislationBody() {
+    final firstCeiling = _firstSocialSecurityCeiling;
     return {
       "name": name.text.trim(),
       "weekend": selectedDays.toList(),
@@ -281,13 +400,22 @@ class LegislationController extends GetxController {
       "number_of_working_hours_for_overtime_holidays": _zeroIfEmpty(
         numberOfWorkingHoursForOvertimeHolidays,
       ),
-      "social_security_employee_percentage": _zeroIfEmpty(
-        socialSecurityEmployee,
+      "social_security_employee_percentage": firstCeiling == null
+          ? _zeroIfEmpty(socialSecurityEmployee)
+          : _zeroIfEmpty(firstCeiling.employeePercentage),
+      "social_security_employer_percentage": firstCeiling == null
+          ? _zeroIfEmpty(socialSecurityEmployer)
+          : _zeroIfEmpty(firstCeiling.employerPercentage),
+      "social_security_ceiling": firstCeiling == null
+          ? _zeroIfEmpty(socialSecurityCeiling)
+          : _zeroIfEmpty(firstCeiling.ceiling),
+      "social_security_ceiling_start_date": convertDateToIson(
+        firstCeiling?.startDate.text ?? socialSecurityCeilingStartDate.text,
       ),
-      "social_security_employer_percentage": _zeroIfEmpty(
-        socialSecurityEmployer,
+      "social_security_ceiling_end_date": convertDateToIson(
+        firstCeiling?.endDate.text ?? socialSecurityCeilingEndDate.text,
       ),
-      "social_security_ceiling": _zeroIfEmpty(socialSecurityCeiling),
+      "social_security_ceilings": _socialSecurityCeilingsBody(),
       "service_tax_percentage": _zeroIfEmpty(serviceTax),
       "income_tax_percentage": _zeroIfEmpty(incomeTaxPercentage),
       "income_tax_ceiling": _zeroIfEmpty(incomeTaxCeiling),
@@ -298,6 +426,7 @@ class LegislationController extends GetxController {
   }
 
   LegislationModel _currentLegislation({String? id}) {
+    final firstCeiling = _firstSocialSecurityCeiling;
     return LegislationModel(
       id: id,
       name: name.text.trim(),
@@ -320,9 +449,22 @@ class LegislationController extends GetxController {
       numberOfWorkingHoursForOvertimeHolidays: _doubleValue(
         numberOfWorkingHoursForOvertimeHolidays,
       ),
-      socialSecurityEmployee: _doubleValue(socialSecurityEmployee),
-      socialSecurityEmployer: _doubleValue(socialSecurityEmployer),
-      socialSecurityCeiling: _doubleValue(socialSecurityCeiling),
+      socialSecurityEmployee: firstCeiling == null
+          ? _doubleValue(socialSecurityEmployee)
+          : _doubleValue(firstCeiling.employeePercentage),
+      socialSecurityEmployer: firstCeiling == null
+          ? _doubleValue(socialSecurityEmployer)
+          : _doubleValue(firstCeiling.employerPercentage),
+      socialSecurityCeilingStartDate: firstCeiling == null
+          ? _dateValue(socialSecurityCeilingStartDate)
+          : _dateValue(firstCeiling.startDate),
+      socialSecurityCeilingEndDate: firstCeiling == null
+          ? _dateValue(socialSecurityCeilingEndDate)
+          : _dateValue(firstCeiling.endDate),
+      socialSecurityCeiling: firstCeiling == null
+          ? _doubleValue(socialSecurityCeiling)
+          : _doubleValue(firstCeiling.ceiling),
+      socialSecurityCeilings: _currentSocialSecurityCeilings(),
       serviceTaxPercentage: _doubleValue(serviceTax),
       incomeTaxPercentage: _doubleValue(incomeTaxPercentage),
       incomeTaxCeiling: _doubleValue(incomeTaxCeiling),
@@ -538,6 +680,42 @@ class LegislationController extends GetxController {
     incomeTaxBrackets.clear();
   }
 
+  void addSocialSecurityCeiling({
+    SocialSecurityCeilingModel? line,
+    double? initialEmployeePercentage,
+    double? initialEmployerPercentage,
+    double? initialCeiling,
+    DateTime? initialStartDate,
+    DateTime? initialEndDate,
+  }) {
+    socialSecurityCeilings.add(
+      SocialSecurityCeilingController(
+        line: line,
+        initialEmployeePercentage: initialEmployeePercentage,
+        initialEmployerPercentage: initialEmployerPercentage,
+        initialCeiling: initialCeiling,
+        initialStartDate: initialStartDate,
+        initialEndDate: initialEndDate,
+      ),
+    );
+  }
+
+  void removeSocialSecurityCeiling(int index) {
+    if (index < 0 || index >= socialSecurityCeilings.length) return;
+    final line = socialSecurityCeilings.removeAt(index);
+    line.dispose();
+    if (socialSecurityCeilings.isEmpty) {
+      addSocialSecurityCeiling();
+    }
+  }
+
+  void _clearSocialSecurityCeilings() {
+    for (final line in socialSecurityCeilings) {
+      line.dispose();
+    }
+    socialSecurityCeilings.clear();
+  }
+
   void loadValues(LegislationModel data) {
     name.text = data.name ?? '';
     numberOfPaidDays.text = (data.numberOfPaidDaysForSickLEave ?? 0).toString();
@@ -558,6 +736,33 @@ class LegislationController extends GetxController {
     socialSecurityEmployee.text = (data.socialSecurityEmployee ?? 0).toString();
     socialSecurityEmployer.text = (data.socialSecurityEmployer ?? 0).toString();
     socialSecurityCeiling.text = (data.socialSecurityCeiling ?? 0).toString();
+    socialSecurityCeilingStartDate.text =
+        data.socialSecurityCeilingStartDate == null
+        ? ''
+        : textToDate(data.socialSecurityCeilingStartDate);
+    socialSecurityCeilingEndDate.text =
+        data.socialSecurityCeilingEndDate == null
+        ? ''
+        : textToDate(data.socialSecurityCeilingEndDate);
+    _clearSocialSecurityCeilings();
+    final savedCeilings = data.socialSecurityCeilings ?? [];
+    if (savedCeilings.isNotEmpty) {
+      for (final line in savedCeilings) {
+        addSocialSecurityCeiling(
+          line: line,
+          initialEmployeePercentage: data.socialSecurityEmployee,
+          initialEmployerPercentage: data.socialSecurityEmployer,
+        );
+      }
+    } else {
+      addSocialSecurityCeiling(
+        initialEmployeePercentage: data.socialSecurityEmployee,
+        initialEmployerPercentage: data.socialSecurityEmployer,
+        initialCeiling: data.socialSecurityCeiling,
+        initialStartDate: data.socialSecurityCeilingStartDate,
+        initialEndDate: data.socialSecurityCeilingEndDate,
+      );
+    }
     serviceTax.text = (data.serviceTaxPercentage ?? 0).toString();
     incomeTaxPercentage.text = (data.incomeTaxPercentage ?? 0).toString();
     incomeTaxCeiling.text = (data.incomeTaxCeiling ?? 0).toString();
@@ -588,6 +793,8 @@ class LegislationController extends GetxController {
     socialSecurityEmployee.clear();
     socialSecurityEmployer.clear();
     socialSecurityCeiling.clear();
+    socialSecurityCeilingStartDate.clear();
+    socialSecurityCeilingEndDate.clear();
     gratuityAfter5Years.clear();
     gratuityFirst5Years.clear();
     serviceTax.clear();
@@ -595,5 +802,7 @@ class LegislationController extends GetxController {
     incomeTaxCeiling.clear();
     _clearIncomeTaxBrackets();
     addIncomeTaxBracket();
+    _clearSocialSecurityCeilings();
+    addSocialSecurityCeiling();
   }
 }

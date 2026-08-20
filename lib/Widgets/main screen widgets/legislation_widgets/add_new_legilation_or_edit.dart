@@ -105,32 +105,6 @@ Widget addNewLegistlationOrEdit({
                         ),
                       ),
                       _PolicyCard(
-                        icon: Icons.percent_rounded,
-                        title: 'Social Security',
-                        description: 'Employee and employer contribution rates',
-                        child: _ResponsiveFields(
-                          children: [
-                            _PolicyField(
-                              label: 'Employee percentage',
-                              controller: controller.socialSecurityEmployee,
-                              type: _PolicyFieldType.decimal,
-                              suffix: '%',
-                            ),
-                            _PolicyField(
-                              label: 'Employer percentage',
-                              controller: controller.socialSecurityEmployer,
-                              type: _PolicyFieldType.decimal,
-                              suffix: '%',
-                            ),
-                            _PolicyField(
-                              label: 'Contribution ceiling',
-                              controller: controller.socialSecurityCeiling,
-                              type: _PolicyFieldType.decimal,
-                            ),
-                          ],
-                        ),
-                      ),
-                      _PolicyCard(
                         icon: Icons.workspace_premium_outlined,
                         title: 'Gratuity',
                         description: 'End-of-service days per completed year',
@@ -166,6 +140,8 @@ Widget addNewLegistlationOrEdit({
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  _SocialSecurityCard(controller: controller),
                   const SizedBox(height: 16),
                   _IncomeTaxCard(controller: controller),
                   const SizedBox(height: 22),
@@ -586,6 +562,209 @@ class _ResponsiveFields extends StatelessWidget {
   }
 }
 
+class _SocialSecurityCard extends StatelessWidget {
+  const _SocialSecurityCard({required this.controller});
+
+  final LegislationController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return _PolicyCard(
+      icon: Icons.percent_rounded,
+      title: 'Social Security',
+      description: 'Dated ceiling lines with their employee and employer rates',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LayoutBuilder(
+            builder: (context, headingConstraints) {
+              final compact = headingConstraints.maxWidth < 560;
+              final heading = const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ceiling lines',
+                    style: TextStyle(
+                      color: Color(0xff203a41),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Add a separate effective period for every ceiling amount.',
+                    style: TextStyle(color: Color(0xff73858a), fontSize: 11),
+                  ),
+                ],
+              );
+              final addButton = OutlinedButton.icon(
+                onPressed: () => controller.addSocialSecurityCeiling(),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: mainColor,
+                  minimumSize: const Size(140, 40),
+                  side: const BorderSide(color: Color(0xffc8d7db)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                icon: const Icon(Icons.add_rounded, size: 18),
+                label: const Text(
+                  'Add new line',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+              );
+
+              if (compact) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [heading, const SizedBox(height: 12), addButton],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: heading),
+                  const SizedBox(width: 16),
+                  addButton,
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 14),
+          Obx(
+            () => Column(
+              children: controller.socialSecurityCeilings.asMap().entries.map((
+                entry,
+              ) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: _SocialSecurityCeilingRow(
+                    index: entry.key,
+                    line: entry.value,
+                    onDelete: () =>
+                        controller.removeSocialSecurityCeiling(entry.key),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SocialSecurityCeilingRow extends StatelessWidget {
+  const _SocialSecurityCeilingRow({
+    required this.index,
+    required this.line,
+    required this.onDelete,
+  });
+
+  final int index;
+  final SocialSecurityCeilingController line;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: index.isEven ? const Color(0xfff7fafb) : const Color(0xfffbfcfc),
+        border: Border.all(color: const Color(0xffdce6e8)),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: LayoutBuilder(
+        builder: (context, rowConstraints) {
+          final fields = <Widget>[
+            _PolicyField(
+              label: 'Employee percentage',
+              controller: line.employeePercentage,
+              type: _PolicyFieldType.decimal,
+              suffix: '%',
+            ),
+            _PolicyField(
+              label: 'Employer percentage',
+              controller: line.employerPercentage,
+              type: _PolicyFieldType.decimal,
+              suffix: '%',
+            ),
+            _PolicyField(
+              label: 'Ceiling',
+              controller: line.ceiling,
+              type: _PolicyFieldType.decimal,
+            ),
+            _PolicyDateField(label: 'Start date', controller: line.startDate),
+            _PolicyDateField(
+              label: 'End date',
+              controller: line.endDate,
+              hintText: 'No end date',
+            ),
+          ];
+          final deleteButton = IconButton(
+            onPressed: onDelete,
+            tooltip: 'Remove ceiling line',
+            style: IconButton.styleFrom(
+              foregroundColor: const Color(0xff7f9095),
+              hoverColor: const Color(0xffffebee),
+            ),
+            icon: const Icon(Icons.delete_outline_rounded, size: 20),
+          );
+          final lineNumber = Container(
+            width: 28,
+            height: 28,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: mainColor.withValues(alpha: 0.08),
+              border: Border.all(color: mainColor.withValues(alpha: 0.18)),
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: Text(
+              '${index + 1}',
+              style: TextStyle(
+                color: mainColor,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          );
+
+          if (rowConstraints.maxWidth < 1050) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(children: [lineNumber, const Spacer(), deleteButton]),
+                const SizedBox(height: 8),
+                _ResponsiveFields(children: fields),
+              ],
+            );
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 7),
+                child: lineNumber,
+              ),
+              const SizedBox(width: 12),
+              for (
+                var fieldIndex = 0;
+                fieldIndex < fields.length;
+                fieldIndex++
+              ) ...[
+                Expanded(child: fields[fieldIndex]),
+                if (fieldIndex < fields.length - 1) const SizedBox(width: 12),
+              ],
+              const SizedBox(width: 6),
+              deleteButton,
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _IncomeTaxCard extends StatelessWidget {
   const _IncomeTaxCard({required this.controller});
 
@@ -771,6 +950,96 @@ class _TaxBracketRow extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _PolicyDateField extends StatelessWidget {
+  const _PolicyDateField({
+    required this.label,
+    required this.controller,
+    this.hintText = 'dd-mm-yyyy',
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final String hintText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Color(0xff536568),
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 7),
+        ValueListenableBuilder<TextEditingValue>(
+          valueListenable: controller,
+          builder: (context, value, child) {
+            return TextFormField(
+              controller: controller,
+              readOnly: true,
+              onTap: () => selectDateContext(context, controller),
+              style: const TextStyle(
+                color: Color(0xff183138),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              decoration: InputDecoration(
+                hintText: hintText,
+                hintStyle: const TextStyle(
+                  color: Color(0xff9aa7aa),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w400,
+                ),
+                suffixIcon: value.text.isEmpty
+                    ? const Icon(
+                        Icons.calendar_today_outlined,
+                        size: 16,
+                        color: Color(0xff718388),
+                      )
+                    : IconButton(
+                        tooltip: 'Clear date',
+                        onPressed: controller.clear,
+                        icon: const Icon(Icons.close_rounded, size: 17),
+                      ),
+                filled: true,
+                fillColor: const Color(0xfffbfcfc),
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 13,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7),
+                  borderSide: const BorderSide(color: Color(0xffc7d5d8)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7),
+                  borderSide: BorderSide(color: mainColor, width: 1.4),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7),
+                  borderSide: const BorderSide(color: Color(0xffc74b50)),
+                ),
+                focusedErrorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7),
+                  borderSide: const BorderSide(
+                    color: Color(0xffc74b50),
+                    width: 1.4,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

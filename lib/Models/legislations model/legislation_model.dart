@@ -19,6 +19,46 @@ class IncomeTaxBracketModel {
   }
 }
 
+class SocialSecurityCeilingModel {
+  final double? employeePercentage;
+  final double? employerPercentage;
+  final double ceiling;
+  final DateTime? startDate;
+  final DateTime? endDate;
+
+  SocialSecurityCeilingModel({
+    this.employeePercentage,
+    this.employerPercentage,
+    required this.ceiling,
+    this.startDate,
+    this.endDate,
+  });
+
+  static double _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  static DateTime? _toDate(dynamic value) {
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value?.toString() ?? '');
+  }
+
+  factory SocialSecurityCeilingModel.fromJson(Map<String, dynamic> json) {
+    return SocialSecurityCeilingModel(
+      employeePercentage: json['employee_percentage'] == null
+          ? null
+          : _toDouble(json['employee_percentage']),
+      employerPercentage: json['employer_percentage'] == null
+          ? null
+          : _toDouble(json['employer_percentage']),
+      ceiling: _toDouble(json['ceiling']),
+      startDate: _toDate(json['start_date']),
+      endDate: _toDate(json['end_date']),
+    );
+  }
+}
+
 class LegislationModel {
   final String? id;
   final String? name;
@@ -33,6 +73,9 @@ class LegislationModel {
   final double? socialSecurityEmployee;
   final double? socialSecurityEmployer;
   final double? socialSecurityCeiling;
+  final DateTime? socialSecurityCeilingStartDate;
+  final DateTime? socialSecurityCeilingEndDate;
+  final List<SocialSecurityCeilingModel>? socialSecurityCeilings;
   final double? serviceTaxPercentage;
   final double? incomeTaxPercentage;
   final double? incomeTaxExemption;
@@ -58,6 +101,9 @@ class LegislationModel {
     this.numberOfWorkingHoursForOvertimeHolidays,
     this.socialSecurityCeiling,
     this.socialSecurityEmployee,
+    this.socialSecurityCeilingStartDate,
+    this.socialSecurityCeilingEndDate,
+    this.socialSecurityCeilings,
     this.socialSecurityEmployer,
     this.serviceTaxPercentage,
     this.incomeTaxPercentage,
@@ -82,6 +128,11 @@ class LegislationModel {
     return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 
+  static DateTime? _toDate(dynamic value) {
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value?.toString() ?? '');
+  }
+
   static List<String> _toStringList(dynamic value) {
     if (value is List) {
       return value.map((day) => day.toString()).toList();
@@ -96,6 +147,22 @@ class LegislationModel {
           .map(
             (item) =>
                 IncomeTaxBracketModel.fromJson(Map<String, dynamic>.from(item)),
+          )
+          .toList();
+    }
+    return [];
+  }
+
+  static List<SocialSecurityCeilingModel> _toSocialSecurityCeilings(
+    dynamic value,
+  ) {
+    if (value is List) {
+      return value
+          .whereType<Map>()
+          .map(
+            (item) => SocialSecurityCeilingModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ),
           )
           .toList();
     }
@@ -138,6 +205,15 @@ class LegislationModel {
         json['social_security_employer_percentage'],
       ),
       socialSecurityCeiling: _toDouble(json['social_security_ceiling']),
+      socialSecurityCeilingStartDate: _toDate(
+        json['social_security_ceiling_start_date'],
+      ),
+      socialSecurityCeilingEndDate: _toDate(
+        json['social_security_ceiling_end_date'],
+      ),
+      socialSecurityCeilings: _toSocialSecurityCeilings(
+        json['social_security_ceilings'],
+      ),
       serviceTaxPercentage: _toDouble(json['service_tax_percentage']),
       incomeTaxPercentage: _toDouble(json['income_tax_percentage']),
       incomeTaxExemption: _toDouble(json['income_tax_exemption']),
