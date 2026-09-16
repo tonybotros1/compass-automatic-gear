@@ -125,6 +125,16 @@ Widget carInformation({
                         controller.carModified.value = true;
                       },
                     ),
+                    myTextFormFieldWithBorder(
+                      width: 300,
+                      labelText: 'Engine Number',
+                      hintText: 'Enter engine serial number',
+                      validate: false,
+                      controller: controller.engineNumber.value,
+                      onChanged: (_) {
+                        controller.carModified.value = true;
+                      },
+                    ),
                   ],
                 ),
               ),

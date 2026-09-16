@@ -35,6 +35,7 @@ Widget addNewCarTradeItemsOrEdit({
                   _TradeTotals(
                     constraints: constraints,
                     isItems: isItemsScreen,
+                    canEdit: canEdit,
                   ),
                   Expanded(
                     child: GetX<CarTradingDashboardController>(
@@ -53,6 +54,7 @@ Widget addNewCarTradeItemsOrEdit({
                                     constraints: constraints,
                                     context: context,
                                     controller: controller,
+                                    canEdit: canEdit,
                                   ),
                           ),
                         );
@@ -70,99 +72,129 @@ Widget addNewCarTradeItemsOrEdit({
 }
 
 class _TradeTotals extends StatelessWidget {
-  const _TradeTotals({required this.constraints, required this.isItems});
+  const _TradeTotals({
+    required this.constraints,
+    required this.isItems,
+    required this.canEdit,
+  });
 
   final BoxConstraints constraints;
   final bool isItems;
+  final bool canEdit;
 
   @override
   Widget build(BuildContext context) {
     return GetX<CarTradingDashboardController>(
       builder: (controller) {
+        final totals = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (child, animation) {
+            final slide = Tween<Offset>(
+              begin: const Offset(0, 0.06),
+              end: Offset.zero,
+            ).animate(animation);
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(position: slide, child: child),
+            );
+          },
+          child: Align(
+            key: ValueKey(isItems),
+            alignment: Alignment.centerLeft,
+            child: Wrap(
+              alignment: WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 10,
+              runSpacing: 8,
+              children: isItems
+                  ? [
+                      _SummaryMetricBox(
+                        label: 'TOTAL PAID',
+                        value: '${controller.totalPays.value}',
+                        icon: Icons.arrow_upward_rounded,
+                        color: const Color(0xFFDC2626),
+                      ),
+                      _SummaryMetricBox(
+                        label: 'TOTAL RECEIVED',
+                        value: '${controller.totalReceives.value}',
+                        icon: Icons.arrow_downward_rounded,
+                        color: const Color(0xFF16A34A),
+                      ),
+                      _SummaryMetricBox(
+                        label: 'NET',
+                        value: '${controller.totalNETs.value}',
+                        icon: Icons.account_balance_wallet_outlined,
+                        color: const Color(0xFF475569),
+                      ),
+                    ]
+                  : [
+                      _SummaryMetricBox(
+                        label: 'PURCHASE TOTAL',
+                        value: '${controller.totalBuyAgreementAmount.value}',
+                        icon: Icons.shopping_cart_outlined,
+                        color: const Color(0xFFEA580C),
+                      ),
+                      _SummaryMetricBox(
+                        label: 'PURCHASE PAID',
+                        value: '${controller.totalBuyAgreementPaid.value}',
+                        icon: Icons.arrow_upward_rounded,
+                        color: const Color(0xFFDC2626),
+                      ),
+                      _SummaryMetricBox(
+                        label: 'SALES TOTAL',
+                        value: '${controller.totalSellAgreementAmount.value}',
+                        icon: Icons.sell_outlined,
+                        color: const Color(0xFF0F766E),
+                      ),
+                      _SummaryMetricBox(
+                        label: 'SALES DOWN PAYMENT',
+                        value:
+                            '${controller.totalSellAgreementDownPayment.value}',
+                        icon: Icons.pie_chart_outline_rounded,
+                        color: const Color(0xFF16A34A),
+                      ),
+                    ],
+            ),
+          ),
+        );
+        final newButton = AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: KeyedSubtree(
+            key: ValueKey('new-button-$isItems'),
+            child: isItems
+                ? newItemButton(context, controller)
+                : newItemButtonForSalesAgreement(
+                    context,
+                    controller,
+                    constraints,
+                    canEdit: canEdit,
+                  ),
+          ),
+        );
         return Padding(
           padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  switchInCurve: Curves.easeOutCubic,
-                  switchOutCurve: Curves.easeInCubic,
-                  transitionBuilder: (child, animation) {
-                    final slide = Tween<Offset>(
-                      begin: const Offset(0, 0.06),
-                      end: Offset.zero,
-                    ).animate(animation);
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(position: slide, child: child),
-                    );
-                  },
-                  child: Align(
-                    key: ValueKey(isItems),
-                    alignment: Alignment.centerLeft,
-                    child: Wrap(
-                      alignment: WrapAlignment.start,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 10,
-                      runSpacing: 8,
-                      children: isItems
-                          ? [
-                              _SummaryMetricBox(
-                                label: 'TOTAL PAID',
-                                value: '${controller.totalPays.value}',
-                                icon: Icons.arrow_upward_rounded,
-                                color: const Color(0xFFDC2626),
-                              ),
-                              _SummaryMetricBox(
-                                label: 'TOTAL RECEIVED',
-                                value: '${controller.totalReceives.value}',
-                                icon: Icons.arrow_downward_rounded,
-                                color: const Color(0xFF16A34A),
-                              ),
-                              _SummaryMetricBox(
-                                label: 'NET',
-                                value: '${controller.totalNETs.value}',
-                                icon: Icons.account_balance_wallet_outlined,
-                                color: const Color(0xFF475569),
-                              ),
-                            ]
-                          : [
-                              _SummaryMetricBox(
-                                label: 'TOTAL AMOUNT',
-                                value:
-                                    '${controller.totalPurchaseAgreementAmount.value}',
-                                icon: Icons.payments_outlined,
-                                color: const Color(0xFF0F766E),
-                              ),
-                              _SummaryMetricBox(
-                                label: 'TOTAL DOWN PAYMENT',
-                                value:
-                                    '${controller.totalPurchaseAgreementDownPayment.value}',
-                                icon: Icons.pie_chart_outline_rounded,
-                                color: const Color(0xFFEA580C),
-                              ),
-                            ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: KeyedSubtree(
-                  key: ValueKey('new-button-$isItems'),
-                  child: isItems
-                      ? newItemButton(context, controller)
-                      : newItemButtonForSalesAgreement(
-                          context,
-                          controller,
-                          constraints,
-                        ),
-                ),
-              ),
-            ],
+          child: LayoutBuilder(
+            builder: (context, layout) {
+              if (!isItems && layout.maxWidth < 600) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Align(alignment: Alignment.centerRight, child: newButton),
+                    const SizedBox(height: 8),
+                    totals,
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: totals),
+                  const SizedBox(width: 14),
+                  newButton,
+                ],
+              );
+            },
           ),
         );
       },
@@ -563,7 +595,7 @@ Widget deleteSectionForPurchaseAgreement(
     onPressed: () {
       alertDialog(
         context: context,
-        content: 'Are you sure you want to delete purchase agreement item?',
+        content: 'Are you sure you want to delete this agreement?',
         onPressed: () async {
           final deleted = await controller.deletePurchaseAgreementItem(
             itemData.id ?? '',
@@ -581,7 +613,9 @@ Widget printeSectionForPurchaseAgreement(
   CarTradingPurchaseAgreementModel itemData,
 ) {
   return _TableActionButton(
-    tooltip: 'Print Sales Agreement',
+    tooltip: itemData.isPurchase
+        ? 'Print Purchase Invoice'
+        : 'Print Sales Agreement',
     icon: Icons.print_outlined,
     color: const Color(0xFF0F766E),
     onPressed: () {
@@ -642,31 +676,19 @@ Widget editSectionForPurchaseAgreement(
   BuildContext context,
   CarTradingDashboardController controller,
   CarTradingPurchaseAgreementModel itemData,
-  BoxConstraints constraints,
-) {
+  BoxConstraints constraints, {
+  required bool canEdit,
+}) {
   return _TableActionButton(
-    tooltip: 'Edit agreement',
-    icon: Icons.edit_outlined,
+    tooltip: canEdit ? 'Edit agreement' : 'View agreement',
+    icon: canEdit ? Icons.edit_outlined : Icons.visibility_outlined,
     color: const Color(0xFF2563EB),
     onPressed: () async {
-      controller.agreementNumber.text = itemData.agreementNumber ?? '';
-      controller.agreementdate.text = textToDate(itemData.agreementDate);
-      controller.buyerName.text = itemData.buyerName ?? '';
-      controller.buyerID.text = itemData.buyerID ?? '';
-      controller.buyerEmail.text = itemData.buyerEmail ?? '';
-      controller.buyerPhone.text = itemData.buyerPhone ?? '';
-      controller.sellerName.text = itemData.sellerName ?? '';
-      controller.sellerID.text = itemData.sellerID ?? '';
-      controller.sellerEmail.text = itemData.sellerEmail ?? '';
-      controller.sellerPhone.text = itemData.sellerPhone ?? '';
-      controller.agreementTotal.text = itemData.amount?.toString() ?? '0';
-      controller.agreementdownpayment.text =
-          itemData.aownpayment?.toString() ?? '0';
-      controller.agreementNote.text = itemData.note ?? '';
+      controller.prepareAgreementForEdit(itemData);
       salesAgreementItemDialog(
         controller: controller,
         constraints: constraints,
-        canEdit: true,
+        canEdit: canEdit,
         onPressed: () async {
           final saved = await controller.updatePurchaseAgreementItem(
             itemData.id ?? '',
@@ -716,6 +738,7 @@ Widget tableOfScreensForSalesAgreement({
   required BoxConstraints constraints,
   required BuildContext context,
   required CarTradingDashboardController controller,
+  required bool canEdit,
 }) {
   final source =
       controller.filteredPurchaseAgreementAddedItems.isEmpty &&
@@ -724,62 +747,88 @@ Widget tableOfScreensForSalesAgreement({
       : controller.filteredPurchaseAgreementAddedItems;
   final items = source.where((item) => item.deleted == false).toList();
 
-  return _modernTableSurface(
-    child: DataTable(
-      horizontalMargin: horizontalMarginForTable,
-      headingRowHeight: 46,
-      dataRowMaxHeight: 58,
-      dataRowMinHeight: 54,
-      columnSpacing: 18,
-      dividerThickness: 0.5,
-      headingRowColor: const WidgetStatePropertyAll(Color(0xFFF1F5F9)),
-      headingTextStyle: const TextStyle(
-        color: Color(0xFF475569),
-        fontSize: 11,
-        fontWeight: FontWeight.w800,
-        letterSpacing: 0.5,
-      ),
-      dataTextStyle: const TextStyle(
-        color: Color(0xFF334155),
-        fontSize: 11.5,
-        fontWeight: FontWeight.w600,
-      ),
-      columns: [
-        DataColumn(
-          label: AutoSizedText(text: 'ACTIONS', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(text: 'AGREEMENT', constraints: constraints),
-        ),
-        DataColumn(
-          label: AutoSizedText(constraints: constraints, text: 'DATE'),
-        ),
-        DataColumn(
-          label: AutoSizedText(constraints: constraints, text: 'SELLER'),
-        ),
-        DataColumn(
-          label: AutoSizedText(constraints: constraints, text: 'BUYER'),
-        ),
-        DataColumn(
-          numeric: true,
-          label: AutoSizedText(constraints: constraints, text: 'TOTAL'),
-        ),
-        DataColumn(
-          numeric: true,
-          label: AutoSizedText(constraints: constraints, text: 'DOWN PAYMENT'),
-        ),
-      ],
-      rows: [
-        for (var index = 0; index < items.length; index++)
-          dataRowForTheTableForPurchaseAgreemnt(
-            items[index],
-            context,
-            constraints,
-            controller,
-            index,
+  return LayoutBuilder(
+    builder: (context, viewportConstraints) {
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minWidth: viewportConstraints.maxWidth),
+          child: _modernTableSurface(
+            child: DataTable(
+              horizontalMargin: horizontalMarginForTable,
+              headingRowHeight: 46,
+              dataRowMaxHeight: 58,
+              dataRowMinHeight: 54,
+              columnSpacing: 18,
+              dividerThickness: 0.5,
+              headingRowColor: const WidgetStatePropertyAll(Color(0xFFF1F5F9)),
+              headingTextStyle: const TextStyle(
+                color: Color(0xFF475569),
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+              ),
+              dataTextStyle: const TextStyle(
+                color: Color(0xFF334155),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+              ),
+              columns: [
+                DataColumn(
+                  label: AutoSizedText(
+                    text: 'ACTIONS',
+                    constraints: constraints,
+                  ),
+                ),
+                DataColumn(
+                  label: AutoSizedText(
+                    text: 'AGREEMENT',
+                    constraints: constraints,
+                  ),
+                ),
+                DataColumn(
+                  label: AutoSizedText(text: 'TYPE', constraints: constraints),
+                ),
+                DataColumn(
+                  label: AutoSizedText(constraints: constraints, text: 'DATE'),
+                ),
+                DataColumn(
+                  label: AutoSizedText(
+                    constraints: constraints,
+                    text: 'SELLER',
+                  ),
+                ),
+                DataColumn(
+                  label: AutoSizedText(constraints: constraints, text: 'BUYER'),
+                ),
+                DataColumn(
+                  numeric: true,
+                  label: AutoSizedText(constraints: constraints, text: 'TOTAL'),
+                ),
+                DataColumn(
+                  numeric: true,
+                  label: AutoSizedText(
+                    constraints: constraints,
+                    text: 'PAID / DOWN PAYMENT',
+                  ),
+                ),
+              ],
+              rows: [
+                for (var index = 0; index < items.length; index++)
+                  dataRowForTheTableForPurchaseAgreemnt(
+                    items[index],
+                    context,
+                    constraints,
+                    controller,
+                    index,
+                    canEdit: canEdit,
+                  ),
+              ],
+            ),
           ),
-      ],
-    ),
+        ),
+      );
+    },
   );
 }
 
@@ -788,8 +837,9 @@ DataRow dataRowForTheTableForPurchaseAgreemnt(
   BuildContext context,
   BoxConstraints constraints,
   CarTradingDashboardController controller,
-  int index,
-) {
+  int index, {
+  required bool canEdit,
+}) {
   return DataRow(
     color: _tableRowColor(index),
     cells: [
@@ -797,15 +847,18 @@ DataRow dataRowForTheTableForPurchaseAgreemnt(
         Row(
           spacing: 5,
           children: [
-            deleteSectionForPurchaseAgreement(controller, context, itemData),
+            if (canEdit)
+              deleteSectionForPurchaseAgreement(controller, context, itemData),
             editSectionForPurchaseAgreement(
               context,
               controller,
               itemData,
               constraints,
+              canEdit: canEdit,
             ),
             printeSectionForPurchaseAgreement(controller, context, itemData),
-            printeSectionForQuotation(controller, context, itemData),
+            if (!itemData.isPurchase)
+              printeSectionForQuotation(controller, context, itemData),
           ],
         ),
       ),
@@ -816,6 +869,7 @@ DataRow dataRowForTheTableForPurchaseAgreemnt(
           color: const Color(0xFF2563EB),
         ),
       ),
+      DataCell(_AgreementTypeBadge(isPurchase: itemData.isPurchase)),
       DataCell(_DateBadge(value: textToDate(itemData.agreementDate))),
       DataCell(
         _PrimaryTableCell(
@@ -834,7 +888,9 @@ DataRow dataRowForTheTableForPurchaseAgreemnt(
       DataCell(
         _AmountBadge(
           value: itemData.amount?.toString() ?? '0',
-          color: const Color(0xFF16A34A),
+          color: itemData.isPurchase
+              ? const Color(0xFFEA580C)
+              : const Color(0xFF16A34A),
         ),
       ),
       DataCell(
@@ -850,38 +906,53 @@ DataRow dataRowForTheTableForPurchaseAgreemnt(
 ElevatedButton newItemButtonForSalesAgreement(
   BuildContext context,
   CarTradingDashboardController controller,
-  BoxConstraints constraints,
-) {
+  BoxConstraints constraints, {
+  required bool canEdit,
+}) {
   return ElevatedButton(
-    onPressed: () {
-      if (controller.currentTradId.value.isEmpty) {
-        alertMessage(context: Get.context!, content: 'Save trade first');
-        return;
-      }
-      controller.agreementNumber.clear();
-      controller.agreementdate.text = textToDate(DateTime.now());
-      controller.buyerName.text = '';
-      controller.buyerID.text = '';
-      controller.buyerEmail.text = '';
-      controller.buyerPhone.text = '';
-      controller.sellerName.text = 'ISSA HASSAN YAKOUB';
-      controller.sellerID.text = '784-1988-2628387-5';
-      controller.sellerEmail.text = 'sales@compass-at.com';
-      controller.sellerPhone.text = '054 567 6644';
-      controller.agreementTotal.clear();
-      controller.agreementdownpayment.clear();
-      controller.agreementNote.clear();
-      salesAgreementItemDialog(
-        constraints: constraints,
-        controller: controller,
-        canEdit: true,
-        onPressed: () async {
-          final saved = await controller.addNewPurchaseAgreementItem();
-          if (saved) controller.calculatePurchaseAgreementTotals();
-        },
-      );
-    },
+    onPressed: !canEdit
+        ? null
+        : () async {
+            if (!await controller.prepareNewAgreement()) return;
+            salesAgreementItemDialog(
+              constraints: constraints,
+              controller: controller,
+              canEdit: true,
+              onPressed: () async {
+                final saved = await controller.addNewPurchaseAgreementItem();
+                if (saved) controller.calculatePurchaseAgreementTotals();
+              },
+            );
+          },
     style: newButtonStyle,
-    child: const Text('New Sales Agreement'),
+    child: const Text('New Agreement'),
   );
+}
+
+class _AgreementTypeBadge extends StatelessWidget {
+  const _AgreementTypeBadge({required this.isPurchase});
+
+  final bool isPurchase;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isPurchase
+        ? const Color(0xFFEA580C)
+        : const Color(0xFF0F766E);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        isPurchase ? 'BUY' : 'SELL',
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
 }

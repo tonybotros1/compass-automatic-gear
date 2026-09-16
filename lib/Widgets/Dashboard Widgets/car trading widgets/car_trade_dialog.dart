@@ -17,7 +17,7 @@ Future<dynamic> carTradesDialog({
   if (screen == 'items') {
     controller.itemsPageName.value = 'items';
   } else if (screen == 'sales_agreement') {
-    controller.itemsPageName.value = 'sales agreement';
+    controller.itemsPageName.value = 'agreements';
   }
 
   return Get.dialog(

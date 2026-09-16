@@ -23,6 +23,7 @@ import '../../Models/car trading/transfer_model.dart';
 import '../../Models/car trading/vehicle_analysis_model.dart';
 import '../../Widgets/main screen widgets/job_cards_widgets/print_delivery_note.dart';
 import '../../Widgets/main screen widgets/job_cards_widgets/print_invoice_pdf.dart';
+import '../../Widgets/pdfs/car_purchase_invoice_pdf.dart';
 import '../../consts.dart';
 import '../../helpers.dart';
 import '../Main screen controllers/websocket_controller.dart';
@@ -121,6 +122,7 @@ class CarTradingDashboardController extends GetxController {
   Rx<TextEditingController> year = TextEditingController().obs;
   Rx<TextEditingController> consignmentFor = TextEditingController().obs;
   Rx<TextEditingController> vin = TextEditingController().obs;
+  Rx<TextEditingController> engineNumber = TextEditingController().obs;
   Rx<TextEditingController> soldTo = TextEditingController().obs;
   Rx<TextEditingController> soldBy = TextEditingController().obs;
   Rx<TextEditingController> sellDate = TextEditingController().obs;
@@ -166,6 +168,10 @@ class CarTradingDashboardController extends GetxController {
   RxDouble totalNETs = RxDouble(0.0);
   RxDouble totalPurchaseAgreementAmount = RxDouble(0.0);
   RxDouble totalPurchaseAgreementDownPayment = RxDouble(0.0);
+  final RxDouble totalBuyAgreementAmount = 0.0.obs;
+  final RxDouble totalBuyAgreementPaid = 0.0.obs;
+  final RxDouble totalSellAgreementAmount = 0.0.obs;
+  final RxDouble totalSellAgreementDownPayment = 0.0.obs;
   RxList<CarTradingItemsModel> filteredAddedItems =
       RxList<CarTradingItemsModel>([]);
   RxList<CarTradingPurchaseAgreementModel> filteredPurchaseAgreementAddedItems =
@@ -247,6 +253,13 @@ class CarTradingDashboardController extends GetxController {
   TextEditingController agreementNote = TextEditingController();
   TextEditingController agreementTotal = TextEditingController();
   TextEditingController agreementdownpayment = TextEditingController();
+  final RxString agreementType = 'sell'.obs;
+  final RxString agreementPaymentMethod = ''.obs;
+  bool _preparingAgreement = false;
+  static const String _agreementCompanyName = 'ISSA HASSAN YAKOUB';
+  static const String _agreementCompanyId = '784-1988-2628387-5';
+  static const String _agreementCompanyEmail = 'sales@compass-at.com';
+  static const String _agreementCompanyPhone = '054 567 6644';
 
   // transfers:
   Rx<TextEditingController> transferDate = TextEditingController().obs;
@@ -271,10 +284,7 @@ class CarTradingDashboardController extends GetxController {
   RxList<VehicleAnalysisModel> allVehicleAnalysis =
       RxList<VehicleAnalysisModel>([]);
 
-  List<Widget> carsTabs = const [
-    Tab(text: 'Sales Agreement'), // note previous name was purchase agreement
-    Tab(text: 'Items'),
-  ];
+  List<Widget> carsTabs = const [Tab(text: 'Agreements'), Tab(text: 'Items')];
   RxMap companyDetails = RxMap({});
 
   final DateFormat dateFormat = DateFormat('dd-MM-yyyy');
@@ -371,6 +381,7 @@ class CarTradingDashboardController extends GetxController {
     year.value.dispose();
     consignmentFor.value.dispose();
     vin.value.dispose();
+    engineNumber.value.dispose();
     soldTo.value.dispose();
     soldBy.value.dispose();
     sellDate.value.dispose();
@@ -983,7 +994,151 @@ class CarTradingDashboardController extends GetxController {
         null) {
       return false;
     }
+    if (!const ['buy', 'sell'].contains(agreementType.value)) {
+      _showError('Please select Buy or Sell');
+      return false;
+    }
+    if (sellerName.text.trim().isEmpty || buyerName.text.trim().isEmpty) {
+      _showError('Please enter the seller and buyer names');
+      return false;
+    }
+    final total = double.tryParse(agreementTotal.text.trim());
+    final paidText = agreementdownpayment.text.trim();
+    final paid = paidText.isEmpty ? 0.0 : double.tryParse(paidText);
+    if (total == null || !total.isFinite || total <= 0) {
+      _showError('Total amount must be greater than zero');
+      return false;
+    }
+    if (paid == null || !paid.isFinite || paid < 0 || paid > total) {
+      final label = agreementType.value == 'buy'
+          ? 'Amount paid'
+          : 'Down payment';
+      _showError('$label must be between zero and the total amount');
+      return false;
+    }
     return true;
+  }
+
+  Future<bool> prepareNewAgreement() async {
+    if (_preparingAgreement) return false;
+    final tradeId = currentTradId.value;
+    if (tradeId.isEmpty) {
+      _showError('Save trade first');
+      return false;
+    }
+    _preparingAgreement = true;
+    try {
+      if (companyDetails.isEmpty) await getCompanyDetails();
+      if (currentTradId.value != tradeId) return false;
+      agreementType.value = 'sell';
+      agreementPaymentMethod.value = '';
+      agreementNumber.clear();
+      agreementdate.text = textToDate(DateTime.now());
+      buyerName.clear();
+      buyerID.clear();
+      buyerEmail.clear();
+      buyerPhone.clear();
+      sellerName.text = _agreementCompanyName;
+      sellerID.text = _agreementCompanyId;
+      sellerEmail.text = _agreementCompanyEmail;
+      sellerPhone.text = _agreementCompanyPhone;
+      agreementTotal.clear();
+      agreementdownpayment.clear();
+      agreementNote.clear();
+      update();
+      return true;
+    } finally {
+      _preparingAgreement = false;
+    }
+  }
+
+  String _companyAgreementValue(List<String> keys) {
+    final contact = companyDetails['contact_details'];
+    for (final source in [companyDetails, if (contact is Map) contact]) {
+      for (final key in keys) {
+        final value = source[key]?.toString().trim() ?? '';
+        if (value.isNotEmpty) return value;
+      }
+    }
+    return '';
+  }
+
+  void prepareAgreementForEdit(CarTradingPurchaseAgreementModel data) {
+    agreementType.value = data.agreementType;
+    agreementPaymentMethod.value = data.paymentMethod;
+    agreementNumber.text = data.agreementNumber ?? '';
+    agreementdate.text = textToDate(data.agreementDate);
+    buyerName.text = data.buyerName ?? '';
+    buyerID.text = data.buyerID ?? '';
+    buyerEmail.text = data.buyerEmail ?? '';
+    buyerPhone.text = data.buyerPhone ?? '';
+    sellerName.text = data.sellerName ?? '';
+    sellerID.text = data.sellerID ?? '';
+    sellerEmail.text = data.sellerEmail ?? '';
+    sellerPhone.text = data.sellerPhone ?? '';
+    agreementTotal.text = (data.amount ?? 0).toString();
+    agreementdownpayment.text = (data.aownpayment ?? 0).toString();
+    agreementNote.text = data.note ?? '';
+    update();
+  }
+
+  void setAgreementType(String type) {
+    if (addingPurchaseAgreement.value ||
+        !const ['buy', 'sell'].contains(type) ||
+        type == agreementType.value) {
+      return;
+    }
+    // Keep each party's entered details together when reversing the transaction.
+    for (final pair in [
+      [sellerName, buyerName],
+      [sellerID, buyerID],
+      [sellerEmail, buyerEmail],
+      [sellerPhone, buyerPhone],
+    ]) {
+      final oldSeller = pair[0].text;
+      pair[0].text = pair[1].text;
+      pair[1].text = oldSeller;
+    }
+    agreementType.value = type;
+    update();
+  }
+
+  Map<String, dynamic> buildAgreementPayload(String agreementIso) {
+    return {
+      'trade_id': currentTradId.value,
+      'agreement_date': agreementIso,
+      'agreement_type': agreementType.value,
+      'payment_method': agreementType.value == 'buy'
+          ? agreementPaymentMethod.value
+          : '',
+      'seller_name': sellerName.text.trim(),
+      'seller_email': sellerEmail.text.trim(),
+      'seller_phone': sellerPhone.text.trim(),
+      'seller_ID': sellerID.text.trim(),
+      'buyer_ID': buyerID.text.trim(),
+      'buyer_name': buyerName.text.trim(),
+      'buyer_email': buyerEmail.text.trim(),
+      'buyer_phone': buyerPhone.text.trim(),
+      'note': agreementNote.text.trim(),
+      'agreement_amount': double.parse(agreementTotal.text.trim()),
+      'agreement_down_payment': agreementdownpayment.text.trim().isEmpty
+          ? 0.0
+          : double.parse(agreementdownpayment.text.trim()),
+    };
+  }
+
+  String _agreementSaveError(String body, String fallback) {
+    final decoded = _jsonObject(body);
+    final detail = decoded['detail'];
+    if (detail is String && detail.trim().isNotEmpty) return detail;
+    if (detail is List && detail.isNotEmpty) {
+      final first = detail.first;
+      if (first is Map) {
+        final message = first['msg']?.toString().trim() ?? '';
+        if (message.isNotEmpty) return message;
+      }
+    }
+    return fallback;
   }
 
   void _upsertCapital(
@@ -1414,7 +1569,7 @@ class CarTradingDashboardController extends GetxController {
       final tradeId = data.tradeId?.trim() ?? '';
       if (tradeId.isEmpty) {
         _showError(
-          'Could not identify the car for this sales agreement. Please refresh the screen.',
+          'Could not identify the car for this agreement. Please refresh the screen.',
         );
         return;
       }
@@ -1422,11 +1577,12 @@ class CarTradingDashboardController extends GetxController {
       final vehicle = await _fetchTradeById(tradeId);
       if (vehicle == null || vehicle.id != tradeId) {
         _showError(
-          'Could not load the car for this sales agreement. Please try again.',
+          'Could not load the car for this agreement. Please try again.',
         );
         return;
       }
 
+      if (companyDetails.isEmpty) await getCompanyDetails();
       final pdfData = await generatePurchaseAgreementOrQuotationPdf(
         data,
         vehicle,
@@ -1436,7 +1592,7 @@ class CarTradingDashboardController extends GetxController {
         onLayout: (PdfPageFormat format) async => pdfData,
       );
     } catch (_) {
-      _showError('Could not prepare the sales agreement. Please try again.');
+      _showError('Could not prepare the agreement. Please try again.');
     }
   }
 
@@ -1445,40 +1601,53 @@ class CarTradingDashboardController extends GetxController {
     CarTradeModel vehicle,
     String type,
   ) async {
-    // final Font robotoMono = pw.Font.ttf(
-    //   await rootBundle.load('assets/fonts/RobotoMono-VariableFont_wght.ttf'),
-    // );
-
-    // var countryCurrency = await helper.getCountryCurrency(companyDetails['']);
-    var headerImage = await networkImageToPdf(
-      companyDetails.containsKey('header_url')
-          ? companyDetails['header_url'] ?? ''
-          : '',
-    );
-    var footerImage = await networkImageToPdf(
-      companyDetails.containsKey('footer_url')
-          ? companyDetails['footer_url'] ?? ''
-          : '',
-    );
+    final images = await Future.wait([
+      _loadAgreementImage(companyDetails['header_url']),
+      _loadAgreementImage(companyDetails['footer_url']),
+    ]);
+    final headerImage = images[0];
+    final footerImage = images[1];
+    if (data.isPurchase) {
+      return generateCarPurchaseInvoicePdf(
+        agreement: data,
+        vehicle: vehicle,
+        companyDetails: Map<String, dynamic>.from(companyDetails),
+        headerImage: headerImage,
+        footerImage: footerImage,
+      );
+    }
 
     final pdf = pw.Document();
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(0),
-        header: (context) => pw.Image(
-          headerImage,
-          height: 115,
-          fit: pw.BoxFit.fitWidth,
-          alignment: pw.Alignment.topCenter,
-        ),
+        header: (context) => headerImage != null
+            ? pw.Image(
+                headerImage,
+                height: 115,
+                fit: pw.BoxFit.fitWidth,
+                alignment: pw.Alignment.topCenter,
+              )
+            : pw.Padding(
+                padding: const pw.EdgeInsets.fromLTRB(24, 24, 24, 10),
+                child: pw.Text(
+                  _companyAgreementValue(['company_name']),
+                  style: const pw.TextStyle(
+                    fontSize: 18,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ),
 
-        footer: (context) => pw.Image(
-          footerImage,
-          height: 100,
-          fit: pw.BoxFit.fitWidth,
-          alignment: pw.Alignment.bottomCenter,
-        ),
+        footer: (context) => footerImage != null
+            ? pw.Image(
+                footerImage,
+                height: 100,
+                fit: pw.BoxFit.fitWidth,
+                alignment: pw.Alignment.bottomCenter,
+              )
+            : pw.SizedBox(height: 24),
         build: (context) {
           return [
             ...List.generate(1, (pageIndex) {
@@ -1561,7 +1730,7 @@ class CarTradingDashboardController extends GetxController {
                               ),
                               pw.Divider(color: PdfColors.grey, thickness: 0.3),
                               pw.SizedBox(
-                                height: 90,
+                                height: 112,
                                 child: pw.Row(
                                   children: [
                                     pw.Container(
@@ -1611,6 +1780,10 @@ class CarTradingDashboardController extends GetxController {
                                               value: vehicle.vin ?? '',
                                             ),
                                             infoRow(
+                                              title: 'Engine Number:',
+                                              value: vehicle.engineNumber ?? '',
+                                            ),
+                                            infoRow(
                                               title: 'Mileage:',
                                               value:
                                                   vehicle.mileage?.toString() ??
@@ -1657,7 +1830,7 @@ class CarTradingDashboardController extends GetxController {
                                         pw.SizedBox(height: 5),
                                         infoRow(
                                           isNumber: true,
-                                          title: 'Remaning Amount:',
+                                          title: 'Remaining Amount:',
                                           value: formatNum(
                                             (data.amount ?? 0) -
                                                 (data.aownpayment ?? 0),
@@ -1811,6 +1984,21 @@ class CarTradingDashboardController extends GetxController {
       ),
     );
     return pdf.save();
+  }
+
+  Future<pw.MemoryImage?> _loadAgreementImage(dynamic value) async {
+    final url = Uri.tryParse(value?.toString().trim() ?? '');
+    if (url == null || !const ['http', 'https'].contains(url.scheme)) {
+      return null;
+    }
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200 || response.bodyBytes.isEmpty) return null;
+      return pw.MemoryImage(response.bodyBytes);
+    } catch (_) {
+      // Letterhead is optional; the invoice can use the company name instead.
+      return null;
+    }
   }
 
   // ===========================================================================
@@ -2684,10 +2872,22 @@ class CarTradingDashboardController extends GetxController {
   void calculatePurchaseAgreementTotals() {
     totalPurchaseAgreementAmount.value = 0.0;
     totalPurchaseAgreementDownPayment.value = 0.0;
+    totalBuyAgreementAmount.value = 0.0;
+    totalBuyAgreementPaid.value = 0.0;
+    totalSellAgreementAmount.value = 0.0;
+    totalSellAgreementDownPayment.value = 0.0;
 
     for (var item in purchaseAgreementAddedItems) {
+      if (item.deleted) continue;
       totalPurchaseAgreementAmount.value += item.amount ?? 0;
       totalPurchaseAgreementDownPayment.value += item.aownpayment ?? 0;
+      if (item.isPurchase) {
+        totalBuyAgreementAmount.value += item.amount ?? 0;
+        totalBuyAgreementPaid.value += item.aownpayment ?? 0;
+      } else {
+        totalSellAgreementAmount.value += item.amount ?? 0;
+        totalSellAgreementDownPayment.value += item.aownpayment ?? 0;
+      }
     }
   }
 
@@ -2927,22 +3127,7 @@ class CarTradingDashboardController extends GetxController {
       Uri url = Uri.parse(
         '$backendUrl/car_trading/add_purchase_agreement_item',
       );
-      Map data = {
-        "trade_id": currentTradId.value,
-        "agreement_date": agreementIso,
-        "seller_name": sellerName.text,
-        "seller_email": sellerEmail.text,
-        "seller_phone": sellerPhone.text,
-        "seller_ID": sellerID.text,
-        "buyer_ID": buyerID.text,
-        "buyer_name": buyerName.text,
-        "buyer_email": buyerEmail.text,
-        "buyer_phone": buyerPhone.text,
-        "note": agreementNote.text,
-        "agreement_amount": double.tryParse(agreementTotal.text) ?? 0,
-        "agreement_down_payment":
-            double.tryParse(agreementdownpayment.text) ?? 0,
-      };
+      final data = buildAgreementPayload(agreementIso);
       final response = await http.post(
         url,
         headers: {
@@ -2978,7 +3163,12 @@ class CarTradingDashboardController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       } else {
-        _showError('Could not save sales agreement. Please try again.');
+        _showError(
+          _agreementSaveError(
+            response.body,
+            'Could not save agreement. Please try again.',
+          ),
+        );
       }
       addingPurchaseAgreement.value = false;
       return false;
@@ -3009,22 +3199,7 @@ class CarTradingDashboardController extends GetxController {
       Uri url = Uri.parse(
         '$backendUrl/car_trading/update_purchase_agreement_item/$id',
       );
-      Map data = {
-        "trade_id": currentTradId.value,
-        "agreement_date": agreementIso,
-        "seller_name": sellerName.text,
-        "seller_email": sellerEmail.text,
-        "seller_phone": sellerPhone.text,
-        "seller_ID": sellerID.text,
-        "buyer_ID": buyerID.text,
-        "buyer_name": buyerName.text,
-        "buyer_email": buyerEmail.text,
-        "buyer_phone": buyerPhone.text,
-        "note": agreementNote.text,
-        "agreement_amount": double.tryParse(agreementTotal.text) ?? 0,
-        "agreement_down_payment":
-            double.tryParse(agreementdownpayment.text) ?? 0,
-      };
+      final data = buildAgreementPayload(agreementIso);
       final response = await http.patch(
         url,
         headers: {
@@ -3060,7 +3235,12 @@ class CarTradingDashboardController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       } else {
-        _showError('Could not update sales agreement. Please try again.');
+        _showError(
+          _agreementSaveError(
+            response.body,
+            'Could not update agreement. Please try again.',
+          ),
+        );
       }
       addingPurchaseAgreement.value = false;
       return false;
@@ -3098,7 +3278,7 @@ class CarTradingDashboardController extends GetxController {
       } else if (response.statusCode == 401) {
         logout();
       } else {
-        _showError('Could not delete sales agreement. Please try again.');
+        _showError('Could not delete agreement. Please try again.');
       }
       return false;
     } catch (e) {
@@ -3168,6 +3348,7 @@ class CarTradingDashboardController extends GetxController {
         'year': yearId.value,
         'note': note.text,
         'vin': vin.value.text,
+        'engine_number': engineNumber.value.text.trim(),
       };
 
       final rawDate = warrantyEndDate.value.text.trim();
@@ -3690,7 +3871,7 @@ class CarTradingDashboardController extends GetxController {
       filteredPurchaseAgreementAddedItems.clear();
       final loaded = await getPurchaseAgreementForCurrentTrade(tradeId);
       if (!loaded && currentTradId.value == tradeId) {
-        _showError('Could not refresh the sales agreements. Please try again.');
+        _showError('Could not refresh the agreements. Please try again.');
       }
       return loaded;
     }
@@ -3717,6 +3898,7 @@ class CarTradingDashboardController extends GetxController {
     boughtBy.value.text = data.boughtBy ?? '';
     buyDate.value.text = textToDate(data.buyDate);
     vin.value.text = data.vin ?? '';
+    engineNumber.value.text = data.engineNumber ?? '';
     soldById.value = data.soldById ?? '';
     soldBy.value.text = data.soldBy ?? '';
     sellDate.value.text = textToDate(data.sellDate);
@@ -3819,6 +4001,7 @@ class CarTradingDashboardController extends GetxController {
     engineSizeId.value = '';
     year.value.clear();
     vin.value.clear();
+    engineNumber.value.clear();
     yearId.value = '';
     note.clear();
     addedItems.clear();

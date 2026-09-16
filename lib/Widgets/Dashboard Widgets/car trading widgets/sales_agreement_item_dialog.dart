@@ -36,13 +36,15 @@ Future<dynamic> salesAgreementItemDialog({
                     spacing: 10,
                     children: [
                       Text(
-                        '🧾 Sales Agreement Items',
+                        '🧾 Agreement',
                         style: fontStyleForScreenNameUsedInButtons,
                       ),
                       const Spacer(),
                       GetX<CarTradingDashboardController>(
                         builder: (controller) => ClickableHoverText(
-                          onTap: controller.addingPurchaseAgreement.isFalse
+                          onTap:
+                              canEdit &&
+                                  controller.addingPurchaseAgreement.isFalse
                               ? onPressed
                               : null,
                           text: controller.addingPurchaseAgreement.isFalse

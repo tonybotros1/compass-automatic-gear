@@ -3,9 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../Controllers/Dashboard Controllers/car_trading_dashboard_controller.dart';
+import '../../drop_down_menu3.dart';
 
 const _slate = Color(0xFF334155);
 const _muted = Color(0xFF64748B);
+const _paymentMethods = <String, Map<String, String>>{
+  'not_specified': {'name': 'Not specified'},
+  'cash': {'name': 'Cash'},
+  'bank_transfer': {'name': 'Bank transfer'},
+  'cheque': {'name': 'Cheque'},
+  'other': {'name': 'Other'},
+};
+
+String _paymentMethodName(String value) => switch (value) {
+  'cash' => 'Cash',
+  'bank_transfer' => 'Bank transfer',
+  'cheque' => 'Cheque',
+  'other' => 'Other',
+  _ => '',
+};
 
 Widget addNewSalesAgreementItemOrEdit({
   required BoxConstraints constraints,
@@ -15,6 +31,7 @@ Widget addNewSalesAgreementItemOrEdit({
 }) {
   return GetBuilder<CarTradingDashboardController>(
     builder: (controller) {
+      final isPurchase = controller.agreementType.value == 'buy';
       return Form(
         key: controller.salesAgreementFormKey,
         child: FocusTraversalGroup(
@@ -27,21 +44,53 @@ Widget addNewSalesAgreementItemOrEdit({
                 _AgreementSection(
                   icon: Icons.description_outlined,
                   title: 'Agreement details',
-                  subtitle: 'Reference and effective date',
-                  child: _ResponsiveFieldRow(
+                  subtitle: 'Transaction type, reference and effective date',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      myTextFormFieldWithBorder(
-                        labelText: 'Agreement Number',
-                        hintText: 'Generated automatically',
-                        isEnabled: false,
-                        controller: controller.agreementNumber,
-                        validate: false,
+                      SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment(
+                            value: 'buy',
+                            label: Text('Buy'),
+                            icon: Icon(Icons.shopping_cart_outlined),
+                          ),
+                          ButtonSegment(
+                            value: 'sell',
+                            label: Text('Sell'),
+                            icon: Icon(Icons.sell_outlined),
+                          ),
+                        ],
+                        selected: {controller.agreementType.value},
+                        onSelectionChanged: canEdit
+                            ? (values) =>
+                                  controller.setAgreementType(values.single)
+                            : null,
                       ),
-                      myTextFormFieldWithBorder(
-                        labelText: 'Agreement Date',
-                        hintText: 'DD/MM/YYYY',
-                        controller: controller.agreementdate,
-                        isEnabled: canEdit,
+                      const SizedBox(height: 8),
+                      Text(
+                        isPurchase
+                            ? 'Company buys this vehicle'
+                            : 'Company sells this vehicle',
+                        style: const TextStyle(color: _muted, fontSize: 12),
+                      ),
+                      const SizedBox(height: 16),
+                      _ResponsiveFieldRow(
+                        children: [
+                          myTextFormFieldWithBorder(
+                            labelText: 'Agreement Number',
+                            hintText: 'Generated automatically',
+                            isEnabled: false,
+                            controller: controller.agreementNumber,
+                            validate: false,
+                          ),
+                          myTextFormFieldWithBorder(
+                            labelText: 'Agreement Date',
+                            hintText: 'DD/MM/YYYY',
+                            controller: controller.agreementdate,
+                            isEnabled: canEdit,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -56,7 +105,7 @@ Widget addNewSalesAgreementItemOrEdit({
                     children: [
                       _PartyCard(
                         icon: Icons.person_outline_rounded,
-                        title: 'Seller',
+                        title: isPurchase ? 'Seller' : 'Seller · Company',
                         color: const Color(0xFF2563EB),
                         children: [
                           myTextFormFieldWithBorder(
@@ -90,7 +139,7 @@ Widget addNewSalesAgreementItemOrEdit({
                       ),
                       _PartyCard(
                         icon: Icons.person_outline_rounded,
-                        title: 'Buyer',
+                        title: isPurchase ? 'Buyer · Company' : 'Buyer',
                         color: const Color(0xFF059669),
                         children: [
                           myTextFormFieldWithBorder(
@@ -128,24 +177,56 @@ Widget addNewSalesAgreementItemOrEdit({
                 _AgreementSection(
                   icon: Icons.payments_outlined,
                   title: 'Payment details',
-                  subtitle: 'Agreed sale value and initial payment',
-                  child: _ResponsiveFieldRow(
+                  subtitle: isPurchase
+                      ? 'Agreed purchase value and amount paid to the seller'
+                      : 'Agreed sale value and initial payment',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      myTextFormFieldWithBorder(
-                        isDouble: true,
-                        labelText: 'Total Amount',
-                        hintText: '0.00',
-                        controller: controller.agreementTotal,
-                        isEnabled: canEdit,
+                      _ResponsiveFieldRow(
+                        children: [
+                          myTextFormFieldWithBorder(
+                            isDouble: true,
+                            labelText: 'Total Amount',
+                            hintText: '0.00',
+                            controller: controller.agreementTotal,
+                            isEnabled: canEdit,
+                          ),
+                          myTextFormFieldWithBorder(
+                            isDouble: true,
+                            labelText: isPurchase
+                                ? 'Amount Paid'
+                                : 'Down Payment',
+                            hintText: '0.00',
+                            controller: controller.agreementdownpayment,
+                            validate: false,
+                            isEnabled: canEdit,
+                          ),
+                        ],
                       ),
-                      myTextFormFieldWithBorder(
-                        isDouble: true,
-                        labelText: 'Down Payment',
-                        hintText: '0.00',
-                        controller: controller.agreementdownpayment,
-                        validate: false,
-                        isEnabled: canEdit,
-                      ),
+                      if (isPurchase) ...[
+                        const SizedBox(height: 16),
+                        CustomDropdown(
+                          width: 300,
+                          items: _paymentMethods,
+                          hintText: 'Payment Method',
+                          showedSelectedName: 'name',
+                          textcontroller: _paymentMethodName(
+                            controller.agreementPaymentMethod.value,
+                          ),
+                          enabled: canEdit,
+                          validator: false,
+                          onChanged: (key, value) {
+                            controller.agreementPaymentMethod.value =
+                                key == 'not_specified' ? '' : key;
+                            controller.update();
+                          },
+                          onDelete: () {
+                            controller.agreementPaymentMethod.value = '';
+                            controller.update();
+                          },
+                        ),
+                      ],
                     ],
                   ),
                 ),

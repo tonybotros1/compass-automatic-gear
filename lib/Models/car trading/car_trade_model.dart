@@ -17,6 +17,7 @@ class CarTradeModel {
   String? yearId;
   String? year;
   String? vin;
+  String? engineNumber;
   String? colorInId;
   String? colorIn;
   String? colorOutId;
@@ -85,6 +86,7 @@ class CarTradeModel {
     this.warrantyEndDate,
     this.serviceContractEndDate,
     this.vin,
+    this.engineNumber,
   });
 
   DateTime? parseDate(String? dateStr) {
@@ -140,6 +142,7 @@ class CarTradeModel {
     year = json['year']?.toString() ?? '';
     yearId = json['year_id']?.toString() ?? '';
     vin = json.containsKey('vin') ? json['vin']?.toString() ?? '' : '';
+    engineNumber = json['engine_number']?.toString() ?? '';
     note = json['note']?.toString() ?? '';
     status = json['status']?.toString() ?? '';
     soldBy = json.containsKey('sold_by')

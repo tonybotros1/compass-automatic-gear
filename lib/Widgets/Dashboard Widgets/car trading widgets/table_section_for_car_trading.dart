@@ -1972,7 +1972,7 @@ class _TradeActionsState extends State<_TradeActions> {
         ),
         const SizedBox(width: 6),
         _TradeActionButton(
-          label: 'Sales Agreement',
+          label: 'Agreements',
           width: 126,
           color: actionButtonColor,
           isLoading: salesAgreementLoading,
